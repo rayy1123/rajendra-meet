@@ -20,20 +20,29 @@ export default function LoginPage() {
     setLoading(true);
     setErrorMsg('');
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      setErrorMsg(error.message || 'Email atau password salah');
+      if (error) {
+        if (error.message.includes('API key')) {
+          setErrorMsg('Kunci API Supabase tidak valid. Periksa konfigurasi Vercel.');
+        } else {
+          setErrorMsg('Email atau password salah. Silakan coba lagi.');
+        }
+        setLoading(false);
+        return;
+      }
+
+      router.push('/events');
+      router.refresh();
+    } catch (err: any) {
+      setErrorMsg(err?.message || 'Terjadi kesalahan sistem.');
       setLoading(false);
-      return;
     }
-
-    router.push('/events');
-    router.refresh();
   };
 
   return (
@@ -50,7 +59,7 @@ export default function LoginPage() {
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             {errorMsg && (
-              <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-lg font-medium">
+              <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-lg font-medium border border-destructive/20">
                 {errorMsg}
               </div>
             )}
