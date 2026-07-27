@@ -19,9 +19,14 @@ export function formatMsToTime(ms: number | null | undefined): string {
   const totalSeconds = Math.floor(ms / 1000);
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
-  const hundredths = Math.floor((ms % 1000) / 10);
+  const hundredths = Math.round((ms % 1000) / 10);
 
   const pad = (num: number, size: number = 2) => String(num).padStart(size, '0');
+
+  // Jika pembulatan perseratus mencapai 100, tambahkan 1 detik
+  if (hundredths === 100) {
+    return formatMsToTime(ms + 10);
+  }
 
   if (minutes > 0) {
     return `${pad(minutes)}:${pad(seconds)}.${pad(hundredths)}`;
@@ -30,14 +35,18 @@ export function formatMsToTime(ms: number | null | undefined): string {
 }
 
 /**
- * 3. Konversi String Waktu Input Operator ke Milidetik (e.g. "01:05.12" atau "28.45" -> ms)
+ * 3. Konversi String Waktu Input Operator ke Milidetik (e.g. "01:05.12", "28.45", atau "28,45" -> ms)
  */
 export function formatTimeToMs(timeStr: string): number | null {
-  if (!timeStr || timeStr.trim() === '' || timeStr.toUpperCase() === 'NT') {
+  if (!timeStr || typeof timeStr !== 'string') return null;
+
+  // Ganti koma ke titik, hilangkan spasi, dan bersihkan string
+  const cleanStr = timeStr.trim().replace(',', '.').toUpperCase();
+
+  if (cleanStr === '' || cleanStr === 'NT' || cleanStr === 'DNS' || cleanStr === 'DSQ' || cleanStr === 'DNF') {
     return null;
   }
 
-  const cleanStr = timeStr.trim();
   let minutes = 0;
   let seconds = 0;
   let hundredths = 0;
@@ -62,8 +71,9 @@ export function formatTimeToMs(timeStr: string): number | null {
       seconds = parseInt(cleanStr, 10) || 0;
     }
 
-    return (minutes * 60 + seconds) * 1000 + hundredths * 10;
-  } catch (error) {
+    const totalMs = (minutes * 60 + seconds) * 1000 + hundredths * 10;
+    return isNaN(totalMs) || totalMs <= 0 ? null : totalMs;
+  } catch {
     return null;
   }
 }

@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Trophy, Award } from 'lucide-react';
+import { Trophy, Loader2 } from 'lucide-react';
 
 interface MedalStat {
   id: string;
@@ -28,18 +28,34 @@ export function MedalLeaderboardView({
 }: MedalLeaderboardViewProps) {
   const router = useRouter();
   const [selectedEventId, setSelectedEventId] = useState(initialEventId);
+  const [isPending, startTransition] = useTransition();
 
+  // Handle pergantian event dengan feedback loading
   const handleEventChange = (val: string) => {
     setSelectedEventId(val);
-    router.push(`/medals?eventId=${val}`);
+    startTransition(() => {
+      router.push(`/medals?eventId=${val}`);
+    });
   };
+
+  // Memastikan data terurut secara independen (Standar Olimpiade: Emas > Perak > Perunggu > Total)
+  const sortedMedalStats = useMemo(() => {
+    return [...medalStats].sort((a, b) => {
+      if (b.gold !== a.gold) return b.gold - a.gold;
+      if (b.silver !== a.silver) return b.silver - a.silver;
+      if (b.bronze !== a.bronze) return b.bronze - a.bronze;
+      const totalA = a.gold + a.silver + a.bronze;
+      const totalB = b.gold + b.silver + b.bronze;
+      return totalB - totalA;
+    });
+  }, [medalStats]);
 
   return (
     <div className="space-y-6">
       {/* Filter Event */}
       <div className="bg-muted/40 p-4 rounded-xl border max-w-md">
         <label className="text-xs font-semibold block mb-1">Pilih Kejuaraan / Event</label>
-        <Select value={selectedEventId} onValueChange={handleEventChange}>
+        <Select value={selectedEventId} onValueChange={handleEventChange} disabled={isPending}>
           <SelectTrigger className="bg-background">
             <SelectValue placeholder="Pilih Event" />
           </SelectTrigger>
@@ -54,15 +70,23 @@ export function MedalLeaderboardView({
       </div>
 
       {/* Tabel Perolehan Medali */}
-      <Card className="shadow-sm border">
+      <Card className="shadow-sm border relative overflow-hidden">
+        {/* Loading Overlay saat berpindah Event */}
+        {isPending && (
+          <div className="absolute inset-0 bg-background/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          </div>
+        )}
+
         <CardHeader className="bg-muted/20 pb-4">
           <CardTitle className="text-lg font-bold flex items-center gap-2">
             <Trophy className="w-5 h-5 text-amber-500" />
             Klasemen Kontingen / Sekolah
           </CardTitle>
         </CardHeader>
+
         <CardContent className="p-0">
-          {medalStats.length === 0 ? (
+          {sortedMedalStats.length === 0 ? (
             <div className="p-12 text-center text-muted-foreground">
               Belum ada data perolehan medali. Pastikan waktu hasil lomba telah diinput pada modul <b>Results</b>.
             </div>
@@ -79,7 +103,7 @@ export function MedalLeaderboardView({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {medalStats.map((stat, idx) => {
+                {sortedMedalStats.map((stat, idx) => {
                   const totalMedals = stat.gold + stat.silver + stat.bronze;
                   return (
                     <TableRow key={stat.id} className="hover:bg-muted/20">

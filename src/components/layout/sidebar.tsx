@@ -17,9 +17,16 @@ import {
   Printer,
   LogOut,
   User,
+  Settings,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 
 const navItems = [
   {
@@ -53,9 +60,14 @@ const navItems = [
     icon: Award,
   },
   {
-    title: 'Cetak & Ekspor PDF/Excel',
+    title: 'Cetak & Ekspor',
     href: '/export',
     icon: Printer,
+  },
+  {
+    title: 'Pengaturan Sistem',
+    href: '/settings',
+    icon: Settings,
   },
 ];
 
@@ -67,21 +79,23 @@ export function SidebarNav({ onItemClick }: SidebarNavProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const supabase = createClient();
 
   useEffect(() => {
     const fetchUser = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user?.email) {
         setUserEmail(user.email);
       }
     };
     fetchUser();
-  }, []);
+  }, [supabase]);
 
   const handleLogout = async () => {
-    const supabase = createClient();
     await supabase.auth.signOut();
+    if (onItemClick) onItemClick();
     router.push('/login');
     router.refresh();
   };
@@ -91,7 +105,11 @@ export function SidebarNav({ onItemClick }: SidebarNavProps) {
       <nav className="space-y-1 px-2">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname.startsWith(item.href);
+          // Memastikan matching route tepat walau ada sub-route
+          const isActive =
+            item.href === '/'
+              ? pathname === '/'
+              : pathname.startsWith(item.href);
 
           return (
             <Link
@@ -105,7 +123,12 @@ export function SidebarNav({ onItemClick }: SidebarNavProps) {
                   : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
               )}
             >
-              <Icon className={cn('h-4 w-4', isActive ? 'text-white' : 'text-muted-foreground')} />
+              <Icon
+                className={cn(
+                  'h-4 w-4',
+                  isActive ? 'text-white' : 'text-muted-foreground'
+                )}
+              />
               {item.title}
             </Link>
           );
@@ -145,12 +168,16 @@ export function MobileSidebar() {
           <span className="sr-only">Toggle Navigation Menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-64 p-0">
-        <div className="flex items-center gap-2 border-b px-6 py-4">
-          <Waves className="h-6 w-6 text-blue-600" />
-          <span className="font-bold text-lg tracking-tight">Rajendra Meet</span>
+      <SheetContent side="left" className="w-64 p-0 flex flex-col">
+        <SheetHeader className="border-b px-6 py-4 flex flex-row items-center gap-2 space-y-0 text-left">
+          <Waves className="h-6 w-6 text-blue-600 shrink-0" />
+          <SheetTitle className="font-bold text-lg tracking-tight">
+            Rajendra Meet
+          </SheetTitle>
+        </SheetHeader>
+        <div className="flex-1 overflow-y-auto">
+          <SidebarNav onItemClick={() => setOpen(false)} />
         </div>
-        <SidebarNav onItemClick={() => setOpen(false)} />
       </SheetContent>
     </Sheet>
   );

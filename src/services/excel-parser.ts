@@ -1,34 +1,160 @@
 import * as XLSX from 'xlsx';
 import { createClient } from '@/lib/supabase/client';
 
+// ==========================================
+// TYPES & INTERFACES
+// ==========================================
+
+export interface ExcelImportStats {
+  eventsCreated: number;
+  competitionEventsCreated: number;
+  athletesCreated: number;
+  registrationsCreated: number;
+}
+
 export interface ExcelImportResult {
   success: boolean;
   message: string;
-  stats?: {
-    eventsCreated: number;
-    competitionEventsCreated: number;
-    athletesCreated: number;
-    registrationsCreated: number;
-  };
+  stats?: ExcelImportStats;
 }
 
+// Interface untuk baris Sheet 1 (Event)
+interface EventSheetRow {
+  'Nama Event'?: string;
+  Name?: string;
+  Penyelenggara?: string;
+  Organizer?: string;
+  Lokasi?: string;
+  Location?: string;
+  'Tanggal Mulai'?: string | number;
+  'Start Date'?: string | number;
+  'Tanggal Selesai'?: string | number;
+  'End Date'?: string | number;
+  'Jenis Kolam'?: string;
+  'Pool Type'?: string;
+  'Panjang Kolam'?: number | string;
+  'Jumlah Lane'?: number | string;
+  Deskripsi?: string;
+}
+
+// Interface untuk baris Sheet 3 (Nomor Lomba)
+interface CompetitionEventSheetRow {
+  'Nama Nomor'?: string;
+  'Event Name'?: string;
+  'Gaya Renang'?: string;
+  Stroke?: string;
+  Jarak?: number | string;
+  Gender?: string;
+  'Jenis Kelamin'?: string;
+  Tingkat?: string;
+  Grade?: string;
+  Kelas?: string;
+  Class?: string;
+  'Kelompok Umur'?: string;
+  'Age Group'?: string;
+}
+
+// Interface untuk baris Sheet 4 (Peserta & Registrasi)
+interface ParticipantSheetRow {
+  'Nama Atlet'?: string;
+  'Athlete Name'?: string;
+  'Nomor Peserta'?: string;
+  'Athlete Number'?: string;
+  'Jenis Kelamin'?: string;
+  Gender?: string;
+  'Tanggal Lahir'?: string | number;
+  Tingkat?: string;
+  Kelas?: string;
+  'Kelompok Umur'?: string;
+  'Sekolah/Klub'?: string;
+  'School/Club'?: string;
+  'Nomor Lomba'?: string;
+  'Competition Event'?: string;
+  'Seed Time MS'?: number | string;
+}
+
+// Interface Payload Database Supabase
+interface EventInsertPayload {
+  name: string;
+  organizer: string;
+  location: string;
+  start_date: string;
+  end_date: string;
+  pool_type: string;
+  pool_length_meters: number;
+  lane_count: number;
+  description: string;
+}
+
+interface CompetitionEventInsertPayload {
+  event_id: string;
+  name: string;
+  stroke: string;
+  distance_meters: number;
+  gender: 'female' | 'male';
+  grade_level: string;
+  class_name: string;
+  age_group: string;
+}
+
+interface AthleteInsertPayload {
+  athlete_number: string;
+  full_name: string;
+  gender: 'female' | 'male';
+  birth_date: string;
+  grade_level: string;
+  class_name: string;
+  age_group: string;
+  school_id: string | null;
+}
+
+interface RegistrationInsertPayload {
+  event_id: string;
+  athlete_id: string;
+  competition_event_id: string;
+  seed_time_ms: number;
+}
+
+// ==========================================
+// HELPER FUNCTIONS
+// ==========================================
+
 /**
- * Membaca dan memproses file Excel Buku Acara SCMS
- * @param file File Excel yang diunggah oleh user
- * @returns Object status eksekusi dan statistik import
+ * Mengonversi nilai Tanggal dari Excel (Numeric Serial atau String) ke format YYYY-MM-DD
+ */
+function parseExcelDate(val: string | number | undefined | null): string {
+  if (!val) return new Date().toISOString().split('T')[0];
+
+  if (typeof val === 'number') {
+    const parsedDate = XLSX.SSF.parse_date_code(val);
+    if (parsedDate) {
+      const year = parsedDate.y;
+      const month = String(parsedDate.m).padStart(2, '0');
+      const day = String(parsedDate.d).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+  }
+
+  return String(val).trim();
+}
+
+// ==========================================
+// MAIN PARSER & IMPORTER FUNCTION
+// ==========================================
+
+/**
+ * Membaca file Excel Buku Acara SCMS dan mengimpor seluruh datanya ke Supabase
  */
 export async function parseAndImportExcel(file: File): Promise<ExcelImportResult> {
   const supabase = createClient();
 
   try {
-    // 1. Baca ArrayBuffer dari file
-    const data = await file.arrayBuffer();
-    const workbook = XLSX.read(data, { type: 'array' });
+    const arrayBuffer = await file.arrayBuffer();
+    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
 
-    // Pastikan sheet utama tersedia
     const sheetNames = workbook.SheetNames;
     if (sheetNames.length === 0) {
-      return { success: false, message: 'File Excel kosong atau corrupt.' };
+      return { success: false, message: 'File Excel kosong atau rusak.' };
     }
 
     let eventsCreated = 0;
@@ -36,35 +162,32 @@ export async function parseAndImportExcel(file: File): Promise<ExcelImportResult
     let athletesCreated = 0;
     let registrationsCreated = 0;
 
-    // Map untuk menampung ID relasi sementara
     let activeEventId = '';
-    const compEventMap = new Map<string, string>(); // Key: "Name_Gender_Grade", Value: competition_event_id
-    const athleteMap = new Map<string, string>();   // Key: "AthleteNumber", Value: athlete_id
 
     // ==========================================
     // SHEET 1: EVENT INFORMATION
     // ==========================================
     if (sheetNames[0]) {
       const eventSheet = workbook.Sheets[sheetNames[0]];
-      const eventRows: any[] = XLSX.utils.sheet_to_json(eventSheet);
+      const eventRows = XLSX.utils.sheet_to_json<EventSheetRow>(eventSheet);
 
       if (eventRows.length > 0) {
         const row = eventRows[0];
-        
-        // Simpan / Buat Event Baru
+        const eventPayload: EventInsertPayload = {
+          name: row['Nama Event'] || row['Name'] || 'Kejuaraan Renang SCMS',
+          organizer: row['Penyelenggara'] || row['Organizer'] || 'Panitia Pelaksana',
+          location: row['Lokasi'] || row['Location'] || 'Kolam Renang Utama',
+          start_date: parseExcelDate(row['Tanggal Mulai'] || row['Start Date']),
+          end_date: parseExcelDate(row['Tanggal Selesai'] || row['End Date']),
+          pool_type: row['Jenis Kolam'] || row['Pool Type'] || 'Long Course',
+          pool_length_meters: Number(row['Panjang Kolam']) || 50,
+          lane_count: Number(row['Jumlah Lane']) || 8,
+          description: row['Deskripsi'] || 'Diimpor dari Buku Acara Excel',
+        };
+
         const { data: eventData, error: eventErr } = await supabase
           .from('events')
-          .insert({
-            name: row['Nama Event'] || row['Name'] || 'Kejuaraan Renang SCMS',
-            organizer: row['Penyelenggara'] || row['Organizer'] || 'Panitia Pelaksana',
-            location: row['Lokasi'] || row['Location'] || 'Kolam Renang Utama',
-            start_date: row['Tanggal Mulai'] || row['Start Date'] || new Date().toISOString().split('T')[0],
-            end_date: row['Tanggal Selesai'] || row['End Date'] || new Date().toISOString().split('T')[0],
-            pool_type: row['Jenis Kolam'] || row['Pool Type'] || 'Long Course',
-            pool_length_meters: Number(row['Panjang Kolam']) || 50,
-            lane_count: Number(row['Jumlah Lane']) || 8,
-            description: row['Deskripsi'] || 'Diimpor dari Buku Acara Excel',
-          })
+          .insert(eventPayload)
           .select('id')
           .single();
 
@@ -82,143 +205,187 @@ export async function parseAndImportExcel(file: File): Promise<ExcelImportResult
     }
 
     // ==========================================
-    // SHEET 3: COMPETITION EVENTS (Nomor Lomba)
+    // SHEET 3: COMPETITION EVENTS (Batch Insert)
     // ==========================================
+    const compEventMap = new Map<string, string>(); // Key: lowerCaseName -> Value: competition_event_id
+
     if (sheetNames[2]) {
       const compSheet = workbook.Sheets[sheetNames[2]];
-      const compRows: any[] = XLSX.utils.sheet_to_json(compSheet);
+      const compRows = XLSX.utils.sheet_to_json<CompetitionEventSheetRow>(compSheet);
 
-      for (const row of compRows) {
-        const name = row['Nama Nomor'] || row['Event Name'];
-        const stroke = row['Gaya Renang'] || row['Stroke'] || 'Freestyle';
-        const distance = Number(row['Jarak']) || 50;
-        const gender = (row['Gender'] || row['Jenis Kelamin'] || 'male').toLowerCase();
-        const gradeLevel = row['Tingkat'] || row['Grade'] || 'SD';
-        const className = row['Kelas'] || row['Class'] || 'Kelas 1';
-        const ageGroup = row['Kelompok Umur'] || row['Age Group'] || 'KU 2015-2016';
+      const compPayloads: CompetitionEventInsertPayload[] = compRows
+        .map((row): CompetitionEventInsertPayload | null => {
+          const name = row['Nama Nomor'] || row['Event Name'];
+          if (!name) return null;
 
-        if (name) {
-          const { data: compData, error: compErr } = await supabase
-            .from('competition_events')
-            .insert({
-              event_id: activeEventId,
-              name,
-              stroke,
-              distance_meters: distance,
-              gender: gender.includes('putri') || gender.includes('female') ? 'female' : 'male',
-              grade_level: gradeLevel,
-              class_name: className,
-              age_group: ageGroup,
-            })
-            .select('id')
-            .single();
+          const stroke = row['Gaya Renang'] || row['Stroke'] || 'Freestyle';
+          const distance = Number(row['Jarak']) || 50;
+          const genderInput = String(row['Gender'] || row['Jenis Kelamin'] || 'male').toLowerCase();
+          const isFemale = genderInput.includes('putri') || genderInput.includes('female');
 
-          if (!compErr && compData) {
-            const mapKey = `${name}_${gender}_${className}`.toLowerCase();
-            compEventMap.set(mapKey, compData.id);
-            competitionEventsCreated++;
-          }
+          return {
+            event_id: activeEventId,
+            name: name.trim(),
+            stroke,
+            distance_meters: distance,
+            gender: isFemale ? 'female' : 'male',
+            grade_level: row['Tingkat'] || row['Grade'] || 'SD',
+            class_name: row['Kelas'] || row['Class'] || 'Kelas 1',
+            age_group: row['Kelompok Umur'] || row['Age Group'] || 'KU',
+          };
+        })
+        .filter((item): item is CompetitionEventInsertPayload => item !== null);
+
+      if (compPayloads.length > 0) {
+        const { data: insertedComps, error: compErr } = await supabase
+          .from('competition_events')
+          .insert(compPayloads)
+          .select('id, name');
+
+        if (compErr) {
+          throw new Error(`Gagal menyimpan Nomor Lomba: ${compErr.message}`);
+        }
+
+        if (insertedComps) {
+          insertedComps.forEach((compItem: { id: string; name: string }) => {
+            compEventMap.set(compItem.name.trim().toLowerCase(), compItem.id);
+          });
+          competitionEventsCreated = insertedComps.length;
         }
       }
     }
 
     // ==========================================
-    // SHEET 4: PARTICIPANTS & REGISTRATIONS
+    // SHEET 4: ATHLETES, SCHOOLS & REGISTRATIONS
     // ==========================================
     if (sheetNames[3]) {
       const participantSheet = workbook.Sheets[sheetNames[3]];
-      const participantRows: any[] = XLSX.utils.sheet_to_json(participantSheet);
+      const participantRows = XLSX.utils.sheet_to_json<ParticipantSheetRow>(participantSheet);
 
-      for (const row of participantRows) {
-        const athleteNum = row['Nomor Peserta'] || row['Athlete Number'] || `ATL-${Math.floor(Math.random() * 899999 + 100000)}`;
-        const fullName = row['Nama Atlet'] || row['Athlete Name'];
-        const gender = (row['Jenis Kelamin'] || row['Gender'] || 'male').toLowerCase();
-        const birthDate = row['Tanggal Lahir'] || '2012-01-01';
-        const gradeLevel = row['Tingkat'] || 'SD';
-        const className = row['Kelas'] || 'Kelas 6';
-        const ageGroup = row['Kelompok Umur'] || 'KU';
-        const schoolName = row['Sekolah/Klub'] || row['School/Club'] || 'Umum';
-        const compEventName = row['Nomor Lomba'] || row['Competition Event'];
-        const seedTimeMs = Number(row['Seed Time MS']) || 0;
+      // 1. Kumpulkan Sekolah Dulu & Bulk Insert jika Belum Ada
+      const rawSchoolNames = participantRows
+        .map((row) => row['Sekolah/Klub'] || row['School/Club'] || 'Umum')
+        .filter((name): name is string => Boolean(name));
 
-        if (fullName) {
-          // Ambil ID dari Map atau inisialisasi sebagai null
-          let athleteId: string | null = athleteMap.get(athleteNum) || null;
+      const schoolNames = Array.from(new Set(rawSchoolNames));
+      const schoolMap = new Map<string, string>(); // Name -> ID
 
-          // 1. Buat / Ambil Atlet jika belum ada di Map
-          if (!athleteId) {
-            let schoolId: string | null = null;
-            
-            // Cek / Buat Sekolah
-            const { data: schoolData } = await supabase
-              .from('schools')
-              .select('id')
-              .eq('name', schoolName)
-              .maybeSingle();
+      if (schoolNames.length > 0) {
+        const { data: existingSchools } = await supabase
+          .from('schools')
+          .select('id, name')
+          .in('name', schoolNames);
 
-            if (schoolData) {
-              schoolId = schoolData.id;
-            } else {
-              const { data: newSchool } = await supabase
-                .from('schools')
-                .insert({ name: schoolName, city: 'Kota', province: 'Provinsi' })
-                .select('id')
-                .single();
-              if (newSchool) schoolId = newSchool.id;
-            }
+        if (existingSchools) {
+          existingSchools.forEach((school: { id: string; name: string }) => {
+            schoolMap.set(school.name, school.id);
+          });
+        }
 
-            // Insert Atlet Baru
-            const { data: athleteData } = await supabase
-              .from('athletes')
-              .insert({
-                athlete_number: athleteNum,
-                full_name: fullName,
-                gender: gender.includes('putri') || gender.includes('female') ? 'female' : 'male',
-                birth_date: birthDate,
-                grade_level: gradeLevel,
-                class_name: className,
-                age_group: ageGroup,
-                school_id: schoolId,
-              })
-              .select('id')
-              .single();
+        const newSchoolsToInsert = schoolNames
+          .filter((name) => !schoolMap.has(name))
+          .map((name) => ({ name, city: 'Kota', province: 'Provinsi' }));
 
-            if (athleteData && athleteData.id) {
-              athleteId = athleteData.id;
-              athleteMap.set(athleteNum, athleteData.id);
-              athletesCreated++;
-            }
-          }
+        if (newSchoolsToInsert.length > 0) {
+          const { data: createdSchools } = await supabase
+            .from('schools')
+            .insert(newSchoolsToInsert)
+            .select('id, name');
 
-          // 2. Hubungkan Atlet ke Nomor Lomba (Registrasi)
-          if (athleteId && compEventName) {
-            const mapKey = `${compEventName}_${gender}_${className}`.toLowerCase();
-            let targetCompEventId = compEventMap.get(mapKey);
-
-            // Cari ID fallback jika tidak ada di map
-            if (!targetCompEventId) {
-              const { data: foundComp } = await supabase
-                .from('competition_events')
-                .select('id')
-                .eq('event_id', activeEventId)
-                .ilike('name', `%${compEventName}%`)
-                .maybeSingle();
-
-              if (foundComp) targetCompEventId = foundComp.id;
-            }
-
-            if (targetCompEventId) {
-              const { error: regErr } = await supabase.from('registrations').insert({
-                event_id: activeEventId,
-                athlete_id: athleteId,
-                competition_event_id: targetCompEventId,
-                seed_time_ms: seedTimeMs,
-              });
-
-              if (!regErr) registrationsCreated++;
-            }
+          if (createdSchools) {
+            createdSchools.forEach((school: { id: string; name: string }) => {
+              schoolMap.set(school.name, school.id);
+            });
           }
         }
+      }
+
+      // 2. Kumpulkan & Bulk Insert Atlet
+      const athleteMap = new Map<string, string>(); // AthleteNumber -> ID
+      const athletePayloads: AthleteInsertPayload[] = [];
+      const processedNumbers = new Set<string>();
+
+      participantRows.forEach((row, index) => {
+        const fullName = row['Nama Atlet'] || row['Athlete Name'];
+        if (!fullName) return;
+
+        const athleteNum =
+          row['Nomor Peserta'] ||
+          row['Athlete Number'] ||
+          `ATL-${100000 + index}`;
+
+        if (!processedNumbers.has(athleteNum)) {
+          processedNumbers.add(athleteNum);
+          const genderInput = String(row['Jenis Kelamin'] || row['Gender'] || 'male').toLowerCase();
+          const isFemale = genderInput.includes('putri') || genderInput.includes('female');
+          const schoolName = row['Sekolah/Klub'] || row['School/Club'] || 'Umum';
+
+          athletePayloads.push({
+            athlete_number: athleteNum,
+            full_name: fullName,
+            gender: isFemale ? 'female' : 'male',
+            birth_date: parseExcelDate(row['Tanggal Lahir']),
+            grade_level: row['Tingkat'] || 'SD',
+            class_name: row['Kelas'] || 'Kelas 1',
+            age_group: row['Kelompok Umur'] || 'KU',
+            school_id: schoolMap.get(schoolName) || null,
+          });
+        }
+      });
+
+      if (athletePayloads.length > 0) {
+        const { data: insertedAthletes, error: athErr } = await supabase
+          .from('athletes')
+          .insert(athletePayloads)
+          .select('id, athlete_number');
+
+        if (athErr) {
+          throw new Error(`Gagal menyimpan Atlet: ${athErr.message}`);
+        }
+
+        if (insertedAthletes) {
+          insertedAthletes.forEach((ath: { id: string; athlete_number: string }) => {
+            athleteMap.set(ath.athlete_number, ath.id);
+          });
+          athletesCreated = insertedAthletes.length;
+        }
+      }
+
+      // 3. Bulk Insert Registrasi Peserta ke Nomor Lomba
+      const registrationPayloads: RegistrationInsertPayload[] = [];
+
+      participantRows.forEach((row, index) => {
+        const fullName = row['Nama Atlet'] || row['Athlete Name'];
+        const compEventName = row['Nomor Lomba'] || row['Competition Event'];
+        if (!fullName || !compEventName) return;
+
+        const athleteNum =
+          row['Nomor Peserta'] ||
+          row['Athlete Number'] ||
+          `ATL-${100000 + index}`;
+
+        const athleteId = athleteMap.get(athleteNum);
+        const compEventId = compEventMap.get(String(compEventName).trim().toLowerCase());
+
+        if (athleteId && compEventId) {
+          registrationPayloads.push({
+            event_id: activeEventId,
+            athlete_id: athleteId,
+            competition_event_id: compEventId,
+            seed_time_ms: Number(row['Seed Time MS']) || 0,
+          });
+        }
+      });
+
+      if (registrationPayloads.length > 0) {
+        const { error: regErr } = await supabase
+          .from('registrations')
+          .insert(registrationPayloads);
+
+        if (regErr) {
+          throw new Error(`Gagal menyimpan Registrasi: ${regErr.message}`);
+        }
+        registrationsCreated = registrationPayloads.length;
       }
     }
 
@@ -232,11 +399,12 @@ export async function parseAndImportExcel(file: File): Promise<ExcelImportResult
         registrationsCreated,
       },
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Terjadi kesalahan saat membaca file Excel.';
     console.error('Excel Parser Error:', error);
     return {
       success: false,
-      message: error.message || 'Terjadi kesalahan saat membaca file Excel.',
+      message: errorMessage,
     };
   }
 }

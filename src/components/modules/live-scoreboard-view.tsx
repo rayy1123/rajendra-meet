@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { formatMsToTime } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -14,7 +14,7 @@ interface LiveScoreboardViewProps {
 }
 
 export function LiveScoreboardView({ eventId, compEvents }: LiveScoreboardViewProps) {
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [selectedCompEventId, setSelectedCompEventId] = useState<string>(compEvents[0]?.id || '');
   const [heatsData, setHeatsData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -53,8 +53,14 @@ export function LiveScoreboardView({ eventId, compEvents }: LiveScoreboardViewPr
   }, [selectedCompEventId, supabase]);
 
   useEffect(() => {
-    setLoading(true);
-    fetchScores().finally(() => setLoading(false));
+    let isMounted = true;
+
+    if (selectedCompEventId) {
+      setLoading(true);
+      fetchScores().finally(() => {
+        if (isMounted) setLoading(false);
+      });
+    }
 
     // Setup Supabase Realtime listener pada tabel 'results'
     const channel = supabase
@@ -63,12 +69,13 @@ export function LiveScoreboardView({ eventId, compEvents }: LiveScoreboardViewPr
         'postgres_changes',
         { event: '*', schema: 'public', table: 'results' },
         () => {
-          fetchScores(); // Refresh otomatis jika ada insert/update hasil
+          fetchScores(); // Refresh otomatis jika ada insert/update/delete hasil
         }
       )
       .subscribe();
 
     return () => {
+      isMounted = false;
       supabase.removeChannel(channel);
     };
   }, [selectedCompEventId, fetchScores, supabase]);
@@ -122,46 +129,51 @@ export function LiveScoreboardView({ eventId, compEvents }: LiveScoreboardViewPr
               </CardHeader>
 
               <CardContent className="p-0 divide-y divide-slate-800/60">
-                {heat.heat_assignments
-                  ?.sort((a: any, b: any) => a.lane_number - b.lane_number)
-                  .map((assign: any) => {
-                    const athlete = assign.registrations?.athletes;
-                    const school = athlete?.schools;
-                    const result = assign.results?.[0];
+                {heat.heat_assignments &&
+                  [...heat.heat_assignments]
+                    .sort((a: any, b: any) => a.lane_number - b.lane_number)
+                    .map((assign: any) => {
+                      const athlete = assign.registrations?.athletes;
+                      const school = athlete?.schools;
+                      const result = assign.results?.[0];
 
-                    return (
-                      <div
-                        key={assign.id}
-                        className="p-4 flex items-center justify-between hover:bg-slate-800/30 transition-colors"
-                      >
-                        {/* Lane + Name */}
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-lg bg-blue-950 border border-blue-800 text-blue-400 font-black text-xl flex items-center justify-center shrink-0">
-                            {assign.lane_number}
+                      return (
+                        <div
+                          key={assign.id}
+                          className="p-4 flex items-center justify-between hover:bg-slate-800/30 transition-colors"
+                        >
+                          {/* Lane + Name */}
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-lg bg-blue-950 border border-blue-800 text-blue-400 font-black text-xl flex items-center justify-center shrink-0">
+                              {assign.lane_number}
+                            </div>
+                            <div>
+                              <h4 className="font-bold text-slate-100 text-base">
+                                {athlete?.full_name || 'Lintasan Kosong'}
+                              </h4>
+                              <p className="text-xs text-slate-400">
+                                {school?.name || 'Umum'}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <h4 className="font-bold text-slate-100 text-base">
-                              {athlete?.full_name || 'Lintasan Kosong'}
-                            </h4>
-                            <p className="text-xs text-slate-400">
-                              {school?.name || 'Umum'}
-                            </p>
+
+                          {/* Waktu / Status Hasil Lomba */}
+                          <div className="text-right">
+                            {result?.status && result.status !== 'OK' ? (
+                              <Badge variant="destructive" className="font-mono text-xs font-bold uppercase">
+                                {result.status}
+                              </Badge>
+                            ) : result?.time_ms ? (
+                              <span className="font-mono font-black text-xl sm:text-2xl text-emerald-400 tracking-wider">
+                                {formatMsToTime(result.time_ms)}
+                              </span>
+                            ) : (
+                              <span className="font-mono text-sm text-slate-600">--:--.--</span>
+                            )}
                           </div>
                         </div>
-
-                        {/* Waktu Hasil Lomba */}
-                        <div className="text-right">
-                          {result?.time_ms ? (
-                            <span className="font-mono font-black text-xl sm:text-2xl text-emerald-400 tracking-wider">
-                              {formatMsToTime(result.time_ms)}
-                            </span>
-                          ) : (
-                            <span className="font-mono text-sm text-slate-600">--:--.--</span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
               </CardContent>
             </Card>
           ))}

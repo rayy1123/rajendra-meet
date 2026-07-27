@@ -3,6 +3,32 @@ import { ResultInputOperator } from '@/components/modules/result-input-operator'
 import { Trophy, Waves } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
+// Types untuk menyempurnakan Type Safety
+export interface HeatAssignmentWithResult {
+  id: string;
+  lane_number: number;
+  registrations: {
+    id: string;
+    seed_time_ms: number | null;
+    athletes: {
+      full_name: string;
+      athlete_number: string;
+      schools: { name: string } | null;
+    } | null;
+  } | null;
+  results: {
+    id: string;
+    time_ms: number | null;
+    status: string;
+  } | null;
+}
+
+export interface HeatWithAssignments {
+  id: string;
+  heat_number: number;
+  heat_assignments: HeatAssignmentWithResult[];
+}
+
 export default async function ResultsPage({
   searchParams,
 }: {
@@ -19,16 +45,19 @@ export default async function ResultsPage({
 
   const activeEventId = params.eventId || events?.[0]?.id || '';
 
-  // 2. Ambil daftar nomor lomba (competition_events) berdasarkan event yang dipilih
+  // 2. Ambil daftar nomor lomba berdasarkan event yang dipilih
   const { data: compEvents } = await supabase
     .from('competition_events')
     .select('id, name, stroke, distance_meters, gender, grade_level, class_name')
     .eq('event_id', activeEventId);
 
-  const activeCompEventId = params.compEventId || compEvents?.[0]?.id || '';
+  // Validasi agar compEventId benar-benar milik event yang aktif
+  const isValidCompEvent = compEvents?.some((ce) => ce.id === params.compEventId);
+  const activeCompEventId = isValidCompEvent ? params.compEventId! : compEvents?.[0]?.id || '';
 
-  // 3. Ambil data Heat & Assignment untuk nomor lomba yang dipilih
-  let heatAssignments: any[] = [];
+  // 3. Ambil data Heat & Assignment beserta Hasil Lomba
+  let heatAssignments: HeatWithAssignments[] = [];
+
   if (activeCompEventId) {
     const { data: heats } = await supabase
       .from('heats')
@@ -57,7 +86,15 @@ export default async function ResultsPage({
       .eq('competition_event_id', activeCompEventId)
       .order('heat_number', { ascending: true });
 
-    heatAssignments = heats || [];
+    // Pastikan lane_number di setiap heat terurut rapi (Lane 1..8)
+    if (heats) {
+      heatAssignments = heats.map((h) => ({
+        ...h,
+        heat_assignments: (h.heat_assignments || []).sort(
+          (a, b) => a.lane_number - b.lane_number
+        ),
+      })) as unknown as HeatWithAssignments[];
+    }
   }
 
   return (

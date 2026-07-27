@@ -3,6 +3,28 @@ import { HeatGeneratorOperator } from '@/components/modules/heat-generator-opera
 import { Layers, Waves } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
+// Definisi Interface untuk Type Safety
+export interface RegistrationItem {
+  id: string;
+  seed_time_ms: number | null;
+  athletes: {
+    id: string;
+    full_name: string;
+    athlete_number: string;
+    schools: { name: string } | null;
+  } | null;
+}
+
+export interface HeatItem {
+  id: string;
+  heat_number: number;
+  heat_assignments: {
+    id: string;
+    lane_number: number;
+    registration_id: string;
+  }[];
+}
+
 export default async function HeatsPage({
   searchParams,
 }: {
@@ -26,11 +48,13 @@ export default async function HeatsPage({
     .select('id, name, stroke, distance_meters, gender, grade_level, class_name')
     .eq('event_id', activeEventId);
 
-  const activeCompEventId = params.compEventId || compEvents?.[0]?.id || '';
+  // Validasi agar compEventId benar-benar milik event yang aktif
+  const isValidCompEvent = compEvents?.some((ce) => ce.id === params.compEventId);
+  const activeCompEventId = isValidCompEvent ? params.compEventId! : compEvents?.[0]?.id || '';
 
   // 3. Ambil pendaftaran atlet & status heat yang ada
-  let registrations: any[] = [];
-  let existingHeats: any[] = [];
+  let registrations: RegistrationItem[] = [];
+  let existingHeats: HeatItem[] = [];
 
   if (activeCompEventId) {
     const [{ data: regs }, { data: heats }] = await Promise.all([
@@ -63,8 +87,8 @@ export default async function HeatsPage({
         .order('heat_number', { ascending: true }),
     ]);
 
-    registrations = regs || [];
-    existingHeats = heats || [];
+    registrations = (regs as unknown as RegistrationItem[]) || [];
+    existingHeats = (heats as unknown as HeatItem[]) || [];
   }
 
   return (

@@ -55,15 +55,15 @@ export function HeatGeneratorOperator({
 
   const handleEventChange = (val: string) => {
     setSelectedEventId(val);
-    router.push(`/heats?eventId=${val}`);
+    router.push(`/heats?eventId=${val}`, { scroll: false });
   };
 
   const handleCompEventChange = (val: string) => {
     setSelectedCompEventId(val);
-    router.push(`/heats?eventId=${selectedEventId}&compEventId=${val}`);
+    router.push(`/heats?eventId=${selectedEventId}&compEventId=${val}`, { scroll: false });
   };
 
-  // Fungsi Generate Heat
+  // Fungsi Generate Heat Otomatis
   const handleGenerateHeats = async () => {
     if (!selectedCompEventId || registrations.length === 0) {
       toast.error('Tidak ada peserta terdaftar untuk dikelompokkan.');
@@ -77,7 +77,8 @@ export function HeatGeneratorOperator({
       // 1. Hapus Heat lama jika ada
       if (existingHeats.length > 0) {
         const heatIds = existingHeats.map((h) => h.id);
-        await supabase.from('heats').delete().in('id', heatIds);
+        const { error: deleteErr } = await supabase.from('heats').delete().in('id', heatIds);
+        if (deleteErr) throw deleteErr;
       }
 
       // 2. Hitung jumlah Heat yang dibutuhkan
@@ -85,8 +86,8 @@ export function HeatGeneratorOperator({
       const numHeats = Math.ceil(totalParticipants / laneCount);
       const laneOrder = getLaneOrder(laneCount);
 
-      // Urutkan atlet dari waktu paling cepat ke paling lambat
-      const sortedRegs = [...registrations].sort((a, b) => a.seed_time_ms - b.seed_time_ms);
+      // Urutkan atlet: Perenang tercepat dialokasikan ke Heat terakhir (Standar Seeding)
+      const sortedRegs = [...registrations].sort((a, b) => (b.seed_time_ms || 999999) - (a.seed_time_ms || 999999));
 
       // Algoritma Distribusi Seeding ke Heat
       for (let h = 1; h <= numHeats; h++) {
@@ -102,10 +103,11 @@ export function HeatGeneratorOperator({
 
         if (heatErr || !newHeat) throw heatErr;
 
-        // Ambil porsi atlet untuk Heat ini
-        const heatRegs = sortedRegs.splice(0, laneCount);
+        // Ambil porsi atlet untuk Heat ini (Menggunakan slice tanpa memutasi array asal)
+        const startIndex = (h - 1) * laneCount;
+        const heatRegs = sortedRegs.slice(startIndex, startIndex + laneCount);
 
-        // Petakan ke Lintasan
+        // Petakan ke Lintasan Spearhead
         const assignments = heatRegs.map((reg, idx) => ({
           heat_id: newHeat.id,
           registration_id: reg.id,
@@ -119,7 +121,7 @@ export function HeatGeneratorOperator({
       toast.success(`Berhasil membuat ${numHeats} Heat secara otomatis!`);
       router.refresh();
     } catch (err: any) {
-      toast.error(err.message || 'Gagal memproses pembagian Heat.');
+      toast.error(err?.message || 'Gagal memproses pembagian Heat.');
     } finally {
       setGenerating(false);
     }
@@ -150,7 +152,7 @@ export function HeatGeneratorOperator({
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-muted/40 p-4 rounded-xl border">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full lg:w-auto flex-1">
           <div className="space-y-1">
-            <label className="text-xs font-semibold">Pilih Event</label>
+            <label className="text-xs font-semibold block">Pilih Event</label>
             <Select value={selectedEventId} onValueChange={handleEventChange}>
               <SelectTrigger className="bg-background">
                 <SelectValue placeholder="Pilih Event" />
@@ -166,7 +168,7 @@ export function HeatGeneratorOperator({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-semibold">Pilih Nomor Lomba</label>
+            <label className="text-xs font-semibold block">Pilih Nomor Lomba</label>
             <Select value={selectedCompEventId} onValueChange={handleCompEventChange}>
               <SelectTrigger className="bg-background">
                 <SelectValue placeholder="Pilih Nomor Lomba" />
@@ -241,30 +243,31 @@ export function HeatGeneratorOperator({
               </CardHeader>
 
               <CardContent className="p-0 divide-y">
-                {heat.heat_assignments
-                  ?.sort((a: any, b: any) => a.lane_number - b.lane_number)
-                  .map((assign: any) => {
-                    const reg = registrations.find((r) => r.id === assign.registration_id);
-                    const athlete = reg?.athletes;
+                {heat.heat_assignments &&
+                  [...heat.heat_assignments]
+                    .sort((a: any, b: any) => a.lane_number - b.lane_number)
+                    .map((assign: any) => {
+                      const reg = registrations.find((r) => r.id === assign.registration_id);
+                      const athlete = reg?.athletes;
 
-                    return (
-                      <div key={assign.id} className="p-3 flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-3">
-                          <span className="w-7 h-7 rounded bg-blue-100 text-blue-700 font-bold flex items-center justify-center shrink-0">
-                            {assign.lane_number}
-                          </span>
-                          <div>
-                            <p className="font-bold text-sm text-foreground">{athlete?.full_name || 'Kosong'}</p>
-                            <p className="text-muted-foreground">{athlete?.schools?.name || 'Umum'}</p>
+                      return (
+                        <div key={assign.id} className="p-3 flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-3">
+                            <span className="w-7 h-7 rounded bg-blue-100 text-blue-700 font-bold flex items-center justify-center shrink-0">
+                              {assign.lane_number}
+                            </span>
+                            <div>
+                              <p className="font-bold text-sm text-foreground">{athlete?.full_name || 'Kosong'}</p>
+                              <p className="text-muted-foreground">{athlete?.schools?.name || 'Umum'}</p>
+                            </div>
+                          </div>
+
+                          <div className="font-mono font-bold text-slate-600">
+                            {reg?.seed_time_ms ? formatMsToTime(reg.seed_time_ms) : 'NT'}
                           </div>
                         </div>
-
-                        <div className="font-mono font-bold text-slate-600">
-                          {reg?.seed_time_ms ? formatMsToTime(reg.seed_time_ms) : 'NT'}
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
               </CardContent>
             </Card>
           ))}

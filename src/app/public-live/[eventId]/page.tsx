@@ -3,22 +3,22 @@ import { LiveScoreboardView } from '@/components/modules/live-scoreboard-view';
 import { Waves } from 'lucide-react';
 import { notFound } from 'next/navigation';
 
-export default async function PublicLivePage({
-  params,
-}: {
+interface PublicLivePageProps {
   params: Promise<{ eventId: string }>;
-}) {
-  const supabase = await createClient();
+}
+
+export default async function PublicLivePage({ params }: PublicLivePageProps) {
   const { eventId } = await params;
+  const supabase = await createClient();
 
   // 1. Ambil detail Event
-  const { data: event } = await supabase
+  const { data: event, error: eventError } = await supabase
     .from('events')
     .select('id, name, location, pool_type, lane_count')
     .eq('id', eventId)
     .single();
 
-  if (!event) {
+  if (eventError || !event) {
     notFound();
   }
 
@@ -45,8 +45,12 @@ export default async function PublicLivePage({
         </div>
 
         <div className="text-right text-xs text-slate-400 hidden md:block">
-          <p className="font-semibold text-slate-200">📍 {event.location}</p>
-          <p>{event.pool_type} • {event.lane_count} Lintasan</p>
+          <p className="font-semibold text-slate-200">
+            📍 {event.location || 'Lokasi Belum Ditentukan'}
+          </p>
+          <p>
+            {event.pool_type || 'Standard'} • {event.lane_count || 8} Lintasan
+          </p>
         </div>
       </header>
 
