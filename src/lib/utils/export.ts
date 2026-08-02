@@ -1,36 +1,60 @@
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 
 /**
  * 1. Fungsi Ekspor Data ke Format Excel (.xlsx) dengan Lebar Kolom Otomatis
  */
-export function exportToExcel(data: Record<string, any>[], fileName: string) {
-  if (!data || data.length === 0) return;
+export async function exportToExcel(
+  data: Record<string, unknown>[],
+  fileName: string
+): Promise<void> {
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'SCMS';
+  workbook.created = new Date();
 
-  const worksheet = XLSX.utils.json_to_sheet(data);
+  const worksheet = workbook.addWorksheet('Data');
 
-  // Menghitung lebar kolom secara otomatis berdasarkan isi data terpanjang
-  const objectKeys = Object.keys(data[0]);
-  const colWidths = objectKeys.map((key) => {
-    const maxContentLength = Math.max(
-      key.length,
-      ...data.map((row) => (row[key] ? String(row[key]).length : 0))
-    );
-    return { wch: Math.min(Math.max(maxContentLength + 3, 10), 50) }; // min 10, max 50 char
+  if (data.length === 0) {
+    worksheet.addRow(['Tidak ada data']);
+  } else {
+    const headers = Object.keys(data[0]);
+
+    worksheet.columns = headers.map((header) => {
+      // Lebar kolom otomatis: header vs isi terpanjang, dibatasi 10..50
+      const longestValue = data.reduce((max, row) => {
+        const len = String(row[header] ?? '').length;
+        return len > max ? len : max;
+      }, header.length);
+
+      return {
+        header,
+        key: header,
+        width: Math.min(Math.max(longestValue + 2, 10), 50),
+      };
+    });
+
+    worksheet.getRow(1).font = { bold: true };
+
+    data.forEach((row) => {
+      worksheet.addRow(row);
+    });
+  }
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   });
 
-  worksheet['!cols'] = colWidths;
-
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Data');
-
-  XLSX.writeFile(workbook, `${fileName}.xlsx`);
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${fileName}.xlsx`;
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
 /**
- * 2. Fungsi Cetak Halaman (PDF Printer Friendly)
+ * 2. Fungsi Cetak Halaman (Print Preview Browser)
  */
-export function printPage() {
-  if (typeof window !== 'undefined') {
-    window.print();
-  }
+export function printPage(): void {
+  window.print();
 }

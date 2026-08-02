@@ -1,6 +1,12 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
+/**
+ * Prefix rute yang boleh diakses tanpa login (halaman publik SCMS).
+ * Harus selaras dengan struktur route di src/app.
+ */
+const PUBLIC_ROUTE_PREFIXES = ['/public', '/public-live'];
+
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({
     request: {
@@ -42,7 +48,11 @@ export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // Rute publik yang boleh diakses tanpa login
-  const isPublicRoute = pathname === '/login' || pathname.startsWith('/scoreboard');
+  const isPublicRoute =
+    pathname === '/login' ||
+    PUBLIC_ROUTE_PREFIXES.some(
+      (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+    );
 
   // 1. Jika belum login dan mencoba mengakses rute terproteksi
   if (!user && !isPublicRoute) {

@@ -25,7 +25,7 @@ export function ExportView({ events, initialEventId, exportData }: ExportViewPro
   };
 
   // Format data untuk ekspor Excel
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     const flatRows: any[] = [];
 
     exportData.forEach((ce) => {
@@ -44,7 +44,7 @@ export function ExportView({ events, initialEventId, exportData }: ExportViewPro
     });
 
     const activeEventName = events.find((e) => e.id === selectedEventId)?.name || 'Buku_Acara';
-    exportToExcel(flatRows, `Buku_Acara_${activeEventName.replace(/\s+/g, '_')}`);
+    await exportToExcel(flatRows, `Buku_Acara_${activeEventName.replace(/\s+/g, '_')}`);
   };
 
   return (

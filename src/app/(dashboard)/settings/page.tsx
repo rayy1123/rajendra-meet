@@ -56,7 +56,7 @@ export default async function SettingsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[100px]">Peringkat</TableHead>
+                     <TableHead className="w-24">Peringkat</TableHead>
                       <TableHead>Medali / Deskripsi</TableHead>
                       <TableHead className="text-right">Poin Perorangan</TableHead>
                       <TableHead className="text-right">Poin Estafet</TableHead>

@@ -135,7 +135,7 @@ export default async function SchoolsPage({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[80px]">No</TableHead>
+                   <TableHead className="w-20">No</TableHead>
                     <TableHead>Nama Sekolah / Klub</TableHead>
                     <TableHead>Kode Kontingen</TableHead>
                     <TableHead>Kota / Kabupaten</TableHead>

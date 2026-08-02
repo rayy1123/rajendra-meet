@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { createClient } from '@/lib/supabase/client';
 
 // ==========================================
@@ -120,22 +120,83 @@ interface RegistrationInsertPayload {
 // ==========================================
 
 /**
- * Mengonversi nilai Tanggal dari Excel (Numeric Serial atau String) ke format YYYY-MM-DD
+ * Mengonversi nilai Tanggal dari Excel (Date, Numeric Serial, atau String) ke format YYYY-MM-DD
  */
-function parseExcelDate(val: string | number | undefined | null): string {
+function parseExcelDate(val: string | number | Date | undefined | null): string {
   if (!val) return new Date().toISOString().split('T')[0];
 
+  if (val instanceof Date) {
+    return val.toISOString().split('T')[0];
+  }
+
   if (typeof val === 'number') {
-    const parsedDate = XLSX.SSF.parse_date_code(val);
-    if (parsedDate) {
-      const year = parsedDate.y;
-      const month = String(parsedDate.m).padStart(2, '0');
-      const day = String(parsedDate.d).padStart(2, '0');
-      return `${year}-${month}-${day}`;
+    // Serial date Excel: hari sejak 1899-12-30 (epoch 1900 system)
+    const EXCEL_EPOCH_MS = Date.UTC(1899, 11, 30);
+    const date = new Date(EXCEL_EPOCH_MS + val * 86400000);
+    if (!isNaN(date.getTime())) {
+      return date.toISOString().split('T')[0];
     }
   }
 
   return String(val).trim();
+}
+
+/**
+ * Mengonversi cell value ExcelJS menjadi nilai primitif sederhana.
+ */
+function cellValue(cell: ExcelJS.Cell): string | number | Date | null {
+  const v = cell.value;
+  if (v === null || v === undefined) return null;
+  if (v instanceof Date) return v;
+  if (typeof v === 'number' || typeof v === 'string') return v;
+  if (typeof v === 'object') {
+    if ('text' in v && typeof v.text === 'string') return v.text;
+    if ('result' in v) {
+      const r = (v as ExcelJS.CellFormulaValue).result;
+      if (typeof r === 'number' || typeof r === 'string') return r;
+      if (r instanceof Date) return r;
+    }
+    if ('richText' in v) {
+      return (v as ExcelJS.CellRichTextValue).richText.map((t) => t.text).join('');
+    }
+  }
+  return String(v);
+}
+
+/**
+ * Padanan XLSX.utils.sheet_to_json: baris pertama dipakai sebagai header.
+ */
+function sheetToJson<T>(worksheet: ExcelJS.Worksheet | undefined): T[] {
+  if (!worksheet) return [];
+
+  const headerRow = worksheet.getRow(1);
+  const headers: (string | null)[] = [];
+  headerRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+    const raw = cellValue(cell);
+    headers[colNumber] = raw === null ? null : String(raw).trim();
+  });
+
+  const rows: T[] = [];
+  worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+    if (rowNumber === 1) return;
+
+    const obj: Record<string, string | number | Date | null> = {};
+    let hasValue = false;
+
+    row.eachCell({ includeEmpty: false }, (cell, colNumber) => {
+      const key = headers[colNumber];
+      if (!key) return;
+      const value = cellValue(cell);
+      if (value !== null && value !== '') {
+        obj[key] = value;
+        hasValue = true;
+      }
+    });
+
+    if (hasValue) rows.push(obj as T);
+  });
+
+  return rows;
 }
 
 // ==========================================
@@ -150,10 +211,11 @@ export async function parseAndImportExcel(file: File): Promise<ExcelImportResult
 
   try {
     const arrayBuffer = await file.arrayBuffer();
-    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(arrayBuffer);
 
-    const sheetNames = workbook.SheetNames;
-    if (sheetNames.length === 0) {
+    const worksheets = workbook.worksheets;
+    if (worksheets.length === 0) {
       return { success: false, message: 'File Excel kosong atau rusak.' };
     }
 
@@ -167,9 +229,8 @@ export async function parseAndImportExcel(file: File): Promise<ExcelImportResult
     // ==========================================
     // SHEET 1: EVENT INFORMATION
     // ==========================================
-    if (sheetNames[0]) {
-      const eventSheet = workbook.Sheets[sheetNames[0]];
-      const eventRows = XLSX.utils.sheet_to_json<EventSheetRow>(eventSheet);
+    if (worksheets[0]) {
+      const eventRows = sheetToJson<EventSheetRow>(worksheets[0]);
 
       if (eventRows.length > 0) {
         const row = eventRows[0];
@@ -209,9 +270,8 @@ export async function parseAndImportExcel(file: File): Promise<ExcelImportResult
     // ==========================================
     const compEventMap = new Map<string, string>(); // Key: lowerCaseName -> Value: competition_event_id
 
-    if (sheetNames[2]) {
-      const compSheet = workbook.Sheets[sheetNames[2]];
-      const compRows = XLSX.utils.sheet_to_json<CompetitionEventSheetRow>(compSheet);
+    if (worksheets[2]) {
+      const compRows = sheetToJson<CompetitionEventSheetRow>(worksheets[2]);
 
       const compPayloads: CompetitionEventInsertPayload[] = compRows
         .map((row): CompetitionEventInsertPayload | null => {
@@ -258,9 +318,8 @@ export async function parseAndImportExcel(file: File): Promise<ExcelImportResult
     // ==========================================
     // SHEET 4: ATHLETES, SCHOOLS & REGISTRATIONS
     // ==========================================
-    if (sheetNames[3]) {
-      const participantSheet = workbook.Sheets[sheetNames[3]];
-      const participantRows = XLSX.utils.sheet_to_json<ParticipantSheetRow>(participantSheet);
+    if (worksheets[3]) {
+      const participantRows = sheetToJson<ParticipantSheetRow>(worksheets[3]);
 
       // 1. Kumpulkan Sekolah Dulu & Bulk Insert jika Belum Ada
       const rawSchoolNames = participantRows

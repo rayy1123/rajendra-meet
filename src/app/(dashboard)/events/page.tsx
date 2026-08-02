@@ -1,344 +1,175 @@
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import { revalidatePath } from 'next/cache';
-import { 
-  Plus, 
-  MapPin, 
-  Calendar, 
-  Waves, 
-  Trash2, 
-  Edit, 
-  Trophy 
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-
-// ==========================================
-// SERVER ACTIONS
-// ==========================================
-
-async function createEventAction(formData: FormData) {
-  'use server';
-  const supabase = await createClient();
-
-  const name = formData.get('name') as string;
-  const organizer = formData.get('organizer') as string;
-  const location = formData.get('location') as string;
-  const start_date = formData.get('start_date') as string;
-  const end_date = formData.get('end_date') as string;
-  const pool_type = formData.get('pool_type') as string;
-  const lane_count = parseInt(formData.get('lane_count') as string, 10);
-  const description = formData.get('description') as string;
-
-  const { error } = await supabase.from('events').insert({
-    name,
-    organizer,
-    location,
-    start_date,
-    end_date,
-    pool_type,
-    pool_length_meters: pool_type === 'Short Course' ? 25 : 50,
-    lane_count,
-    description,
-  });
-
-  if (error) {
-    console.error('Error creating event:', error.message);
-    return;
-  }
-
-  revalidatePath('/events');
-}
-
-async function updateEventAction(formData: FormData) {
-  'use server';
-  const supabase = await createClient();
-
-  const id = formData.get('id') as string;
-  const name = formData.get('name') as string;
-  const organizer = formData.get('organizer') as string;
-  const location = formData.get('location') as string;
-  const start_date = formData.get('start_date') as string;
-  const end_date = formData.get('end_date') as string;
-  const pool_type = formData.get('pool_type') as string;
-  const lane_count = parseInt(formData.get('lane_count') as string, 10);
-  const description = formData.get('description') as string;
-
-  const { error } = await supabase.from('events').update({
-    name,
-    organizer,
-    location,
-    start_date,
-    end_date,
-    pool_type,
-    pool_length_meters: pool_type === 'Short Course' ? 25 : 50,
-    lane_count,
-    description,
-  }).eq('id', id);
-
-  if (error) {
-    console.error('Error updating event:', error.message);
-    return;
-  }
-
-  revalidatePath('/events');
-}
-
-async function deleteEventAction(formData: FormData) {
-  'use server';
-  const supabase = await createClient();
-  const id = formData.get('id') as string;
-
-  const { error } = await supabase.from('events').delete().eq('id', id);
-
-  if (error) {
-    console.error('Error deleting event:', error.message);
-    return;
-  }
-
-  revalidatePath('/events');
-}
-
-// ==========================================
-// MAIN SERVER COMPONENT
-// ==========================================
+import { redirect } from 'next/navigation';
 
 export default async function EventsPage() {
   const supabase = await createClient();
+
+  // 1. Cek User Session
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  // 2. Fetch Data Events dari Supabase
   const { data: events } = await supabase
     .from('events')
     .select('*')
     .order('created_at', { ascending: false });
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-5">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Event Management</h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Kelola kejuaraan renang, pengaturan lintasan kolam, dan jadwal perlombaan.
-          </p>
-        </div>
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased pb-12">
+      {/* HEADER / NAVBAR UTAMA */}
+      <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-blue-600/20 text-blue-400 rounded-xl border border-blue-500/30">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <div>
+              <h1 className="text-base font-bold bg-linear-to-r from-blue-400 to-teal-400 bg-clip-text text-transparent">
+                Rajendra Meet Manager
+              </h1>
+              <p className="text-xs text-slate-400">SCMS Platform</p>
+            </div>
+          </div>
 
-        {/* Modal Tambah Event */}
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="w-4 h-4" />
-              Buat Event Baru
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>Buat Kejuaraan Renang Baru</DialogTitle>
-            </DialogHeader>
-            <form action={createEventAction} className="space-y-4 py-2">
-              <div className="space-y-1">
-                <label className="text-xs font-semibold">Nama Event / Kejuaraan</label>
-                <Input name="name" placeholder="Contoh: Kejurda Renang Jabar 2026" required />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold">Penyelenggara</label>
-                  <Input name="organizer" placeholder="PRSI / Club" required />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold">Lokasi / Kolam Renang</label>
-                  <Input name="location" placeholder="Kolam Renang UPI" required />
-                </div>
-              </div>
+          {/* Tombol Navigasi Kanan */}
+          <div className="flex items-center space-x-3">
+            <Link
+              href="/scoreboard"
+              target="_blank"
+              className="hidden sm:flex items-center space-x-2 px-3 py-1.5 text-xs font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl transition"
+            >
+              <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              <span>Live Scoreboard</span>
+            </Link>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold">Tanggal Mulai</label>
-                  <Input type="date" name="start_date" required />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold">Tanggal Selesai</label>
-                  <Input type="date" name="end_date" required />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold">Jenis Kolam</label>
-                  <Select name="pool_type" defaultValue="Long Course">
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Long Course">Long Course (50m)</SelectItem>
-                      <SelectItem value="Short Course">Short Course (25m)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold">Jumlah Lane (Lintasan)</label>
-                  <Select name="lane_count" defaultValue="8">
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="6">6 Lane</SelectItem>
-                      <SelectItem value="8">8 Lane</SelectItem>
-                      <SelectItem value="10">10 Lane</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-semibold">Deskripsi / Catatan Tambahan</label>
-                <Input name="description" placeholder="Catatan singkat event..." />
-              </div>
-
-              <DialogFooter className="mt-6">
-                <Button type="submit">Simpan Event</Button>
-              </DialogFooter>
+            <form action="/auth/signout" method="post">
+              <button
+                type="submit"
+                className="px-3 py-1.5 text-xs font-medium text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 rounded-xl transition"
+              >
+                Logout
+              </button>
             </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Grid List Events */}
-      {!events || events.length === 0 ? (
-        <Card className="p-12 text-center border-dashed">
-          <Trophy className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
-          <h3 className="font-semibold text-lg">Belum Ada Event Kejuaraan</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            Klik tombol "Buat Event Baru" di atas untuk menambahkan kejuaraan renang pertama kamu.
-          </p>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {events.map((evt) => (
-            <Card key={evt.id} className="hover:shadow-md transition-shadow flex flex-col justify-between">
-              <CardHeader className="pb-3">
-                <div className="flex justify-between items-start gap-2">
-                  <CardTitle className="text-lg font-bold line-clamp-1">{evt.name}</CardTitle>
-                  <span className="text-xs font-medium px-2 py-1 bg-primary/10 text-primary rounded-md whitespace-nowrap">
-                    {evt.lane_count} Lane
-                  </span>
-                </div>
-                <CardDescription className="text-xs">{evt.organizer}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2 text-xs text-muted-foreground pb-4">
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-3.5 h-3.5 text-primary" />
-                  <span className="line-clamp-1">{evt.location}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-3.5 h-3.5 text-primary" />
-                  <span>{evt.start_date} s/d {evt.end_date}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Waves className="w-3.5 h-3.5 text-primary" />
-                  <span>{evt.pool_type} ({evt.pool_length_meters}m)</span>
-                </div>
-              </CardContent>
-
-              {/* Action Buttons */}
-              <div className="px-6 pb-4 pt-2 border-t flex items-center justify-between gap-2">
-                {/* Modal Edit */}
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="w-full gap-1">
-                      <Edit className="w-3.5 h-3.5" /> Edit
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[500px]">
-                    <DialogHeader>
-                      <DialogTitle>Edit Kejuaraan Renang</DialogTitle>
-                    </DialogHeader>
-                    <form action={updateEventAction} className="space-y-4 py-2">
-                      <input type="hidden" name="id" value={evt.id} />
-                      <div className="space-y-1">
-                        <label className="text-xs font-semibold">Nama Event</label>
-                        <Input name="name" defaultValue={evt.name} required />
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-1">
-                          <label className="text-xs font-semibold">Penyelenggara</label>
-                          <Input name="organizer" defaultValue={evt.organizer} required />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-xs font-semibold">Lokasi</label>
-                          <Input name="location" defaultValue={evt.location} required />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-1">
-                          <label className="text-xs font-semibold">Tanggal Mulai</label>
-                          <Input type="date" name="start_date" defaultValue={evt.start_date} required />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-xs font-semibold">Tanggal Selesai</label>
-                          <Input type="date" name="end_date" defaultValue={evt.end_date} required />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-1">
-                          <label className="text-xs font-semibold">Jenis Kolam</label>
-                          <Select name="pool_type" defaultValue={evt.pool_type}>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Long Course">Long Course (50m)</SelectItem>
-                              <SelectItem value="Short Course">Short Course (25m)</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-xs font-semibold">Jumlah Lane</label>
-                          <Select name="lane_count" defaultValue={evt.lane_count.toString()}>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="6">6 Lane</SelectItem>
-                              <SelectItem value="8">8 Lane</SelectItem>
-                              <SelectItem value="10">10 Lane</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      <DialogFooter className="mt-6">
-                        <Button type="submit">Perbarui Event</Button>
-                      </DialogFooter>
-                    </form>
-                  </DialogContent>
-                </Dialog>
-
-                {/* Form Hapus */}
-                <form action={deleteEventAction}>
-                  <input type="hidden" name="id" value={evt.id} />
-                  <Button variant="destructive" size="sm" type="submit" className="px-3">
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </Button>
-                </form>
-              </div>
-            </Card>
-          ))}
+          </div>
         </div>
-      )}
+      </header>
+
+      {/* CONTAINER UTAMA */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
+        {/* TITLE BAR & ACTION BUTTONS */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-800 pb-6">
+          <div>
+            <h2 className="text-2xl font-bold text-white tracking-tight">Event Management</h2>
+            <p className="text-sm text-slate-400 mt-1">
+              Kelola kejuaraan renang, pengaturan lintasan kolam, dan jadwal perlombaan.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Tombol Impor Excel */}
+            <Link
+              href="/events/import"
+              className="inline-flex items-center space-x-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold rounded-xl shadow-lg shadow-emerald-900/20 transition"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              <span>Import Buku Acara</span>
+            </Link>
+
+            {/* Tombol Buat Event Manual */}
+            <Link
+              href="/events/new"
+              className="inline-flex items-center space-x-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl shadow-lg shadow-blue-900/20 transition"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Buat Event Baru</span>
+            </Link>
+          </div>
+        </div>
+
+        {/* EVENT CARDS GRID */}
+        {!events || events.length === 0 ? (
+          <div className="text-center py-16 bg-slate-900/40 border border-slate-800 rounded-2xl">
+            <p className="text-slate-400 text-sm">Belum ada event kejuaraan yang dibuat.</p>
+            <p className="text-xs text-slate-500 mt-1">Silakan klik "Buat Event Baru" atau "Import Buku Acara".</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {events.map((event) => (
+              <div
+                key={event.id}
+                className="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 transition flex flex-col justify-between space-y-4"
+              >
+                {/* Card Header */}
+                <div className="space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-bold text-lg text-white line-clamp-1">{event.name}</h3>
+                    <span className="px-2.5 py-1 text-[11px] font-semibold bg-slate-800 text-blue-400 border border-slate-700 rounded-lg whitespace-nowrap">
+                      {event.lane_count || 8} Lane
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 font-medium">{event.organizer || 'Panitia Pelaksana'}</p>
+                </div>
+
+                {/* Card Info */}
+                <div className="space-y-2 text-xs text-slate-300 border-t border-b border-slate-800/80 py-3">
+                  <div className="flex items-center space-x-2">
+                    <svg className="w-4 h-4 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span className="truncate">{event.location || 'Lokasi Belum Diatur'}</span>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <svg className="w-4 h-4 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span>{event.start_date} s/d {event.end_date}</span>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <svg className="w-4 h-4 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span>{event.pool_type || 'Long Course'} ({event.pool_length_meters || 50}m)</span>
+                  </div>
+                </div>
+
+                {/* Card Actions */}
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <Link
+                    href={`/events/${event.id}`}
+                    className="w-full text-center py-2 px-3 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-semibold transition"
+                  >
+                    Kelola Event
+                  </Link>
+                  <Link
+                    href={`/events/${event.id}/edit`}
+                    className="w-full text-center py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold transition"
+                  >
+                    Edit Event
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </main>
     </div>
   );
 }
