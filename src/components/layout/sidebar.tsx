@@ -7,17 +7,21 @@ import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import {
   CalendarDays,
+  LayoutDashboard,
+  Users,
+  School,
   FileSpreadsheet,
-  Tv,
   Layers,
   Trophy,
   Award,
+  Medal,
   Waves,
   Menu,
   Printer,
   LogOut,
   User,
   Settings,
+  Timer,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,47 +32,23 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 
+/**
+ * Menu navigasi. Setiap href WAJIB punya halaman nyata di src/app/(dashboard),
+ * kalau tidak menu akan mengarah ke 404.
+ */
 const navItems = [
-  {
-    title: 'Kejuaraan / Events',
-    href: '/events',
-    icon: CalendarDays,
-  },
-  {
-    title: 'Import Buku Acara',
-    href: '/import',
-    icon: FileSpreadsheet,
-  },
-  {
-    title: 'Auto-Heat Generator',
-    href: '/heats',
-    icon: Layers,
-  },
-  {
-    title: 'Live Scoreboard',
-    href: '/scoreboard',
-    icon: Tv,
-  },
-  {
-    title: 'Input Hasil Lomba',
-    href: '/results',
-    icon: Trophy,
-  },
-  {
-    title: 'Klasemen Medali',
-    href: '/medals',
-    icon: Award,
-  },
-  {
-    title: 'Cetak & Ekspor',
-    href: '/export',
-    icon: Printer,
-  },
-  {
-    title: 'Pengaturan Sistem',
-    href: '/settings',
-    icon: Settings,
-  },
+  { title: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { title: 'Kejuaraan / Events', href: '/events', icon: CalendarDays },
+  { title: 'Atlet', href: '/athletes', icon: Users },
+  { title: 'Sekolah / Klub', href: '/schools', icon: School },
+  { title: 'Auto-Heat Generator', href: '/heats', icon: Layers },
+  { title: 'Input Hasil Lomba', href: '/results', icon: Trophy },
+  { title: 'Perangkingan', href: '/rankings', icon: Timer },
+  { title: 'Klasemen Medali', href: '/medals', icon: Medal },
+  { title: 'Penghargaan', href: '/awards', icon: Award },
+  { title: 'Rajendra Record', href: '/rajendra-record', icon: FileSpreadsheet },
+  { title: 'Cetak & Ekspor', href: '/export', icon: Printer },
+  { title: 'Pengaturan Sistem', href: '/settings', icon: Settings },
 ];
 
 interface SidebarNavProps {
