@@ -8,15 +8,21 @@
 
 do $$
 declare
-  v_event_id uuid := '00000000-0000-0000-0000-000000000000';  -- <<< GANTI INI
+  v_event_id uuid;
   v_base_year int;
 begin
-  if not exists (select 1 from public.events where id = v_event_id) then
-    raise exception 'Event % tidak ditemukan. Ganti v_event_id terlebih dahulu.', v_event_id;
-  end if;
+  -- Terapkan ke event yang ada. Bila belum ada event sama sekali,
+  -- lewati diam-diam supaya migrasi tetap bisa dijalankan pada DB kosong.
+  select id, extract(year from start_date)::int
+    into v_event_id, v_base_year
+  from public.events
+  order by created_at
+  limit 1;
 
-  select extract(year from start_date)::int into v_base_year
-  from public.events where id = v_event_id;
+  if v_event_id is null then
+    raise notice 'Belum ada event; seed default dilewati.';
+    return;
+  end if;
 
   -- -----------------------------------------------------------
   -- Kelompok Umur default (contoh 6 KU, berbasis tahun kelahiran)
