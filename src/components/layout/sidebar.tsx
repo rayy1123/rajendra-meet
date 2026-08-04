@@ -38,7 +38,7 @@ import {
  * kalau tidak menu akan mengarah ke 404.
  */
 const navItems = [
-  { title: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { title: 'Kejuaraan / Events', href: '/events', icon: CalendarDays },
   { title: 'Atlet', href: '/athletes', icon: Users },
   { title: 'Sekolah / Klub', href: '/schools', icon: School },

@@ -5,7 +5,7 @@ import { NextResponse, type NextRequest } from 'next/server';
  * Prefix rute yang boleh diakses tanpa login (halaman publik SCMS).
  * Harus selaras dengan struktur route di src/app.
  */
-const PUBLIC_ROUTE_PREFIXES = ['/public', '/public-live', '/scoreboard', '/guide', '/register'];
+const PUBLIC_ROUTE_PREFIXES = ['/public', '/public-live', '/scoreboard', '/guide', '/register', '/'];
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({
@@ -68,10 +68,10 @@ export async function proxy(request: NextRequest) {
     return redirectResponse;
   }
 
-  // 2. Jika sudah login dan membuka halaman /login, redirect ke /events
+  // 2. Jika sudah login dan membuka halaman /login, redirect ke /dashboard
   if (user && pathname === '/login') {
     const url = request.nextUrl.clone();
-    url.pathname = '/events';
+    url.pathname = '/dashboard';
     const redirectResponse = NextResponse.redirect(url);
 
     // Salin cookie yang diperbarui oleh Supabase ke response redirect

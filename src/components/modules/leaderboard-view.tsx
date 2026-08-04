@@ -149,6 +149,8 @@ export function LeaderboardView({ eventId, compEvents, embedded, showHeatTab = t
     [heats]
   );
 
+  const heatCount = useMemo(() => new Set(heats.map((h) => h.heat_number)).size, [heats]);
+
   if (compEvents.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-[var(--m-border)] py-14 text-center text-[var(--m-muted)]">
@@ -179,6 +181,11 @@ export function LeaderboardView({ eventId, compEvents, embedded, showHeatTab = t
         <div className="pub-chip">
           <Radio className="h-3.5 w-3.5 animate-ping text-[var(--m-aqua)]" /> Live
         </div>
+        {total > 0 && (
+          <span className="pub-chip">
+            <Layers className="h-3.5 w-3.5 text-[var(--m-aqua)]" /> {heatCount} Heat
+          </span>
+        )}
       </div>
 
       {loading ? (
@@ -199,11 +206,18 @@ export function LeaderboardView({ eventId, compEvents, embedded, showHeatTab = t
             <Stat icon={<Timer className="h-4 w-4" />} label="Waktu Terbaik" value={bestTime ? formatMsToTime(bestTime) : '—'} />
           </div>
 
+          {/* Ringkasan akumulasi heat */}
+          {total > 0 && (
+            <p className="pub-eyebrow">
+              Akumulasi {heatCount} Heat • {total} Peserta Lintas Heat — Peringkat Dihitung Otomatis
+            </p>
+          )}
+
           {/* Tab */}
           {showHeatTab && (
             <div className="inline-flex rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] p-1">
               <TabBtn active={tab === 'rank'} onClick={() => setTab('rank')} icon={<ListOrdered className="h-4 w-4" />} label="Peringkat" />
-              <TabBtn active={tab === 'heat'} onClick={() => setTab('heat')} icon={<Layers className="h-4 w-4" />} label="Per Heat" />
+              <TabBtn active={tab === 'heat'} onClick={() => setTab('heat')} icon={<Layers className="h-4 w-4" />} label="Akumulasi Heat" />
             </div>
           )}
 
