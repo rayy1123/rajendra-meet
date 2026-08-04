@@ -47,7 +47,7 @@ export default async function PublicLivePage({ params }: PublicLivePageProps) {
           </span>
         </div>
 
-        <LeaderboardView eventId={eventId} compEvents={compEvents || []} />
+        <LeaderboardView eventId={eventId} compEvents={compEvents || []} showHeatTab />
       </div>
     </PublicShell>
   );
