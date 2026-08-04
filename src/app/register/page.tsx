@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Waves, Lock, Mail, Loader2, User } from 'lucide-react';
+import { Waves, Lock, Mail, Loader2, User, CheckCircle2, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -17,6 +17,8 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [infoMsg, setInfoMsg] = useState('');
+  const [needConfirm, setNeedConfirm] = useState(false);
+  const [resending, setResending] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,29 +39,60 @@ export default function RegisterPage() {
         password,
         options: {
           data: { full_name: fullName },
+          emailRedirectTo: `${window.location.origin}/scoreboard`,
         },
       });
 
       if (error) {
-        setErrorMsg(error.message);
+        // Tangani rate-limit email Supabase secara ramah
+        if (error.status === 429 || error.message?.includes('rate limit')) {
+          setErrorMsg('Pengiriman email dibatasi sementara. Mohon tunggu beberapa saat dan coba lagi.');
+        } else {
+          setErrorMsg(error.message);
+        }
         setLoading(false);
         return;
       }
 
-      // Jika email belum dikonfirmasi, Supabase mengembalikan user tanpa session.
+      // Bila email belum dikonfirmasi, Supabase mengembalikan user tanpa session.
       if (data.session === null) {
+        setNeedConfirm(true);
         setInfoMsg(
-          'Pendaftaran berhasil! Silakan cek email Anda untuk verifikasi, lalu masuk.'
+          'Pendaftaran diterima! Silakan cek email Anda untuk verifikasi, lalu masuk. ' +
+            'Jika tidak ada email, klik “Kirim Ulang Email” di bawah.'
         );
         setLoading(false);
         return;
       }
 
-      router.push('/events');
+      // Langsung aktif: arahkan ke scoreboard publik (viewer sudah login & bisa input sendiri).
+      router.push('/scoreboard');
       router.refresh();
     } catch (err: any) {
       setErrorMsg(err?.message || 'Terjadi kesalahan sistem.');
       setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setResending(true);
+    setErrorMsg('');
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.resend({ type: 'signup', email });
+      if (error) {
+        if (error.status === 429 || error.message?.includes('rate limit')) {
+          setErrorMsg('Pengiriman email dibatasi sementara. Mohon tunggu beberapa saat.');
+        } else {
+          setErrorMsg(error.message);
+        }
+      } else {
+        setInfoMsg('Email verifikasi telah dikirim ulang. Silakan cek kotak masuk Anda.');
+      }
+    } catch (err: any) {
+      setErrorMsg(err?.message || 'Gagal mengirim ulang email.');
+    } finally {
+      setResending(false);
     }
   };
 
@@ -77,73 +110,91 @@ export default function RegisterPage() {
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleRegister} className="space-y-4">
-            {errorMsg && (
-              <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-lg font-medium border border-destructive/20">
-                {errorMsg}
-              </div>
-            )}
-            {infoMsg && (
-              <div className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-sm p-3 rounded-lg font-medium border border-emerald-500/20">
-                {infoMsg}
-              </div>
-            )}
-
-            <div className="space-y-1">
-              <label className="text-xs font-semibold">Nama Lengkap</label>
-              <div className="relative">
-                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Nama Anda"
-                  className="pl-9"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-semibold">Email</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="email"
-                  placeholder="email@contoh.com"
-                  className="pl-9"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-semibold">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="password"
-                  placeholder="••••••••"
-                  className="pl-9"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 mt-2" disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Memproses...
-                </>
-              ) : (
-                'Daftar'
+          {!needConfirm ? (
+            <form onSubmit={handleRegister} className="space-y-4">
+              {errorMsg && (
+                <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-lg font-medium border border-destructive/20">
+                  {errorMsg}
+                </div>
               )}
-            </Button>
-          </form>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold">Nama Lengkap</label>
+                <div className="relative">
+                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Nama Anda"
+                    className="pl-9"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold">Email</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="email"
+                    placeholder="email@contoh.com"
+                    className="pl-9"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold">Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    className="pl-9"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 mt-2" disabled={loading}>
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Memproses...
+                  </>
+                ) : (
+                  'Daftar'
+                )}
+              </Button>
+            </form>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-start gap-3 rounded-lg bg-emerald-500/15 border border-emerald-500/20 p-4">
+                <CheckCircle2 className="h-5 w-5 text-emerald-600 mt-0.5 shrink-0" />
+                <p className="text-sm text-emerald-700 dark:text-emerald-300">{infoMsg}</p>
+              </div>
+              {errorMsg && (
+                <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-lg font-medium border border-destructive/20">
+                  {errorMsg}
+                </div>
+              )}
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleResend}
+                disabled={resending}
+              >
+                {resending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+                Kirim Ulang Email
+              </Button>
+            </div>
+          )}
 
           <p className="text-center text-sm text-muted-foreground mt-4">
             Sudah punya akun?{' '}
