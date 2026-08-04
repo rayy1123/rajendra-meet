@@ -4,8 +4,7 @@ import { useEffect, useState, useCallback, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { formatMsToTime } from '@/lib/utils';
 import { rankResults, type RankableResult, type ResultStatus } from '@/services/ranking';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Trophy, Radio, ListOrdered, Layers, Timer, CheckCircle2 } from 'lucide-react';
+import { Loader2, Trophy, ListOrdered, Layers, Timer, CheckCircle2 } from 'lucide-react';
 
 interface CompEvent {
   id: string;
@@ -162,30 +161,50 @@ export function LeaderboardView({ eventId, compEvents, embedded, showHeatTab = t
   return (
     <div className={embedded ? 'space-y-3' : 'space-y-6'}>
       {/* Pilihan nomor lomba / acara */}
-      <div className="pub-card flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="w-full space-y-1 sm:w-auto">
+      <div className="pub-card flex flex-col gap-3 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="pub-eyebrow">Pilih Acara / Nomor Lomba</p>
-          <Select value={selectedCompEventId} onValueChange={(v) => { setSelectedCompEventId(v); setTab('rank'); }}>
-            <SelectTrigger className="w-full bg-[var(--m-surface)] font-semibold text-[var(--m-ink)] sm:w-[440px]">
-              <SelectValue placeholder="Pilih Acara" />
-            </SelectTrigger>
-            <SelectContent className="bg-[var(--m-surface)] text-[var(--m-ink)]">
-              {compEvents.map((ce) => (
-                <SelectItem key={ce.id} value={ce.id}>
-                  {ce.distance_meters}m {ce.stroke} {ce.grade_level} ({ce.gender === 'female' ? 'Putri' : 'Putra'})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-2">
+            <span className="pub-chip">
+              <span className="relative inline-flex h-3.5 w-3.5 items-center justify-center overflow-hidden">
+                <span className="absolute inline-flex h-3.5 w-3.5 animate-ping rounded-full bg-[var(--m-aqua)]/70" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--m-aqua)]" />
+              </span>
+              Live
+            </span>
+            {total > 0 && (
+              <span className="pub-chip">
+                <Layers className="h-3.5 w-3.5 text-[var(--m-aqua)]" /> {heatCount} Heat
+              </span>
+            )}
+          </div>
         </div>
-        <div className="pub-chip">
-          <Radio className="h-3.5 w-3.5 animate-ping text-[var(--m-aqua)]" /> Live
+        <div className="flex flex-wrap gap-2">
+          {compEvents.map((ce) => {
+            const active = ce.id === selectedCompEventId;
+            return (
+              <button
+                key={ce.id}
+                type="button"
+                onClick={() => { setSelectedCompEventId(ce.id); setTab('rank'); }}
+                className={
+                  'rounded-xl border px-3.5 py-2 text-left text-sm font-semibold transition-colors ' +
+                  (active
+                    ? 'border-[var(--m-aqua)] bg-[var(--m-aqua)] text-white shadow-sm'
+                    : 'border-[var(--m-border)] bg-[var(--m-surface)] text-[var(--m-ink)] hover:border-[var(--m-aqua)] hover:bg-[var(--m-aqua-soft)]')
+                }
+              >
+                <span className="block leading-tight">
+                  {ce.distance_meters}m {ce.stroke} {ce.grade_level}
+                </span>
+                <span className={'block text-[11px] font-medium ' + (active ? 'text-white/80' : 'text-[var(--m-muted)]')}>
+                  {ce.gender === 'female' ? 'Putri' : 'Putra'}
+                  {ce.class_name ? ` · ${ce.class_name}` : ''}
+                </span>
+              </button>
+            );
+          })}
         </div>
-        {total > 0 && (
-          <span className="pub-chip">
-            <Layers className="h-3.5 w-3.5 text-[var(--m-aqua)]" /> {heatCount} Heat
-          </span>
-        )}
       </div>
 
       {loading ? (

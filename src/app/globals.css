@@ -148,7 +148,7 @@
     @apply rounded-2xl border border-[var(--m-border)] bg-[var(--m-surface)] shadow-sm;
   }
   .pub-chip {
-    @apply inline-flex items-center gap-1.5 rounded-full border border-[var(--m-border)] bg-[var(--m-surface)] px-3 py-1 text-xs font-medium text-[var(--m-muted)];
+    @apply relative inline-flex items-center gap-1.5 overflow-hidden rounded-full border border-[var(--m-border)] bg-[var(--m-surface)] px-3 py-1 text-xs font-medium text-[var(--m-muted)];
   }
   .pub-eyebrow {
     @apply text-xs font-semibold uppercase tracking-[0.18em] text-[var(--m-aqua-ink)];
