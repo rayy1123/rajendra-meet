@@ -14,6 +14,7 @@ export default function RegisterPage() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [infoMsg, setInfoMsg] = useState('');
@@ -31,6 +32,11 @@ export default function RegisterPage() {
       setLoading(false);
       return;
     }
+    if (password !== confirm) {
+      setErrorMsg('Konfirmasi password tidak cocok.');
+      setLoading(false);
+      return;
+    }
 
     try {
       const supabase = createClient();
@@ -44,8 +50,17 @@ export default function RegisterPage() {
       });
 
       if (error) {
-        // Tangani rate-limit email Supabase secara ramah
-        if (error.status === 429 || error.message?.includes('rate limit')) {
+        // Email sudah terdaftar -> tolak dengan pesan jelas (tanpa konfirmasi email).
+        const msg = (error.message || '').toLowerCase();
+        if (
+          error.status === 422 ||
+          msg.includes('already registered') ||
+          msg.includes('already been registered') ||
+          msg.includes('user already') ||
+          msg.includes('email already')
+        ) {
+          setErrorMsg('Email sudah terdaftar. Silakan masuk dengan akun tersebut.');
+        } else if (error.status === 429 || msg.includes('rate limit')) {
           setErrorMsg('Pengiriman email dibatasi sementara. Mohon tunggu beberapa saat dan coba lagi.');
         } else {
           setErrorMsg(error.message);
@@ -81,7 +96,7 @@ export default function RegisterPage() {
       const supabase = createClient();
       const { error } = await supabase.auth.resend({ type: 'signup', email });
       if (error) {
-        if (error.status === 429 || error.message?.includes('rate limit')) {
+        if (error.status === 429 || (error.message || '').includes('rate limit')) {
           setErrorMsg('Pengiriman email dibatasi sementara. Mohon tunggu beberapa saat.');
         } else {
           setErrorMsg(error.message);
@@ -158,6 +173,21 @@ export default function RegisterPage() {
                     className="pl-9"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold">Konfirmasi Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    className="pl-9"
+                    value={confirm}
+                    onChange={(e) => setConfirm(e.target.value)}
                     required
                   />
                 </div>

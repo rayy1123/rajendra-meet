@@ -112,6 +112,11 @@ export default function LoginPage() {
               Daftar sebagai viewer
             </Link>
           </p>
+          <p className="text-center text-sm text-muted-foreground mt-1">
+            <Link href="/forgot-password" className="text-blue-600 hover:underline font-medium">
+              Lupa password?
+            </Link>
+          </p>
         </CardContent>
       </Card>
     </div>
