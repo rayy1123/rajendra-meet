@@ -5,7 +5,7 @@ import { NextResponse, type NextRequest } from 'next/server';
  * Prefix rute yang boleh diakses tanpa login (halaman publik SCMS).
  * Harus selaras dengan struktur route di src/app.
  */
-const PUBLIC_ROUTE_PREFIXES = ['/public', '/public-live'];
+const PUBLIC_ROUTE_PREFIXES = ['/public', '/public-live', '/scoreboard', '/guide', '/register'];
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({

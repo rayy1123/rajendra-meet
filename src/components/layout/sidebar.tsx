@@ -22,6 +22,7 @@ import {
   User,
   Settings,
   Timer,
+  BookOpen,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -49,6 +50,7 @@ const navItems = [
   { title: 'Rajendra Record', href: '/rajendra-record', icon: FileSpreadsheet },
   { title: 'Cetak & Ekspor', href: '/export', icon: Printer },
   { title: 'Pengaturan Sistem', href: '/settings', icon: Settings },
+  { title: 'Panduan', href: '/guide', icon: BookOpen },
 ];
 
 interface SidebarNavProps {

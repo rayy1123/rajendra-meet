@@ -3,37 +3,54 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Waves, Lock, Mail, Loader2 } from 'lucide-react';
+import { Waves, Lock, Mail, Loader2, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Link from 'next/link';
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [infoMsg, setInfoMsg] = useState('');
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setErrorMsg('');
+    setInfoMsg('');
+
+    if (password.length < 6) {
+      setErrorMsg('Password minimal 6 karakter.');
+      setLoading(false);
+      return;
+    }
 
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: { full_name: fullName },
+        },
       });
 
       if (error) {
-        if (error.message.includes('API key')) {
-          setErrorMsg('Kunci API Supabase tidak valid. Periksa konfigurasi Vercel.');
-        } else {
-          setErrorMsg('Email atau password salah. Silakan coba lagi.');
-        }
+        setErrorMsg(error.message);
+        setLoading(false);
+        return;
+      }
+
+      // Jika email belum dikonfirmasi, Supabase mengembalikan user tanpa session.
+      if (data.session === null) {
+        setInfoMsg(
+          'Pendaftaran berhasil! Silakan cek email Anda untuk verifikasi, lalu masuk.'
+        );
         setLoading(false);
         return;
       }
@@ -53,25 +70,47 @@ export default function LoginPage() {
           <div className="mx-auto bg-blue-600 text-white p-3 rounded-2xl w-fit">
             <Waves className="w-8 h-8" />
           </div>
-          <CardTitle className="text-2xl font-bold tracking-tight">Rajendra Meet System</CardTitle>
-          <CardDescription>Masuk untuk mengelola kejuaraan dan hasil lomba</CardDescription>
+          <CardTitle className="text-2xl font-bold tracking-tight">Daftar Akun Viewer</CardTitle>
+          <CardDescription>
+            Buat akun untuk menginput data sendiri. Anda akan masuk sebagai viewer.
+          </CardDescription>
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleRegister} className="space-y-4">
             {errorMsg && (
               <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-lg font-medium border border-destructive/20">
                 {errorMsg}
               </div>
             )}
+            {infoMsg && (
+              <div className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-sm p-3 rounded-lg font-medium border border-emerald-500/20">
+                {infoMsg}
+              </div>
+            )}
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold">Email Operator / Juri</label>
+              <label className="text-xs font-semibold">Nama Lengkap</label>
+              <div className="relative">
+                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Nama Anda"
+                  className="pl-9"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-semibold">Email</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="email"
-                  placeholder="admin@rajendrameet.com"
+                  placeholder="email@contoh.com"
                   className="pl-9"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -101,15 +140,15 @@ export default function LoginPage() {
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Memproses...
                 </>
               ) : (
-                'Masuk Dashboard'
+                'Daftar'
               )}
             </Button>
           </form>
 
           <p className="text-center text-sm text-muted-foreground mt-4">
-            Belum punya akun?{' '}
-            <Link href="/register" className="text-blue-600 hover:underline font-medium">
-              Daftar sebagai viewer
+            Sudah punya akun?{' '}
+            <Link href="/login" className="text-blue-600 hover:underline font-medium">
+              Masuk di sini
             </Link>
           </p>
         </CardContent>

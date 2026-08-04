@@ -77,17 +77,6 @@ export default async function EventsPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            {/* Tombol Impor Excel */}
-            <Link
-              href="/events/import"
-              className="inline-flex items-center space-x-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold rounded-xl shadow-lg shadow-emerald-900/20 transition"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-              </svg>
-              <span>Import Buku Acara</span>
-            </Link>
-
             {/* Tombol Buat Event Manual */}
             <Link
               href="/events/new"
@@ -159,10 +148,10 @@ export default async function EventsPage() {
                     Kelola Event
                   </Link>
                   <Link
-                    href={`/events/${event.id}/edit`}
+                    href={`/heats?eventId=${event.id}`}
                     className="w-full text-center py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold transition"
                   >
-                    Edit Event
+                    Atur Heat
                   </Link>
                 </div>
               </div>

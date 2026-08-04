@@ -128,3 +128,63 @@
     @apply font-sans;
   }
 }
+
+/* =====================================================================
+   Public theme — "Marine" (light, premium sports-timing aesthetic)
+   Used by scoreboard, live board, guide. Cohesive with the light
+   dashboard, but with a calm water-blue accent instead of neon.
+   ===================================================================== */
+@layer components {
+  .pub-shell {
+    @apply min-h-screen flex flex-col bg-[var(--m-bg)] text-[var(--m-ink)] antialiased;
+  }
+  .pub-header {
+    @apply sticky top-0 z-40 border-b border-[var(--m-border)] bg-[var(--m-bg)]/80 backdrop-blur;
+  }
+  .pub-container {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+  }
+  .pub-card {
+    @apply rounded-2xl border border-[var(--m-border)] bg-[var(--m-surface)] shadow-sm;
+  }
+  .pub-chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-[var(--m-border)] bg-[var(--m-surface)] px-3 py-1 text-xs font-medium text-[var(--m-muted)];
+  }
+  .pub-eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.18em] text-[var(--m-aqua-ink)];
+  }
+  .pub-link {
+    @apply text-sm font-medium text-[var(--m-muted)] transition-colors hover:text-[var(--m-ink)];
+  }
+  .pub-btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors;
+  }
+  .pub-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--m-aqua)] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--m-aqua-ink)];
+  }
+  .pub-btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] px-4 py-2 text-sm font-semibold text-[var(--m-ink)] transition-colors hover:bg-[var(--m-aqua-soft)];
+  }
+  .pub-time {
+    @apply font-mono font-semibold tabular-nums tracking-tight;
+  }
+  /* Medal tints for rank 1/2/3 — muted, not neon */
+  .rank-medal {
+    @apply flex h-9 w-9 items-center justify-center rounded-xl text-base font-bold;
+  }
+  .rank-1 { @apply flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100 text-base font-bold text-amber-700; }
+  .rank-2 { @apply flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-base font-bold text-slate-600; }
+  .rank-3 { @apply flex h-9 w-9 items-center justify-center rounded-xl bg-orange-100 text-base font-bold text-orange-700; }
+  .rank-n { @apply flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] text-base font-bold text-[var(--m-muted)]; }
+}
+
+:root {
+  --m-bg: oklch(0.985 0.005 230);
+  --m-surface: oklch(1 0 0);
+  --m-ink: oklch(0.27 0.045 245);
+  --m-muted: oklch(0.52 0.02 245);
+  --m-border: oklch(0.91 0.01 245);
+  --m-aqua: oklch(0.62 0.12 215);
+  --m-aqua-ink: oklch(0.46 0.11 222);
+  --m-aqua-soft: oklch(0.62 0.12 215 / 10%);
+}
