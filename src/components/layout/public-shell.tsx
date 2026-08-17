@@ -34,8 +34,14 @@ export function PublicShell({
           </Link>
 
           <nav className="flex items-center gap-2 sm:gap-3">
+            <Link href="/daftar-lomba" className="pub-link hidden sm:inline">
+              Daftar Lomba
+            </Link>
             <Link href="/guide" className="pub-link hidden sm:inline">
               Panduan
+            </Link>
+            <Link href="/pendaftaran-saya" className="pub-link hidden sm:inline">
+              Pendaftaran Saya
             </Link>
             <Link href="/login" className="pub-btn-ghost">
               Masuk

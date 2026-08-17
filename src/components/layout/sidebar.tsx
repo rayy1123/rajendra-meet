@@ -24,6 +24,7 @@ import {
   Timer,
   BookOpen,
   Radio,
+  CreditCard,
   type LucideIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -86,6 +87,7 @@ const navGroups: NavGroup[] = [
   {
     label: 'Sistem',
     items: [
+      { title: 'Verifikasi Pembayaran', href: '/verifikasi-pembayaran', icon: CreditCard },
       { title: 'Pengaturan', href: '/settings', icon: Settings },
       { title: 'Panduan', href: '/guide', icon: BookOpen },
     ],
