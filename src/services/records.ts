@@ -172,6 +172,7 @@ export interface RecordCandidate {
   competition_event_id: string;
   athlete_id: string;
   athlete_name: string;
+  school_name?: string;
   time_ms: number;
   status: string;
   event_id?: string;
@@ -187,6 +188,7 @@ export interface BrokenRecord {
   competition_event_id: string;
   athlete_id: string;
   athlete_name: string;
+  school_name: string;
   time_ms: number;
   /** null bila belum pernah ada rekor untuk nomor lomba ini. */
   previous_time_ms: number | null;
@@ -230,6 +232,7 @@ export function detectBrokenRecords(
       competition_event_id: c.competition_event_id,
       athlete_id: c.athlete_id,
       athlete_name: c.athlete_name,
+      school_name: c.school_name ?? '',
       time_ms: c.time_ms,
       previous_time_ms: best ?? null,
       improvement_ms: best != null ? best - c.time_ms : null,

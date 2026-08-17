@@ -48,73 +48,75 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/*
+  =====================================================================
+  SCMS Design Tokens — "Marine" (light, premium sports-timing aesthetic)
+  Single calm light theme. Muted water-blue accent, no neon / dark "AI" look.
+  Used by BOTH the dashboard shell and the public pages so the whole app
+  feels like one cohesive product.
+  ===================================================================== */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  /* Surfaces */
+  --background: oklch(0.985 0.005 230);
+  --foreground: oklch(0.27 0.045 245);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.27 0.045 245);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
+  --popover-foreground: oklch(0.27 0.045 245);
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Brand — calm water-blue */
+  --primary: oklch(0.62 0.12 215);
+  --primary-foreground: oklch(0.99 0 0);
+  --primary-ink: oklch(0.46 0.11 222);
+  --primary-soft: oklch(0.62 0.12 215 / 10%);
+
+  /* Muted / secondary */
+  --secondary: oklch(0.96 0.01 230);
+  --secondary-foreground: oklch(0.27 0.045 245);
+  --muted: oklch(0.96 0.01 230);
+  --muted-foreground: oklch(0.52 0.02 245);
+
+  /* Accent (hover / subtle) */
+  --accent: oklch(0.96 0.015 225);
+  --accent-foreground: oklch(0.27 0.045 245);
+
+  /* Destructive */
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+
+  /* Lines & focus */
+  --border: oklch(0.91 0.01 245);
+  --input: oklch(0.91 0.01 245);
+  --ring: oklch(0.62 0.12 215);
+
+  /* Charts (muted, water-family) */
+  --chart-1: oklch(0.62 0.12 215);
+  --chart-2: oklch(0.7 0.1 200);
+  --chart-3: oklch(0.62 0.1 245);
+  --chart-4: oklch(0.7 0.09 160);
+  --chart-5: oklch(0.6 0.08 280);
+
+  --radius: 0.75rem;
+
+  /* Sidebar (marine-tinted) */
+  --sidebar: oklch(0.992 0.004 230);
+  --sidebar-foreground: oklch(0.35 0.04 245);
+  --sidebar-primary: oklch(0.62 0.12 215);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.95 0.015 225);
+  --sidebar-accent-foreground: oklch(0.27 0.045 245);
+  --sidebar-border: oklch(0.91 0.01 245);
+  --sidebar-ring: oklch(0.62 0.12 215);
+
+  /* ---- Marine public theme aliases (kept for public pages) ---- */
+  --m-bg: oklch(0.985 0.005 230);
+  --m-surface: oklch(1 0 0);
+  --m-ink: oklch(0.27 0.045 245);
+  --m-muted: oklch(0.52 0.02 245);
+  --m-border: oklch(0.91 0.01 245);
+  --m-aqua: oklch(0.62 0.12 215);
+  --m-aqua-ink: oklch(0.46 0.11 222);
+  --m-aqua-soft: oklch(0.62 0.12 215 / 10%);
 }
 
 @layer base {
@@ -122,17 +124,19 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
   }
   html {
     @apply font-sans;
   }
+  /* Refined focus visibility for accessibility */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring/60 ring-offset-1 ring-offset-background;
+  }
 }
 
 /* =====================================================================
-   Public theme — "Marine" (light, premium sports-timing aesthetic)
-   Used by scoreboard, live board, guide. Cohesive with the light
-   dashboard, but with a calm water-blue accent instead of neon.
+   Shared component classes (Marine) — used by public + dashboard shells.
    ===================================================================== */
 @layer components {
   .pub-shell {
@@ -169,22 +173,8 @@
     @apply font-mono font-semibold tabular-nums tracking-tight;
   }
   /* Medal tints for rank 1/2/3 — muted, not neon */
-  .rank-medal {
-    @apply flex h-9 w-9 items-center justify-center rounded-xl text-base font-bold;
-  }
   .rank-1 { @apply flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100 text-base font-bold text-amber-700; }
   .rank-2 { @apply flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-base font-bold text-slate-600; }
   .rank-3 { @apply flex h-9 w-9 items-center justify-center rounded-xl bg-orange-100 text-base font-bold text-orange-700; }
   .rank-n { @apply flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] text-base font-bold text-[var(--m-muted)]; }
-}
-
-:root {
-  --m-bg: oklch(0.985 0.005 230);
-  --m-surface: oklch(1 0 0);
-  --m-ink: oklch(0.27 0.045 245);
-  --m-muted: oklch(0.52 0.02 245);
-  --m-border: oklch(0.91 0.01 245);
-  --m-aqua: oklch(0.62 0.12 215);
-  --m-aqua-ink: oklch(0.46 0.11 222);
-  --m-aqua-soft: oklch(0.62 0.12 215 / 10%);
 }
