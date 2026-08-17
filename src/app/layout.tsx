@@ -14,9 +14,23 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SCMS — Swimming Competition Management System",
+  title: {
+    default: "Rajendra Meet — Sistem Manajemen Kejuaraan Renang",
+    template: "%s · Rajendra Meet",
+  },
   description:
-    "Sistem manajemen kejuaraan renang: event, peserta, heat, hasil, ranking, dan live result.",
+    "Sistem manajemen kejuaraan renang: event, peserta, heat, hasil, ranking, dan live result secara real-time.",
+  applicationName: "Rajendra Meet",
+  authors: [{ name: "Rajendra Project" }],
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    shortcut: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/icon.svg", type: "image/svg+xml" }],
+  },
+  appleWebApp: {
+    title: "Rajendra Meet",
+    statusBarStyle: "default",
+  },
 };
 
 export default function RootLayout({
@@ -26,7 +40,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="id"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">

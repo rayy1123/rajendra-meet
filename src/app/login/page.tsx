@@ -29,8 +29,11 @@ export default function LoginPage() {
       });
 
       if (error) {
+        const msg = error.message.toLowerCase();
         if (error.message.includes('API key')) {
-          setErrorMsg('Kunci API Supabase tidak valid. Periksa konfigurasi Vercel.');
+          setErrorMsg('Kunci API Supabase tidak valid. Periksa konfigurasi server.');
+        } else if (msg.includes('not confirmed') || msg.includes('email not confirmed')) {
+          setErrorMsg('Email belum dikonfirmasi. Silakan cek kotak masuk Anda untuk verifikasi.');
         } else {
           setErrorMsg('Email atau password salah. Silakan coba lagi.');
         }
@@ -38,35 +41,45 @@ export default function LoginPage() {
         return;
       }
 
-      router.push('/events');
+      const ADMIN_ROLES = ['super_admin', 'event_admin', 'operator'];
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .single();
+      const role = (profile as { role?: string } | null)?.role;
+      const target = role && ADMIN_ROLES.includes(role) ? '/events' : '/scoreboard';
+
+      router.push(target);
       router.refresh();
-    } catch (err: any) {
-      setErrorMsg(err?.message || 'Terjadi kesalahan sistem.');
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : 'Terjadi kesalahan sistem.');
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 px-4">
-      <Card className="w-full max-w-md shadow-lg border-muted">
-        <CardHeader className="text-center space-y-2">
-          <div className="mx-auto bg-blue-600 text-white p-3 rounded-2xl w-fit">
-            <Waves className="w-8 h-8" />
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <Card className="w-full max-w-md border-border bg-card shadow-lg">
+        <CardHeader className="space-y-2 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
+            <Waves className="w-7 h-7" />
           </div>
-          <CardTitle className="text-2xl font-bold tracking-tight">Rajendra Meet System</CardTitle>
-          <CardDescription>Masuk untuk mengelola kejuaraan dan hasil lomba</CardDescription>
+          <CardTitle className="text-2xl font-bold tracking-tight">Rajendra Meet</CardTitle>
+          <CardDescription>
+            Masuk untuk memantau pertandingan, melihat scoreboard, dan menginput data lomba.
+          </CardDescription>
         </CardHeader>
 
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             {errorMsg && (
-              <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-lg font-medium border border-destructive/20">
+              <div className="border border-destructive/20 bg-destructive/10 p-3 rounded-lg font-medium text-destructive text-sm">
                 {errorMsg}
               </div>
             )}
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold">Email Operator / Juri</label>
+              <label className="text-xs font-semibold">Email</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -95,27 +108,31 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 mt-2" disabled={loading}>
+            <Button type="submit" className="mt-2 w-full" disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Memproses...
                 </>
               ) : (
-                'Masuk Dashboard'
+                'Masuk'
               )}
             </Button>
           </form>
 
-          <p className="text-center text-sm text-muted-foreground mt-4">
+          <p className="mt-4 text-center text-sm text-muted-foreground">
             Belum punya akun?{' '}
-            <Link href="/register" className="text-blue-600 hover:underline font-medium">
+            <Link href="/register" className="font-medium text-primary hover:underline">
               Daftar sebagai viewer
             </Link>
           </p>
-          <p className="text-center text-sm text-muted-foreground mt-1">
-            <Link href="/forgot-password" className="text-blue-600 hover:underline font-medium">
+          <p className="mt-1 text-center text-sm text-muted-foreground">
+            <Link href="/forgot-password" className="font-medium text-primary hover:underline">
               Lupa password?
             </Link>
+          </p>
+          <p className="mt-3 px-2 text-center text-xs text-muted-foreground">
+            Penonton &amp; orang tua dapat mendaftar sebagai viewer untuk memantau scoreboard
+            dan menginput data langsung. Panitia/juri menggunakan akun yang sama untuk mengelola lomba.
           </p>
         </CardContent>
       </Card>

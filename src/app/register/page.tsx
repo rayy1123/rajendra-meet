@@ -45,12 +45,11 @@ export default function RegisterPage() {
         password,
         options: {
           data: { full_name: fullName },
-          emailRedirectTo: `${window.location.origin}/scoreboard`,
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/scoreboard`,
         },
       });
 
       if (error) {
-        // Email sudah terdaftar -> tolak dengan pesan jelas (tanpa konfirmasi email).
         const msg = (error.message || '').toLowerCase();
         if (
           error.status === 422 ||
@@ -69,22 +68,20 @@ export default function RegisterPage() {
         return;
       }
 
-      // Bila email belum dikonfirmasi, Supabase mengembalikan user tanpa session.
       if (data.session === null) {
         setNeedConfirm(true);
         setInfoMsg(
           'Pendaftaran diterima! Silakan cek email Anda untuk verifikasi, lalu masuk. ' +
-            'Jika tidak ada email, klik “Kirim Ulang Email” di bawah.'
+            'Jika tidak ada email, klik "Kirim Ulang Email" di bawah.'
         );
         setLoading(false);
         return;
       }
 
-      // Langsung aktif: arahkan ke scoreboard publik (viewer sudah login & bisa input sendiri).
       router.push('/scoreboard');
       router.refresh();
-    } catch (err: any) {
-      setErrorMsg(err?.message || 'Terjadi kesalahan sistem.');
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : 'Terjadi kesalahan sistem.');
       setLoading(false);
     }
   };
@@ -94,7 +91,11 @@ export default function RegisterPage() {
     setErrorMsg('');
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.resend({ type: 'signup', email });
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/scoreboard` },
+      });
       if (error) {
         if (error.status === 429 || (error.message || '').includes('rate limit')) {
           setErrorMsg('Pengiriman email dibatasi sementara. Mohon tunggu beberapa saat.');
@@ -104,19 +105,19 @@ export default function RegisterPage() {
       } else {
         setInfoMsg('Email verifikasi telah dikirim ulang. Silakan cek kotak masuk Anda.');
       }
-    } catch (err: any) {
-      setErrorMsg(err?.message || 'Gagal mengirim ulang email.');
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : 'Gagal mengirim ulang email.');
     } finally {
       setResending(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 px-4">
-      <Card className="w-full max-w-md shadow-lg border-muted">
-        <CardHeader className="text-center space-y-2">
-          <div className="mx-auto bg-blue-600 text-white p-3 rounded-2xl w-fit">
-            <Waves className="w-8 h-8" />
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <Card className="w-full max-w-md border-border bg-card shadow-lg">
+        <CardHeader className="space-y-2 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
+            <Waves className="w-7 h-7" />
           </div>
           <CardTitle className="text-2xl font-bold tracking-tight">Daftar Akun Viewer</CardTitle>
           <CardDescription>
@@ -128,7 +129,7 @@ export default function RegisterPage() {
           {!needConfirm ? (
             <form onSubmit={handleRegister} className="space-y-4">
               {errorMsg && (
-                <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-lg font-medium border border-destructive/20">
+                <div className="border border-destructive/20 bg-destructive/10 p-3 rounded-lg font-medium text-destructive text-sm">
                   {errorMsg}
                 </div>
               )}
@@ -193,7 +194,7 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 mt-2" disabled={loading}>
+              <Button type="submit" className="mt-2 w-full" disabled={loading}>
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Memproses...
@@ -205,12 +206,12 @@ export default function RegisterPage() {
             </form>
           ) : (
             <div className="space-y-4">
-              <div className="flex items-start gap-3 rounded-lg bg-emerald-500/15 border border-emerald-500/20 p-4">
-                <CheckCircle2 className="h-5 w-5 text-emerald-600 mt-0.5 shrink-0" />
-                <p className="text-sm text-emerald-700 dark:text-emerald-300">{infoMsg}</p>
+              <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/10 p-4">
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                <p className="text-sm text-primary-ink">{infoMsg}</p>
               </div>
               {errorMsg && (
-                <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-lg font-medium border border-destructive/20">
+                <div className="border border-destructive/20 bg-destructive/10 p-3 rounded-lg font-medium text-destructive text-sm">
                   {errorMsg}
                 </div>
               )}
@@ -226,9 +227,9 @@ export default function RegisterPage() {
             </div>
           )}
 
-          <p className="text-center text-sm text-muted-foreground mt-4">
+          <p className="mt-4 text-center text-sm text-muted-foreground">
             Sudah punya akun?{' '}
-            <Link href="/login" className="text-blue-600 hover:underline font-medium">
+            <Link href="/login" className="font-medium text-primary hover:underline">
               Masuk di sini
             </Link>
           </p>
