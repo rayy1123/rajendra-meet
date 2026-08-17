@@ -1,8 +1,13 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import DashboardLayout from '@/components/layout/layout';
+import type { UserRole } from '@/types/database';
 
-const ADMIN_ROLES = ['super_admin', 'event_admin', 'operator'];
+const ADMIN_ROLES: UserRole[] = ['super_admin', 'event_admin', 'operator'];
+
+interface ProfileRole {
+  role: UserRole;
+}
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -18,7 +23,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
       .select('role')
       .eq('id', user.id)
       .single();
-    const role = (profile as any)?.role;
+    const role = (profile as ProfileRole | null)?.role;
     if (!role || !ADMIN_ROLES.includes(role)) {
       redirect('/');
     }

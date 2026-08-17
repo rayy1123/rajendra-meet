@@ -16,11 +16,12 @@ export default async function PublicLivePage({ params }: PublicLivePageProps) {
 
   const { data: event, error: eventError } = await supabase
     .from('events')
-    .select('id, name, location, pool_type, lane_count')
+    .select('id, name, location, pool_type, lane_count, is_published')
     .eq('id', eventId)
     .single();
 
-  if (eventError || !event) {
+  // Jangan bocorkan event yang belum dipublikasikan lewat URL publik.
+  if (eventError || !event || !event.is_published) {
     notFound();
   }
 

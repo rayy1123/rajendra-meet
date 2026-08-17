@@ -1,8 +1,18 @@
 import { createClient } from '@/lib/supabase/server';
 import { PublicShell } from '@/components/layout/public-shell';
-import { LeaderboardView } from '@/components/modules/leaderboard-view';
+import { LeaderboardView, type CompEvent } from '@/components/modules/leaderboard-view';
 import { CalendarDays, MapPin, Waves } from 'lucide-react';
 import Link from 'next/link';
+
+interface EventCardData {
+  id: string;
+  name: string;
+  location: string | null;
+  start_date: string;
+  end_date: string;
+  lane_count: number | null;
+  pool_type: string | null;
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -41,7 +51,7 @@ export default async function ScoreboardPage() {
   );
 }
 
-function EventCard({ event }: { event: any }) {
+function EventCard({ event }: { event: EventCardData }) {
   return (
     <div className="pub-card flex flex-col gap-4 p-5 transition-shadow hover:shadow-md">
       <div className="flex items-start justify-between gap-2">
@@ -92,7 +102,7 @@ async function EventScoreboard({ eventId }: { eventId: string }) {
     <div className="mt-auto">
       <LeaderboardView
         eventId={eventId}
-        compEvents={compEvents as any}
+        compEvents={compEvents as CompEvent[]}
         embedded
       />
       <Link
