@@ -51,10 +51,10 @@ export function ExcelImportButton() {
         variant="secondary"
         onClick={() => fileInputRef.current?.click()}
         disabled={loading}
-        className="gap-2 bg-white text-blue-700 hover:bg-blue-50 font-semibold shadow-sm"
+        className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-sm"
       >
         {loading ? (
-          <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+          <Loader2 className="w-4 h-4 animate-spin text-primary" />
         ) : (
           <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
         )}

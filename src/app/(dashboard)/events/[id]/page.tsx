@@ -3,6 +3,16 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Layers, Clock, Radio, Waves } from 'lucide-react';
 
+interface CompEventRow {
+  id: string;
+  name: string;
+  stroke: string;
+  distance_meters: number;
+  gender: string;
+  grade_level: string;
+  class_name: string;
+}
+
 interface PageProps {
   params: Promise<{ id: string }>;
 }
@@ -47,7 +57,7 @@ export default async function EventDetailPage({ params }: PageProps) {
         </div>
         <div className="mt-5 flex flex-wrap gap-2">
           <Link href={`/heats?eventId=${event.id}`} className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
-            <Layers className="h-4 w-4" /> Atur Heat
+            <Layers className="h-4 w-4" /> Atur Acara
           </Link>
           <Link href={`/results?eventId=${event.id}`} className="inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold">
             <Clock className="h-4 w-4" /> Input Hasil
@@ -64,7 +74,7 @@ export default async function EventDetailPage({ params }: PageProps) {
           <p className="text-sm text-muted-foreground">Belum ada nomor lomba. Tambahkan lewat menu yang sesuai.</p>
         ) : (
           <div className="divide-y">
-            {compEvents.map((ce: any) => (
+            {compEvents.map((ce: CompEventRow) => (
               <div key={ce.id} className="flex items-center justify-between py-3">
                 <div>
                   <p className="font-medium">

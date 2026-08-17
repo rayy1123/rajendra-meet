@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { School, Plus, Search, Building2, Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PageHeader } from '@/components/ui/page-header';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,6 +20,15 @@ export interface SchoolWithCount {
   city: string | null;
   created_at: string;
   athletes_count: number;
+}
+
+interface SchoolRow {
+  id: string;
+  name: string;
+  code: string | null;
+  city: string | null;
+  created_at: string;
+  athletes: { count?: number }[] | null;
 }
 
 export default async function SchoolsPage({
@@ -51,7 +61,7 @@ export default async function SchoolsPage({
 
   // Formatting data agar siap dipakai di tabel
   const schools: SchoolWithCount[] =
-    schoolsData?.map((school: any) => ({
+    schoolsData?.map((school: SchoolRow) => ({
       id: school.id,
       name: school.name,
       code: school.code,
@@ -62,20 +72,16 @@ export default async function SchoolsPage({
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="border-b pb-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <School className="w-8 h-8 text-blue-600" /> Master Sekolah / Klub
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Kelola daftar kontingen sekolah dan klub renang yang terdaftar dalam kejuaraan.
-          </p>
-        </div>
-        <Button className="flex items-center gap-2">
-          <Plus className="w-4 h-4" /> Tambah Sekolah / Klub
-        </Button>
-      </div>
+      <PageHeader
+        title="Master Sekolah / Klub"
+        description="Kelola daftar kontingen sekolah dan klub renang yang terdaftar dalam kejuaraan."
+        icon={<School className="h-6 w-6" />}
+        actions={
+          <Button className="flex items-center gap-2">
+            <Plus className="w-4 h-4" /> Tambah Sekolah / Klub
+          </Button>
+        }
+      />
 
       {/* Ringkasan Statistik */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -148,7 +154,7 @@ export default async function SchoolsPage({
                       <TableCell className="font-medium">{index + 1}</TableCell>
                       <TableCell className="font-semibold">{school.name}</TableCell>
                       <TableCell>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
                           {school.code || '-'}
                         </span>
                       </TableCell>

@@ -1,8 +1,9 @@
 import { createClient } from '@/lib/supabase/server';
 import { detectBrokenRecords, type RecordCandidate, type ExistingRecord } from '@/services/records';
 import { formatMsToTime } from '@/lib/utils';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trophy, Crown } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { PageHeader } from '@/components/ui/page-header';
+import { Crown } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,28 +24,36 @@ export default async function RajendraRecordPage() {
       status,
       heat_assignments!inner (
         registrations!inner (
-          athletes!inner ( full_name ),
+          athletes!inner ( id, full_name, schools ( name ) ),
           competition_event_id
         )
       )
     `);
 
-  const candidates: RecordCandidate[] = (results || [])
-    .map((r: any) => {
-      const reg = r.heat_assignments?.registrations;
-      return {
-        competition_event_id: reg.competition_event_id,
-        athlete_id: reg.athletes.id,
-        athlete_name: reg.athletes.full_name,
-        time_ms: r.time_ms ?? 0,
-        status: r.status,
-      };
-    });
+  const candidates: RecordCandidate[] = (results || []).map((r: {
+    time_ms: number | null;
+    status: string | null;
+    heat_assignments: {
+      registrations: {
+        athletes: { id: string; full_name: string | null; schools: { name: string | null }[] | null }[] | null;
+        competition_event_id: string;
+      }[];
+    }[];
+  }) => {
+    const ha = r.heat_assignments?.[0];
+    const reg = ha?.registrations?.[0];
+    const ath = reg?.athletes?.[0];
+    return {
+      time_ms: r.time_ms ?? 0,
+      status: r.status ?? '',
+      competition_event_id: reg?.competition_event_id ?? '',
+      athlete_id: ath?.id ?? '',
+      athlete_name: ath?.full_name ?? '',
+      school_name: ath?.schools?.[0]?.name ?? '',
+    };
+  }) as unknown as RecordCandidate[];
 
-  const existingRecs: ExistingRecord[] = (existing || []).map((e: any) => ({
-    competition_event_id: e.competition_event_id,
-    time_ms: e.time_ms,
-  }));
+  const existingRecs: ExistingRecord[] = (existing || []) as unknown as ExistingRecord[];
 
   const broken = detectBrokenRecords(candidates, existingRecs);
 
@@ -54,19 +63,18 @@ export default async function RajendraRecordPage() {
     .select('id, distance_meters, stroke, gender, grade_level');
 
   const compName = (id: string) => {
-    const c = (compEvents || []).find((x: any) => x.id === id);
+    const c = (compEvents || []).find((x: { id: string; distance_meters?: number | null; stroke?: string | null; grade_level?: string | null; gender?: string | null }) => x.id === id);
     if (!c) return id;
     return `${c.distance_meters}m ${c.stroke} ${c.grade_level} (${c.gender === 'female' ? 'Putri' : 'Putra'})`;
   };
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-6">
-      <div>
-        <h1 className="text-2xl font-bold">Rajendra Record</h1>
-        <p className="text-sm text-muted-foreground">
-          Deteksi otomatis rekor baru per nomor lomba. Rekor memecahkan catatan tercepat sebelumnya.
-        </p>
-      </div>
+      <PageHeader
+        title="Rajendra Record"
+        description="Deteksi otomatis rekor baru per nomor lomba. Rekor memecahkan catatan tercepat sebelumnya."
+        icon={<Crown className="h-6 w-6" />}
+      />
 
       {broken.length === 0 ? (
         <Card>
@@ -83,6 +91,7 @@ export default async function RajendraRecordPage() {
                 <div className="flex-1">
                   <p className="font-semibold">{compName(b.competition_event_id)}</p>
                   <p className="text-sm text-muted-foreground">{b.athlete_name}</p>
+                  <p className="text-xs text-muted-foreground/80">{b.school_name || 'Perorangan'}</p>
                 </div>
                 <div className="text-right">
                   <p className="pub-time text-2xl text-primary">{formatMsToTime(b.time_ms)}</p>

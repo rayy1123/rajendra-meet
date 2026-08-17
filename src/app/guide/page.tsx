@@ -1,5 +1,5 @@
 import { PublicShell } from '@/components/layout/public-shell';
-import { BookOpen, UserPlus, LogIn, Trophy, Layers, Waves, Clock } from 'lucide-react';
+import { BookOpen, UserPlus, Trophy, Layers, Waves, Clock } from 'lucide-react';
 import Link from 'next/link';
 
 export const metadata = {
@@ -28,11 +28,11 @@ const SECTIONS = [
   },
   {
     icon: Layers,
-    title: '3. Pembagian Heat (Auto-Heat Generator)',
+    title: '3. Pembagian Acara (Auto-Acara Generator)',
     body: [
-      'Buka menu Heats, pilih event dan nomor lomba, lalu klik Generate Heat Otomatis.',
+      'Buka menu Acara, pilih event dan nomor lomba, lalu klik Generate Acara Otomatis.',
       'Peserta tercepat ditempatkan di heat terakhir; lintasan menggunakan pola tengah-ke-luar (standar FINA).',
-      'Heat hanya membagi jalannya lomba. Peringkat dihitung lintas heat pada nomor lomba yang sama.',
+      'Acara membagi jalannya lomba. Peringkat dihitung lintas acara pada nomor lomba yang sama.',
     ],
   },
   {

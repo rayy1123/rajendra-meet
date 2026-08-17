@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { HeatGeneratorOperator } from '@/components/modules/heat-generator-operator';
 import { Layers, Waves } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { PageHeader } from '@/components/ui/page-header';
 
 // Definisi Interface untuk Type Safety
 export interface RegistrationItem {
@@ -62,6 +63,7 @@ export default async function HeatsPage({
         .from('registrations')
         .select(`
           id,
+          athlete_id,
           seed_time_ms,
           athletes (
             id,
@@ -93,17 +95,11 @@ export default async function HeatsPage({
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="border-b pb-5 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <Layers className="w-8 h-8 text-blue-600" /> Auto-Heat Generator
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Bagi peserta lomba ke dalam Heat dan Lintasan secara otomatis menggunakan algoritma Spearhead Seeding standar FINA/Aquatics.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Auto-Acara Generator"
+        description="Bagi peserta lomba ke dalam Acara dan Lintasan secara otomatis menggunakan algoritma Spearhead Seeding standar FINA/Aquatics."
+        icon={<Layers className="h-6 w-6" />}
+      />
 
       {!events || events.length === 0 ? (
         <Card className="p-12 text-center border-dashed">

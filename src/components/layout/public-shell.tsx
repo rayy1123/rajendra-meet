@@ -50,7 +50,7 @@ export function PublicShell({
       <main className="flex-1">
         {title && (
           <div className="pub-container pt-10 pb-6">
-            <p className="pub-eyebrow">SCMS · Live Competition</p>
+            <p className="pub-eyebrow">Rajendra Meet · Hasil Langsung</p>
             <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--m-ink)] sm:text-4xl">
               {title}
             </h1>
@@ -64,8 +64,11 @@ export function PublicShell({
 
       <footer className="border-t border-[var(--m-border)] py-6">
         <div className="pub-container flex flex-col items-center justify-between gap-2 text-xs text-[var(--m-muted)] sm:flex-row">
-          <p>© {new Date().getFullYear()} Rajendra Meet · Sistem Manajemen Kejuaraan Renang</p>
-          <p>Dikembangkan dengan Next.js &amp; Supabase</p>
+          <p>© {new Date().getFullYear()} Rajendra Meet — Sistem Manajemen Kejuaraan Renang</p>
+          <p className="flex items-center gap-1.5">
+            <Waves className="h-3.5 w-3.5 text-[var(--m-aqua)]" />
+            Hasil Lomba Real-time
+          </p>
         </div>
       </footer>
     </div>

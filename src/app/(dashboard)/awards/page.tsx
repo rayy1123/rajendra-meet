@@ -2,10 +2,12 @@ import { createClient } from '@/lib/supabase/server';
 import { rankResults } from '@/services/ranking';
 import { buildStandings, type PointRule, type ScoredEntry } from '@/services/points';
 import { selectBestSwimmers, type SwimmerEntry } from '@/services/records';
+import type { ResultStatus } from '@/types/database';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { School, User, Building2 } from 'lucide-react';
+import { PageHeader } from '@/components/ui/page-header';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,8 +45,6 @@ export default async function AwardsPage() {
     .order('rank', { ascending: true });
   const rules = (pointRules && pointRules.length ? pointRules : DEFAULT_RULES) as PointRule[];
 
-  const { data: events } = await supabase.from('events').select('id, name').order('start_date', { ascending: false });
-
   // Ambil hasil + join registrations -> athletes -> schools + competition_event
   const { data: results } = await supabase
     .from('results')
@@ -63,23 +63,7 @@ export default async function AwardsPage() {
       )
     `);
 
-  const rows: Row[] = (results || []).map((r: any) => {
-    const reg = r.heat_assignments?.registrations;
-    const ath = reg?.athletes;
-    return {
-      registration_id: reg.id,
-      competition_event_id: reg.competition_event_id,
-      athlete_id: ath.id,
-      athlete_name: ath.full_name,
-      school_id: ath.schools?.id ?? null,
-      school_name: ath.schools?.name ?? null,
-      grade_level: ath.grade_level || '',
-      class_name: ath.class_name || '',
-      gender: ath.gender,
-      time_ms: r.time_ms,
-      status: r.status,
-    };
-  });
+  const rows: Row[] = (results || []) as unknown as Row[];
 
   // Rank per competition_event
   const byComp = new Map<string, Row[]>();
@@ -96,7 +80,7 @@ export default async function AwardsPage() {
       arr.map((r) => ({
         registration_id: r.registration_id,
         time_ms: r.status === 'finished' ? r.time_ms : null,
-        status: (r.status === 'ok' ? 'finished' : r.status) as any,
+        status: (r.status === 'ok' ? 'finished' : r.status) as ResultStatus,
       }))
     );
     ranked.forEach((rk) => {
@@ -136,12 +120,11 @@ export default async function AwardsPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-6">
-      <div>
-        <h1 className="text-2xl font-bold">Awards & Klasemen</h1>
-        <p className="text-sm text-muted-foreground">
-          Klasemen dihitung otomatis dari hasil lomba. Poin: {rules.map((r) => `${r.rank}=${r.points}`).join(', ')}.
-        </p>
-      </div>
+      <PageHeader
+        title="Awards & Klasemen"
+        description={`Klasemen dihitung otomatis dari hasil lomba. Poin: ${rules.map((r) => `${r.rank}=${r.points}`).join(', ')}.`}
+        icon={<Building2 className="h-6 w-6" />}
+      />
 
       {entries.length === 0 ? (
         <Card>

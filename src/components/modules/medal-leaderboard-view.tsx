@@ -16,7 +16,7 @@ interface MedalStat {
 }
 
 interface MedalLeaderboardViewProps {
-  events: any[];
+  events: { id: string; name: string }[];
   initialEventId: string;
   medalStats: MedalStat[];
 }

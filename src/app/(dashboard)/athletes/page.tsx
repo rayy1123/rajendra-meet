@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
-import { AthleteManager } from '@/components/modules/athlete-manager';
+import { AthleteManager, type AthleteRow, type Opt } from '@/components/modules/athlete-manager';
+import { PageHeader } from '@/components/ui/page-header';
+import { Users } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,19 +35,16 @@ export default async function AthletesPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">Master Data Atlet</h1>
-          <p className="text-sm text-muted-foreground">
-            Kelompok Umur (KU) dihitung otomatis dari tanggal lahir saat disimpan.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Master Data Atlet"
+        description="Kelompok Umur (KU) dihitung otomatis dari tanggal lahir saat disimpan."
+        icon={<Users className="h-6 w-6" />}
+      />
 
       <AthleteManager
-        athletes={(athletes || []) as any}
-        schools={(schools || []) as any}
-        events={(events || []) as any}
+        athletes={(athletes || []) as unknown as AthleteRow[]}
+        schools={(schools || []) as Opt[]}
+        events={(events || []) as Opt[]}
       />
     </div>
   );

@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { PageHeader } from '@/components/ui/page-header';
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -17,17 +18,11 @@ export default async function SettingsPage() {
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="border-b pb-5 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <Settings className="w-8 h-8 text-blue-600" /> Pengaturan Sistem
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Konfigurasi aturan poin kejuaraan, tata letak lintasan kolam, dan pemeliharaan sistem.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Pengaturan Sistem"
+        description="Konfigurasi aturan poin kejuaraan, tata letak lintasan kolam, dan pemeliharaan sistem."
+        icon={<Settings className="h-6 w-6" />}
+      />
 
       <Tabs defaultValue="points" className="space-y-6">
         <TabsList className="grid w-full sm:w-auto grid-cols-3">

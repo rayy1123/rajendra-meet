@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { ResultInputOperator } from '@/components/modules/result-input-operator';
 import { Trophy, Waves } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { PageHeader } from '@/components/ui/page-header';
 
 // Types untuk menyempurnakan Type Safety
 export interface HeatAssignmentWithResult {
@@ -20,7 +21,7 @@ export interface HeatAssignmentWithResult {
     id: string;
     time_ms: number | null;
     status: string;
-  } | null;
+  }[] | null;
 }
 
 export interface HeatWithAssignments {
@@ -99,17 +100,11 @@ export default async function ResultsPage({
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="border-b pb-5 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <Trophy className="w-8 h-8 text-amber-500" /> Input Hasil Lomba
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Input waktu tempuh per lintasan (lane). Hasil otomatis tersimpan dan terupdate secara realtime.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Input Hasil Lomba"
+        description="Input waktu tempuh per lintasan (lane). Hasil otomatis tersimpan dan terupdate secara realtime."
+        icon={<Trophy className="h-6 w-6" />}
+      />
 
       {!events || events.length === 0 ? (
         <Card className="p-12 text-center border-dashed">

@@ -6,7 +6,7 @@ import { formatMsToTime } from '@/lib/utils';
 import { rankResults, type RankableResult, type ResultStatus } from '@/services/ranking';
 import { Loader2, Trophy, ListOrdered, Layers, Timer, CheckCircle2 } from 'lucide-react';
 
-interface CompEvent {
+export interface CompEvent {
   id: string;
   name: string;
   stroke: string | null;
@@ -14,6 +14,27 @@ interface CompEvent {
   gender: string | null;
   grade_level: string | null;
   class_name: string | null;
+}
+
+interface RawAssignment {
+  id: string;
+  lane_number: number;
+  results?: { id?: string | null; time_ms?: number | null; status?: string | null }[] | null;
+  registrations?: {
+    id?: string | null;
+    seed_time_ms?: number | null;
+    athletes?: {
+      full_name?: string | null;
+      athlete_number?: string | null;
+      schools?: { name?: string | null } | null;
+    } | null;
+  } | null;
+}
+
+interface RawHeat {
+  id: string;
+  heat_number: number;
+  heat_assignments?: RawAssignment[] | null;
 }
 
 interface HeatGroup {
@@ -35,7 +56,7 @@ interface LeaderboardViewProps {
   compEvents: CompEvent[];
   /** Bila true, tidak menampilkan header judul (dipakai di dalam kartu event). */
   embedded?: boolean;
-  /** Tampilkan tab Per Heat (berguna di halaman live penuh). */
+  /** Tampilkan tab Per Acara (berguna di halaman live penuh). */
   showHeatTab?: boolean;
 }
 
@@ -44,14 +65,13 @@ const STATUS_LABEL: Record<string, string> = {
   dnf: 'DNF',
   dq: 'DQ',
   scr: 'SCR',
-  ok: 'OK',
 };
 
-export function LeaderboardView({ eventId, compEvents, embedded, showHeatTab = true }: LeaderboardViewProps) {
+export function LeaderboardView({ compEvents, embedded, showHeatTab = true }: LeaderboardViewProps) {
   const supabase = useMemo(() => createClient(), []);
   const [selectedCompEventId, setSelectedCompEventId] = useState<string>(compEvents[0]?.id || '');
   const [heats, setHeats] = useState<HeatGroup[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<'rank' | 'heat'>('rank');
 
   const fetchData = useCallback(async () => {
@@ -76,8 +96,8 @@ export function LeaderboardView({ eventId, compEvents, embedded, showHeatTab = t
       .eq('competition_event_id', selectedCompEventId)
       .order('heat_number', { ascending: true });
 
-    const flat: HeatGroup[] = (data || []).flatMap((h: any) =>
-      (h.heat_assignments || []).map((a: any) => ({
+    const flat: HeatGroup[] = (data || []).flatMap((h: RawHeat) =>
+      (h.heat_assignments || []).map((a: RawAssignment) => ({
         id: h.id,
         heat_number: h.heat_number,
         lane_number: a.lane_number,
@@ -97,6 +117,7 @@ export function LeaderboardView({ eventId, compEvents, embedded, showHeatTab = t
 
   useEffect(() => {
     let isMounted = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (selectedCompEventId) fetchData().finally(() => isMounted && setLoading(false));
     const channel = supabase
       .channel(`leaderboard-${selectedCompEventId}`)
@@ -114,7 +135,7 @@ export function LeaderboardView({ eventId, compEvents, embedded, showHeatTab = t
   const total = heats.length;
   const finished = heats.filter((h) => {
     const s = (h.status || 'finished').toLowerCase();
-    return s === 'finished' || s === 'ok';
+    return s === 'finished';
   }).length;
   const hasResult = (h: HeatGroup) => h.result_id !== null;
   const bestTime = useMemo(() => {
@@ -126,7 +147,7 @@ export function LeaderboardView({ eventId, compEvents, embedded, showHeatTab = t
   const ranked = useMemo(() => {
     const input: RankableResult[] = heats.map((h) => {
       const raw = (h.status || 'finished').toLowerCase();
-      const isFinished = raw === 'finished' || raw === 'ok';
+      const isFinished = raw === 'finished';
       const status: ResultStatus = isFinished ? 'finished' : (raw as ResultStatus);
       return {
         registration_id: h.registration_id || h.id,
@@ -174,7 +195,7 @@ export function LeaderboardView({ eventId, compEvents, embedded, showHeatTab = t
             </span>
             {total > 0 && (
               <span className="pub-chip">
-                <Layers className="h-3.5 w-3.5 text-[var(--m-aqua)]" /> {heatCount} Heat
+                <Layers className="h-3.5 w-3.5 text-[var(--m-aqua)]" /> {heatCount} Acara
               </span>
             )}
           </div>
@@ -214,7 +235,7 @@ export function LeaderboardView({ eventId, compEvents, embedded, showHeatTab = t
         </div>
       ) : total === 0 ? (
         <div className="rounded-xl border border-dashed border-[var(--m-border)] py-14 text-center text-[var(--m-muted)]">
-          Belum ada Heat / Jadwal Lomba untuk acara ini.
+          Belum ada Acara / Jadwal Lomba untuk nomor ini.
         </div>
       ) : (
         <>
@@ -228,7 +249,7 @@ export function LeaderboardView({ eventId, compEvents, embedded, showHeatTab = t
           {/* Ringkasan akumulasi heat */}
           {total > 0 && (
             <p className="pub-eyebrow">
-              Akumulasi {heatCount} Heat • {total} Peserta Lintas Heat — Peringkat Dihitung Otomatis
+              Akumulasi {heatCount} Acara • {total} Peserta Lintas Acara — Peringkat Dihitung Otomatis
             </p>
           )}
 
@@ -236,7 +257,7 @@ export function LeaderboardView({ eventId, compEvents, embedded, showHeatTab = t
           {showHeatTab && (
             <div className="inline-flex rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] p-1">
               <TabBtn active={tab === 'rank'} onClick={() => setTab('rank')} icon={<ListOrdered className="h-4 w-4" />} label="Peringkat" />
-              <TabBtn active={tab === 'heat'} onClick={() => setTab('heat')} icon={<Layers className="h-4 w-4" />} label="Akumulasi Heat" />
+              <TabBtn active={tab === 'heat'} onClick={() => setTab('heat')} icon={<Layers className="h-4 w-4" />} label="Akumulasi Acara" />
             </div>
           )}
 
@@ -257,27 +278,28 @@ export function LeaderboardView({ eventId, compEvents, embedded, showHeatTab = t
                   const isDnf = r.status !== 'finished';
                   const rankClass = r.rank === 1 ? 'rank-1' : r.rank === 2 ? 'rank-2' : r.rank === 3 ? 'rank-3' : 'rank-n';
                   return (
-                    <div key={r.registration_id} className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-[var(--m-aqua-soft)]">
-                      <div className="flex items-center gap-4">
-                        <span className={rankClass}>{r.rank ?? '–'}</span>
-                        <div>
-                          <h4 className="text-base font-semibold text-[var(--m-ink)]">{h?.athlete_name || 'Lintasan Kosong'}</h4>
-                          <p className="text-xs text-[var(--m-muted)]">
-                            {h?.school_name || 'Umum'}
-                            {h?.lane_number ? ` · Lane ${h.lane_number}` : ''}
-                          </p>
-                        </div>
+                    <div key={r.registration_id} className="flex items-stretch gap-3 px-3 py-2.5 transition-colors hover:bg-[var(--m-aqua-soft)] sm:px-4">
+                      <span className={`${rankClass} h-auto w-9 shrink-0 self-center`}>{r.rank ?? '–'}</span>
+                      <span className="flex w-9 shrink-0 self-center flex-col items-center justify-center rounded-lg bg-[var(--m-aqua-soft)] py-1 text-[var(--m-aqua-ink)]">
+                        <span className="text-[9px] font-semibold uppercase leading-none">Lane</span>
+                        <span className="text-base font-black leading-none">{h?.lane_number ?? '-'}</span>
+                        <span className="mt-0.5 text-[8px] font-medium leading-none text-[var(--m-muted)]">Acara {h?.heat_number}</span>
+                      </span>
+                      <div className="min-w-0 flex-1 self-center">
+                        <h4 className="truncate text-base font-semibold text-[var(--m-ink)]">{h?.athlete_name || 'Lintasan Kosong'}</h4>
+                        <p className="truncate text-xs text-[var(--m-muted)]">{h?.school_name || 'Umum'}</p>
                       </div>
-                      <div className="text-right">
-                        {isDnf ? (
-                          <span className="rounded-md bg-red-50 px-2 py-0.5 font-mono text-xs font-bold uppercase text-red-600">
-                            {STATUS_LABEL[r.status] || r.status}
-                          </span>
-                        ) : h?.time_ms ? (
-                          <span className="pub-time text-xl text-[var(--m-aqua-ink)] sm:text-2xl">{formatMsToTime(h.time_ms)}</span>
-                        ) : (
-                          <span className="pub-time text-sm text-[var(--m-muted)]">—</span>
-                        )}
+                      <div className="flex shrink-0 flex-col items-end justify-center gap-0.5">
+                        <span className="pub-time text-xl leading-none text-[var(--m-aqua-ink)] sm:text-2xl">
+                          {isDnf ? (
+                            <span className="rounded-md bg-red-50 px-2 py-0.5 font-mono text-xs font-bold uppercase text-red-600">{STATUS_LABEL[r.status] || r.status}</span>
+                          ) : h?.time_ms ? (
+                            formatMsToTime(h.time_ms)
+                          ) : (
+                            <span className="text-sm text-[var(--m-muted)]">—</span>
+                          )}
+                        </span>
+                        <span className="text-[10px] font-medium uppercase tracking-wide text-[var(--m-muted)]">Seed {formatMsToTime(h?.seed_time_ms)}</span>
                       </div>
                     </div>
                   );
@@ -295,7 +317,7 @@ export function LeaderboardView({ eventId, compEvents, embedded, showHeatTab = t
                     <div key={hn} className="pub-card overflow-hidden">
                       <div className="flex items-center justify-between border-b border-[var(--m-border)] bg-[var(--m-aqua-soft)] px-4 py-2.5">
                         <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-[var(--m-ink)]">
-                          <Layers className="h-4 w-4 text-[var(--m-aqua-ink)]" /> Heat {hn}
+                          <Layers className="h-4 w-4 text-[var(--m-aqua-ink)]" /> Acara {hn}
                         </h3>
                         <span className={`pub-chip ${heatDone ? 'text-emerald-600' : 'text-[var(--m-muted)]'}`}>
                           {heatDone ? 'Selesai' : 'Berlangsung'}
@@ -304,29 +326,33 @@ export function LeaderboardView({ eventId, compEvents, embedded, showHeatTab = t
                       <div className="grid grid-cols-1 gap-px bg-[var(--m-border)] sm:grid-cols-2">
                         {lanes.map((l) => {
                           const raw = (l.status || 'finished').toLowerCase();
-                          const isDnf = raw !== 'finished' && raw !== 'ok';
+                          const isDnf = raw !== 'finished';
                           const rank = rankByReg.get(l.registration_id || l.id);
                           return (
-                            <div key={l.id} className="flex items-center gap-3 bg-[var(--m-surface)] px-4 py-2.5">
-                              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--m-aqua-soft)] text-xs font-bold text-[var(--m-aqua-ink)]">
-                                {l.lane_number}
+                            <div key={l.id} className="flex items-stretch gap-2.5 bg-[var(--m-surface)] px-3 py-2 sm:px-4">
+                              <span className="flex w-8 shrink-0 self-center flex-col items-center justify-center rounded-lg bg-[var(--m-aqua-soft)] py-1 text-[var(--m-aqua-ink)]">
+                                <span className="text-[8px] font-semibold uppercase leading-none">Lane</span>
+                                <span className="text-sm font-black leading-none">{l.lane_number}</span>
                               </span>
-                              <div className="min-w-0 flex-1">
+                              <div className="min-w-0 flex-1 self-center">
                                 <p className="truncate text-sm font-semibold text-[var(--m-ink)]">{l.athlete_name || 'Kosong'}</p>
                                 <p className="truncate text-xs text-[var(--m-muted)]">{l.school_name || 'Umum'}</p>
                               </div>
-                              {isDnf && l.status ? (
-                                <span className="rounded bg-red-50 px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase text-red-600">{STATUS_LABEL[l.status] || l.status}</span>
-                              ) : l.time_ms ? (
-                                <span className="pub-time text-sm text-[var(--m-aqua-ink)]">{formatMsToTime(l.time_ms)}</span>
-                              ) : (
-                                <span className="text-xs text-[var(--m-muted)]">—</span>
-                              )}
-                              {rank && !isDnf && (
-                                <span className={`ml-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${rank <= 3 ? 'bg-amber-100 text-amber-700' : 'bg-[var(--m-aqua-soft)] text-[var(--m-aqua-ink)]'}`}>
-                                  {rank}
-                                </span>
-                              )}
+                              <div className="flex shrink-0 flex-col items-end justify-center gap-0.5">
+                                <div className="flex items-center gap-1">
+                                  {isDnf && l.status ? (
+                                    <span className="rounded bg-red-50 px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase text-red-600">{STATUS_LABEL[l.status] || l.status}</span>
+                                  ) : l.time_ms ? (
+                                    <span className="pub-time text-sm text-[var(--m-aqua-ink)]">{formatMsToTime(l.time_ms)}</span>
+                                  ) : (
+                                    <span className="text-xs text-[var(--m-muted)]">—</span>
+                                  )}
+                                  {rank && !isDnf && (
+                                    <span className={`ml-0.5 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${rank <= 3 ? 'bg-amber-100 text-amber-700' : 'bg-[var(--m-aqua-soft)] text-[var(--m-aqua-ink)]'}`}>{rank}</span>
+                                  )}
+                                </div>
+                                <span className="text-[10px] font-medium uppercase tracking-wide text-[var(--m-muted)]">Seed {formatMsToTime(l.seed_time_ms)}</span>
+                              </div>
                             </div>
                           );
                         })}

@@ -25,7 +25,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Search, UserPlus, Loader2 } from 'lucide-react';
 
-interface AthleteRow {
+export interface AthleteRow {
   id: string;
   athlete_number: string;
   full_name: string;
@@ -37,7 +37,7 @@ interface AthleteRow {
   schools: { name: string } | null;
 }
 
-interface Opt {
+export interface Opt {
   id: string;
   name: string;
 }

@@ -2,6 +2,25 @@ import { createClient } from '@/lib/supabase/server';
 import { MedalLeaderboardView } from '@/components/modules/medal-leaderboard-view';
 import { Award, Waves } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { PageHeader } from '@/components/ui/page-header';
+
+interface MedalStat {
+  id: string;
+  name: string;
+  gold: number;
+  silver: number;
+  bronze: number;
+}
+
+interface ResultRow {
+  time_ms?: number | null;
+  heat_assignments?: {
+    competition_events?: { id: string; event_id?: string; name?: string } | null;
+    registrations?: {
+      athletes?: { full_name?: string | null; schools?: { id: string; name?: string } | null } | null;
+    } | null;
+  } | null;
+}
 
 export default async function MedalsPage({
   searchParams,
@@ -20,7 +39,7 @@ export default async function MedalsPage({
   const activeEventId = params.eventId || events?.[0]?.id || '';
 
   // 2. Query Hasil Lomba Tercepat per Kategori untuk Menghitung Medali
-  let medalStats: any[] = [];
+  let medalStats: MedalStat[] = [];
 
   if (activeEventId) {
     const { data: results } = await supabase
@@ -54,9 +73,10 @@ export default async function MedalsPage({
 
     if (results) {
       // Grouping per Nomor Lomba
-      const compEventGroups = new Map<string, any[]>();
-      results.forEach((r: any) => {
-        const ceId = r.heat_assignments.competition_events.id;
+      const compEventGroups = new Map<string, ResultRow[]>();
+      (results as unknown as ResultRow[]).forEach((r) => {
+        const ceId = r.heat_assignments?.competition_events?.id;
+        if (!ceId) return;
         if (!compEventGroups.has(ceId)) compEventGroups.set(ceId, []);
         compEventGroups.get(ceId)?.push(r);
       });
@@ -64,12 +84,12 @@ export default async function MedalsPage({
       // Tetapkan Juara 1 (Emas), Juara 2 (Perak), Juara 3 (Perunggu) per Nomor Lomba
       compEventGroups.forEach((compResults) => {
         // Urutkan waktu dari yang tercepat
-        const sorted = compResults.sort((a, b) => a.time_ms - b.time_ms);
+        const sorted = compResults.sort((a, b) => (a.time_ms ?? 0) - (b.time_ms ?? 0));
 
         sorted.forEach((res, index) => {
           if (index > 2) return; // Hanya ambil Top 3
 
-          const school = res.heat_assignments.registrations.athletes.schools;
+          const school = res.heat_assignments?.registrations?.athletes?.schools;
           const schoolId = school?.id || 'umum';
           const schoolName = school?.name || 'Umum / Perorangan';
 
@@ -94,17 +114,11 @@ export default async function MedalsPage({
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="border-b pb-5 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <Award className="w-8 h-8 text-amber-500" /> Perolehan Medali & Klasemen
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Peringkat akumulasi medali Emas, Perak, dan Perunggu per kontingen/sekolah secara otomatis.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Perolehan Medali & Klasemen"
+        description="Peringkat akumulasi medali Emas, Perak, dan Perunggu per kontingen/sekolah secara otomatis."
+        icon={<Award className="h-6 w-6" />}
+      />
 
       {!events || events.length === 0 ? (
         <Card className="p-12 text-center border-dashed">

@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
-import { ExportView } from '@/components/modules/export-view';
+import { ExportView, type ExportCompEvent } from '@/components/modules/export-view';
 import { FileSpreadsheet, Printer } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { PageHeader } from '@/components/ui/page-header';
 
 export default async function ExportPage({
   searchParams,
@@ -20,7 +21,7 @@ export default async function ExportPage({
   const activeEventId = params.eventId || events?.[0]?.id || '';
 
   // 2. Ambil data nomor lomba & susunan seri/lintasan untuk diekspor
-  let exportData: any[] = [];
+  let exportData: ExportCompEvent[] = [];
 
   if (activeEventId) {
     const { data: compEvents } = await supabase
@@ -47,23 +48,17 @@ export default async function ExportPage({
       .order('event_number', { ascending: true });
 
     if (compEvents) {
-      exportData = compEvents;
+      exportData = compEvents as unknown as ExportCompEvent[];
     }
   }
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto print:p-0 print:m-0">
-      {/* Header (Disembunyikan saat cetak PDF) */}
-      <div className="border-b pb-5 flex justify-between items-center print:hidden">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <FileSpreadsheet className="w-8 h-8 text-emerald-600" /> Cetak & Ekspor Laporan
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Unduh lembar susunan seri/lintasan dalam bentuk Excel atau cetak langsung menjadi PDF untuk panitia/juri.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Cetak & Ekspor Laporan"
+        description="Unduh lembar susunan seri/lintasan dalam bentuk Excel atau cetak langsung menjadi PDF untuk panitia/juri."
+        icon={<FileSpreadsheet className="h-6 w-6" />}
+      />
 
       {!events || events.length === 0 ? (
         <Card className="p-12 text-center border-dashed print:hidden">

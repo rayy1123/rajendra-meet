@@ -9,10 +9,28 @@ import { Printer, Download } from 'lucide-react';
 import { exportToExcel, printPage } from '@/lib/utils/export';
 import { formatMsToTime } from '@/lib/utils';
 
+interface HeatAssignmentRow {
+  heat_number: number;
+  lane_number: number;
+  registrations?: {
+    seed_time_ms?: number | null;
+    athletes?: { full_name?: string | null; schools?: { name?: string | null } | null } | null;
+  } | null;
+}
+
+export interface ExportCompEvent {
+  id: string;
+  event_number?: string | null;
+  name?: string | null;
+  gender?: string | null;
+  age_group?: string | null;
+  heat_assignments?: HeatAssignmentRow[] | null;
+}
+
 interface ExportViewProps {
-  events: any[];
+  events: { id: string; name: string }[];
   initialEventId: string;
-  exportData: any[];
+  exportData: ExportCompEvent[];
 }
 
 export function ExportView({ events, initialEventId, exportData }: ExportViewProps) {
@@ -26,15 +44,15 @@ export function ExportView({ events, initialEventId, exportData }: ExportViewPro
 
   // Format data untuk ekspor Excel
   const handleExportExcel = async () => {
-    const flatRows: any[] = [];
+    const flatRows: Record<string, string | number>[] = [];
 
     exportData.forEach((ce) => {
-      ce.heat_assignments?.forEach((ha: any) => {
+      ce.heat_assignments?.forEach((ha) => {
         flatRows.push({
           'No Acara': ce.event_number || '-',
           'Nomor Lomba': ce.name || '-',
           Kategori: `${ce.gender || '-'} - ${ce.age_group || '-'}`,
-          Seri: ha.heat_number,
+          Acara: ha.heat_number,
           Lintasan: ha.lane_number,
           'Nama Atlet': ha.registrations?.athletes?.full_name || '-',
           'Klub / Sekolah': ha.registrations?.athletes?.schools?.name || 'Perorangan',
@@ -75,7 +93,7 @@ export function ExportView({ events, initialEventId, exportData }: ExportViewPro
           >
             <Download className="w-4 h-4" /> Export Excel (.xlsx)
           </Button>
-          <Button onClick={printPage} className="gap-2 bg-blue-600 hover:bg-blue-700">
+          <Button onClick={printPage} className="gap-2 bg-primary hover:bg-primary/90">
             <Printer className="w-4 h-4" /> Cetak / Save PDF
           </Button>
         </div>
@@ -85,7 +103,7 @@ export function ExportView({ events, initialEventId, exportData }: ExportViewPro
       <div className="space-y-8 print:space-y-6">
         {exportData.length === 0 ? (
           <Card className="p-8 text-center text-muted-foreground print:hidden">
-            Belum ada data susunan seri/lintasan untuk diekspor. Pastikan Anda telah menjalankan <b>Auto-Heat Generator</b>.
+            Belum ada data susunan acara/lintasan untuk diekspor. Pastikan Anda telah menjalankan <b>Auto-Acara Generator</b>.
           </Card>
         ) : (
           exportData.map((ce) => (
@@ -104,12 +122,12 @@ export function ExportView({ events, initialEventId, exportData }: ExportViewPro
                 </div>
               </div>
 
-              {/* Tabel Seri & Lintasan */}
+              {/* Tabel Acara & Lintasan */}
               <table className="w-full text-sm text-left border-collapse border border-slate-300 print:border-black">
                 <thead>
                   <tr className="bg-muted/50 print:bg-slate-100">
                     <th className="border border-slate-300 print:border-black px-3 py-1.5 text-center w-12 font-bold">
-                      Seri
+                      Acara
                     </th>
                     <th className="border border-slate-300 print:border-black px-3 py-1.5 text-center w-16 font-bold">
                       Ltsn
@@ -128,8 +146,8 @@ export function ExportView({ events, initialEventId, exportData }: ExportViewPro
                 <tbody>
                   {ce.heat_assignments && ce.heat_assignments.length > 0 ? (
                     [...ce.heat_assignments]
-                      .sort((a: any, b: any) => a.heat_number - b.heat_number || a.lane_number - b.lane_number)
-                      .map((ha: any, idx: number) => (
+                      .sort((a, b) => a.heat_number - b.heat_number || a.lane_number - b.lane_number)
+                      .map((ha, idx: number) => (
                         <tr key={idx} className="hover:bg-muted/20">
                           <td className="border border-slate-300 print:border-black px-3 py-1 text-center font-bold">
                             {ha.heat_number}

@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { createClient } from '@/lib/supabase/server';
-import { CalendarDays, Users, School, Layers, Trophy, Medal } from 'lucide-react';
+import { CalendarDays, Users, School, Layers, Trophy, Medal, LayoutDashboard } from 'lucide-react';
+import { PageHeader } from '@/components/ui/page-header';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,30 +43,29 @@ export default async function DashboardPage() {
     { label: 'Total Atlet', value: athletes, icon: Users, href: '/athletes' },
     { label: 'Sekolah / Klub', value: schools, icon: School, href: '/schools' },
     { label: 'Nomor Lomba', value: competitionEvents, icon: Trophy, href: '/events' },
-    { label: 'Total Heat', value: heats, icon: Layers, href: '/heats' },
+    { label: 'Total Acara', value: heats, icon: Layers, href: '/heats' },
     { label: 'Hasil Masuk', value: results, icon: Medal, href: '/results' },
   ];
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Ringkasan Dashboard</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Data langsung dari database kejuaraan.
-        </p>
-      </div>
+      <PageHeader
+        title="Ringkasan Dashboard"
+        description="Data langsung dari database kejuaraan."
+        icon={<LayoutDashboard className="h-6 w-6" />}
+      />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {stats.map((s) => {
           const Icon = s.icon;
           return (
             <Link key={s.label} href={s.href}>
-              <Card className="hover:border-blue-600/50 transition-colors h-full">
+              <Card className="hover:border-primary/50 transition-colors h-full">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     {s.label}
                   </CardTitle>
-                  <Icon className="h-4 w-4 text-blue-600" />
+                  <Icon className="h-4 w-4 text-primary" />
                 </CardHeader>
                 <CardContent className="text-3xl font-bold">{s.value}</CardContent>
               </Card>
@@ -89,7 +89,7 @@ export default async function DashboardPage() {
             <div className="pt-3">
               <Link
                 href={`/public-live/${activeEvent.id}`}
-                className="text-blue-600 hover:underline font-medium"
+                className="text-primary hover:underline font-medium"
               >
                 Buka halaman live publik →
               </Link>
