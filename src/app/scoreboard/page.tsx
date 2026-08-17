@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { PublicShell } from '@/components/layout/public-shell';
-import { LeaderboardView, type CompEvent } from '@/components/modules/leaderboard-view';
+import { CompEventPicker } from '@/components/modules/comp-event-picker';
+import type { CompEvent } from '@/components/modules/leaderboard-view';
 import { CalendarDays, MapPin, Waves } from 'lucide-react';
 import Link from 'next/link';
 
@@ -81,7 +82,7 @@ function EventCard({ event }: { event: EventCardData }) {
   );
 }
 
-// Ambil nomor lomba per event dan tampilkan leaderboard di dalam kartu.
+// Ambil nomor lomba per event dan tampilkan sebagai satu pemilih acara yang rapi.
 async function EventScoreboard({ eventId }: { eventId: string }) {
   const supabase = await createClient();
   const { data: compEvents } = await supabase
@@ -90,21 +91,9 @@ async function EventScoreboard({ eventId }: { eventId: string }) {
     .eq('event_id', eventId)
     .order('distance_meters', { ascending: true });
 
-  if (!compEvents || compEvents.length === 0) {
-    return (
-      <p className="mt-auto rounded-xl bg-[var(--m-aqua-soft)] px-3 py-2 text-xs text-[var(--m-aqua-ink)]">
-        Nomor lomba belum disusun.
-      </p>
-    );
-  }
-
   return (
     <div className="mt-auto">
-      <LeaderboardView
-        eventId={eventId}
-        compEvents={compEvents as CompEvent[]}
-        embedded
-      />
+      <CompEventPicker eventId={eventId} compEvents={(compEvents ?? []) as CompEvent[]} />
       <Link
         href={`/public-live/${eventId}`}
         className="pub-btn-ghost mt-3 w-full"

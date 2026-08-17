@@ -66,7 +66,8 @@ export default function LoginPage() {
           </div>
           <CardTitle className="text-2xl font-bold tracking-tight">Rajendra Meet</CardTitle>
           <CardDescription>
-            Masuk untuk memantau pertandingan, melihat scoreboard, dan menginput data lomba.
+            Masuk ke Rajendra Meet untuk melihat scoreboard, memantau pertandingan,
+            dan — bagi panitia — mengelola kejuaraan.
           </CardDescription>
         </CardHeader>
 
@@ -131,8 +132,8 @@ export default function LoginPage() {
             </Link>
           </p>
           <p className="mt-3 px-2 text-center text-xs text-muted-foreground">
-            Penonton &amp; orang tua dapat mendaftar sebagai viewer untuk memantau scoreboard
-            dan menginput data langsung. Panitia/juri menggunakan akun yang sama untuk mengelola lomba.
+            Penonton &amp; orang tua mendaftar sebagai <span className="font-medium text-foreground">viewer</span> untuk
+            memantau scoreboard. Panitia &amp; juri menggunakan akun yang diberikan panitia untuk mengelola lomba.
           </p>
         </CardContent>
       </Card>

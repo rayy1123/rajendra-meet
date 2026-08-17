@@ -58,6 +58,8 @@ interface LeaderboardViewProps {
   embedded?: boolean;
   /** Tampilkan tab Per Acara (berguna di halaman live penuh). */
   showHeatTab?: boolean;
+  /** Tampilkan tombol pilih nomor lomba. False bila pemilih sudah di luar (mis. CompEventPicker). */
+  showEventTabs?: boolean;
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -67,7 +69,7 @@ const STATUS_LABEL: Record<string, string> = {
   scr: 'SCR',
 };
 
-export function LeaderboardView({ compEvents, embedded, showHeatTab = true }: LeaderboardViewProps) {
+export function LeaderboardView({ compEvents, embedded, showHeatTab = true, showEventTabs = true }: LeaderboardViewProps) {
   const supabase = useMemo(() => createClient(), []);
   const [selectedCompEventId, setSelectedCompEventId] = useState<string>(compEvents[0]?.id || '');
   const [heats, setHeats] = useState<HeatGroup[]>([]);
@@ -201,7 +203,7 @@ export function LeaderboardView({ compEvents, embedded, showHeatTab = true }: Le
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          {compEvents.map((ce) => {
+          {showEventTabs && compEvents.map((ce) => {
             const active = ce.id === selectedCompEventId;
             return (
               <button

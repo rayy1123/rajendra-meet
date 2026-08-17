@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-geist-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -50,73 +50,76 @@
 
 /*
   =====================================================================
-  SCMS Design Tokens — "Marine" (light, premium sports-timing aesthetic)
-  Single calm light theme. Muted water-blue accent, no neon / dark "AI" look.
-  Used by BOTH the dashboard shell and the public pages so the whole app
-  feels like one cohesive product.
+  SCMS Design Tokens — "Aqua Editorial"
+  Light, refined, editorial sports-timing aesthetic. Deep ocean -> cyan
+  water palette as brand accent (elegant, not neon / not dark "AI").
+  One cohesive language for dashboard + public pages.
   ===================================================================== */
 :root {
-  /* Surfaces */
-  --background: oklch(0.985 0.005 230);
-  --foreground: oklch(0.27 0.045 245);
+  /* Surfaces — soft, layered whites with a cool blue cast */
+  --background: oklch(0.985 0.012 232);
+  --foreground: oklch(0.24 0.05 245);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.27 0.045 245);
+  --card-foreground: oklch(0.24 0.05 245);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.27 0.045 245);
+  --popover-foreground: oklch(0.24 0.05 245);
 
-  /* Brand — calm water-blue */
-  --primary: oklch(0.62 0.12 215);
-  --primary-foreground: oklch(0.99 0 0);
-  --primary-ink: oklch(0.46 0.11 222);
-  --primary-soft: oklch(0.62 0.12 215 / 10%);
+  /* Brand — deep ocean -> cyan water */
+  --primary: oklch(0.58 0.13 222);
+  --primary-foreground: oklch(0.99 0.005 222);
+  --primary-ink: oklch(0.42 0.11 230);
+  --primary-soft: oklch(0.96 0.04 222);
+  --brand-2: oklch(0.66 0.13 205);
+  --brand-3: oklch(0.5 0.12 240);
 
   /* Muted / secondary */
-  --secondary: oklch(0.96 0.01 230);
-  --secondary-foreground: oklch(0.27 0.045 245);
-  --muted: oklch(0.96 0.01 230);
-  --muted-foreground: oklch(0.52 0.02 245);
+  --secondary: oklch(0.955 0.015 230);
+  --secondary-foreground: oklch(0.24 0.05 245);
+  --muted: oklch(0.962 0.012 230);
+  --muted-foreground: oklch(0.5 0.025 245);
 
   /* Accent (hover / subtle) */
-  --accent: oklch(0.96 0.015 225);
-  --accent-foreground: oklch(0.27 0.045 245);
+  --accent: oklch(0.955 0.025 222);
+  --accent-foreground: oklch(0.24 0.05 245);
 
   /* Destructive */
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
 
   /* Lines & focus */
-  --border: oklch(0.91 0.01 245);
-  --input: oklch(0.91 0.01 245);
-  --ring: oklch(0.62 0.12 215);
+  --border: oklch(0.9 0.015 232);
+  --input: oklch(0.9 0.015 232);
+  --ring: oklch(0.58 0.13 222);
 
-  /* Charts (muted, water-family) */
-  --chart-1: oklch(0.62 0.12 215);
-  --chart-2: oklch(0.7 0.1 200);
-  --chart-3: oklch(0.62 0.1 245);
-  --chart-4: oklch(0.7 0.09 160);
-  --chart-5: oklch(0.6 0.08 280);
+  /* Charts (water-family, refined) */
+  --chart-1: oklch(0.58 0.13 222);
+  --chart-2: oklch(0.66 0.13 205);
+  --chart-3: oklch(0.55 0.12 240);
+  --chart-4: oklch(0.7 0.11 190);
+  --chart-5: oklch(0.62 0.1 265);
 
-  --radius: 0.75rem;
+  --radius: 1rem;
 
-  /* Sidebar (marine-tinted) */
-  --sidebar: oklch(0.992 0.004 230);
-  --sidebar-foreground: oklch(0.35 0.04 245);
-  --sidebar-primary: oklch(0.62 0.12 215);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.95 0.015 225);
-  --sidebar-accent-foreground: oklch(0.27 0.045 245);
-  --sidebar-border: oklch(0.91 0.01 245);
-  --sidebar-ring: oklch(0.62 0.12 215);
+  /* Sidebar (ocean-tinted) */
+  --sidebar: oklch(0.992 0.008 230);
+  --sidebar-foreground: oklch(0.33 0.04 245);
+  --sidebar-primary: oklch(0.58 0.13 222);
+  --sidebar-primary-foreground: oklch(0.99 0.005 222);
+  --sidebar-accent: oklch(0.95 0.03 222);
+  --sidebar-accent-foreground: oklch(0.24 0.05 245);
+  --sidebar-border: oklch(0.9 0.015 232);
+  --sidebar-ring: oklch(0.58 0.13 222);
 
-  /* ---- Marine public theme aliases (kept for public pages) ---- */
-  --m-bg: oklch(0.985 0.005 230);
+  /* ---- Public theme aliases (Aqua) ---- */
+  --m-bg: oklch(0.985 0.012 232);
   --m-surface: oklch(1 0 0);
-  --m-ink: oklch(0.27 0.045 245);
-  --m-muted: oklch(0.52 0.02 245);
-  --m-border: oklch(0.91 0.01 245);
-  --m-aqua: oklch(0.62 0.12 215);
-  --m-aqua-ink: oklch(0.46 0.11 222);
-  --m-aqua-soft: oklch(0.62 0.12 215 / 10%);
+  --m-ink: oklch(0.24 0.05 245);
+  --m-muted: oklch(0.5 0.025 245);
+  --m-border: oklch(0.9 0.015 232);
+  --m-aqua: oklch(0.58 0.13 222);
+  --m-aqua-ink: oklch(0.42 0.11 230);
+  --m-aqua-soft: oklch(0.96 0.04 222);
+  --m-aqua-2: oklch(0.66 0.13 205);
 }
 
 @layer base {
@@ -129,14 +132,13 @@
   html {
     @apply font-sans;
   }
-  /* Refined focus visibility for accessibility */
   :focus-visible {
     @apply outline-none ring-2 ring-ring/60 ring-offset-1 ring-offset-background;
   }
 }
 
 /* =====================================================================
-   Shared component classes (Marine) — used by public + dashboard shells.
+   Shared component classes (Aqua) — used by public + dashboard shells.
    ===================================================================== */
 @layer components {
   .pub-shell {
