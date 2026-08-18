@@ -25,6 +25,8 @@ import {
   Radio,
   Home,
   CreditCard,
+  Wrench,
+  ShieldCheck,
   type LucideIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -71,6 +73,7 @@ const navGroups: NavGroup[] = [
     label: 'Operasional Lomba',
     items: [
       { title: 'Acara & Heat', href: '/heats', icon: Layers },
+      { title: 'Heat & Lane', href: '/heat-lane', icon: Layers },
       { title: 'Input Hasil', href: '/results', icon: Trophy },
       { title: 'Perangkingan', href: '/rankings', icon: Timer },
       { title: 'Klasemen Medali', href: '/medals', icon: Medal },
@@ -80,6 +83,7 @@ const navGroups: NavGroup[] = [
     label: 'Hasil & Penghargaan',
     items: [
       { title: 'Penghargaan', href: '/awards', icon: Award },
+      { title: 'Sertifikat', href: '/sertifikat', icon: Award },
       { title: 'Rajendra Record', href: '/rajendra-record', icon: FileSpreadsheet },
       { title: 'Live Scoreboard', href: '/scoreboard', icon: Radio },
       { title: 'Cetak & Ekspor', href: '/export', icon: Printer },
@@ -89,6 +93,8 @@ const navGroups: NavGroup[] = [
     label: 'Sistem',
     items: [
       { title: 'Verifikasi Pembayaran', href: '/verifikasi-pembayaran', icon: CreditCard },
+      { title: 'Peralatan', href: '/equipment', icon: Wrench },
+      { title: 'Log Audit', href: '/audit', icon: ShieldCheck },
       { title: 'Pengaturan', href: '/settings', icon: Settings },
       { title: 'Panduan', href: '/guide', icon: BookOpen },
     ],
