@@ -94,7 +94,7 @@ export default async function RajendraRecordPage() {
                   <p className="text-xs text-muted-foreground/80">{b.school_name || 'Perorangan'}</p>
                 </div>
                 <div className="text-right">
-                  <p className="pub-time text-2xl text-primary">{formatMsToTime(b.time_ms)}</p>
+                  <p className="font-mono text-2xl tabular-nums tracking-tight text-primary">{formatMsToTime(b.time_ms)}</p>
                   {b.improvement_ms != null && (
                     <p className="text-xs text-emerald-600">-{(b.improvement_ms / 1000).toFixed(2)}s dari rekor lama</p>
                   )}

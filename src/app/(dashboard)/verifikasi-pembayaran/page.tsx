@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { PageHeader } from '@/components/ui/page-header';
+import { Card, CardContent } from '@/components/ui/card';
 import { CheckCircle2, XCircle, Clock, Waves } from 'lucide-react';
 import { verifyPaymentAction, rejectPaymentAction } from '@/app/daftar-lomba/actions';
 
@@ -29,11 +30,13 @@ export default async function VerifikasiPembayaranPage() {
       />
 
       {!rows || rows.length === 0 ? (
-        <div className="pub-card mt-6 p-12 text-center">
-          <Waves className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
-          <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Belum ada pembayaran</h3>
-          <p className="mt-1 text-sm text-[var(--m-muted)]">Pembayaran yang masuk akan muncul di sini untuk diverifikasi.</p>
-        </div>
+        <Card className="mt-6">
+          <CardContent className="flex flex-col items-center gap-2 py-12 text-center">
+            <Waves className="h-10 w-10 text-primary" />
+            <h3 className="mt-1 font-semibold text-foreground">Belum ada pembayaran</h3>
+            <p className="text-sm text-muted-foreground">Pembayaran yang masuk akan muncul di sini untuk diverifikasi.</p>
+          </CardContent>
+        </Card>
       ) : (
         <div className="mt-6 space-y-3">
           {rows.map((r) => {
@@ -41,36 +44,38 @@ export default async function VerifikasiPembayaranPage() {
             const s = STATUS[(r.status ?? 'pending') as keyof typeof STATUS] ?? STATUS.pending;
             const Icon = s.icon;
             return (
-              <div key={r.id} className="pub-card flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <div className="font-semibold text-[var(--m-ink)]">{reg?.competition_events?.name ?? 'Nomor lomba'}</div>
-                  <div className="text-xs text-[var(--m-muted)]">{reg?.athletes?.full_name ?? 'Atlet'}</div>
-                  <div className="mt-1 text-xs text-[var(--m-muted)]">
-                    {r.proof_url ? `Bukti: ${r.proof_url}` : 'Tanpa bukti'} · {new Date(r.created_at).toLocaleString('id-ID')}
+              <Card key={r.id}>
+                <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <div className="font-semibold text-foreground">{reg?.competition_events?.name ?? 'Nomor lomba'}</div>
+                    <div className="text-xs text-muted-foreground">{reg?.athletes?.full_name ?? 'Atlet'}</div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      {r.proof_url ? `Bukti: ${r.proof_url}` : 'Tanpa bukti'} · {new Date(r.created_at).toLocaleString('id-ID')}
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${s.cls}`}>
-                    <Icon className="h-3.5 w-3.5" /> {s.label}
-                  </span>
-                  {r.status === 'pending' && (
-                    <>
-                      <form action={verifyPaymentAction}>
-                        <input type="hidden" name="registrationId" value={r.registration_id} />
-                        <button type="submit" className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-emerald-700">
-                          <CheckCircle2 className="h-4 w-4" /> Terima
-                        </button>
-                      </form>
-                      <form action={rejectPaymentAction}>
-                        <input type="hidden" name="registrationId" value={r.registration_id} />
-                        <button type="submit" className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-red-700">
-                          <XCircle className="h-4 w-4" /> Tolak
-                        </button>
-                      </form>
-                    </>
-                  )}
-                </div>
-              </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${s.cls}`}>
+                      <Icon className="h-3.5 w-3.5" /> {s.label}
+                    </span>
+                    {r.status === 'pending' && (
+                      <>
+                        <form action={verifyPaymentAction}>
+                          <input type="hidden" name="registrationId" value={r.registration_id} />
+                          <button type="submit" className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-emerald-700">
+                            <CheckCircle2 className="h-4 w-4" /> Terima
+                          </button>
+                        </form>
+                        <form action={rejectPaymentAction}>
+                          <input type="hidden" name="registrationId" value={r.registration_id} />
+                          <button type="submit" className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-red-700">
+                            <XCircle className="h-4 w-4" /> Tolak
+                          </button>
+                        </form>
+                      </>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             );
           })}
         </div>

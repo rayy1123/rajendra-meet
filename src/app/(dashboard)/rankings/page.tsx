@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { LeaderboardView, type CompEvent } from '@/components/modules/leaderboard-view';
 import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/ui/page-header';
 import { Trophy } from 'lucide-react';
 
@@ -46,7 +47,7 @@ export default async function RankingsPage() {
               <div className="flex items-center gap-2 border-b border-border pb-3">
                 <Trophy className="h-5 w-5 text-amber-500" />
                 <h2 className="text-lg font-bold">{ev.name}</h2>
-                <span className="pub-chip ml-auto">{ev.compEvents.length} Nomor Lomba</span>
+                <Badge variant="secondary" className="ml-auto">{ev.compEvents.length} Nomor Lomba</Badge>
               </div>
               {ev.compEvents.length === 0 ? (
                 <p className="py-6 text-center text-sm text-muted-foreground">
