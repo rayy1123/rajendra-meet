@@ -1,6 +1,7 @@
 import { LandingShell } from '@/components/layout/landing-shell';
 import { Testimonials, type Testimonial } from '@/components/modules/testimonials';
-import { Waves, Phone, Mail, Share2, ArrowRight, Trophy, MapPin, CalendarDays } from 'lucide-react';
+import { PhotoSlider, ABOUT_PHOTOS } from '@/components/modules/photo-slider';
+import { Waves, Phone, Mail, Share2, ArrowRight, Trophy, MapPin, CalendarDays, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 
@@ -84,40 +85,59 @@ export default async function HomePage() {
       {/* ===== HERO ===== */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-[var(--m-aqua-soft)] via-[var(--m-bg)] to-[var(--m-bg)]" />
-        <div className="pub-container pt-16 pb-12 text-center sm:pt-24 sm:pb-16">
-          <span className="pub-chip mx-auto mb-5 w-fit">
-            <Waves className="h-3.5 w-3.5 text-[var(--m-aqua)]" /> Sistem Kejuaraan Renang · Sejak 2013
-          </span>
-          <h1 className="mx-auto max-w-3xl text-4xl font-black tracking-tight text-[var(--m-ink)] sm:text-6xl">
-            Selenggarakan lomba renang jadi{' '}
-            <span className="text-[var(--m-aqua-ink)]">lebih mudah & terukur.</span>
-          </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-base text-[var(--m-muted)] sm:text-lg">
-            Rajendra Meet membantu panitia mengelola pendaftaran peserta, menyusun
-            heat, menginput hasil, dan menampilkan scoreboard secara real-time —
-            semua dalam satu sistem.
-          </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link href="/scoreboard" className="pub-btn-primary">
-              Lihat Jadwal Lomba <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link href="/register" className="pub-btn-ghost">
-              Daftar sebagai Panitia
-            </Link>
+        {/* floating soft blobs — biar nggak kaku */}
+        <div className="absolute -left-16 top-10 -z-10 h-64 w-64 rounded-full bg-[var(--m-aqua)]/20 blur-3xl animate-blob" />
+        <div className="absolute -right-10 top-40 -z-10 h-72 w-72 rounded-full bg-[var(--m-aqua-2)]/20 blur-3xl animate-blob-slow" />
+
+        <div className="pub-container grid grid-cols-1 items-center gap-10 pt-16 pb-12 sm:pt-24 sm:pb-16 lg:grid-cols-2 lg:gap-12">
+          {/* Teks */}
+          <div className="text-center lg:text-left">
+            <span className="pub-chip mx-auto mb-5 w-fit lg:mx-0">
+              <Waves className="h-3.5 w-3.5 text-[var(--m-aqua)]" /> Sistem Kejuaraan Renang · Sejak 2013
+            </span>
+            <h1 className="mx-auto max-w-xl text-4xl font-black leading-[1.1] tracking-tight text-[var(--m-ink)] sm:text-5xl lg:text-6xl">
+              Selenggarakan lomba renang jadi{' '}
+              <span className="bg-gradient-to-r from-[var(--m-aqua)] to-[var(--m-aqua-2)] bg-clip-text text-transparent">
+                lebih mudah & terukur.
+              </span>
+            </h1>
+            <p className="mx-auto mt-5 max-w-xl text-base text-[var(--m-muted)] sm:text-lg">
+              Rajendra Meet membantu panitia mengelola pendaftaran peserta, menyusun
+              heat, menginput hasil, dan menampilkan scoreboard secara real-time —
+              semua dalam satu sistem yang ramah & menyenangkan.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
+              <Link href="/scoreboard" className="pub-btn-primary">
+                Lihat Jadwal Lomba <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link href="/daftar-lomba" className="pub-btn-ghost">
+                Daftar Lomba
+              </Link>
+            </div>
+
+            <dl className="mx-auto mt-10 grid max-w-md grid-cols-3 gap-3 lg:mx-0">
+              {[
+                { v: 'Real-time', l: 'Live scoreboard' },
+                { v: 'Otomatis', l: 'Penyusunan heat' },
+                { v: 'Mudah', l: 'Daftar online' },
+              ].map((s) => (
+                <div key={s.l} className="pub-card rounded-2xl p-4 text-center transition-transform hover:-translate-y-1">
+                  <dt className="text-lg font-bold text-[var(--m-aqua-ink)] sm:text-xl">{s.v}</dt>
+                  <dd className="mt-0.5 text-xs text-[var(--m-muted)] sm:text-sm">{s.l}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
 
-          <dl className="mx-auto mt-12 grid max-w-2xl grid-cols-3 gap-4">
-            {[
-              { v: 'Real-time', l: 'Live scoreboard' },
-              { v: 'Otomatis', l: 'Penyusunan heat' },
-              { v: 'Mudah', l: 'Pendaftaran online' },
-            ].map((s) => (
-              <div key={s.l} className="pub-card p-4">
-                <dt className="text-lg font-bold text-[var(--m-aqua-ink)] sm:text-xl">{s.v}</dt>
-                <dd className="mt-0.5 text-xs text-[var(--m-muted)] sm:text-sm">{s.l}</dd>
-              </div>
-            ))}
-          </dl>
+          {/* Slider foto yang bergeser */}
+          <div className="relative">
+            <div className="absolute -inset-4 -z-10 rounded-[2rem] bg-gradient-to-tr from-[var(--m-aqua-soft)] to-[var(--m-aqua-2)]/30 blur-2xl" />
+            <PhotoSlider className="aspect-[4/5] sm:aspect-[4/3] lg:aspect-[4/5]" />
+            <div className="absolute -bottom-5 -left-5 hidden items-center gap-2 rounded-2xl bg-white px-4 py-2.5 soft-shadow sm:inline-flex">
+              <Sparkles className="h-4 w-4 text-[var(--m-aqua)]" />
+              <span className="text-sm font-semibold text-[var(--m-ink)]">Seru & terukur</span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -193,7 +213,7 @@ export default async function HomePage() {
 
       {/* ===== TENTANG ===== */}
       <section className="pub-container py-12 sm:py-16">
-        <div className="pub-card overflow-hidden">
+        <div className="pub-card overflow-hidden rounded-3xl-x">
           <div className="grid grid-cols-1 lg:grid-cols-2">
             <div className="flex flex-col justify-center gap-4 p-8 sm:p-10">
               <span className="pub-eyebrow">Tentang Rajendra Meet</span>
@@ -222,14 +242,9 @@ export default async function HomePage() {
                 ))}
               </ul>
             </div>
-            <div
-              className="min-h-56 bg-cover bg-center sm:min-h-full"
-              style={{
-                backgroundImage:
-                  'linear-gradient(135deg, var(--m-aqua-soft), var(--m-bg)), url(https://images.unsplash.com/photo-1530549387789-4c1017266635?auto=format&fit=crop&w=900&q=70)',
-                backgroundBlendMode: 'multiply',
-              }}
-            />
+            <div className="min-h-56 sm:min-h-full">
+              <PhotoSlider photos={ABOUT_PHOTOS} className="h-full min-h-72" />
+            </div>
           </div>
         </div>
       </section>

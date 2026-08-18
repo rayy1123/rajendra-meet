@@ -180,3 +180,34 @@
   .rank-3 { @apply flex h-9 w-9 items-center justify-center rounded-xl bg-orange-100 text-base font-bold text-orange-700; }
   .rank-n { @apply flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] text-base font-bold text-[var(--m-muted)]; }
 }
+
+/* =====================================================================
+   Softening utilities — "tidak kaku" (referensi gaya Student Open):
+   animasi halus, card lebih rounded, bayangan lembut, blob gradien.
+   ===================================================================== */
+@keyframes scms-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+@keyframes scms-blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(24px, -28px) scale(1.06); }
+  66% { transform: translate(-18px, 16px) scale(0.96); }
+}
+.animate-float { animation: scms-float 6s ease-in-out infinite; }
+.animate-blob { animation: scms-blob 16s ease-in-out infinite; }
+.animate-blob-slow { animation: scms-blob 22s ease-in-out infinite; }
+
+.soft-shadow {
+  box-shadow: 0 24px 50px -28px rgba(33, 86, 140, 0.35);
+}
+.soft-shadow-lg {
+  box-shadow: 0 36px 70px -32px rgba(33, 86, 140, 0.4);
+}
+.rounded-3xl-x { border-radius: 1.75rem; }
+
+/* Slider track — geser horizontal antar foto */
+.slider-track {
+  display: flex;
+  transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
