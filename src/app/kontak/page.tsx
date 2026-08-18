@@ -40,7 +40,7 @@ export default function KontakPage() {
         className="relative bg-cover bg-center text-white"
         style={{
           backgroundImage:
-            'linear-gradient(rgba(13,44,66,0.62), rgba(13,44,66,0.62)), url(/brand/contact-hero.jpg)',
+            'linear-gradient(rgba(13,44,66,0.62), rgba(13,44,66,0.62)), url(/brand/contact-hero.png)',
         }}
       >
         <div className="pub-container py-16 text-center sm:py-20">

@@ -24,6 +24,7 @@ import {
   Timer,
   BookOpen,
   Radio,
+  Home,
   CreditCard,
   type LucideIcon,
 } from 'lucide-react';
@@ -55,6 +56,7 @@ const navGroups: NavGroup[] = [
   {
     label: 'Ikhtisar',
     items: [
+      { title: 'Beranda', href: '/', icon: Home },
       { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
       { title: 'Kejuaraan / Events', href: '/events', icon: CalendarDays },
     ],
