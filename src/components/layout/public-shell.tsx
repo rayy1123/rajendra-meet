@@ -20,17 +20,11 @@ export function PublicShell({
       <header className="pub-header">
         <div className="pub-container flex h-16 items-center justify-between">
           <Link href="/scoreboard" className="flex items-center gap-2.5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--m-aqua)] text-white">
-              <Waves className="h-5 w-5" />
-            </span>
-            <span className="flex flex-col leading-none">
-              <span className="text-sm font-bold tracking-tight text-[var(--m-ink)]">
-                Rajendra Meet
-              </span>
-              <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--m-muted)]">
-                Swimming Results
-              </span>
-            </span>
+            <img
+              src="/brand/logo.png"
+              alt="Rajendra Meet"
+              className="h-9 w-auto rounded-md"
+            />
           </Link>
 
           <nav className="flex items-center gap-2 sm:gap-3">
@@ -42,6 +36,9 @@ export function PublicShell({
             </Link>
             <Link href="/pendaftaran-saya" className="pub-link hidden sm:inline">
               Pendaftaran Saya
+            </Link>
+            <Link href="/kontak" className="pub-link hidden sm:inline">
+              Kontak
             </Link>
             <Link href="/login" className="pub-btn-ghost">
               Masuk

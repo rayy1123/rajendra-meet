@@ -23,9 +23,9 @@ export const metadata: Metadata = {
   applicationName: "Rajendra Meet",
   authors: [{ name: "Rajendra Project" }],
   icons: {
-    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
-    shortcut: [{ url: "/icon.svg", type: "image/svg+xml" }],
-    apple: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    icon: [{ url: "/brand/favicon.png", type: "image/png" }],
+    shortcut: [{ url: "/brand/favicon.png", type: "image/png" }],
+    apple: [{ url: "/brand/favicon.png", type: "image/png" }],
   },
   appleWebApp: {
     title: "Rajendra Meet",
