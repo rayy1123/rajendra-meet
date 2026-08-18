@@ -56,7 +56,7 @@ export default async function CertificatePage({
       compLabel = `${ceCur.distance_meters}m ${ceCur.stroke} ${ceCur.gender === 'male' ? 'Putra' : 'Putri'}`;
       const { data: assigns } = await supabase
         .from('heat_assignments')
-        .select('id, heat_id')
+        .select('id, heat_id, registration_id')
         .in(
           'heat_id',
           // ambil semua heat dari comp_event
@@ -68,12 +68,42 @@ export default async function CertificatePage({
           ).data?.map((h) => h.id) ?? [],
         );
       const ids = (assigns ?? []).map((a) => a.id);
+      // Map assignment -> registration (kolom langsung)
+      const regOfAssign: Record<string, string> = {};
+      (assigns ?? []).forEach((a: any) => (regOfAssign[a.id] = a.registration_id));
+      const regIds = (assigns ?? []).map((a: any) => a.registration_id).filter(Boolean);
+      const { data: regRows } = await supabase
+        .from('registrations')
+        .select('id, athlete_id')
+        .in('id', regIds);
+      const athleteOfReg: Record<string, string> = {};
+      (regRows ?? []).forEach((r: any) => (athleteOfReg[r.id] = r.athlete_id));
+      const athIds = Object.values(athleteOfReg);
+      const { data: athRows } = await supabase
+        .from('athletes')
+        .select('id, full_name, school_id')
+        .in('id', athIds);
+      const athName: Record<string, string> = {};
+      const schoolOfAthlete: Record<string, string> = {};
+      (athRows ?? []).forEach((a: any) => {
+        athName[a.id] = a.full_name;
+        schoolOfAthlete[a.id] = a.school_id;
+      });
+      const { data: schRows } = await supabase.from('schools').select('id, name');
+      const schMap: Record<string, string> = {};
+      (schRows ?? []).forEach((s: any) => (schMap[s.id] = s.name));
+
+      const personOfAssign = (aid: string): { name: string; school: string | null } => {
+        const athId = regOfAssign[aid] && athleteOfReg[regOfAssign[aid]];
+        if (!athId) return { name: '—', school: null };
+        const sid = schoolOfAthlete[athId];
+        return { name: athName[athId] ?? '—', school: sid ? schMap[sid] ?? null : null };
+      };
+
       if (ids.length > 0) {
         const { data: res } = await supabase
           .from('results')
-          .select(
-            'time_ms, is_new_record, heat_assignments(lane_number, registrations(athletes(full_name, schools(name))))',
-          )
+          .select('time_ms, is_new_record, heat_assignment_id')
           .in('heat_assignment_id', ids)
           .eq('status', 'finished')
           .order('time_ms', { ascending: true })
@@ -83,20 +113,16 @@ export default async function CertificatePage({
         const seen = new Set<string>();
         const picked: any[] = [];
         for (const r of res ?? []) {
-          const ath = r.heat_assignments?.[0]?.registrations?.[0]?.athletes?.[0];
-          const name = ath?.full_name ?? '—';
-          if (seen.has(name)) continue;
-          seen.add(name);
-          picked.push(r);
+          const p = personOfAssign(r.heat_assignment_id);
+          if (seen.has(p.name)) continue;
+          seen.add(p.name);
+          picked.push({ ...r, _person: p });
           if (picked.length >= 3) break;
         }
         certs = picked.map((r: any, i: number) => ({
           rank: i + 1,
-          swimmer:
-            r.heat_assignments?.[0]?.registrations?.[0]?.athletes?.[0]?.full_name ?? '—',
-          school:
-            r.heat_assignments?.[0]?.registrations?.[0]?.athletes?.[0]?.schools?.name ??
-            null,
+          swimmer: r._person.name,
+          school: r._person.school,
           finish: r.time_ms,
         }));
       }

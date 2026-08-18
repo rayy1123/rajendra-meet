@@ -53,18 +53,43 @@ export default async function HeatLanePage({
       if (heatCur) {
         const { data: assigns } = await supabase
           .from('heat_assignments')
-          .select(
-            'lane_number, registrations(seed_time_ms, athletes(full_name, schools(name))), results(status)',
-          )
+          .select('lane_number, registration_id, results(status)')
           .eq('heat_id', heatCur.id)
           .order('lane_number', { ascending: true });
-        rows = (assigns ?? []).map((a: any) => ({
-          lane: a.lane_number,
-          swimmer: a.registrations?.athletes?.full_name ?? '—',
-          school: a.registrations?.athletes?.schools?.name ?? null,
-          seed: a.registrations?.seed_time_ms ?? null,
-          status: a.results?.[0]?.status ?? 'assigned',
-        }));
+
+        // Resolve school via kolom langsung (nested schools(name) tdk ter-infer)
+        const regIds = (assigns ?? []).map((a: any) => a.registration_id).filter(Boolean);
+        const { data: regRows } = await supabase
+          .from('registrations')
+          .select('id, athlete_id')
+          .in('id', regIds);
+        const athleteOfReg: Record<string, string> = {};
+        (regRows ?? []).forEach((r: any) => (athleteOfReg[r.id] = r.athlete_id));
+        const athIds = Object.values(athleteOfReg);
+        const { data: athRows } = await supabase
+          .from('athletes')
+          .select('id, full_name, school_id')
+          .in('id', athIds);
+        const schoolName: Record<string, string> = {};
+        const athName: Record<string, string> = {};
+        (athRows ?? []).forEach((a: any) => {
+          athName[a.id] = a.full_name;
+          schoolName[a.id] = a.school_id;
+        });
+        const { data: schRows } = await supabase.from('schools').select('id, name');
+        const schMap: Record<string, string> = {};
+        (schRows ?? []).forEach((s: any) => (schMap[s.id] = s.name));
+
+        rows = (assigns ?? []).map((a: any) => {
+          const athId = athleteOfReg[a.registration_id];
+          return {
+            lane: a.lane_number,
+            swimmer: (athId && athName[athId]) || '—',
+            school: athId && schoolName[athId] ? schMap[schoolName[athId]] ?? null : null,
+            seed: null,
+            status: a.results?.[0]?.status ?? 'assigned',
+          };
+        });
       }
     }
   }
