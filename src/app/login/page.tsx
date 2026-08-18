@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Waves, Lock, Mail, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import Link from 'next/link';
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -49,8 +47,9 @@ export default function LoginPage() {
       const role = (profile as { role?: string } | null)?.role;
       const target = role && ADMIN_ROLES.includes(role) ? '/events' : '/scoreboard';
 
-      router.push(target);
-      router.refresh();
+      // Full navigation (bukan router.push) agar middleware membaca cookie session
+      // yang baru diset — menghindari redirect loop /login <-> dashboard.
+      window.location.assign(target);
     } catch (err: unknown) {
       setErrorMsg(err instanceof Error ? err.message : 'Terjadi kesalahan sistem.');
       setLoading(false);

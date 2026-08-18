@@ -46,6 +46,9 @@ export function PublicShell({
             <Link href="/galeri" className="pub-link hidden sm:inline">
               Galeri
             </Link>
+            <Link href="/medali" className="pub-link hidden sm:inline">
+              Medali
+            </Link>
             <Link href="/login" className="pub-btn-ghost">
               Masuk
             </Link>

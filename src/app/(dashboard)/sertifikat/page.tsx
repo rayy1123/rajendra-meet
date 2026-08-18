@@ -57,7 +57,7 @@ export default async function CertificatePage({
       const { data: assigns } = await supabase
         .from('heat_assignments')
         .select('id, heat_id')
-        .eq(
+        .in(
           'heat_id',
           // ambil semua heat dari comp_event
           (
@@ -77,11 +77,26 @@ export default async function CertificatePage({
           .in('heat_assignment_id', ids)
           .eq('status', 'finished')
           .order('time_ms', { ascending: true })
-          .limit(3);
-        certs = (res ?? []).map((r: any, i: number) => ({
+          .limit(50);
+        // Ambil 3 atlet BERBEDA tercepat (hindari atlet sama muncul berulang
+        // karena seed bisa menempatkan satu atlet di beberapa lane/heat).
+        const seen = new Set<string>();
+        const picked: any[] = [];
+        for (const r of res ?? []) {
+          const ath = r.heat_assignments?.[0]?.registrations?.[0]?.athletes?.[0];
+          const name = ath?.full_name ?? '—';
+          if (seen.has(name)) continue;
+          seen.add(name);
+          picked.push(r);
+          if (picked.length >= 3) break;
+        }
+        certs = picked.map((r: any, i: number) => ({
           rank: i + 1,
-          swimmer: r.heat_assignments?.registrations?.athletes?.full_name ?? '—',
-          school: r.heat_assignments?.registrations?.athletes?.schools?.name ?? null,
+          swimmer:
+            r.heat_assignments?.[0]?.registrations?.[0]?.athletes?.[0]?.full_name ?? '—',
+          school:
+            r.heat_assignments?.[0]?.registrations?.[0]?.athletes?.[0]?.schools?.name ??
+            null,
           finish: r.time_ms,
         }));
       }
