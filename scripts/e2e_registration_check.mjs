@@ -10,7 +10,7 @@ const ANON = pick('NEXT_PUBLIC_SUPABASE_ANON_KEY');
 
 const sb = createClient(URL, ANON, { auth: { persistSession: false } });
 
-const EMAIL = 'penonton@rajendra.id';
+const EMAIL = 'pendaftaran@rajendra.id';
 const PW = 'Penonton#2026';
 
 async function main() {

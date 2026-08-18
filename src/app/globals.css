@@ -120,6 +120,9 @@
   --m-aqua-ink: oklch(0.42 0.11 230);
   --m-aqua-soft: oklch(0.96 0.04 222);
   --m-aqua-2: oklch(0.66 0.13 205);
+  --m-navy: oklch(0.27 0.06 235);
+  --m-soft: oklch(0.97 0.012 232);
+  --m-orange: oklch(0.7 0.17 45);
 }
 
 @layer base {

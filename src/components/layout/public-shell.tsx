@@ -40,6 +40,12 @@ export function PublicShell({
             <Link href="/kontak" className="pub-link hidden sm:inline">
               Kontak
             </Link>
+            <Link href="/program" className="pub-link hidden sm:inline">
+              Buku Acara
+            </Link>
+            <Link href="/galeri" className="pub-link hidden sm:inline">
+              Galeri
+            </Link>
             <Link href="/login" className="pub-btn-ghost">
               Masuk
             </Link>
