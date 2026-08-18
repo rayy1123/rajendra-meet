@@ -211,3 +211,13 @@
   display: flex;
   transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
 }
+
+/* Reveal — kartu muncul naik & memudar secara bertahap (stagger lewat animation-delay) */
+@keyframes scms-reveal {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.reveal {
+  opacity: 0;
+  animation: scms-reveal 600ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}

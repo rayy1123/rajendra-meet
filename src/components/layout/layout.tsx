@@ -12,17 +12,11 @@ export default function DashboardLayout({
       {/* Sidebar Desktop */}
       <aside className="sticky top-0 hidden h-screen w-72 shrink-0 flex-col border-r border-border bg-sidebar md:flex">
         <div className="flex h-16 items-center gap-2.5 border-b border-border px-6">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <Waves className="h-5 w-5" />
-          </span>
-          <div>
-            <h2 className="font-black text-base leading-none tracking-tight text-foreground">
-              Rajendra Meet
-            </h2>
-            <p className="text-[10px] font-semibold tracking-[0.14em] text-muted-foreground">
-              MANAJEMEN KEJUARAAN
-            </p>
-          </div>
+          <img
+            src="/brand/logo.png"
+            alt="Rajendra Meet"
+            className="h-8 w-auto rounded-md"
+          />
         </div>
         <div className="flex-1 overflow-y-auto py-4">
           <SidebarNav />

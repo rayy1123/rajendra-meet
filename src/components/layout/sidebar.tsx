@@ -15,7 +15,6 @@ import {
   Trophy,
   Award,
   Medal,
-  Waves,
   Menu,
   Printer,
   LogOut,
@@ -222,9 +221,11 @@ export function MobileSidebar() {
       </SheetTrigger>
       <SheetContent side="left" className="w-72 p-0 flex flex-col">
         <SheetHeader className="flex flex-row items-center gap-2 border-b px-6 py-4 text-left space-y-0">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-primary-foreground shrink-0">
-            <Waves className="h-4 w-4" />
-          </span>
+          <img
+            src="/brand/logo.png"
+            alt="Rajendra Meet"
+            className="h-7 w-auto rounded-md"
+          />
           <SheetTitle className="font-bold text-lg tracking-tight">
             Rajendra Meet
           </SheetTitle>

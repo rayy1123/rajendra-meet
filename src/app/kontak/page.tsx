@@ -43,10 +43,10 @@ export default function KontakPage() {
             'linear-gradient(rgba(13,44,66,0.62), rgba(13,44,66,0.62)), url(/brand/contact-hero.png)',
         }}
       >
-        <div className="pub-container py-16 text-center sm:py-20">
+        <div className="pub-container py-12 text-center sm:py-14">
           <p className="pub-eyebrow !text-white/80">Rajendra Meet · Kontak</p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-5xl">Hubungi Kami</h1>
-          <p className="mx-auto mt-3 max-w-xl text-white/85">
+          <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-4xl">Hubungi Kami</h1>
+          <p className="mx-auto mt-2 max-w-xl text-sm text-white/85 sm:text-base">
             Kami siap membantu mewujudkan acara renang impian Anda — dari pendaftaran hingga
             live scoreboard.
           </p>
@@ -54,16 +54,17 @@ export default function KontakPage() {
       </section>
 
       {/* Kontak cards */}
-      <section className="pub-container -mt-10 pb-12">
+      <section className="pub-container -mt-8 pb-12">
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {contacts.map((c) => {
+          {contacts.map((c, i) => {
             const Icon = c.icon;
             return (
               <div
                 key={c.title}
-                className="rounded-2xl bg-[var(--m-surface)] p-6 text-center shadow-soft transition-transform hover:-translate-y-1"
+                className="reveal rounded-2xl bg-[var(--m-surface)] p-6 text-center shadow-soft"
+                style={{ animationDelay: `${i * 110}ms` }}
               >
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[var(--m-aqua)] to-[var(--m-aqua-deep)] text-white">
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[var(--m-aqua)] to-[var(--m-aqua-deep)] text-white transition-transform duration-300 group-hover:scale-110">
                   <Icon className="h-6 w-6" />
                 </div>
                 <h3 className="font-semibold text-[var(--m-ink)]">{c.title}</h3>
@@ -77,7 +78,7 @@ export default function KontakPage() {
                         href={l.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block text-[var(--m-aqua-deep)] hover:underline"
+                        className="block text-[var(--m-aqua-deep)] transition-colors hover:text-[var(--m-aqua)] hover:underline"
                       >
                         {l.label}
                       </a>
