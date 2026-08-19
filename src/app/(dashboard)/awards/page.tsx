@@ -119,7 +119,7 @@ export default async function AwardsPage() {
     rows.find((r) => r.school_id === id)?.school_name || 'Umum';
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 p-6">
+    <div className="mx-auto max-w-5xl space-y-6 p-6">
       <PageHeader
         title="Awards & Klasemen"
         description={`Klasemen dihitung otomatis dari hasil lomba. Poin: ${rules.map((r) => `${r.rank}=${r.points}`).join(', ')}.`}

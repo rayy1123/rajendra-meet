@@ -34,7 +34,7 @@ export default async function AthletesPage() {
     .order('full_name', { ascending: true });
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 p-6">
+    <div className="mx-auto max-w-5xl space-y-6 p-6">
       <PageHeader
         title="Master Data Atlet"
         description="Kelompok Umur (KU) dihitung otomatis dari tanggal lahir saat disimpan."

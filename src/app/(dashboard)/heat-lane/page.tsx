@@ -105,7 +105,7 @@ export default async function HeatLanePage({
         title="Heat & Lane Management"
         description="Pantau pembagian lintasan per heat. Data diambil langsung dari hasil seeding & penugasan lintasan."
       />
-      <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
+      <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6">
         {/* Selectors */}
         <HeatLaneSelectors
           eventOpts={eventOpts}
