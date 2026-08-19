@@ -94,7 +94,7 @@ const navGroups: NavGroup[] = [
       { title: 'Peralatan', href: '/equipment', icon: Wrench },
       { title: 'Log Audit', href: '/audit', icon: ShieldCheck },
       { title: 'Pengaturan', href: '/settings', icon: Settings },
-      { title: 'Panduan', href: '/guide', icon: BookOpen },
+      { title: 'Panduan', href: '/panduan', icon: BookOpen },
     ],
   },
 ];

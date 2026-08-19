@@ -19,7 +19,7 @@ export function PublicShell({
     <div className="pub-shell">
       <header className="pub-header">
         <div className="pub-container flex h-16 items-center justify-between">
-          <Link href="/scoreboard" className="flex items-center gap-2.5">
+          <Link href="/" className="flex items-center gap-2.5">
             <img
               src="/brand/logo.png"
               alt="Rajendra Meet"
