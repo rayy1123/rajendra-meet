@@ -31,17 +31,11 @@ export function LandingShell({ children }: { children: React.ReactNode }) {
       <header className="pub-header">
         <div className="pub-container flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--m-aqua)] text-white">
-              <Waves className="h-5 w-5" />
-            </span>
-            <span className="flex flex-col leading-none">
-              <span className="text-sm font-bold tracking-tight text-[var(--m-ink)]">
-                Rajendra Meet
-              </span>
-              <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--m-muted)]">
-                Swimming Results
-              </span>
-            </span>
+            <img
+              src="/brand/logo.png"
+              alt="Rajendra Meet"
+              className="h-9 w-auto rounded-md"
+            />
           </Link>
 
           <nav className="flex items-center gap-1 sm:gap-2">
@@ -70,12 +64,11 @@ export function LandingShell({ children }: { children: React.ReactNode }) {
         <div className="pub-container grid grid-cols-1 gap-8 py-10 sm:grid-cols-2">
           <div>
             <Link href="/" className="flex items-center gap-2.5">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--m-aqua)] text-white">
-                <Waves className="h-5 w-5" />
-              </span>
-              <span className="text-sm font-bold tracking-tight text-[var(--m-ink)]">
-                Rajendra Meet
-              </span>
+              <img
+                src="/brand/logo.png"
+                alt="Rajendra Meet"
+                className="h-9 w-auto rounded-md"
+              />
             </Link>
             <p className="mt-3 max-w-md text-sm text-[var(--m-muted)]">
               Sistem manajemen kejuaraan renang yang memudahkan panitia
