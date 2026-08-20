@@ -3,6 +3,7 @@ import { HeatGeneratorOperator } from '@/components/modules/heat-generator-opera
 import { Layers, Waves } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 
 // Definisi Interface untuk Type Safety
 export interface RegistrationItem {
@@ -100,6 +101,7 @@ export default async function HeatsPage({
         description="Bagi peserta lomba ke dalam Acara dan Lintasan secara otomatis menggunakan algoritma Spearhead Seeding standar FINA/Aquatics."
         icon={<Layers className="h-6 w-6" />}
       />
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Acara & Heat' }]} className="mb-1" />
 
       {!events || events.length === 0 ? (
         <Card className="p-12 text-center border-dashed">

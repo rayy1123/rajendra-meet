@@ -40,9 +40,14 @@ export default function LoginPage() {
       }
 
       const ADMIN_ROLES = ['super_admin', 'event_admin', 'operator'];
+      const { data: meData } = await supabase.auth.getUser();
+      const userId = meData.data.user?.id;
+      // PENTING: filter id milik sendiri agar tidak membaca profil baris
+      // pertama (kebocoran role / redirect salah).
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
+        .eq('id', userId ?? '')
         .single();
       const role = (profile as { role?: string } | null)?.role;
       const target = role && ADMIN_ROLES.includes(role) ? '/events' : '/scoreboard';

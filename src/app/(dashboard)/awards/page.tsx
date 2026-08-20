@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { School, User, Building2 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/page-header';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 
 export const dynamic = 'force-dynamic';
 
@@ -125,6 +126,7 @@ export default async function AwardsPage() {
         description={`Klasemen dihitung otomatis dari hasil lomba. Poin: ${rules.map((r) => `${r.rank}=${r.points}`).join(', ')}.`}
         icon={<Building2 className="h-6 w-6" />}
       />
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Penghargaan' }]} className="mb-1" />
 
       {entries.length === 0 ? (
         <Card>

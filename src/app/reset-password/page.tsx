@@ -51,7 +51,13 @@ export default function ResetPasswordPage() {
       }
 
       const ADMIN_ROLES = ['super_admin', 'event_admin', 'operator'];
-      const { data: profile } = await supabase.from('profiles').select('role').single();
+      // PENTING: baca profil MILIK user sendiri, bukan baris pertama.
+      const userId = sessionData.session?.user?.id;
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', userId ?? '')
+        .single();
       const role = (profile as { role?: string } | null)?.role;
       const target = role && ADMIN_ROLES.includes(role) ? '/events' : '/scoreboard';
 

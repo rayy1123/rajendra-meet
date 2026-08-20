@@ -5,6 +5,7 @@ import { Waves, Plus, MapPin, CalendarDays, ExternalLink, Trophy } from 'lucide-
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { LogoutButton } from '@/components/layout/logout-button';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 
 export default async function EventsPage() {
   const supabase = await createClient();
@@ -39,6 +40,7 @@ export default async function EventsPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Kejuaraan / Events' }]} className="mb-2" />
       {/* Header Bar */}
       <div className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">

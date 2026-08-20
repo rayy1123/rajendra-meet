@@ -128,7 +128,7 @@ export function RegistrationWizard({
           Atlet didaftarkan ke {selectedCats.length} nomor lomba. Menunggu verifikasi pembayaran oleh panitia.
         </p>
         <div className="mt-6 flex justify-center gap-3">
-          <Button onClick={() => router.push("/dashboard/pendaftaran-saya")}>Lihat Pendaftaran</Button>
+          <Button onClick={() => router.push("/pendaftaran-saya")}>Lihat Pendaftaran</Button>
           <Button variant="outline" onClick={() => router.push("/scoreboard")}>Scoreboard</Button>
         </div>
       </Card>

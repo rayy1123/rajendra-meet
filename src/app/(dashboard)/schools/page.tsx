@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { School, Plus, Search, Building2, Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -82,6 +83,8 @@ export default async function SchoolsPage({
           </Button>
         }
       />
+
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Sekolah / Klub' }]} className="mb-1" />
 
       {/* Ringkasan Statistik */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

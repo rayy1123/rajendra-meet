@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { PageHeader } from '@/components/ui/page-header';
 import { PrintButton } from '@/components/modules/print-button';
 import { Trophy } from 'lucide-react';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 
 export const dynamic = 'force-dynamic';
 
@@ -137,6 +138,7 @@ export default async function CertificatePage({
         title="Sertifikat Penghargaan"
         description="Cetak sertifikat juara 1–3 per nomor lomba. Gunakan tombol Cetak untuk menyimpan / kirim PDF."
       />
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Sertifikat' }]} className="mb-1" />
       <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6">
         <div className="mb-6 flex flex-wrap items-center gap-3">
           <span className="rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-[var(--m-ink)]">

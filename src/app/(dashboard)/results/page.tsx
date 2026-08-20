@@ -3,6 +3,7 @@ import { ResultInputOperator } from '@/components/modules/result-input-operator'
 import { Trophy, Waves } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 
 // Types untuk menyempurnakan Type Safety
 export interface HeatAssignmentWithResult {
@@ -105,6 +106,7 @@ export default async function ResultsPage({
         description="Input waktu tempuh per lintasan (lane). Hasil otomatis tersimpan dan terupdate secara realtime."
         icon={<Trophy className="h-6 w-6" />}
       />
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Input Hasil' }]} className="mb-1" />
 
       {!events || events.length === 0 ? (
         <Card className="p-12 text-center border-dashed">

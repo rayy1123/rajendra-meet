@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createClient } from '@/lib/supabase/server';
+import { requireRole } from '@/lib/auth';
 import { PageHeader } from '@/components/ui/page-header';
 import { ShieldCheck } from 'lucide-react';
 
@@ -13,7 +13,10 @@ const ACTION_STYLE: Record<string, string> = {
 };
 
 export default async function AuditPage() {
-  const supabase = await createClient();
+  // Defense-in-depth: audit log hanya untuk event_admin / super_admin.
+  // Selain layout guard, page ini sendiri menolak role lain.
+  const { supabase } = await requireRole(['event_admin', 'super_admin']);
+
   const { data } = await supabase
     .from('audit_log')
     .select('*')

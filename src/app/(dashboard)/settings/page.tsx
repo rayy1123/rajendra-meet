@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { requireRole } from '@/lib/auth';
 import { Settings, Shield, Sliders, Database, Save, Server } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,7 +8,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { PageHeader } from '@/components/ui/page-header';
 
 export default async function SettingsPage() {
-  const supabase = await createClient();
+  // Defense-in-depth: pengaturan sistem hanya untuk admin event / super admin.
+  const { supabase } = await requireRole(['event_admin', 'super_admin']);
 
   // 1. Fetch data setting sistem & aturan poin
   const [{ data: pointRules }, { data: systemConfigs }] = await Promise.all([

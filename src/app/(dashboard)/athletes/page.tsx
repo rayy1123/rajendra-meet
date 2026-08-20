@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { AthleteManager, type AthleteRow, type Opt } from '@/components/modules/athlete-manager';
 import { PageHeader } from '@/components/ui/page-header';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { Users } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -40,6 +41,7 @@ export default async function AthletesPage() {
         description="Kelompok Umur (KU) dihitung otomatis dari tanggal lahir saat disimpan."
         icon={<Users className="h-6 w-6" />}
       />
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Atlet' }]} className="mb-1" />
 
       <AthleteManager
         athletes={(athletes || []) as unknown as AthleteRow[]}

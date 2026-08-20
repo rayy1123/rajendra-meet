@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { PageHeader } from '@/components/ui/page-header';
 import { HeatLaneSelectors, type Opt } from '@/components/modules/heat-lane-selectors';
 import { Layers, UserX } from 'lucide-react';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 
 export const dynamic = 'force-dynamic';
 
@@ -105,6 +106,7 @@ export default async function HeatLanePage({
         title="Heat & Lane Management"
         description="Pantau pembagian lintasan per heat. Data diambil langsung dari hasil seeding & penugasan lintasan."
       />
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Heat & Lane' }]} className="mb-1" />
       <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6">
         {/* Selectors */}
         <HeatLaneSelectors

@@ -2,16 +2,34 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 /**
- * Prefix rute yang boleh diakses tanpa login (halaman publik SCMS).
- * Harus selaras dengan struktur route di src/app.
+ * Proxy (menggantikan middleware yang sudah deprecated di Next.js 16).
+ * Tugas:
+ *   1. Refresh sesi Supabase (set cookie session lewat response).
+ *   2. Guard rute — hanya rute publik yang boleh diakses tanpa login.
+ *   3. Suntikkan security headers pada SETIAP response.
  */
-const PUBLIC_ROUTE_PREFIXES = ['/public', '/public-live', '/scoreboard', '/guide', '/register', '/forgot-password', '/reset-password', '/'];
+
+const PUBLIC_ROUTE_PREFIXES = [
+  '/public',
+  '/public-live',
+  '/scoreboard',
+  '/medali',
+  '/guide',
+  '/register',
+  '/forgot-password',
+  '/reset-password',
+  '/auth',
+  '/daftar-lomba',
+  '/kontak',
+  '/program',
+  '/galeri',
+  '/live',
+  '/',
+];
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
+    request: { headers: request.headers },
   });
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -29,10 +47,10 @@ export async function proxy(request: NextRequest) {
         return request.cookies.getAll();
       },
       setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        response = NextResponse.next({
-          request,
-        });
+        cookiesToSet.forEach(({ name, value }) =>
+          request.cookies.set(name, value)
+        );
+        response = NextResponse.next({ request });
         cookiesToSet.forEach(({ name, value, options }) =>
           response.cookies.set(name, value, options)
         );
@@ -40,51 +58,88 @@ export async function proxy(request: NextRequest) {
     },
   });
 
-  // Penting: Selalu gunakan getUser() di Middleware/Proxy untuk validasi token terenkripsi dari server
+  // Guard dijalankan di bawah (setelah refresh sesi) agar cookie terbaru
+  // ikut terbawa ke redirect.
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   const pathname = request.nextUrl.pathname;
 
-  // Rute publik yang boleh diakses tanpa login
   const isPublicRoute =
     pathname === '/login' ||
     PUBLIC_ROUTE_PREFIXES.some(
       (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
     );
 
-  // 1. Jika belum login dan mencoba mengakses rute terproteksi
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     const redirectResponse = NextResponse.redirect(url);
-
-    // Salin cookie yang diperbarui oleh Supabase ke response redirect
     response.cookies.getAll().forEach((cookie) => {
       redirectResponse.cookies.set(cookie.name, cookie.value);
     });
-
-    return redirectResponse;
+    return applySecurityHeaders(redirectResponse);
   }
 
-  // 2. Jika sudah login dan membuka halaman /login, redirect ke /dashboard
   if (user && pathname === '/login') {
     const url = request.nextUrl.clone();
     url.pathname = '/dashboard';
     const redirectResponse = NextResponse.redirect(url);
-
-    // Salin cookie yang diperbarui oleh Supabase ke response redirect
     response.cookies.getAll().forEach((cookie) => {
       redirectResponse.cookies.set(cookie.name, cookie.value);
     });
-
-    return redirectResponse;
+    return applySecurityHeaders(redirectResponse);
   }
 
+  return applySecurityHeaders(response);
+}
+
+/**
+ * Header keamanan standar tinggi untuk seluruh aplikasi.
+ * - CSP: membatasi sumber script/style/connect agar mitigasi XSS & injeksi.
+ * - HSTS: paksa HTTPS (hanya aktif efektif di production/Vercel).
+ * - X-Frame-Options + frame-ancestors: cegah clickjacking.
+ * - NoSniff: cegah MIME sniffing.
+ * - Referrer-Policy: tidak bocor path saat navigasi keluar.
+ */
+function applySecurityHeaders(response: NextResponse): NextResponse {
+  const csp = [
+    "default-src 'self'",
+    // Supabase JS butuh wasm + WS untuk realtime; izinkan host Supabase.
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+    // Style inline diperlukan oleh Tailwind (CDN-free, tapi ada style dinamis).
+    "style-src 'self' 'unsafe-inline'",
+    // Script: hanya milik sendiri (Next.js menyajikan dari /_next).
+    "script-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob: https://*.supabase.co",
+    "font-src 'self' data:",
+    "frame-src 'none'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join('; ');
+
+  response.headers.set('Content-Security-Policy', csp);
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('X-Frame-Options', 'DENY');
+  response.headers.set(
+    'Referrer-Policy',
+    'strict-origin-when-cross-origin'
+  );
+  response.headers.set(
+    'Permissions-Policy',
+    'camera=(), microphone=(), geolocation=()'
+  );
+  response.headers.set(
+    'Strict-Transport-Security',
+    'max-age=63072000; includeSubDomains; preload'
+  );
   return response;
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 };

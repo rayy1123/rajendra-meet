@@ -32,7 +32,9 @@ export async function submitRegistrationAction(formData: FormData): Promise<Acti
     return { ok: false, error: "Data pendaftaran tidak lengkap." };
   }
 
-  // Validasi atlet milik user (atau dikelola oleh panitia)
+  // Validasi atlet ada DAN (user adalah panitia OPERATOR+ ATAU atlet ini
+  // sudah terikat user lewat registrasi miliknya). Ini cegah viewer
+  // mendaftarkan atlet orang lain.
   const { data: athlete } = await supabase
     .from("athletes")
     .select("id, event_id")
@@ -40,6 +42,26 @@ export async function submitRegistrationAction(formData: FormData): Promise<Acti
     .maybeSingle();
 
   if (!athlete) return { ok: false, error: "Atlet tidak valid." };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+  const role = profile?.role;
+  const isPanitia = role === "super_admin" || role === "event_admin" || role === "operator";
+
+  if (!isPanitia) {
+    const { data: owned } = await supabase
+      .from("registrations")
+      .select("id")
+      .eq("athlete_id", athleteId)
+      .eq("registrant_id", user.id)
+      .maybeSingle();
+    if (!owned) {
+      return { ok: false, error: "Anda tidak berwenang mendaftarkan atlet ini." };
+    }
+  }
 
   try {
     for (const ceId of competitionEventIds) {
@@ -167,6 +189,18 @@ export async function verifyPaymentAction(formData: FormData): Promise<void> {
   } = await supabase.auth.getUser();
   if (!user) return;
 
+  // Hanya panitia (operator ke atas) yang boleh memverifikasi pembayaran.
+  // Tanpa gate ini, viewer bisa memverifikasi lewat POST langsung ke action.
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle();
+  const role = profile?.role;
+  if (role !== 'super_admin' && role !== 'event_admin' && role !== 'operator') {
+    return;
+  }
+
   const regId = formData.get("registrationId")?.toString();
   if (!regId) return;
 
@@ -188,6 +222,17 @@ export async function rejectPaymentAction(formData: FormData): Promise<void> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return;
+
+  // Hanya panitia (operator ke atas) yang boleh menolak pembayaran.
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle();
+  const role = profile?.role;
+  if (role !== 'super_admin' && role !== 'event_admin' && role !== 'operator') {
+    return;
+  }
 
   const regId = formData.get("registrationId")?.toString();
   if (!regId) return;

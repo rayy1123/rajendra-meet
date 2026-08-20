@@ -3,6 +3,7 @@ import { LeaderboardView, type CompEvent } from '@/components/modules/leaderboar
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/ui/page-header';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { Trophy } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -33,6 +34,7 @@ export default async function RankingsPage() {
         description="Peringkat otomatis per nomor lomba, dihitung lintas heat berdasarkan waktu tercepat."
         icon={<Trophy className="h-6 w-6" />}
       />
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Perangkingan' }]} className="mb-1" />
 
       {byEvent.length === 0 ? (
         <Card>

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { requireRole } from '@/lib/auth';
 import { PageHeader } from '@/components/ui/page-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { CheckCircle2, XCircle, Clock, Waves } from 'lucide-react';
@@ -13,7 +13,9 @@ const STATUS = {
 } as const;
 
 export default async function VerifikasiPembayaranPage() {
-  const supabase = await createClient();
+  // Defense-in-depth: hanya panitia yang boleh melihat/memverifikasi.
+  const { supabase } = await requireRole(['super_admin', 'event_admin', 'operator']);
+
   const { data: rows } = await supabase
     .from('payment_verifications')
     .select(

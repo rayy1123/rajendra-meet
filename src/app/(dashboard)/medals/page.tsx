@@ -3,6 +3,7 @@ import { MedalLeaderboardView } from '@/components/modules/medal-leaderboard-vie
 import { Award, Waves } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 
 interface MedalStat {
   id: string;
@@ -119,6 +120,7 @@ export default async function MedalsPage({
         description="Peringkat akumulasi medali Emas, Perak, dan Perunggu per kontingen/sekolah secara otomatis."
         icon={<Award className="h-6 w-6" />}
       />
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Klasemen Medali' }]} className="mb-1" />
 
       {!events || events.length === 0 ? (
         <Card className="p-12 text-center border-dashed">
