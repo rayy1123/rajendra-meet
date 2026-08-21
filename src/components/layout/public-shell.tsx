@@ -1,9 +1,11 @@
 import Link from 'next/link';
 import { Waves } from 'lucide-react';
+import { LandingNav } from '@/components/layout/landing-nav';
 
 /**
  * Kerangka halaman publik yang konsisten untuk scoreboard, live board, dan
- * panduan. Tema "Marine" (lihat globals.css). Header memuat logo dan tautan
+ * panduan. Tema "Marine" (lihat globals.css). Header memuat logo, tombol
+ * Menu (drawer navigasi, konsisten dengan beranda) di mobile, serta tautan
  * masuk/daftar; footer ringkas. Konten disisipkan via children.
  */
 export function PublicShell({
@@ -28,6 +30,8 @@ export function PublicShell({
           </Link>
 
           <nav className="flex items-center gap-2 sm:gap-3">
+            {/* Drawer navigasi (sidebar samping) — konsisten di semua halaman publik */}
+            <LandingNav />
             <Link href="/daftar-lomba" className="pub-link hidden sm:inline">
               Daftar Lomba
             </Link>

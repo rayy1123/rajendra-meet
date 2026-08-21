@@ -1,19 +1,21 @@
 -- =====================================================================
--- SCMS — Seed nomor perlombaan gaya (TK/SD/SMP/SMA + Fins)
+-- SCMS — Seed nomor perlombaan gaya (sesuai foto dokumen: ~106 nomor)
 -- Jalankan via: supabase db query --linked -f supabase/seed_fins_competition.sql
+--
+-- Struktur MENGIKUTI foto:
+--   Baris 1 (PAUD/TK s.d. SD Kelas 4): 5 nomor (semua 25M)
+--   Baris 2 (SD Kelas 5 s.d. SMA):     7 nomor (25M + 50M)
+-- Kelompok usia di-split Putra/Putri. PAUD & TK DIGABUNG jadi 1 kategori.
 --
 -- 1) Hapus SELURUH competition_events (cascade -> registrations, heats,
 --    heat_assignments, results ikut terhapus). Athletes & schools tetap.
--- 2) Seed nomor dari list user ke event "Festival Renang Pelajar 2026"
---    (fallback: event pertama jika nama tidak ketemu).
---    Kombinasi: 10 kelompok usia (gender-split = 20) x 8 nomor gaya = 160 nomor.
+-- 2) Seed ke event "Festival Renang Pelajar 2026" (fallback: event pertama).
 -- 3) Isi 16 peserta ke 1 nomor: "25M Gaya Bebas Fins Putra SD Kelas 1".
 -- =====================================================================
 
--- 0) Bersihkan nomor lama (instruksi: "sisanya dihapus saja")
+-- 0) Bersihkan nomor lama
 delete from public.competition_events;
 
--- 1) Seed nomor + 16 peserta
 do $$
 declare
   v_event   uuid;
@@ -28,18 +30,31 @@ declare
   glabel    text;
   ord       int := 0;
 
-  -- Kelompok usia (index paralel)
-  grades  text[] := array['TK','TK','SD','SD','SD','SD','SD','SD','SMP','SMA'];
-  classes text[] := array['PAUD','TK','Kelas 1','Kelas 2','Kelas 3','Kelas 4','Kelas 5','Kelas 6','','',''];
-  ags     text[] := array['PAUD','TK','SD Kelas 1','SD Kelas 2','SD Kelas 3','SD Kelas 4','SD Kelas 5','SD Kelas 6','SMP','SMA'];
+  -- Baris 1: 5 kelompok usia
+  ags1   text[] := array['PAUD/TK','SD Kelas 1','SD Kelas 2','SD Kelas 3','SD Kelas 4'];
+  grades1 text[] := array['TK','SD','SD','SD','SD'];
+  classes1 text[] := array['PAUD/TK','Kelas 1','Kelas 2','Kelas 3','Kelas 4'];
 
-  -- Nomor gaya (persis dari list user)
-  nms     text[] := array[
-    '25M Papan Kaki Bebas Fins','25M Gaya Bebas Fins','25M Gaya Dada','25M Gaya Kupu Fins',
-    '25M Gaya Punggung Fins','50M Gaya Bebas Fins','50M Gaya Dada','50M Gaya Kupu Fins'
+  -- Baris 2: 4 kelompok usia
+  ags2   text[] := array['SD Kelas 5','SD Kelas 6','SMP','SMA'];
+  grades2 text[] := array['SD','SD','SMP','SMA'];
+  classes2 text[] := array['Kelas 5','Kelas 6','',''];
+
+  -- Nomor baris 1 (5 nomor, 25M)
+  nms1   text[] := array[
+    '25M Papan Kaki Bebas Fins','25M Gaya Bebas Fins','25M Gaya Dada',
+    '25M Gaya Kupu Kupu Fins','25M Gaya Punggung Fins'
   ];
-  strokes text[] := array['Freestyle','Freestyle','Breaststroke','Butterfly','Backstroke','Freestyle','Breaststroke','Butterfly'];
-  dists   int[]  := array[25,25,25,25,25,50,50,50];
+  strokes1 text[] := array['Freestyle','Freestyle','Breaststroke','Butterfly','Backstroke'];
+  dists1 int[] := array[25,25,25,25,25];
+
+  -- Nomor baris 2 (7 nomor, 25M + 50M)
+  nms2   text[] := array[
+    '25M Gaya Bebas Fins','25M Gaya Dada','25M Gaya Kupu Kupu Fins','25M Gaya Punggung Fins',
+    '50M Gaya Bebas Fins','50M Gaya Dada','50M Gaya Kupu Kupu Fins'
+  ];
+  strokes2 text[] := array['Freestyle','Breaststroke','Butterfly','Backstroke','Freestyle','Breaststroke','Butterfly'];
+  dists2 int[] := array[25,25,25,25,50,50,50];
 begin
   -- Event target
   select id into v_event from public.events where name = 'Festival Renang Pelajar 2026' limit 1;
@@ -47,29 +62,47 @@ begin
     select id into v_event from public.events order by created_at limit 1;
   end if;
 
-  -- Ambil daftar sekolah untuk peserta
+  -- Daftar sekolah untuk peserta
   select array_agg(id) into v_schools
   from (select id from public.schools order by created_at limit 10) s;
 
-  -- Seed competition_events: kelompok usia x gender x nomor gaya
-  for j in 1..array_length(grades, 1) loop
+  -- Seed baris 1
+  for j in 1..array_length(ags1, 1) loop
     foreach g in array array['male','female'] loop
       glabel := case when g = 'male' then 'Putra' else 'Putri' end;
-      for k in 1..array_length(nms, 1) loop
+      for k in 1..array_length(nms1, 1) loop
         ord := ord + 1;
         insert into public.competition_events
           (event_id, name, stroke, distance_meters, gender, grade_level, class_name, age_group, session_no, order_no)
         values
           (v_event,
-           nms[k] || ' ' || glabel || ' ' || ags[j],
-           strokes[k], dists[k], g::gender_type,
-           grades[j], classes[j], ags[j], 1, ord)
+           nms1[k] || ' ' || glabel || ' ' || ags1[j],
+           strokes1[k], dists1[k], g::gender_type,
+           grades1[j], classes1[j], ags1[j], 1, ord)
         on conflict do nothing;
       end loop;
     end loop;
   end loop;
 
-  -- 2) 16 peserta untuk 1 nomor pilihan
+  -- Seed baris 2
+  for j in 1..array_length(ags2, 1) loop
+    foreach g in array array['male','female'] loop
+      glabel := case when g = 'male' then 'Putra' else 'Putri' end;
+      for k in 1..array_length(nms2, 1) loop
+        ord := ord + 1;
+        insert into public.competition_events
+          (event_id, name, stroke, distance_meters, gender, grade_level, class_name, age_group, session_no, order_no)
+        values
+          (v_event,
+           nms2[k] || ' ' || glabel || ' ' || ags2[j],
+           strokes2[k], dists2[k], g::gender_type,
+           grades2[j], classes2[j], ags2[j], 1, ord)
+        on conflict do nothing;
+      end loop;
+    end loop;
+  end loop;
+
+  -- 16 peserta untuk 1 nomor pilihan
   select id into v_ce
   from public.competition_events
   where event_id = v_event
@@ -96,10 +129,12 @@ begin
   end loop;
 end $$;
 
--- 3) Verifikasi
+-- Verifikasi
 select
   (select count(*) from public.competition_events) as total_nomor,
   (select count(*) from public.competition_events where name like '%Fins%') as nomor_fins,
+  (select count(*) filter (where gender='male') from public.competition_events) as putra,
+  (select count(*) filter (where gender='female') from public.competition_events) as putri,
   (select count(*) from public.registrations) as total_registrasi,
   (select count(*) from public.registrations
      where competition_event_id = (

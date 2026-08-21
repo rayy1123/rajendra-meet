@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Menu, X, Waves } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 const PUBLIC_LINKS = [
   { href: '/', label: 'Beranda' },
@@ -50,10 +50,11 @@ export function LandingNav() {
           {/* Panel */}
           <div className="relative flex h-full w-72 max-w-[85vw] flex-col bg-[var(--m-surface)] shadow-xl">
             <div className="flex flex-row items-center gap-2 border-b border-[var(--m-border)] px-6 py-4">
-              <Waves className="h-6 w-6 text-[var(--m-aqua)]" />
-              <span className="font-bold text-lg tracking-tight text-[var(--m-ink)]">
-                Rajendra Meet
-              </span>
+              <img
+                src="/brand/logo.png"
+                alt="Rajendra Meet"
+                className="h-7 w-auto rounded-md"
+              />
               <button
                 type="button"
                 aria-label="Tutup"
