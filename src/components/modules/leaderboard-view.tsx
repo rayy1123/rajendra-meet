@@ -133,6 +133,34 @@ export function LeaderboardView({ compEvents, embedded, showHeatTab = true, show
 
   const selectedComp = compEvents.find((c) => c.id === selectedCompEventId);
 
+  // Urutkan nomor lomba berdasar jenjang usia: PAUD/TK → SD Kelas 1-6 → SMP → SMA,
+  // lalu gender (Putra dulu), lalu jarak & gaya.
+  const sortedCompEvents = useMemo(() => {
+    const ageRank = (g: string | null): number => {
+      const k = (g || '').toUpperCase();
+      if (k === 'PAUD/TK' || k === 'TK') return 0;
+      if (k === 'SD') return 1;
+      if (k === 'SMP') return 7;
+      if (k === 'SMA') return 8;
+      return 99;
+    };
+    const genderRank = (g: string | null) => (g === 'female' ? 1 : 0);
+    return [...compEvents].sort((a, b) => {
+      const ra = ageRank(a.grade_level), rb = ageRank(b.grade_level);
+      if (ra !== rb) return ra - rb;
+      if (a.grade_level === 'SD' && b.grade_level === 'SD') {
+        const na = parseInt((a.class_name || '').replace(/\D/g, ''), 10) || 0;
+        const nb = parseInt((b.class_name || '').replace(/\D/g, ''), 10) || 0;
+        if (na !== nb) return na - nb;
+      }
+      const ga = genderRank(a.gender), gb = genderRank(b.gender);
+      if (ga !== gb) return ga - gb;
+      const da = a.distance_meters ?? 0, db = b.distance_meters ?? 0;
+      if (da !== db) return da - db;
+      return (a.stroke || '').localeCompare(b.stroke || '');
+    });
+  }, [compEvents]);
+
   // Ringkasan live
   const total = heats.length;
   const finished = heats.filter((h) => {
@@ -202,32 +230,26 @@ export function LeaderboardView({ compEvents, embedded, showHeatTab = true, show
             )}
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {showEventTabs && compEvents.map((ce) => {
-            const active = ce.id === selectedCompEventId;
+        <select
+          value={selectedCompEventId}
+          onChange={(e) => { setSelectedCompEventId(e.target.value); setTab('rank'); }}
+          className="w-full rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] px-3.5 py-2.5 text-sm font-semibold text-[var(--m-ink)] shadow-sm transition-colors hover:border-[var(--m-aqua)] focus:border-[var(--m-aqua)] focus:outline-none sm:w-auto sm:min-w-[340px]"
+        >
+          {sortedCompEvents.map((ce) => {
+            const usia =
+              ce.grade_level === 'TK'
+                ? 'PAUD/TK'
+                : ce.grade_level === 'SD' && ce.class_name
+                  ? `SD ${ce.class_name}`
+                  : ce.grade_level || '';
+            const gender = ce.gender === 'female' ? 'Putri' : 'Putra';
             return (
-              <button
-                key={ce.id}
-                type="button"
-                onClick={() => { setSelectedCompEventId(ce.id); setTab('rank'); }}
-                className={
-                  'rounded-xl border px-3.5 py-2 text-left text-sm font-semibold transition-colors ' +
-                  (active
-                    ? 'border-[var(--m-aqua)] bg-[var(--m-aqua)] text-white shadow-sm'
-                    : 'border-[var(--m-border)] bg-[var(--m-surface)] text-[var(--m-ink)] hover:border-[var(--m-aqua)] hover:bg-[var(--m-aqua-soft)]')
-                }
-              >
-                <span className="block leading-tight">
-                  {ce.distance_meters}m {ce.stroke} {ce.grade_level}
-                </span>
-                <span className={'block text-[11px] font-medium ' + (active ? 'text-white/80' : 'text-[var(--m-muted)]')}>
-                  {ce.gender === 'female' ? 'Putri' : 'Putra'}
-                  {ce.class_name ? ` · ${ce.class_name}` : ''}
-                </span>
-              </button>
+              <option key={ce.id} value={ce.id}>
+                {ce.distance_meters}m {ce.stroke} · {usia} · {gender}
+              </option>
             );
           })}
-        </div>
+        </select>
       </div>
 
       {loading ? (
