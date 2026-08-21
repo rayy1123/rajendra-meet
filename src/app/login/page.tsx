@@ -49,7 +49,10 @@ export default function LoginPage() {
         .eq('id', userId ?? '')
         .single();
       const role = (profile as { role?: string } | null)?.role;
-      const target = role && ADMIN_ROLES.includes(role) ? '/events' : '/scoreboard';
+      // Admin/operator masuk ke dashboard events; viewer (orang tua/peserta)
+      // diarahkan ke halaman pendaftaran mereka yang punya navigasi publik,
+      // bukan langsung ke scoreboard (halaman publik tanpa menu).
+      const target = role && ADMIN_ROLES.includes(role) ? '/events' : '/pendaftaran-saya';
 
       // Full navigation (bukan router.push) agar middleware membaca cookie session
       // yang baru diset — menghindari redirect loop /login <-> dashboard.
