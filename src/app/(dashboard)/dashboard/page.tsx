@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { createClient } from '@/lib/supabase/server';
-import { CalendarDays, Users, School, Layers, Trophy, Medal, Award, CreditCard, LayoutDashboard } from 'lucide-react';
+import { CalendarDays, Users, School, Layers, Trophy, Medal, LayoutDashboard } from 'lucide-react';
 import { PageHeader } from '@/components/ui/page-header';
 
 export const dynamic = 'force-dynamic';
@@ -76,42 +76,6 @@ export default async function DashboardPage() {
             </Link>
           );
         })}
-      </div>
-
-      {/* ===== Aksi Cepat ===== */}
-      <div>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Aksi Cepat
-        </h2>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {[
-            { label: 'Input Hasil', desc: 'Catat waktu per lintasan', icon: Trophy, href: '/results' },
-            { label: 'Generator Heat', desc: 'Bagi peserta ke heat', icon: Layers, href: '/heats' },
-            { label: 'Perangkingan', desc: 'Peringkat otomatis', icon: Medal, href: '/rankings' },
-            { label: 'Klasemen Medali', desc: 'Rekap per sekolah', icon: Award, href: '/medals' },
-            { label: 'Verifikasi Bayar', desc: 'Cek pembayaran', icon: CreditCard, href: '/verifikasi-pembayaran' },
-            { label: 'Atlet', desc: 'Master data atlet', icon: Users, href: '/athletes' },
-            { label: 'Sekolah / Klub', desc: 'Kontingen', icon: School, href: '/schools' },
-            { label: 'Kejuaraan', desc: 'Kelola event', icon: CalendarDays, href: '/events' },
-          ].map((a) => {
-            const Icon = a.icon;
-            return (
-              <Link key={a.label} href={a.href}>
-                <Card className="group h-full transition-all duration-200 hover:-translate-y-1 hover:shadow-soft hover:border-primary/40">
-                  <CardContent className="flex items-start gap-3 p-4">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary-ink">
-                      <Icon className="h-4 w-4" />
-                    </span>
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-foreground">{a.label}</p>
-                      <p className="truncate text-xs text-muted-foreground">{a.desc}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            );
-          })}
-        </div>
       </div>
 
       {activeEvent ? (

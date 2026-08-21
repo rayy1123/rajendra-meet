@@ -39,15 +39,6 @@ export function LandingShell({ children }: { children: React.ReactNode }) {
           </Link>
 
           <nav className="flex items-center gap-1 sm:gap-2">
-            <Link href="/" className="pub-link hidden sm:inline">
-              Beranda
-            </Link>
-            <Link href="/scoreboard" className="pub-link hidden sm:inline">
-              Jadwal Lomba
-            </Link>
-            <Link href="/guide" className="pub-link hidden sm:inline">
-              Panduan
-            </Link>
             <Link href="/login" className="pub-btn-ghost">
               Masuk
             </Link>
