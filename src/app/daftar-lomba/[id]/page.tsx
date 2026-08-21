@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
 import { PublicShell } from '@/components/layout/public-shell';
 import { RegistrationWizard, type CompEventDTO, type AthleteDTO } from '@/components/modules/registration-wizard';
 import { Waves } from 'lucide-react';
@@ -42,8 +43,11 @@ export default async function DaftarLombaEventPage({ params }: { params: Promise
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Daftar atlet mensyaratkan login sebagai viewer/penonton.
+  if (!user) redirect(`/login?redirect=/daftar-lomba/${id}`);
+
   const existingAthletes: AthleteDTO[] = [];
-  if (user) {
+  {
     const { data: regs } = await supabase
       .from('registrations')
       .select('athlete_id, athletes(id, full_name, birth_date, gender, grade_level, school_id)')
@@ -62,22 +66,11 @@ export default async function DaftarLombaEventPage({ params }: { params: Promise
   return (
     <PublicShell title={`Daftar: ${event.name}`} subtitle="Isi data atlet, pilih nomor lomba, lalu kirim bukti pembayaran untuk diverifikasi panitia.">
       <div className="pub-container pb-16">
-        {!user ? (
-          <div className="pub-card p-10 text-center">
-            <h3 className="font-semibold text-[var(--m-ink)]">Masuk untuk mendaftar</h3>
-            <p className="mt-1 text-sm text-[var(--m-muted)]">Anda perlu login sebagai penonton/viewer untuk mendaftarkan atlet.</p>
-            <div className="mt-4 flex justify-center gap-3">
-              <Link href={`/login?redirect=/daftar-lomba/${id}`} className="pub-btn-primary">Masuk</Link>
-              <Link href="/register" className="pub-btn-ghost">Daftar</Link>
-            </div>
-          </div>
-        ) : (
-          <RegistrationWizard
-            eventId={event.id}
-            competitionEvents={(compEvents ?? []) as CompEventDTO[]}
-            existingAthletes={existingAthletes}
-          />
-        )}
+        <RegistrationWizard
+          eventId={event.id}
+          competitionEvents={(compEvents ?? []) as CompEventDTO[]}
+          existingAthletes={existingAthletes}
+        />
       </div>
     </PublicShell>
   );

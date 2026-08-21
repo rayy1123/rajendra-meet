@@ -60,6 +60,13 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
+    label: 'Akun Saya',
+    items: [
+      { title: 'Atlet Saya', href: '/atlet-saya', icon: User },
+      { title: 'Pendaftaran Saya', href: '/pendaftaran-saya', icon: CreditCard },
+    ],
+  },
+  {
     label: 'Data Peserta',
     items: [
       { title: 'Atlet', href: '/athletes', icon: Users },
