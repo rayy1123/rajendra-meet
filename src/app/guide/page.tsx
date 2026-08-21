@@ -63,10 +63,6 @@ export default function GuidePage() {
       subtitle="Cara menggunakan SCMS Rajendra Meet: dari mendaftar, menginput data, hingga melihat scoreboard."
     >
       <div className="pub-container space-y-5 pb-16">
-        <Link href="/scoreboard" className="pub-btn-ghost inline-flex">
-          ← Kembali ke Scoreboard
-        </Link>
-
         {SECTIONS.map((s) => (
           <section key={s.title} className="pub-card p-6">
             <div className="flex items-start gap-3">

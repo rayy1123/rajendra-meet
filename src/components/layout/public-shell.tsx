@@ -30,29 +30,8 @@ export function PublicShell({
           </Link>
 
           <nav className="flex items-center gap-2 sm:gap-3">
-            {/* Drawer navigasi (sidebar samping) — konsisten di semua halaman publik */}
+            {/* Drawer navigasi (sidebar samping) — semua tautan halaman ada di sini */}
             <LandingNav />
-            <Link href="/daftar-lomba" className="pub-link hidden sm:inline">
-              Daftar Lomba
-            </Link>
-            <Link href="/guide" className="pub-link hidden sm:inline">
-              Panduan
-            </Link>
-            <Link href="/pendaftaran-saya" className="pub-link hidden sm:inline">
-              Pendaftaran Saya
-            </Link>
-            <Link href="/kontak" className="pub-link hidden sm:inline">
-              Kontak
-            </Link>
-            <Link href="/program" className="pub-link hidden sm:inline">
-              Buku Acara
-            </Link>
-            <Link href="/galeri" className="pub-link hidden sm:inline">
-              Galeri
-            </Link>
-            <Link href="/medali" className="pub-link hidden sm:inline">
-              Medali
-            </Link>
             <Link href="/login" className="pub-btn-ghost">
               Masuk
             </Link>

@@ -23,9 +23,8 @@ export function GalleryGrid({ photos }: { photos: Photo[] }) {
         <Images className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
         <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Galeri masih kosong</h3>
         <p className="mt-1 text-sm text-[var(--m-muted)]">
-          Taruh foto di{' '}
-          <code className="rounded bg-[var(--m-soft)] px-1">public/galeri/</code> (jpg/png/webp)
-          untuk menampilkannya di sini.
+          Dokumentasi foto kejuaraan akan tampil di sini setelah panitia
+          mengunggahnya.
         </p>
       </div>
     );

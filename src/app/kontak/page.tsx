@@ -90,15 +90,16 @@ export default function KontakPage() {
           })}
         </div>
 
-        {/* Map */}
+        {/* Peta lokasi */}
         <div className="mt-8 overflow-hidden rounded-3xl shadow-soft">
-          <iframe
-            title="Lokasi Rajendra Meet"
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d253840.656274439!2d106.68942838127395!3d-6.229746460330873!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f157c6a414e3%3A0x2e947c268b05b65d!2sSouth%20Jakarta%2C%20South%20Jakarta%20City%2C%20Jakarta!5e0!3m2!1sen!2sid!4v1663123456789!5m2!1sen!2sid"
-            className="h-80 w-full border-0"
-            allowFullScreen
-            loading="lazy"
-          />
+          <a
+            href="https://www.google.com/maps/search/?api=1&query=Jl.+Setu+Babakan+No.+14A+Jagakarsa+Jakarta+Selatan"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex h-40 items-center justify-center gap-2 bg-[var(--m-soft)] text-sm font-medium text-[var(--m-aqua-deep)] transition-colors hover:text-[var(--m-aqua)] hover:underline"
+          >
+            <MapPin className="h-5 w-5" /> Lihat lokasi di Google Maps
+          </a>
         </div>
 
         <p className="mt-6 flex items-center justify-center gap-2 text-sm text-[var(--m-muted)]">
