@@ -69,7 +69,7 @@ export default function ForgotPasswordPage() {
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="email"
-                    placeholder="email@contoh.com"
+                    placeholder="email@gmail.com"
                     className="pl-9"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}

@@ -50,7 +50,7 @@ export function PhotoSlider({
   if (count === 0) return null;
 
   return (
-    <div className={`group relative overflow-hidden rounded-3xl-x soft-shadow-lg ${className}`}>
+    <div className={`group relative overflow-hidden rounded-3xl soft-shadow-lg ${className}`}>
       <div
         className="slider-track h-full"
         style={{ transform: `translateX(-${index * 100}%)` }}

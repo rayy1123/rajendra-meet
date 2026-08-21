@@ -213,7 +213,7 @@ export default async function HomePage() {
 
       {/* ===== TENTANG ===== */}
       <section className="pub-container py-12 sm:py-16">
-        <div className="pub-card overflow-hidden rounded-3xl-x">
+        <div className="pub-card overflow-hidden rounded-3xl">
           <div className="grid grid-cols-1 lg:grid-cols-2">
             <div className="flex flex-col justify-center gap-4 p-8 sm:p-10">
               <span className="pub-eyebrow">Tentang Rajendra Meet</span>

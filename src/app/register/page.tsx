@@ -155,7 +155,7 @@ export default function RegisterPage() {
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="email"
-                    placeholder="email@contoh.com"
+                    placeholder="email@gmail.com"
                     className="pl-9"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -170,7 +170,7 @@ export default function RegisterPage() {
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="password"
-                    placeholder="••••••••"
+                    placeholder="Buat password Anda"
                     className="pl-9"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -185,7 +185,7 @@ export default function RegisterPage() {
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="password"
-                    placeholder="••••••••"
+                    placeholder="Tulis Ulang Password Anda"
                     className="pl-9"
                     value={confirm}
                     onChange={(e) => setConfirm(e.target.value)}

@@ -89,7 +89,7 @@ export default function LoginPage() {
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="email"
-                  placeholder="admin@rajendrameet.com"
+                  placeholder="Masukkan email Anda"
                   className="pl-9"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -104,7 +104,7 @@ export default function LoginPage() {
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="Masukkan password Anda"
                   className="pl-9"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -136,8 +136,7 @@ export default function LoginPage() {
             </Link>
           </p>
           <p className="mt-3 px-2 text-center text-xs text-muted-foreground">
-            Penonton &amp; orang tua mendaftar sebagai <span className="font-medium text-foreground">viewer</span> untuk
-            memantau scoreboard. Panitia &amp; juri menggunakan akun yang diberikan panitia untuk mengelola lomba.
+           Licensed By Rayvanes Arrasyid
           </p>
         </CardContent>
       </Card>
