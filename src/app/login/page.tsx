@@ -21,7 +21,7 @@ export default function LoginPage() {
 
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -40,10 +40,9 @@ export default function LoginPage() {
       }
 
       const ADMIN_ROLES = ['super_admin', 'event_admin', 'operator'];
-      const { data: meData } = await supabase.auth.getUser();
-      const userId = meData.data.user?.id;
-      // PENTING: filter id milik sendiri agar tidak membaca profil baris
-      // pertama (kebocoran role / redirect salah).
+      // Gunakan user dari hasil signIn langsung (tidak perlu getUser lagi),
+      // sehingga tidak ada race condition session di client memory.
+      const userId = data.user?.id;
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')

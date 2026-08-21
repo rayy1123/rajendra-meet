@@ -104,6 +104,16 @@ export async function proxy(request: NextRequest) {
  * - Referrer-Policy: tidak bocor path saat navigasi keluar.
  */
 function applySecurityHeaders(response: NextResponse): NextResponse {
+  // React dev (Next.js dev mode) membutuhkan 'unsafe-eval' untuk HMR &
+  // runtime dev-nya; tanpa ini client tidak ter-hydrate sehingga seluruh
+  // interaktivitas (tombol, form, hamburger) mati di `npm run dev`.
+  // Di production React sudah ter-compile sehingga eval tidak diperlukan
+  // dan kita biarkan CSP tetap ketat (tanpa unsafe-eval).
+  const isDev = process.env.NODE_ENV !== 'production';
+  const scriptSrc = isDev
+    ? "'self' 'unsafe-inline' 'unsafe-eval'"
+    : "'self' 'unsafe-inline'";
+
   const csp = [
     "default-src 'self'",
     // Supabase JS butuh wasm + WS untuk realtime; izinkan host Supabase.
@@ -111,7 +121,7 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
     // Style inline diperlukan oleh Tailwind (CDN-free, tapi ada style dinamis).
     "style-src 'self' 'unsafe-inline'",
     // Script: hanya milik sendiri (Next.js menyajikan dari /_next).
-    "script-src 'self' 'unsafe-inline'",
+    `script-src ${scriptSrc}`,
     "img-src 'self' data: blob: https://*.supabase.co",
     "font-src 'self' data:",
     "frame-src 'none'",
