@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PageHeader } from '@/components/ui/page-header';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 
-import { ArrowLeft, Loader2 } from 'lucide-react';
-import Link from 'next/link';
+import { Loader2 } from 'lucide-react';
 
 export default function NewEventPage() {
   const router = useRouter();
@@ -54,14 +55,12 @@ export default function NewEventPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 p-6">
-      <Link href="/events" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" /> Kembali ke Event
-      </Link>
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Kejuaraan / Events', href: '/events' }, { label: 'Buat Event Baru' }]} className="mb-2" />
+      <PageHeader
+        title="Buat Event Kejuaraan Baru"
+        description="Isi detail kejuaraan renang: nama, penyenggara, lokasi, jadwal, dan konfigurasi kolam."
+      />
       <Card>
-        <CardHeader>
-          <CardTitle>Buat Event Kejuaraan Baru</CardTitle>
-        </CardHeader>
-        <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && <div className="rounded-lg bg-destructive/15 px-3 py-2 text-sm text-destructive">{error}</div>}
             <div className="space-y-1">
@@ -107,7 +106,6 @@ export default function NewEventPage() {
               Simpan Event
             </Button>
           </form>
-        </CardContent>
       </Card>
     </div>
   );

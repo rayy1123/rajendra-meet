@@ -3,6 +3,7 @@ import { detectBrokenRecords, type RecordCandidate, type ExistingRecord } from '
 import { formatMsToTime } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { Crown } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -70,6 +71,7 @@ export default async function RajendraRecordPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-6">
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Rajendra Record' }]} className="mb-4" />
       <PageHeader
         title="Rajendra Record"
         description="Deteksi otomatis rekor baru per nomor lomba. Rekor memecahkan catatan tercepat sebelumnya."

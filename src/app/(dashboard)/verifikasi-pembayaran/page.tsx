@@ -1,5 +1,6 @@
 import { requireRole } from '@/lib/auth';
 import { PageHeader } from '@/components/ui/page-header';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { Card, CardContent } from '@/components/ui/card';
 import { CheckCircle2, XCircle, Clock, Waves } from 'lucide-react';
 import { verifyPaymentAction, rejectPaymentAction } from '@/app/daftar-lomba/actions';
@@ -25,6 +26,7 @@ export default async function VerifikasiPembayaranPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Verifikasi Pembayaran' }]} className="mb-4" />
       <PageHeader
         title="Verifikasi Pembayaran"
         description="Terima atau tolak pembayaran pendaftaran lomba. Hanya panitia/operator yang dapat memverifikasi."

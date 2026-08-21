@@ -3,6 +3,7 @@ import { ExportView, type ExportCompEvent } from '@/components/modules/export-vi
 import { FileSpreadsheet, Printer } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 
 export default async function ExportPage({
   searchParams,
@@ -54,6 +55,7 @@ export default async function ExportPage({
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto print:p-0 print:m-0">
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Cetak & Ekspor' }]} className="mb-4" />
       <PageHeader
         title="Cetak & Ekspor Laporan"
         description="Unduh lembar susunan seri/lintasan dalam bentuk Excel atau cetak langsung menjadi PDF untuk panitia/juri."

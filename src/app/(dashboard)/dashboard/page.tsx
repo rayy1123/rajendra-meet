@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { createClient } from '@/lib/supabase/server';
 import { CalendarDays, Users, School, Layers, Trophy, Medal, LayoutDashboard } from 'lucide-react';
 import { PageHeader } from '@/components/ui/page-header';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,6 +50,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb items={[{ label: 'Dashboard' }]} className="mb-2" />
       <PageHeader
         title="Ringkasan Dashboard"
         description="Data langsung dari database kejuaraan."

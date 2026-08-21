@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { PageHeader } from '@/components/ui/page-header';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 
 export default async function SettingsPage() {
   // Defense-in-depth: pengaturan sistem hanya untuk admin event / super admin.
@@ -19,6 +20,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Pengaturan' }]} className="mb-4" />
       <PageHeader
         title="Pengaturan Sistem"
         description="Konfigurasi aturan poin kejuaraan, tata letak lintasan kolam, dan pemeliharaan sistem."

@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Layers, Clock, Radio, Waves } from 'lucide-react';
+import { PageHeader } from '@/components/ui/page-header';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 
 interface CompEventRow {
   id: string;
@@ -34,20 +36,13 @@ export default async function EventDetailPage({ params }: PageProps) {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-6">
-      <Link href="/events" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" /> Kembali ke Event
-      </Link>
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Kejuaraan / Events', href: '/events' }, { label: event.name }]} className="mb-2" />
+      <PageHeader
+        title={event.name}
+        description={event.organizer || 'Panitia Pelaksana'}
+      />
 
       <div className="rounded-2xl border bg-card p-6">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold">{event.name}</h1>
-            <p className="text-sm text-muted-foreground">{event.organizer || 'Panitia Pelaksana'}</p>
-          </div>
-          <span className="rounded-lg bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">
-            {event.lane_count || 8} Lintasan
-          </span>
-        </div>
         <div className="mt-4 flex flex-wrap gap-4 text-sm text-muted-foreground">
           {event.location && (
             <span className="flex items-center gap-1.5"><Waves className="h-4 w-4" /> {event.location}</span>

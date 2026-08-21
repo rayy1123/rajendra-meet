@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { requireRole } from '@/lib/auth';
 import { PageHeader } from '@/components/ui/page-header';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { ShieldCheck } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -26,6 +27,7 @@ export default async function AuditPage() {
 
   return (
     <>
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Log Audit' }]} className="mb-4" />
       <PageHeader
         title="Log Audit Sistem"
         description="Catatan modifikasi sistem dan event keamanan (override waktu, login, perubahan seeding)."

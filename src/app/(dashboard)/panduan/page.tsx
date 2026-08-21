@@ -1,4 +1,5 @@
 import { PageHeader } from '@/components/ui/page-header';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 import {
   BookOpen,
   Layers,
@@ -73,6 +74,7 @@ const SECTIONS = [
 export default function PanduanAdminPage() {
   return (
     <>
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Panduan' }]} className="mb-4" />
       <PageHeader
         title="Panduan Operasional Panitia"
         description="Panduan teknis untuk pengelola kejuaraan: atlet, heat, input hasil, verifikasi pembayaran, hingga audit. Halaman ini hanya untuk akun yang masuk."

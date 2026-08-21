@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from '@/lib/supabase/server';
 import { PageHeader } from '@/components/ui/page-header';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { Wrench, AlertTriangle, CheckCircle2 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -22,6 +23,7 @@ export default async function EquipmentPage() {
 
   return (
     <>
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Peralatan' }]} className="mb-4" />
       <PageHeader
         title="Pemeliharaan Peralatan"
         description="Lacak kesiapan teknis peralatan: touchpad, starting block, konsol waktu, dan kalibrasinya."
