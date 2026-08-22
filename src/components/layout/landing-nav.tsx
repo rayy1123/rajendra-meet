@@ -6,13 +6,13 @@ import { Menu, X } from 'lucide-react';
 
 const PUBLIC_LINKS = [
   { href: '/', label: 'Beranda' },
-  { href: '/scoreboard', label: 'Jadwal Lomba' },
+  { href: '/scoreboard', label: 'Live Scoreboard' },
   { href: '/daftar-lomba', label: 'Daftar Lomba' },
-  { href: '/guide', label: 'Panduan' },
   { href: '/kontak', label: 'Kontak' },
   { href: '/program', label: 'Buku Acara' },
   { href: '/galeri', label: 'Galeri' },
   { href: '/medali', label: 'Medali' },
+  { href: '/guide', label: 'Panduan' },
 ];
 
 /**
