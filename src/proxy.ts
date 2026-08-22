@@ -83,8 +83,18 @@ export async function proxy(request: NextRequest) {
   }
 
   if (user && pathname === '/login') {
+    // Sudah login: arahkan ke dashboard masing-masing, bukan /dashboard
+    // (yang hanya untuk admin & akan memantulkan viewer ke landing).
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+    const role = (profile as { role?: string } | null)?.role;
+    const ADMIN_ROLES = ['super_admin', 'event_admin', 'operator'];
+    const target = role && ADMIN_ROLES.includes(role) ? '/events' : '/dashboard-viewer';
     const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
+    url.pathname = target;
     const redirectResponse = NextResponse.redirect(url);
     response.cookies.getAll().forEach((cookie) => {
       redirectResponse.cookies.set(cookie.name, cookie.value);
