@@ -148,10 +148,17 @@ export function SidebarNav({ onItemClick }: SidebarNavProps) {
     router.refresh();
   };
 
+  const isAdmin =
+    role && ['super_admin', 'event_admin', 'operator'].includes(role);
+  // Viewer hanya melihat grup "Akun Saya"; panitia/admin melihat semua menu.
+  const visibleGroups = isAdmin
+    ? navGroups
+    : navGroups.filter((g) => g.label === 'Akun Saya');
+
   return (
     <div className="flex h-full flex-col justify-between py-4">
       <nav className="space-y-5 px-3">
-        {navGroups.map((group) => (
+        {visibleGroups.map((group) => (
           <div key={group.label} className="space-y-1">
             <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">
               {group.label}
