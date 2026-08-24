@@ -46,7 +46,7 @@ export default async function PendaftaranSayaPage() {
               const st = STATUS_STYLE[pay?.status ?? 'pending'] ?? STATUS_STYLE.pending;
               const Icon = st.icon;
               return (
-                <div key={r.id} className="pub-card flex items-center justify-between p-4">
+                <div key={r.id} className="pub-card flex items-center justify-between p-4 transition-shadow duration-200 hover:shadow-md">
                   <div>
                     <div className="font-semibold text-[var(--m-ink)]">{ce?.name ?? 'Nomor lomba'}</div>
                     <div className="text-xs text-[var(--m-muted)]">{ath?.full_name ?? 'Atlet'}</div>

@@ -30,7 +30,7 @@ export default async function DaftarLombaPage() {
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {events.map((event) => (
-              <div key={event.id} className="pub-card flex flex-col gap-4 p-5">
+              <div key={event.id} className="pub-card flex flex-col gap-4 p-5 transition-shadow duration-200 hover:shadow-md">
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="font-bold text-[var(--m-ink)] leading-snug">{event.name}</h3>
                   <span className="pub-chip shrink-0">{event.lane_count || 8} lintasan</span>
