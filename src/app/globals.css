@@ -182,10 +182,16 @@
     @apply font-mono font-semibold tabular-nums tracking-tight;
   }
   /* Medal tints for rank 1/2/3 — muted, not neon */
-  .rank-1 { @apply flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100 text-base font-bold text-amber-700; }
-  .rank-2 { @apply flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-base font-bold text-slate-600; }
-  .rank-3 { @apply flex h-9 w-9 items-center justify-center rounded-xl bg-orange-100 text-base font-bold text-orange-700; }
-  .rank-n { @apply flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] text-base font-bold text-[var(--m-muted)]; }
+  .rank-1 { @apply flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-200 to-amber-400 font-bold text-amber-900 shadow-sm; }
+  .rank-2 { @apply flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-slate-200 to-slate-400 font-bold text-slate-700 shadow-sm; }
+  .rank-3 { @apply flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-orange-200 to-orange-400 font-bold text-orange-900 shadow-sm; }
+  .rank-n { @apply flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] font-bold text-[var(--m-muted)]; }
+
+  /* Live board card — soft pulsing accent (Stitch-style) */
+  .live-card {
+    @apply rounded-2xl border border-[var(--m-border)] bg-[var(--m-surface)];
+    animation: pulse-border 2.4s ease-in-out infinite;
+  }
 }
 
 /* =====================================================================
