@@ -23,7 +23,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, UserPlus, Loader2, Users } from 'lucide-react';
+import { Plus, Search, UserPlus, Loader2, Users, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 
 export interface AthleteRow {
@@ -55,6 +55,12 @@ export function AthleteManager({
   const supabase = createClient();
   const [list, setList] = useState<AthleteRow[]>(athletes);
   const [query, setQuery] = useState('');
+  const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
+  const [kuFilter, setKuFilter] = useState<string>('all');
+  const [sort, setSort] = useState<{ key: keyof AthleteRow; dir: 'asc' | 'desc' }>({
+    key: 'full_name',
+    dir: 'asc',
+  });
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
@@ -68,15 +74,45 @@ export function AthleteManager({
     school_id: '',
   });
 
+  // Daftar KU unik untuk filter cepat
+  const kuOptions = useMemo(
+    () => Array.from(new Set(list.map((a) => a.age_group).filter(Boolean))).sort(),
+    [list]
+  );
+
   const filtered = useMemo(() => {
     const q = query.toLowerCase();
-    return list.filter(
-      (a) =>
+    const out = list.filter((a) => {
+      const matchQ =
         a.full_name.toLowerCase().includes(q) ||
         (a.schools?.name || '').toLowerCase().includes(q) ||
-        (a.age_group || '').toLowerCase().includes(q)
-    );
-  }, [list, query]);
+        (a.age_group || '').toLowerCase().includes(q);
+      const matchG = genderFilter === 'all' || a.gender === genderFilter;
+      const matchKu = kuFilter === 'all' || a.age_group === kuFilter;
+      return matchQ && matchG && matchKu;
+    });
+    const { key, dir } = sort;
+    out.sort((a, b) => {
+      let av: string, bv: string;
+      if (key === 'schools') {
+        av = (a.schools?.name || '').toString();
+        bv = (b.schools?.name || '').toString();
+      } else {
+        av = (a[key] ?? '').toString();
+        bv = (b[key] ?? '').toString();
+      }
+      return dir === 'asc' ? av.localeCompare(bv, 'id') : bv.localeCompare(av, 'id');
+    });
+    return out;
+  }, [list, query, genderFilter, kuFilter, sort]);
+
+  const toggleSort = (key: keyof AthleteRow) =>
+    setSort((s) => (s.key === key ? { key, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' }));
+
+  const renderSort = (col: keyof AthleteRow) => {
+    if (sort.key !== col) return <ArrowUpDown className="h-3.5 w-3.5 opacity-40" />;
+    return sort.dir === 'asc' ? <ArrowUp className="h-3.5 w-3.5" /> : <ArrowDown className="h-3.5 w-3.5" />;
+  };
 
   const set = (k: keyof typeof form, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -125,12 +161,34 @@ export function AthleteManager({
             className="pl-9"
           />
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4" /> Tambah Atlet
-            </Button>
-          </DialogTrigger>
+        <div className="flex flex-wrap items-center gap-2">
+          <Select value={genderFilter} onValueChange={(v) => setGenderFilter(v as typeof genderFilter)}>
+            <SelectTrigger className="h-9 w-auto min-w-[7.5rem]">
+              <SelectValue placeholder="Jenis" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Kelamin</SelectItem>
+              <SelectItem value="male">Putra</SelectItem>
+              <SelectItem value="female">Putri</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={kuFilter} onValueChange={setKuFilter}>
+            <SelectTrigger className="h-9 w-auto min-w-[7.5rem]">
+              <SelectValue placeholder="KU" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua KU</SelectItem>
+              {kuOptions.map((ku) => (
+                <SelectItem key={ku} value={ku}>{ku}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4" /> Tambah Atlet
+              </Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Tambah Atlet Baru</DialogTitle>
@@ -205,19 +263,65 @@ export function AthleteManager({
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <Card>
         <CardContent className="p-0">
+          <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5">
+            <p className="text-xs text-muted-foreground">
+              Menampilkan <span className="font-semibold text-foreground">{filtered.length}</span> dari {list.length} atlet
+            </p>
+            {(genderFilter !== 'all' || kuFilter !== 'all') && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs"
+                onClick={() => { setGenderFilter('all'); setKuFilter('all'); }}
+              >
+                Reset filter
+              </Button>
+            )}
+          </div>
           <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>No</TableHead>
-                <TableHead>Nama</TableHead>
-                <TableHead>Sekolah</TableHead>
-                <TableHead>KU</TableHead>
-                <TableHead>Kelamin</TableHead>
-                <TableHead>Tgl Lahir</TableHead>
+            <TableHeader className="sticky top-0 z-10 bg-muted/60 backdrop-blur supports-[backdrop-filter]:bg-muted/50">
+              <TableRow className="hover:bg-transparent">
+                <TableHead
+                  className="cursor-pointer select-none"
+                  onClick={() => toggleSort('athlete_number')}
+                >
+                  <span className="inline-flex items-center gap-1">No {renderSort("athlete_number")}</span>
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer select-none"
+                  onClick={() => toggleSort('full_name')}
+                >
+                  <span className="inline-flex items-center gap-1">Nama {renderSort("full_name")}</span>
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer select-none"
+                  onClick={() => toggleSort('schools')}
+                >
+                  <span className="inline-flex items-center gap-1">Sekolah {renderSort("schools")}</span>
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer select-none"
+                  onClick={() => toggleSort('age_group')}
+                >
+                  <span className="inline-flex items-center gap-1">KU {renderSort("age_group")}</span>
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer select-none"
+                  onClick={() => toggleSort('gender')}
+                >
+                  <span className="inline-flex items-center gap-1">Kelamin {renderSort("gender")}</span>
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer select-none"
+                  onClick={() => toggleSort('birth_date')}
+                >
+                  <span className="inline-flex items-center gap-1">Tgl Lahir {renderSort("birth_date")}</span>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
