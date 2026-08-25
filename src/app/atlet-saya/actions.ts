@@ -143,3 +143,21 @@ export async function duplicateAthlete(formData: FormData): Promise<AthleteFormS
   revalidatePath('/atlet-saya');
   return { ok: true };
 }
+
+export async function updateAthletePhoto(formData: FormData): Promise<AthleteFormState> {
+  const { supabase, user } = await requireUser();
+  const id = formData.get('id') as string;
+  const url = (formData.get('photo_url') as string)?.trim();
+  if (!id) return { ok: false, error: 'ID tidak valid.' };
+  if (!url) return { ok: false, error: 'URL foto tidak valid.' };
+
+  const { error } = await supabase
+    .from('athletes')
+    .update({ photo_url: url })
+    .eq('id', id)
+    .eq('owner_id', user.id);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath('/atlet-saya');
+  revalidatePath(`/atlet-saya/${id}`);
+  return { ok: true };
+}

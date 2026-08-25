@@ -33,3 +33,17 @@ export async function updatePassword(formData: FormData): Promise<ProfileState> 
   if (error) return { ok: false, error: error.message };
   return { ok: true };
 }
+
+export async function updateProfilePhoto(formData: FormData): Promise<ProfileState> {
+  const { supabase, user } = await requireUser();
+  const url = (formData.get('avatar_url') as string)?.trim();
+  if (!url) return { ok: false, error: 'URL foto tidak valid.' };
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ avatar_url: url })
+    .eq('id', user.id);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath('/profile');
+  return { ok: true };
+}

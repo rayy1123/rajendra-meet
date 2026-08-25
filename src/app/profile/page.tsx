@@ -11,7 +11,7 @@ export default async function ProfilePage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, role')
+    .select('full_name, role, avatar_url')
     .eq('id', user.id)
     .single();
 
@@ -28,9 +28,11 @@ export default async function ProfilePage() {
         <PageHeader title="Profil" description="Kelola data akun Anda." />
 
         <ProfileManager
+          userId={user.id}
           email={user.email ?? ''}
           fullName={profile?.full_name ?? ''}
           role={profile?.role ?? 'viewer'}
+          avatarUrl={profile?.avatar_url ?? ''}
         />
       </div>
     </DashboardLayout>

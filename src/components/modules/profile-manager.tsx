@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { updateProfileName, updatePassword, type ProfileState } from '@/app/profile/actions';
+import { updateProfileName, updatePassword, updateProfilePhoto, type ProfileState } from '@/app/profile/actions';
+import { AvatarUpload } from '@/components/modules/avatar-upload';
 
 const ROLE_LABELS: Record<string, string> = {
   super_admin: 'Super Admin',
@@ -20,17 +21,22 @@ function initials(name: string): string {
 }
 
 export function ProfileManager({
+  userId,
   email,
   fullName,
   role,
+  avatarUrl,
 }: {
+  userId: string;
   email: string;
   fullName: string;
   role: string;
+  avatarUrl: string;
 }) {
   const [name, setName] = useState(fullName);
   const [savingName, setSavingName] = useState(false);
   const [nameMsg, setNameMsg] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [avatar, setAvatar] = useState(avatarUrl);
 
   const [pw, setPw] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -66,13 +72,28 @@ export function ProfileManager({
     }
   }
 
+  async function onPhoto(url: string) {
+    setAvatar(url);
+    const fd = new FormData();
+    fd.set('avatar_url', url);
+    await updateProfilePhoto(fd);
+  }
+
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       {/* Kartu identitas */}
       <div className="pub-card flex flex-col items-center gap-3 p-6 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-xl font-bold text-primary">
-          {initials(fullName || email)}
+        <div className="relative h-20 w-20 overflow-hidden rounded-full bg-primary/10">
+          {avatar ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={avatar} alt={fullName} className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-primary">
+              {initials(fullName || email)}
+            </div>
+          )}
         </div>
+        <AvatarUpload folder="viewer" uid={userId} currentUrl={avatar} onUploaded={onPhoto} />
         <div>
           <div className="font-semibold text-[var(--m-ink)]">{fullName || '(belum diisi)'}</div>
           <div className="text-sm text-[var(--m-muted)]">{email}</div>

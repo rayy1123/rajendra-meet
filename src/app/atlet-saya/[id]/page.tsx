@@ -30,7 +30,7 @@ export default async function AthleteProfilePage({
   const { data: athlete } = await supabase
     .from('athletes')
     .select(
-      'id, full_name, gender, birth_date, age_group, grade_level, class_name, school_id, schools(name), parent_phone, medical_notes, height_cm, weight_kg'
+      'id, full_name, gender, birth_date, age_group, grade_level, class_name, school_id, schools(name), parent_phone, medical_notes, height_cm, weight_kg, photo_url'
     )
     .eq('id', id)
     .eq('owner_id', user.id)
@@ -77,8 +77,15 @@ export default async function AthleteProfilePage({
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-lg font-bold text-primary">
-              {initials(athlete.full_name)}
+            <div className="relative h-14 w-14 overflow-hidden rounded-full bg-primary/10">
+              {athlete.photo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={athlete.photo_url} alt={athlete.full_name} className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center rounded-full text-lg font-bold text-primary">
+                  {initials(athlete.full_name)}
+                </div>
+              )}
             </div>
             <div>
               <h1 className="text-xl font-bold text-[var(--m-ink)]">{athlete.full_name}</h1>
@@ -92,7 +99,9 @@ export default async function AthleteProfilePage({
           </div>
           <AthleteProfileActions
             id={athlete.id}
+            userId={user.id}
             initial={formValues}
+            photoUrl={athlete.photo_url ?? ''}
             schools={(schools ?? []).map((s) => ({ id: s.id, name: s.name }))}
           />
         </div>
