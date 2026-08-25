@@ -1,15 +1,14 @@
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
-import { PublicShell } from '@/components/layout/public-shell';
+import { requireUser } from '@/lib/auth';
+import DashboardLayout from '@/components/layout/layout';
+import { PageHeader } from '@/components/ui/page-header';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { RegistrationWizard, type CompEventDTO, type AthleteDTO } from '@/components/modules/registration-wizard';
-import { Waves } from 'lucide-react';
-import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
 export default async function DaftarLombaEventPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const supabase = await createClient();
+  const { supabase, user } = await requireUser();
 
   const { data: event } = await supabase
     .from('events')
@@ -20,15 +19,12 @@ export default async function DaftarLombaEventPage({ params }: { params: Promise
 
   if (!event) {
     return (
-      <PublicShell title="Kejuaraan tidak ditemukan">
-        <div className="pub-container pb-16">
-          <div className="pub-card p-12 text-center">
-            <Waves className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
-            <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Kejuaraan tidak tersedia</h3>
-            <Link href="/daftar-lomba" className="pub-btn-primary mt-4 inline-flex">Kembali ke Daftar Lomba</Link>
-          </div>
+      <DashboardLayout>
+        <div className="pub-card p-12 text-center">
+          <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Kejuaraan tidak tersedia</h3>
+          <p className="mt-1 text-sm text-[var(--m-muted)]">Kejuaraan ini belum dipublikasikan atau tidak ditemukan.</p>
         </div>
-      </PublicShell>
+      </DashboardLayout>
     );
   }
 
@@ -38,14 +34,7 @@ export default async function DaftarLombaEventPage({ params }: { params: Promise
     .eq('event_id', id)
     .order('distance_meters', { ascending: true });
 
-  // Atlet milik user di event ini = atlet dari registrasinya
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  // Daftar atlet mensyaratkan login sebagai viewer/penonton.
-  if (!user) redirect(`/login?redirect=/daftar-lomba/${id}`);
-
+  // Atlet yang sudah terdaftar di event ini (milik viewer).
   const existingAthletes: AthleteDTO[] = [];
   {
     const { data: regs } = await supabase
@@ -64,14 +53,26 @@ export default async function DaftarLombaEventPage({ params }: { params: Promise
   }
 
   return (
-    <PublicShell title={`Daftar: ${event.name}`} subtitle="Isi data atlet, pilih nomor lomba, lalu kirim bukti pembayaran untuk diverifikasi panitia.">
-      <div className="pub-container pb-16">
+    <DashboardLayout>
+      <div className="space-y-6">
+        <Breadcrumb
+          items={[
+            { label: 'Dashboard', href: '/dashboard-viewer' },
+            { label: 'Daftar Lomba', href: '/daftar-lomba' },
+            { label: event.name },
+          ]}
+          className="mb-2"
+        />
+        <PageHeader
+          title={`Daftar: ${event.name}`}
+          description="Isi data atlet, pilih nomor lomba, lalu kirim bukti pembayaran untuk diverifikasi panitia."
+        />
         <RegistrationWizard
           eventId={event.id}
           competitionEvents={(compEvents ?? []) as CompEventDTO[]}
           existingAthletes={existingAthletes}
         />
       </div>
-    </PublicShell>
+    </DashboardLayout>
   );
 }

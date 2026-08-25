@@ -35,7 +35,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { Badge } from '@/components/ui/badge';
 
 /**
  * Struktur navigasi, dikelompokkan agar alur kerja panitia mudah diikuti.
@@ -107,13 +106,6 @@ const navGroups: NavGroup[] = [
   },
 ];
 
-const ROLE_LABELS: Record<string, string> = {
-  super_admin: 'Super Admin',
-  event_admin: 'Event Admin',
-  operator: 'Operator',
-  viewer: 'Viewer',
-};
-
 interface SidebarNavProps {
   onItemClick?: () => void;
   collapsed?: boolean;
@@ -121,7 +113,6 @@ interface SidebarNavProps {
 
 export function SidebarNav({ onItemClick, collapsed = false }: SidebarNavProps) {
   const pathname = usePathname();
-  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const supabase = createClient();
 
@@ -130,7 +121,6 @@ export function SidebarNav({ onItemClick, collapsed = false }: SidebarNavProps) 
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (user?.email) setUserEmail(user.email);
       if (user) {
         const { data: profile } = await supabase
           .from('profiles')
@@ -194,25 +184,6 @@ export function SidebarNav({ onItemClick, collapsed = false }: SidebarNavProps) 
           </div>
         ))}
       </nav>
-
-      {/* User Info & Logout */}
-      <div className="space-y-2 px-3 pt-4 border-t border-border">
-        {userEmail && (
-          <div className={cn('flex items-center gap-2 rounded-lg bg-muted/60 px-3 py-2', collapsed && 'justify-center px-0')}>
-            <User className="h-4 w-4 shrink-0 text-primary" />
-            {!collapsed && (
-              <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">
-                {userEmail}
-              </span>
-            )}
-            {!collapsed && role && (
-              <Badge variant="secondary" className="shrink-0 text-[10px]">
-                {ROLE_LABELS[role] ?? role}
-              </Badge>
-            )}
-          </div>
-        )}
-      </div>
     </div>
   );
 }

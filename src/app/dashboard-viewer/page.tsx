@@ -12,6 +12,13 @@ export const dynamic = 'force-dynamic';
 export default async function DashboardViewerPage() {
   const { supabase, user } = await requireUser();
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('full_name')
+    .eq('id', user.id)
+    .single();
+  const displayName = profile?.full_name || user.email || 'Pengguna';
+
   // Ringkasan data milik viewer
   const [{ count: athleteCount }, { count: eventCount }] = await Promise.all([
     supabase.from('athletes').select('id', { count: 'exact', head: true }).eq('owner_id', user.id),
@@ -59,7 +66,7 @@ export default async function DashboardViewerPage() {
       <div className="space-y-6">
         <Breadcrumb items={[{ label: 'Dashboard' }]} className="mb-2" />
         <PageHeader
-          title="Dashboard"
+          title={`Selamat datang, ${displayName}`}
           description="Selamat datang di panel Anda. Kelola atlet dan pantau pendaftaran lomba renang."
         />
 
