@@ -10,6 +10,7 @@ import {
   type AthleteFormState,
 } from '@/app/atlet-saya/actions';
 import { AthleteFormModal, type AthleteFormValues } from '@/components/modules/athlete-form-modal';
+import { EmptyState } from '@/components/ui/empty-state';
 import { AthleteDetailModal, type AthleteDetail } from '@/components/modules/athlete-detail-modal';
 import { ConfirmDialog } from '@/components/modules/confirm-dialog';
 
@@ -342,20 +343,20 @@ export function AthleteSayaManager({
 
       {/* Empty */}
       {athletes.length === 0 && (
-        <div className="pub-card p-12 text-center">
-          <Users className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
-          <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Belum ada atlet</h3>
-          <p className="mt-1 text-sm text-[var(--m-muted)]">
-            Tambahkan atlet secara manual untuk digunakan saat mendaftar lomba.
-          </p>
-          <button
-            type="button"
-            onClick={openNew}
-            className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-ink"
-          >
-            <Plus className="h-4 w-4" /> Tambah Atlet
-          </button>
-        </div>
+        <EmptyState
+          icon={<Users className="h-6 w-6" />}
+          title="Belum ada atlet"
+          description="Tambahkan atlet secara manual untuk digunakan saat mendaftar lomba."
+          action={
+            <button
+              type="button"
+              onClick={openNew}
+              className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-ink"
+            >
+              <Plus className="h-4 w-4" /> Tambah Atlet
+            </button>
+          }
+        />
       )}
 
       {/* Grouped list */}

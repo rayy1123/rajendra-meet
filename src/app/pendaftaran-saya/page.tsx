@@ -2,6 +2,7 @@ import { requireUser } from '@/lib/auth';
 import DashboardLayout from '@/components/layout/layout';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Waves, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import Link from 'next/link';
 
@@ -49,16 +50,16 @@ export default async function PendaftaranSayaPage() {
         />
 
         {rows.length === 0 ? (
-          <div className="pub-card p-12 text-center">
-            <Waves className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
-            <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Belum ada pendaftaran</h3>
-            <p className="mt-1 text-sm text-[var(--m-muted)]">
-              Daftarkan atlet Anda ke kejuaraan yang tersedia.
-            </p>
-            <Link href="/daftar-lomba" className="pub-btn-primary mt-4 inline-flex">
-              Daftar Lomba
-            </Link>
-          </div>
+          <EmptyState
+            icon={<Waves className="h-6 w-6" />}
+            title="Belum ada pendaftaran"
+            description="Daftarkan atlet Anda ke kejuaraan yang tersedia."
+            action={
+              <Link href="/daftar-lomba" className="pub-btn-primary mt-4 inline-flex">
+                Daftar Lomba
+              </Link>
+            }
+          />
         ) : (
           <div className="space-y-3">
             {rows.map((r) => {
