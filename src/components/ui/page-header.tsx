@@ -30,24 +30,24 @@ export function PageHeader({
       )}
       {...props}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3.5">
         {icon && (
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
             {icon}
           </span>
         )}
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          <h1 className="text-[1.7rem] font-bold leading-tight tracking-tight text-foreground">
             {title}
           </h1>
           {description && (
-            <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
+            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+              {description}
+            </p>
           )}
         </div>
       </div>
-      {actions && (
-        <div className="flex flex-wrap items-center gap-2">{actions}</div>
-      )}
+      {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </div>
   );
 }
