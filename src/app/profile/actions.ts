@@ -13,10 +13,10 @@ export async function updateProfileName(formData: FormData): Promise<ProfileStat
   const fullName = (formData.get('full_name') as string)?.trim();
   const username = (formData.get('username') as string)?.trim();
   if (!fullName) return { ok: false, error: 'Nama wajib diisi.' };
-  // Syarat: username harus sama dengan nama asli (nama lengkap).
   if (!username) return { ok: false, error: 'Username wajib diisi.' };
-  if (username.toLowerCase() !== fullName.toLowerCase())
-    return { ok: false, error: 'Username harus sama dengan nama asli (Nama Lengkap).' };
+  // Username bebas (terpisah dari nama lengkap), hanya huruf/angka/garis bawah.
+  if (!/^[a-zA-Z0-9_]+$/.test(username))
+    return { ok: false, error: 'Username hanya boleh huruf, angka, dan garis bawah (_).' };
 
   const { error } = await supabase
     .from('profiles')

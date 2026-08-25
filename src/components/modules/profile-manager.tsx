@@ -63,10 +63,6 @@ export function ProfileManager({
 
   async function saveName(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (userField.trim().toLowerCase() !== name.trim().toLowerCase()) {
-      showToast(false, 'Username harus sama dengan nama asli (Nama Lengkap).');
-      return;
-    }
     setSaving(true);
     const fd = new FormData();
     fd.set('full_name', name);
@@ -221,7 +217,7 @@ export function ProfileManager({
                   placeholder="Harus sama dengan Nama Lengkap"
                 />
                 <p className="mt-1 text-xs text-[var(--m-muted)]">
-                  Username harus sama dengan nama asli agar mudah dikenali.
+                  Username terpisah dari nama lengkap, bebas (huruf/angka/_).
                 </p>
               </div>
               <div className="flex gap-2">
