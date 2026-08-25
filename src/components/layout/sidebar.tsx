@@ -63,6 +63,7 @@ const navGroups: NavGroup[] = [
     label: 'Akun Saya',
     items: [
       { title: 'Dashboard', href: '/dashboard-viewer', icon: LayoutDashboard },
+      { title: 'Daftar Lomba', href: '/daftar-lomba', icon: CalendarDays },
       { title: 'Atlet Saya', href: '/atlet-saya', icon: User },
       { title: 'Pendaftaran Saya', href: '/pendaftaran-saya', icon: CreditCard },
     ],

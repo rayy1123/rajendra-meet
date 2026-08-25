@@ -1,12 +1,16 @@
-import { createClient } from '@/lib/supabase/server';
-import { PublicShell } from '@/components/layout/public-shell';
+import { requireUser } from '@/lib/auth';
+import DashboardLayout from '@/components/layout/layout';
+import { PageHeader } from '@/components/ui/page-header';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { MapPin, CalendarDays, Waves, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
 export default async function DaftarLombaPage() {
-  const supabase = await createClient();
+  // Syarat login: requireUser akan redirect ke /login kalau belum masuk.
+  const { supabase } = await requireUser();
+
   const { data: events } = await supabase
     .from('events')
     .select('id, name, location, start_date, end_date, lane_count, pool_type')
@@ -14,11 +18,20 @@ export default async function DaftarLombaPage() {
     .order('start_date', { ascending: false });
 
   return (
-    <PublicShell
-      title="Daftar Lomba"
-      subtitle="Pilih kejuaraan untuk mendaftarkan atlet Anda ke nomor-nomor lomba. Pembayaran akan diverifikasi oleh panitia."
-    >
-      <div className="pub-container pb-16">
+    <DashboardLayout>
+      <div className="space-y-6">
+        <Breadcrumb
+          items={[
+            { label: 'Dashboard', href: '/dashboard-viewer' },
+            { label: 'Daftar Lomba' },
+          ]}
+          className="mb-2"
+        />
+        <PageHeader
+          title="Daftar Lomba"
+          description="Pilih kejuaraan untuk mendaftarkan atlet Anda ke nomor-nomor lomba. Pembayaran akan diverifikasi oleh panitia."
+        />
+
         {!events || events.length === 0 ? (
           <div className="pub-card p-12 text-center">
             <Waves className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
@@ -30,7 +43,10 @@ export default async function DaftarLombaPage() {
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {events.map((event) => (
-              <div key={event.id} className="pub-card flex flex-col gap-4 p-5 transition-shadow duration-200 hover:shadow-md">
+              <div
+                key={event.id}
+                className="pub-card flex flex-col gap-4 p-5 transition-shadow duration-200 hover:shadow-md"
+              >
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="font-bold text-[var(--m-ink)] leading-snug">{event.name}</h3>
                   <span className="pub-chip shrink-0">{event.lane_count || 8} lintasan</span>
@@ -59,6 +75,6 @@ export default async function DaftarLombaPage() {
           </div>
         )}
       </div>
-    </PublicShell>
+    </DashboardLayout>
   );
 }
