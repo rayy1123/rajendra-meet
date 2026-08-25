@@ -29,7 +29,7 @@ export function PaymentVerifyActions({ id }: { id: string }) {
     <div className="flex items-center gap-2">
       <button
         type="button"
-        onClick={() => run('approve')}
+        onClick={() => run('approved')}
         disabled={pending}
         className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition-ui hover:bg-emerald-700 disabled:opacity-60"
       >
@@ -38,7 +38,7 @@ export function PaymentVerifyActions({ id }: { id: string }) {
       </button>
       <button
         type="button"
-        onClick={() => run('reject')}
+        onClick={() => run('rejected')}
         disabled={pending}
         className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 transition-ui hover:bg-red-100 disabled:opacity-60"
       >
