@@ -61,11 +61,13 @@ export default async function ScoreboardPage({
 
             {/* Leaderboard per acara (satu nomor yang dipilih) */}
             {current && compEvents.length > 0 ? (
-              <LeaderboardView
-                eventId={current.id}
-                compEvents={compEvents}
-                showHeatTab={false}
-              />
+              <div className="live-card overflow-hidden p-1">
+                <LeaderboardView
+                  eventId={current.id}
+                  compEvents={compEvents}
+                  showHeatTab={false}
+                />
+              </div>
             ) : (
               <div className="pub-card p-12 text-center">
                 <Waves className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
