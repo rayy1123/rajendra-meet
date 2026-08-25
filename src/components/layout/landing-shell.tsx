@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Waves, Phone, Mail } from 'lucide-react';
 import { LandingNav } from '@/components/layout/landing-nav';
+import { ThemeToggle } from '@/components/modules/theme-toggle';
 
 function InstagramIcon({ className }: { className?: string }) {
   return (
@@ -41,6 +42,7 @@ export function LandingShell({ children }: { children: React.ReactNode }) {
 
           <nav className="flex items-center gap-1 sm:gap-2">
             <LandingNav />
+            <ThemeToggle />
             <Link href="/login" className="pub-btn-ghost">
               Masuk
             </Link>
