@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AthleteProfileActions } from '@/components/modules/athlete-profile-actions';
 import type { AthleteFormValues } from '@/components/modules/athlete-form-modal';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, CalendarPlus } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -97,13 +97,21 @@ export default async function AthleteProfilePage({
               </p>
             </div>
           </div>
-          <AthleteProfileActions
-            id={athlete.id}
-            userId={user.id}
-            initial={formValues}
-            photoUrl={athlete.photo_url ?? ''}
+          <div className="flex items-center gap-2">
+            <Link
+              href="/daftar-lomba"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-ink"
+            >
+              <CalendarPlus className="h-4 w-4" /> Daftarkan ke Lomba
+            </Link>
+            <AthleteProfileActions
+              id={athlete.id}
+              userId={user.id}
+              initial={formValues}
+              photoUrl={athlete.photo_url ?? ''}
             schools={(schools ?? []).map((s) => ({ id: s.id, name: s.name }))}
           />
+        </div>
         </div>
 
         <div className="grid gap-4 lg:grid-cols-2">
