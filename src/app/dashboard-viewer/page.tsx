@@ -4,7 +4,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { Card, CardContent } from '@/components/ui/card';
 import DashboardLayout from '@/components/layout/layout';
-import { User, ClipboardList, CalendarDays, ArrowRight } from 'lucide-react';
+import { User, UserCircle, ClipboardList, CalendarDays, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
@@ -61,6 +61,13 @@ export default async function DashboardViewerPage() {
     { label: 'Event Aktif', value: eventCount ?? 0, href: '/daftar-lomba', icon: CalendarDays },
   ];
 
+  const quickLinks = [
+    { label: 'Atlet Saya', href: '/atlet-saya', icon: User },
+    { label: 'Daftar Lomba', href: '/daftar-lomba', icon: CalendarDays },
+    { label: 'Pendaftaran', href: '/pendaftaran-saya', icon: ClipboardList },
+    { label: 'Profil', href: '/profile', icon: UserCircle },
+  ];
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -86,6 +93,24 @@ export default async function DashboardViewerPage() {
                     </div>
                   </CardContent>
                 </Card>
+              </Link>
+            );
+          })}
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {quickLinks.map((q) => {
+            const Icon = q.icon;
+            return (
+              <Link
+                key={q.href}
+                href={q.href}
+                className="pub-card flex items-center gap-3 p-4 transition-shadow hover:shadow-md"
+              >
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Icon className="h-4 w-4" />
+                </div>
+                <span className="text-sm font-semibold text-[var(--m-ink)]">{q.label}</span>
               </Link>
             );
           })}
@@ -125,7 +150,15 @@ export default async function DashboardViewerPage() {
           ) : (
             <Card>
               <CardContent className="py-10 text-center text-sm text-[var(--m-muted)]">
-                Belum ada pendaftaran. Tambahkan atlet di <Link href="/atlet-saya" className="font-semibold text-primary hover:underline">Atlet Saya</Link>, lalu daftarkan lewat <Link href="/daftar-lomba" className="font-semibold text-primary hover:underline">Daftar Lomba</Link>.
+                Belum ada pendaftaran. Tambahkan atlet di{' '}
+                <Link href="/atlet-saya" className="font-semibold text-primary hover:underline">
+                  Atlet Saya
+                </Link>
+                , lalu daftarkan lewat{' '}
+                <Link href="/daftar-lomba" className="font-semibold text-primary hover:underline">
+                  Daftar Lomba
+                </Link>
+                .
               </CardContent>
             </Card>
           )}
