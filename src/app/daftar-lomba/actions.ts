@@ -107,34 +107,43 @@ export async function submitRegistrationAction(formData: FormData): Promise<Acti
   }
 }
 
-/** Buat atlet (event-scoped) lalu daftarkan ke nomor lomba + buat verifikasi pembayaran pending. */
+/** Pilih atlet tersimpan (milik viewer) lalu daftarkan ke nomor lomba, ATAU
+ *  buat atlet baru milik viewer lalu daftarkan. Atlet SELALU terikat
+ *  owner_id = user.id agar muncul di "Atlet Saya" dan diproteksi RLS. */
 export async function createAthleteAndRegisterAction(formData: FormData): Promise<ActionResult> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Sesi berakhir, silakan login kembali." };
+  if (!user) return { ok: false, error: 'Sesi berakhir, silakan login kembali.' };
 
-  const eventId = formData.get("eventId")?.toString();
-  const fullName = formData.get("fullName")?.toString()?.trim();
-  const birthDate = formData.get("birthDate")?.toString();
-  const gender = formData.get("gender")?.toString();
-  const gradeLevel = formData.get("gradeLevel")?.toString() || "";
-  const classname = formData.get("className")?.toString() || "";
+  const eventId = formData.get('eventId')?.toString();
+  const athleteId = formData.get('athleteId')?.toString() || '';
+  const fullName = formData.get('fullName')?.toString()?.trim();
+  const birthDate = formData.get('birthDate')?.toString();
+  const gender = formData.get('gender')?.toString();
+  const gradeLevel = formData.get('gradeLevel')?.toString() || '';
+  const classname = formData.get('className')?.toString() || '';
   const competitionEventIds = formData
-    .getAll("competitionEventId")
+    .getAll('competitionEventId')
     .map((c) => c.toString())
     .filter(Boolean);
-  const proofUrl = formData.get("proofUrl")?.toString() || null;
-  const amountDue = Number(formData.get("amountDue") || "0") || 0;
+  const proofUrl = formData.get('proofUrl')?.toString() || null;
+  const amountDue = Number(formData.get('amountDue') || '0') || 0;
 
-  if (!eventId || !fullName || !birthDate || !gender || competitionEventIds.length === 0) {
-    return { ok: false, error: "Data pendaftaran tidak lengkap." };
+  if (!eventId || competitionEventIds.length === 0) {
+    return { ok: false, error: 'Data pendaftaran tidak lengkap.' };
   }
 
-  try {
+  let finalAthleteId = athleteId;
+
+  if (!finalAthleteId) {
+    // Mode baru: validasi & buat atlet milik user.
+    if (!fullName || !birthDate || !gender) {
+      return { ok: false, error: 'Data atlet tidak lengkap.' };
+    }
     const { data: athlete, error: athErr } = await supabase
-      .from("athletes")
+      .from('athletes')
       .insert({
         event_id: eventId,
         athlete_number: `REG-${Date.now().toString(36)}`,
@@ -143,41 +152,77 @@ export async function createAthleteAndRegisterAction(formData: FormData): Promis
         birth_date: birthDate,
         grade_level: gradeLevel,
         class_name: classname,
-        age_group: "",
+        age_group: '',
         school_id: null,
+        owner_id: user.id,
       })
-      .select("id")
+      .select('id')
       .single();
 
     if (athErr || !athlete) {
-      return { ok: false, error: athErr?.message || "Gagal menyimpan atlet." };
+      return { ok: false, error: athErr?.message || 'Gagal menyimpan atlet.' };
     }
+    finalAthleteId = athlete.id;
+  } else {
+    // Mode existing: pastikan atlet ini milik user (owner_id) atau sudah
+    // pernah dia daftarkan. Cegah mendaftarkan atlet orang lain.
+    const { data: owned } = await supabase
+      .from('athletes')
+      .select('id')
+      .eq('id', finalAthleteId)
+      .eq('owner_id', user.id)
+      .maybeSingle();
+    if (!owned) {
+      const { data: regOwned } = await supabase
+        .from('registrations')
+        .select('id')
+        .eq('athlete_id', finalAthleteId)
+        .eq('registrant_id', user.id)
+        .maybeSingle();
+      if (!regOwned) {
+        return { ok: false, error: 'Anda tidak berwenang mendaftarkan atlet ini.' };
+      }
+    }
+  }
 
+  try {
     for (const ceId of competitionEventIds) {
+      // Cegah duplikat (unique athlete_id + competition_event_id)
+      const { data: existing } = await supabase
+        .from('registrations')
+        .select('id')
+        .eq('athlete_id', finalAthleteId)
+        .eq('competition_event_id', ceId)
+        .maybeSingle();
+
+      if (existing) continue;
+
       const { data: reg, error: regErr } = await supabase
-        .from("registrations")
+        .from('registrations')
         .insert({
           event_id: eventId,
-          athlete_id: athlete.id,
+          athlete_id: finalAthleteId,
           competition_event_id: ceId,
           registrant_id: user.id,
         })
-        .select("id")
+        .select('id')
         .single();
 
-      if (regErr || !reg) return { ok: false, error: regErr?.message || "Gagal mendaftarkan nomor lomba." };
+      if (regErr || !reg) {
+        return { ok: false, error: regErr?.message || 'Gagal mendaftarkan nomor lomba.' };
+      }
 
-      const { error: payErr } = await supabase.from("payment_verifications").insert({
+      const { error: payErr } = await supabase.from('payment_verifications').insert({
         registration_id: reg.id,
-        status: "pending",
+        status: 'pending',
         amount_due: amountDue,
         proof_url: proofUrl,
       });
-      if (payErr) return { ok: false, error: payErr.message || "Gagal membuat verifikasi pembayaran." };
+      if (payErr) return { ok: false, error: payErr.message || 'Gagal membuat verifikasi pembayaran.' };
     }
     return { ok: true };
   } catch {
-    return { ok: false, error: "Terjadi kesalahan saat menyimpan pendaftaran." };
+    return { ok: false, error: 'Terjadi kesalahan saat menyimpan pendaftaran.' };
   }
 }
 
