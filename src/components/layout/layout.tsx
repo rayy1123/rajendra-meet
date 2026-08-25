@@ -1,5 +1,8 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import { SidebarNav, MobileSidebar } from '@/components/layout/sidebar';
-import { Waves } from 'lucide-react';
+import { Waves, PanelLeft, PanelLeftClose } from 'lucide-react';
 import Link from 'next/link';
 
 export default function DashboardLayout({
@@ -7,19 +10,52 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const [collapsed, setCollapsed] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('scms-sidebar-collapsed') === '1';
+  });
+
+  // Persist preferensi di localStorage.
+  useEffect(() => {
+    localStorage.setItem('scms-sidebar-collapsed', collapsed ? '1' : '0');
+  }, [collapsed]);
+
   return (
     <div className="flex min-h-screen flex-col bg-background md:flex-row">
-      {/* Sidebar Desktop */}
-      <aside className="sticky top-0 hidden h-screen w-72 shrink-0 flex-col border-r border-border bg-sidebar md:flex">
-        <div className="flex h-16 items-center gap-2.5 border-b border-border px-6">
-          <img
-            src="/brand/logo.png"
-            alt="Rajendra Meet"
-            className="h-8 w-auto rounded-md"
-          />
+      {/* Sidebar Desktop — collapsible */}
+      <aside
+        className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-border bg-sidebar transition-[width] duration-200 md:flex ${
+          collapsed ? 'w-[76px]' : 'w-72'
+        }`}
+      >
+        <div
+          className={`flex h-16 items-center gap-2.5 border-b border-border ${
+            collapsed ? 'justify-center px-2' : 'px-6'
+          }`}
+        >
+          {!collapsed && (
+            <img
+              src="/brand/logo.png"
+              alt="Rajendra Meet"
+              className="h-8 w-auto rounded-md"
+            />
+          )}
+          <button
+            type="button"
+            onClick={() => setCollapsed((c) => !c)}
+            className="ml-auto rounded-lg p-1.5 text-[var(--m-muted)] transition-colors hover:bg-[var(--m-soft)] hover:text-[var(--m-ink)]"
+            aria-label={collapsed ? 'Buka sidebar' : 'Tutup sidebar'}
+            title={collapsed ? 'Buka sidebar' : 'Tutup sidebar'}
+          >
+            {collapsed ? (
+              <PanelLeft className="h-5 w-5" />
+            ) : (
+              <PanelLeftClose className="h-5 w-5" />
+            )}
+          </button>
         </div>
         <div className="flex-1 overflow-y-auto py-4">
-          <SidebarNav />
+          <SidebarNav collapsed={collapsed} />
         </div>
       </aside>
 

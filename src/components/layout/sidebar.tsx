@@ -114,9 +114,10 @@ const ROLE_LABELS: Record<string, string> = {
 
 interface SidebarNavProps {
   onItemClick?: () => void;
+  collapsed?: boolean;
 }
 
-export function SidebarNav({ onItemClick }: SidebarNavProps) {
+export function SidebarNav({ onItemClick, collapsed = false }: SidebarNavProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -160,9 +161,11 @@ export function SidebarNav({ onItemClick }: SidebarNavProps) {
       <nav className="space-y-5 px-3">
         {visibleGroups.map((group) => (
           <div key={group.label} className="space-y-1">
-            <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">
-              {group.label}
-            </p>
+            {!collapsed && (
+              <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">
+                {group.label}
+              </p>
+            )}
             {group.items.map((item) => {
               const Icon = item.icon;
               const isActive =
@@ -175,8 +178,10 @@ export function SidebarNav({ onItemClick }: SidebarNavProps) {
                   key={item.href}
                   href={item.href}
                   onClick={onItemClick}
+                  title={collapsed ? item.title : undefined}
                   className={cn(
                     'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all',
+                    collapsed && 'justify-center px-0',
                     isActive
                       ? 'bg-primary text-primary-foreground shadow-sm'
                       : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
@@ -188,7 +193,7 @@ export function SidebarNav({ onItemClick }: SidebarNavProps) {
                       isActive ? 'text-white' : 'text-primary'
                     )}
                   />
-                  {item.title}
+                  {!collapsed && item.title}
                 </Link>
               );
             })}
@@ -199,12 +204,14 @@ export function SidebarNav({ onItemClick }: SidebarNavProps) {
       {/* User Info & Logout */}
       <div className="space-y-2 px-3 pt-4 border-t border-border">
         {userEmail && (
-          <div className="flex items-center gap-2 rounded-lg bg-muted/60 px-3 py-2">
+          <div className={cn('flex items-center gap-2 rounded-lg bg-muted/60 px-3 py-2', collapsed && 'justify-center px-0')}>
             <User className="h-4 w-4 shrink-0 text-primary" />
-            <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">
-              {userEmail}
-            </span>
-            {role && (
+            {!collapsed && (
+              <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">
+                {userEmail}
+              </span>
+            )}
+            {!collapsed && role && (
               <Badge variant="secondary" className="shrink-0 text-[10px]">
                 {ROLE_LABELS[role] ?? role}
               </Badge>
@@ -215,10 +222,13 @@ export function SidebarNav({ onItemClick }: SidebarNavProps) {
         <Button
           variant="ghost"
           onClick={handleLogout}
-          className="w-full justify-start gap-3 px-3 text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/30"
+          className={cn(
+            'w-full justify-start gap-3 px-3 text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/30',
+            collapsed && 'justify-center px-0'
+          )}
         >
           <LogOut className="h-4 w-4" />
-          <span>Keluar</span>
+          {!collapsed && <span>Keluar</span>}
         </Button>
       </div>
     </div>
