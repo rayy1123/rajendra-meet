@@ -82,14 +82,14 @@ export default async function DashboardViewerPage() {
             const Icon = s.icon;
             return (
               <Link key={s.label} href={s.href}>
-                <Card className="transition-shadow hover:shadow-md">
+                <Card className="elevated transition-ui hover:-translate-y-0.5 hover:shadow-pop">
                   <CardContent className="flex items-center gap-4 p-5">
                     <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                       <Icon className="h-5 w-5" />
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-[var(--m-ink)]">{s.value}</div>
-                      <div className="text-xs text-[var(--m-muted)]">{s.label}</div>
+                      <div className="text-2xl font-bold tabular-nums text-[var(--m-ink)]">{s.value}</div>
+                      <div className="text-xs font-medium text-[var(--m-muted)]">{s.label}</div>
                     </div>
                   </CardContent>
                 </Card>
@@ -105,7 +105,7 @@ export default async function DashboardViewerPage() {
               <Link
                 key={q.href}
                 href={q.href}
-                className="pub-card flex items-center gap-3 p-4 transition-shadow hover:shadow-md"
+                className="pub-card elevated flex items-center gap-3 p-4 transition-ui hover:-translate-y-0.5 hover:border-primary/40"
               >
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <Icon className="h-4 w-4" />
@@ -118,7 +118,7 @@ export default async function DashboardViewerPage() {
 
         <div>
           <div className="mb-2 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-[var(--m-ink)]">Pendaftaran Terbaru</h2>
+            <h2 className="h-section">Pendaftaran Terbaru</h2>
             <Link
               href="/pendaftaran-saya"
               className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
