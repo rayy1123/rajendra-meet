@@ -11,7 +11,7 @@ import {
 } from '@/app/profile/actions';
 import { AvatarUpload } from '@/components/modules/avatar-upload';
 import { ConfirmDialog } from '@/components/modules/confirm-dialog';
-import { Pencil, KeyRound, LogOut } from 'lucide-react';
+import { Pencil, KeyRound, LogOut, X, Loader2 } from 'lucide-react';
 
 const ROLE_LABELS: Record<string, string> = {
   super_admin: 'Super Admin',
@@ -42,57 +42,58 @@ export function ProfileManager({
   role: string;
   avatarUrl: string;
 }) {
-  const [active, setActive] = useState<'none' | 'profile' | 'password'>('none');
+  const [modal, setModal] = useState<'none' | 'profile' | 'password'>('none');
   const [name, setName] = useState(fullName);
-  const [savingName, setSavingName] = useState(false);
-  const [nameMsg, setNameMsg] = useState<{ ok: boolean; msg: string } | null>(null);
   const [avatar, setAvatar] = useState(avatarUrl);
-
   const [pw, setPw] = useState('');
   const [confirm, setConfirm] = useState('');
-  const [savingPw, setSavingPw] = useState(false);
-  const [pwMsg, setPwMsg] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState<{ ok: boolean; msg: string } | null>(null);
   const [showLogout, setShowLogout] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const router = useRouter();
 
-  async function doLogout() {
-    setLoggingOut(true);
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push('/login');
-    router.refresh();
+  function showToast(ok: boolean, msg: string) {
+    setToast({ ok, msg });
+    setTimeout(() => setToast(null), 2600);
   }
 
   async function saveName(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setSavingName(true);
-    setNameMsg(null);
+    setSaving(true);
     const fd = new FormData();
     fd.set('full_name', name);
     const res: ProfileState = await updateProfileName(fd);
-    setSavingName(false);
-    setNameMsg(res.ok ? { ok: true, msg: 'Nama tersimpan.' } : { ok: false, msg: res.error ?? 'Gagal.' });
-    if (res.ok) setActive('none');
+    setSaving(false);
+    if (res.ok) {
+      setModal('none');
+      showToast(true, 'Profil berhasil diperbarui.');
+    } else {
+      showToast(false, res.error ?? 'Gagal menyimpan.');
+    }
   }
 
   async function savePw(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setSavingPw(true);
-    setPwMsg(null);
+    setSaving(true);
     const fd = new FormData();
     fd.set('password', pw);
     fd.set('confirm', confirm);
     const res: ProfileState = await updatePassword(fd);
-    setSavingPw(false);
+    setSaving(false);
     if (res.ok) {
       setPw('');
       setConfirm('');
-      setPwMsg({ ok: true, msg: 'Password diubah.' });
-      setActive('none');
+      setModal('none');
+      showToast(true, 'Password berhasil diubah.');
     } else {
-      setPwMsg({ ok: false, msg: res.error ?? 'Gagal.' });
+      showToast(false, res.error ?? 'Gagal mengubah password.');
     }
+  }
+
+  function cancelModal() {
+    setModal('none');
+    showToast(false, 'Tidak ada perubahan.');
   }
 
   async function onPhoto(url: string) {
@@ -102,8 +103,27 @@ export function ProfileManager({
     await updateProfilePhoto(fd);
   }
 
+  async function doLogout() {
+    setLoggingOut(true);
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/login');
+    router.refresh();
+  }
+
   return (
     <div className="space-y-4">
+      {/* Toast popup */}
+      {toast && (
+        <div
+          className={`fixed bottom-6 right-6 z-[80] rounded-xl px-4 py-3 text-sm font-medium shadow-lg ${
+            toast.ok ? 'bg-emerald-600 text-white' : 'bg-slate-700 text-white'
+          }`}
+        >
+          {toast.msg}
+        </div>
+      )}
+
       {/* Kartu identitas */}
       <div className="pub-card flex flex-col items-center gap-3 p-6 text-center">
         <div className="relative h-20 w-20 overflow-hidden rounded-full bg-primary/10">
@@ -128,14 +148,14 @@ export function ProfileManager({
         <div className="mt-2 flex w-full flex-col gap-2">
           <button
             type="button"
-            onClick={() => setActive(active === 'profile' ? 'none' : 'profile')}
+            onClick={() => setModal('profile')}
             className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm font-semibold transition-colors hover:bg-accent"
           >
             <Pencil className="h-4 w-4" /> Ubah Profil
           </button>
           <button
             type="button"
-            onClick={() => setActive(active === 'password' ? 'none' : 'password')}
+            onClick={() => setModal('password')}
             className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm font-semibold transition-colors hover:bg-accent"
           >
             <KeyRound className="h-4 w-4" /> Ganti Password
@@ -150,105 +170,111 @@ export function ProfileManager({
         </div>
       </div>
 
-      {/* Section: Ubah Profil */}
-      {active === 'profile' && (
-        <div className="pub-card space-y-4 p-6">
-          <h3 className="font-semibold text-[var(--m-ink)]">Ubah Profil</h3>
-          <div className="flex flex-col items-center gap-2">
-            <div className="relative h-16 w-16 overflow-hidden rounded-full bg-primary/10">
-              {avatar ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={avatar} alt={fullName} className="h-full w-full object-cover" />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-lg font-bold text-primary">
-                  {initials(fullName || email)}
-                </div>
-              )}
+      {/* Modal: Ubah Profil */}
+      {modal === 'profile' && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-sm rounded-2xl border bg-card p-6 shadow-lg">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-[var(--m-ink)]">Ubah Profil</h3>
+              <button type="button" onClick={cancelModal} className="rounded-lg p-1.5 text-[var(--m-muted)] hover:bg-[var(--m-soft)]" aria-label="Tutup">
+                <X className="h-5 w-5" />
+              </button>
             </div>
-            <AvatarUpload folder="viewer" uid={userId} currentUrl={avatar} onUploaded={onPhoto} />
+            <div className="mb-4 flex flex-col items-center gap-2">
+              <div className="relative h-16 w-16 overflow-hidden rounded-full bg-primary/10">
+                {avatar ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={avatar} alt={fullName} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-lg font-bold text-primary">
+                    {initials(fullName || email)}
+                  </div>
+                )}
+              </div>
+              <AvatarUpload folder="viewer" uid={userId} currentUrl={avatar} onUploaded={onPhoto} />
+            </div>
+            <form onSubmit={saveName} className="space-y-3">
+              <div>
+                <label className="mb-1 block text-sm font-medium">Nama Lengkap</label>
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+                  placeholder="Nama lengkap"
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-ink disabled:opacity-50"
+                >
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  {saving ? 'Menyimpan…' : 'Simpan'}
+                </button>
+                <button
+                  type="button"
+                  onClick={cancelModal}
+                  className="rounded-lg border border-border px-3.5 py-2 text-sm font-semibold hover:bg-accent"
+                >
+                  Batal
+                </button>
+              </div>
+            </form>
           </div>
-          <form onSubmit={saveName} className="space-y-3">
-            <div>
-              <label className="mb-1 block text-sm font-medium">Nama Lengkap</label>
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm"
-                placeholder="Nama lengkap"
-              />
-            </div>
-            {nameMsg && (
-              <p className={nameMsg.ok ? 'text-sm text-emerald-600' : 'text-sm text-red-600'}>
-                {nameMsg.msg}
-              </p>
-            )}
-            <div className="flex gap-2">
-              <button
-                type="submit"
-                disabled={savingName}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-ink disabled:opacity-50"
-              >
-                {savingName ? 'Menyimpan…' : 'Simpan'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setActive('none')}
-                className="rounded-lg border border-border px-3.5 py-2 text-sm font-semibold hover:bg-accent"
-              >
-                Batal
-              </button>
-            </div>
-          </form>
         </div>
       )}
 
-      {/* Section: Ganti Password */}
-      {active === 'password' && (
-        <div className="pub-card space-y-4 p-6">
-          <h3 className="font-semibold text-[var(--m-ink)]">Ganti Password</h3>
-          <form onSubmit={savePw} className="space-y-3">
-            <div>
-              <label className="mb-1 block text-sm font-medium">Password Baru</label>
-              <input
-                type="password"
-                value={pw}
-                onChange={(e) => setPw(e.target.value)}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm"
-                placeholder="Minimal 6 karakter"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium">Konfirmasi</label>
-              <input
-                type="password"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm"
-                placeholder="Ulangi password"
-              />
-            </div>
-            {pwMsg && (
-              <p className={`text-sm ${pwMsg.ok ? 'text-emerald-600' : 'text-red-600'}`}>
-                {pwMsg.msg}
-              </p>
-            )}
-            <div className="flex gap-2">
-              <button
-                type="submit"
-                disabled={savingPw}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-ink disabled:opacity-50"
-              >
-                {savingPw ? 'Menyimpan…' : 'Simpan'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setActive('none')}
-                className="rounded-lg border border-border px-3.5 py-2 text-sm font-semibold hover:bg-accent"
-              >
-                Batal
+      {/* Modal: Ganti Password */}
+      {modal === 'password' && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-sm rounded-2xl border bg-card p-6 shadow-lg">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-[var(--m-ink)]">Ganti Password</h3>
+              <button type="button" onClick={cancelModal} className="rounded-lg p-1.5 text-[var(--m-muted)] hover:bg-[var(--m-soft)]" aria-label="Tutup">
+                <X className="h-5 w-5" />
               </button>
             </div>
-          </form>
+            <form onSubmit={savePw} className="space-y-3">
+              <div>
+                <label className="mb-1 block text-sm font-medium">Password Baru</label>
+                <input
+                  type="password"
+                  value={pw}
+                  onChange={(e) => setPw(e.target.value)}
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+                  placeholder="Minimal 6 karakter"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium">Konfirmasi</label>
+                <input
+                  type="password"
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+                  placeholder="Ulangi password"
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-ink disabled:opacity-50"
+                >
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  {saving ? 'Menyimpan…' : 'Simpan'}
+                </button>
+                <button
+                  type="button"
+                  onClick={cancelModal}
+                  className="rounded-lg border border-border px-3.5 py-2 text-sm font-semibold hover:bg-accent"
+                >
+                  Batal
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
