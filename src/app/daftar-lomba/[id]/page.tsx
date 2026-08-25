@@ -34,23 +34,21 @@ export default async function DaftarLombaEventPage({ params }: { params: Promise
     .eq('event_id', id)
     .order('distance_meters', { ascending: true });
 
-  // Atlet yang sudah terdaftar di event ini (milik viewer).
-  const existingAthletes: AthleteDTO[] = [];
-  {
-    const { data: regs } = await supabase
-      .from('registrations')
-      .select('athlete_id, athletes(id, full_name, birth_date, gender, grade_level, school_id)')
-      .eq('event_id', id)
-      .eq('registrant_id', user.id);
-    const seen = new Set<string>();
-    for (const r of regs ?? []) {
-      const a = (r as unknown as { athletes: AthleteDTO | null }).athletes;
-      if (a && !seen.has(a.id)) {
-        seen.add(a.id);
-        existingAthletes.push(a);
-      }
-    }
-  }
+  // Atlet milik viewer (bisa dipilih saat mendaftar ke event ini).
+  const { data: myAthletes } = await supabase
+    .from('athletes')
+    .select('id, full_name, birth_date, gender, grade_level, school_id')
+    .eq('owner_id', user.id)
+    .order('full_name');
+
+  const existingAthletes: AthleteDTO[] = (myAthletes ?? []).map((a) => ({
+    id: a.id,
+    full_name: a.full_name,
+    birth_date: a.birth_date,
+    gender: a.gender === 'female' ? 'female' : 'male',
+    grade_level: a.grade_level ?? '',
+    school_id: a.school_id,
+  }));
 
   return (
     <DashboardLayout>
