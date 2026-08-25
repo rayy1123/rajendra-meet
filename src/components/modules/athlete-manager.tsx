@@ -23,7 +23,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, UserPlus, Loader2 } from 'lucide-react';
+import { Plus, Search, UserPlus, Loader2, Users } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export interface AthleteRow {
   id: string;
@@ -222,8 +223,12 @@ export function AthleteManager({
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
-                    Belum ada atlet. Klik “Tambah Atlet” untuk memulai.
+                  <TableCell colSpan={6} className="p-0">
+                    <EmptyState
+                      icon={<Users className="h-6 w-6" />}
+                      title="Belum ada atlet"
+                      description="Klik “Tambah Atlet” untuk memulai master data atlet kejuaraan."
+                    />
                   </TableCell>
                 </TableRow>
               ) : (

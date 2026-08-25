@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 import {
   Table,
   TableBody,
@@ -134,11 +135,15 @@ export default async function SchoolsPage({
               Gagal memuat data sekolah: {error.message}
             </div>
           ) : schools.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              {searchQuery
-                ? `Tidak ada sekolah atau klub dengan kata kunci "${searchQuery}"`
-                : 'Belum ada data sekolah/klub terdaftar.'}
-            </div>
+            <EmptyState
+              icon={<School className="h-6 w-6" />}
+              title="Belum ada sekolah / klub"
+              description={
+                searchQuery
+                  ? `Tidak ada sekolah atau klub dengan kata kunci "${searchQuery}".`
+                  : 'Belum ada data sekolah/klub terdaftar. Klik "Tambah Sekolah / Klub" di atas untuk memulai.'
+              }
+            />
           ) : (
             <div className="rounded-md border overflow-x-auto">
               <Table>
