@@ -19,9 +19,13 @@ export function ThemeToggle({ className }: { className?: string }) {
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-color-scheme: dark)').matches;
     const isDark = saved === 'dark' || prefersDark;
-    setDark(isDark);
     document.documentElement.classList.toggle('dark', isDark);
-    setMounted(true);
+    // Defer setState agar tidak sync dalam effect (hindari cascading renders).
+    const id = requestAnimationFrame(() => {
+      setDark(isDark);
+      setMounted(true);
+    });
+    return () => cancelAnimationFrame(id);
   }, []);
 
   function toggle() {
