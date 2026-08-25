@@ -95,7 +95,7 @@ export default async function HomePage() {
             <span className="pub-chip mx-auto mb-5 w-fit lg:mx-0">
               <Waves className="h-3.5 w-3.5 text-[var(--m-aqua)]" /> Sistem Kejuaraan Renang · Sejak 2013
             </span>
-            <h1 className="mx-auto max-w-xl text-4xl font-black leading-[1.1] tracking-tight text-[var(--m-ink)] sm:text-5xl lg:text-6xl">
+            <h1 className="h-display mx-auto max-w-xl lg:mx-0">
               Selenggarakan lomba renang jadi{' '}
               <span className="bg-gradient-to-r from-[var(--m-aqua)] to-[var(--m-aqua-2)] bg-clip-text text-transparent">
                 lebih mudah & terukur.
@@ -145,7 +145,7 @@ export default async function HomePage() {
       <section className="pub-container py-12 sm:py-16">
         <div className="mb-8 text-center">
           <span className="pub-eyebrow">Event</span>
-          <h2 className="mt-2 text-2xl font-bold text-[var(--m-ink)] sm:text-3xl">
+          <h2 className="h-title mt-2">
             Lomba Yang Akan Datang
           </h2>
         </div>
@@ -163,7 +163,7 @@ export default async function HomePage() {
             {upcoming.map((ev) => {
               const tgl = formatTanggal(ev.start_date);
               return (
-                <div key={ev.id} className="pub-card overflow-hidden">
+                <div key={ev.id} className="pub-card elevated overflow-hidden transition-ui hover:-translate-y-1 hover:shadow-pop">
                   <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center">
                     {/* Tanggal */}
                     <div className="flex w-full shrink-0 items-center gap-3 sm:w-32 sm:flex-col sm:items-center sm:gap-0">
@@ -217,7 +217,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2">
             <div className="flex flex-col justify-center gap-4 p-8 sm:p-10">
               <span className="pub-eyebrow">Tentang Rajendra Meet</span>
-              <h2 className="text-2xl font-bold text-[var(--m-ink)] sm:text-3xl">
+              <h2 className="h-title">
                 Satu sistem untuk seluruh rangkaian kejuaraan renang
               </h2>
               <p className="text-sm leading-relaxed text-[var(--m-muted)] sm:text-base">
@@ -253,7 +253,7 @@ export default async function HomePage() {
       <section className="pub-container py-12 sm:py-16">
         <div className="mb-8 text-center">
           <span className="pub-eyebrow">Testimoni</span>
-          <h2 className="mt-2 text-2xl font-bold text-[var(--m-ink)] sm:text-3xl">
+          <h2 className="h-title mt-2">
             Apa Kata Mereka
           </h2>
         </div>
