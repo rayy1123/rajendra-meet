@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
@@ -17,7 +17,6 @@ import {
   Medal,
   Menu,
   Printer,
-  LogOut,
   User,
   UserCircle,
   Settings,
@@ -122,7 +121,6 @@ interface SidebarNavProps {
 
 export function SidebarNav({ onItemClick, collapsed = false }: SidebarNavProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const supabase = createClient();
@@ -144,13 +142,6 @@ export function SidebarNav({ onItemClick, collapsed = false }: SidebarNavProps) 
     };
     fetchUser();
   }, [supabase]);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    if (onItemClick) onItemClick();
-    router.push('/login');
-    router.refresh();
-  };
 
   const isAdmin =
     role && ['super_admin', 'event_admin', 'operator'].includes(role);
@@ -221,18 +212,6 @@ export function SidebarNav({ onItemClick, collapsed = false }: SidebarNavProps) 
             )}
           </div>
         )}
-
-        <Button
-          variant="ghost"
-          onClick={handleLogout}
-          className={cn(
-            'w-full justify-start gap-3 px-3 text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/30',
-            collapsed && 'justify-center px-0'
-          )}
-        >
-          <LogOut className="h-4 w-4" />
-          {!collapsed && <span>Keluar</span>}
-        </Button>
       </div>
     </div>
   );
