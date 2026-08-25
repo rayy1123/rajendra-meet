@@ -10,7 +10,7 @@ export function PaymentVerifyActions({ id }: { id: string }) {
   const [busy, setBusy] = useState<'approve' | 'reject' | null>(null);
 
   function run(status: 'approved' | 'rejected') {
-    setBusy(status);
+    setBusy(status === 'approved' ? 'approve' : 'reject');
     const fd = new FormData();
     fd.set('id', id);
     fd.set('status', status);
