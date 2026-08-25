@@ -19,6 +19,7 @@ import {
   Printer,
   LogOut,
   User,
+  UserCircle,
   Settings,
   Timer,
   BookOpen,
@@ -66,6 +67,7 @@ const navGroups: NavGroup[] = [
       { title: 'Daftar Lomba', href: '/daftar-lomba', icon: CalendarDays },
       { title: 'Atlet Saya', href: '/atlet-saya', icon: User },
       { title: 'Pendaftaran Saya', href: '/pendaftaran-saya', icon: CreditCard },
+      { title: 'Profil', href: '/profile', icon: UserCircle },
     ],
   },
   {

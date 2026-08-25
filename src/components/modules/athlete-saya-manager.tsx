@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import Link from 'next/link';
 import { Plus, Pencil, Trash2, Copy, Search, Users, CheckSquare, X, Download } from 'lucide-react';
 import {
   deleteAthlete,
@@ -375,14 +376,13 @@ export function AthleteSayaManager({
                   onChange={() => toggleSelect(a.id)}
                   className="mt-1"
                 />
-                <button
-                  type="button"
-                  onClick={() => openDetail(a)}
+                <Link
+                  href={`/atlet-saya/${a.id}`}
                   className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary"
                 >
                   {initials(a.full_name)}
-                </button>
-                <button type="button" onClick={() => openDetail(a)} className="min-w-0 flex-1 text-left">
+                </Link>
+                <Link href={`/atlet-saya/${a.id}`} className="min-w-0 flex-1 text-left">
                   <div className="truncate font-semibold text-[var(--m-ink)]">{a.full_name}</div>
                   <div className="truncate text-xs text-[var(--m-muted)]">
                     {a.gender === 'female' ? 'Putri' : 'Putra'} · {age(a.birth_date)} thn
@@ -391,7 +391,7 @@ export function AthleteSayaManager({
                       ? ` · ${regsByAthlete.get(a.id)!.length} lomba`
                       : ''}
                   </div>
-                </button>
+                </Link>
                 <div className="flex items-center gap-1">
                   <button
                     type="button"
