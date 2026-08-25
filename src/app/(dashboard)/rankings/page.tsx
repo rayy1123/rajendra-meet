@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Trophy } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -37,11 +38,11 @@ export default async function RankingsPage() {
       <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Perangkingan' }]} className="mb-1" />
 
       {byEvent.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            Belum ada kejuaraan. Buat event terlebih dahulu.
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={<Trophy className="h-6 w-6" />}
+          title="Belum ada kejuaraan"
+          description="Buat event terlebih dahulu untuk mulai menampilkan perangkingan per nomor lomba."
+        />
       ) : (
         byEvent.map((ev) => (
           <Card key={ev.id}>

@@ -1,9 +1,9 @@
 import { createClient } from '@/lib/supabase/server';
 import { ResultInputOperator } from '@/components/modules/result-input-operator';
-import { Trophy, Waves } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { Trophy } from 'lucide-react';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
+import { EmptyState } from '@/components/ui/empty-state';
 
 // Types untuk menyempurnakan Type Safety
 export interface HeatAssignmentWithResult {
@@ -109,13 +109,11 @@ export default async function ResultsPage({
       <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Input Hasil' }]} className="mb-1" />
 
       {!events || events.length === 0 ? (
-        <Card className="p-12 text-center border-dashed">
-          <Waves className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
-          <h3 className="font-semibold text-lg">Belum Ada Event</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            Silakan buat event terlebih dahulu di menu Events atau impor Buku Acara Excel.
-          </p>
-        </Card>
+        <EmptyState
+          icon={<Trophy className="h-6 w-6" />}
+          title="Belum ada event"
+          description="Silakan buat event terlebih dahulu di menu Events atau impor Buku Acara Excel untuk mulai input hasil."
+        />
       ) : (
         <ResultInputOperator
           events={events}

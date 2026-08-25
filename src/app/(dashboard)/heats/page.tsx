@@ -1,9 +1,9 @@
 import { createClient } from '@/lib/supabase/server';
 import { HeatGeneratorOperator } from '@/components/modules/heat-generator-operator';
-import { Layers, Waves } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { Layers } from 'lucide-react';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
+import { EmptyState } from '@/components/ui/empty-state';
 
 // Definisi Interface untuk Type Safety
 export interface RegistrationItem {
@@ -104,13 +104,11 @@ export default async function HeatsPage({
       <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Acara & Heat' }]} className="mb-1" />
 
       {!events || events.length === 0 ? (
-        <Card className="p-12 text-center border-dashed">
-          <Waves className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
-          <h3 className="font-semibold text-lg">Belum Ada Event</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            Silakan buat event atau impor Buku Acara Excel terlebih dahulu.
-          </p>
-        </Card>
+        <EmptyState
+          icon={<Layers className="h-6 w-6" />}
+          title="Belum ada event"
+          description="Silakan buat event atau impor Buku Acara Excel terlebih dahulu untuk mulai menyusun acara & lintasan."
+        />
       ) : (
         <HeatGeneratorOperator
           events={events}
