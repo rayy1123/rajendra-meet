@@ -33,17 +33,20 @@ export function ProfileManager({
   userId,
   email,
   fullName,
+  username,
   role,
   avatarUrl,
 }: {
   userId: string;
   email: string;
   fullName: string;
+  username: string;
   role: string;
   avatarUrl: string;
 }) {
   const [modal, setModal] = useState<'none' | 'profile' | 'password'>('none');
   const [name, setName] = useState(fullName);
+  const [userField, setUserField] = useState(username || fullName);
   const [avatar, setAvatar] = useState(avatarUrl);
   const [pw, setPw] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -60,9 +63,14 @@ export function ProfileManager({
 
   async function saveName(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (userField.trim().toLowerCase() !== name.trim().toLowerCase()) {
+      showToast(false, 'Username harus sama dengan nama asli (Nama Lengkap).');
+      return;
+    }
     setSaving(true);
     const fd = new FormData();
     fd.set('full_name', name);
+    fd.set('username', userField);
     const res: ProfileState = await updateProfileName(fd);
     setSaving(false);
     if (res.ok) {
@@ -139,6 +147,7 @@ export function ProfileManager({
         <div>
           <div className="font-semibold text-[var(--m-ink)]">{fullName || '(belum diisi)'}</div>
           <div className="text-sm text-[var(--m-muted)]">{email}</div>
+          <div className="text-xs text-[var(--m-muted)]">@{userField || fullName}</div>
         </div>
         <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
           {ROLE_LABELS[role] ?? role}
@@ -202,6 +211,18 @@ export function ProfileManager({
                   className="w-full rounded-lg border border-border px-3 py-2 text-sm"
                   placeholder="Nama lengkap"
                 />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium">Username</label>
+                <input
+                  value={userField}
+                  onChange={(e) => setUserField(e.target.value)}
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+                  placeholder="Harus sama dengan Nama Lengkap"
+                />
+                <p className="mt-1 text-xs text-[var(--m-muted)]">
+                  Username harus sama dengan nama asli agar mudah dikenali.
+                </p>
               </div>
               <div className="flex gap-2">
                 <button

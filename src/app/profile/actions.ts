@@ -11,11 +11,16 @@ export interface ProfileState {
 export async function updateProfileName(formData: FormData): Promise<ProfileState> {
   const { supabase, user } = await requireUser();
   const fullName = (formData.get('full_name') as string)?.trim();
+  const username = (formData.get('username') as string)?.trim();
   if (!fullName) return { ok: false, error: 'Nama wajib diisi.' };
+  // Syarat: username harus sama dengan nama asli (nama lengkap).
+  if (!username) return { ok: false, error: 'Username wajib diisi.' };
+  if (username.toLowerCase() !== fullName.toLowerCase())
+    return { ok: false, error: 'Username harus sama dengan nama asli (Nama Lengkap).' };
 
   const { error } = await supabase
     .from('profiles')
-    .update({ full_name: fullName })
+    .update({ full_name: fullName, username })
     .eq('id', user.id);
   if (error) return { ok: false, error: error.message };
   revalidatePath('/profile');
