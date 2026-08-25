@@ -1,4 +1,5 @@
 import { LandingShell } from '@/components/layout/landing-shell';
+import { LandingAurora } from '@/components/modules/landing-aurora';
 import { Testimonials, type Testimonial } from '@/components/modules/testimonials';
 import { PhotoSlider, ABOUT_PHOTOS } from '@/components/modules/photo-slider';
 import { Waves, Phone, Mail, Share2, ArrowRight, Trophy, MapPin, CalendarDays, Sparkles } from 'lucide-react';
@@ -84,10 +85,7 @@ export default async function HomePage() {
     <LandingShell>
       {/* ===== HERO ===== */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-[var(--m-aqua-soft)] via-[var(--m-bg)] to-[var(--m-bg)]" />
-        {/* floating soft blobs — biar nggak kaku */}
-        <div className="absolute -left-16 top-10 -z-10 h-64 w-64 rounded-full bg-[var(--m-aqua)]/20 blur-3xl animate-blob" />
-        <div className="absolute -right-10 top-40 -z-10 h-72 w-72 rounded-full bg-[var(--m-aqua-2)]/20 blur-3xl animate-blob-slow" />
+        <LandingAurora />
 
         <div className="pub-container grid grid-cols-1 items-center gap-10 pt-16 pb-12 sm:pt-24 sm:pb-16 lg:grid-cols-2 lg:gap-12">
           {/* Teks */}
