@@ -428,6 +428,15 @@ export function AthleteSayaManager({
         </div>
       )}
 
+      {/* Floating action button — Tambah Atlet (background filled) */}
+      <button
+        type="button"
+        onClick={openNew}
+        className="fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-lg transition-colors hover:bg-primary-ink"
+      >
+        <Plus className="h-5 w-5" /> Atlet
+      </button>
+
       {/* Modals */}
       <AthleteFormModal
         open={showForm}

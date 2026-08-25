@@ -2,6 +2,7 @@ import { requireUser } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
+import DashboardLayout from '@/components/layout/layout';
 import { AthleteSayaManager } from '@/components/modules/athlete-saya-manager';
 
 export const dynamic = 'force-dynamic';
@@ -56,24 +57,26 @@ export default async function AtletSayaPage() {
   }));
 
   return (
-    <div className="space-y-6">
-      <Breadcrumb
-        items={[
-          { label: 'Dashboard Viewer', href: '/dashboard-viewer' },
-          { label: 'Atlet Saya' },
-        ]}
-        className="mb-2"
-      />
-      <PageHeader
-        title="Atlet Saya"
-        description="Kelola data atlet Anda secara manual. Atlet yang dibuat di sini bisa digunakan saat mendaftar ke nomor lomba."
-      />
+    <DashboardLayout>
+      <div className="space-y-6">
+        <Breadcrumb
+          items={[
+            { label: 'Dashboard', href: '/dashboard-viewer' },
+            { label: 'Atlet Saya' },
+          ]}
+          className="mb-2"
+        />
+        <PageHeader
+          title="Atlet Saya"
+          description="Kelola data atlet Anda secara manual. Atlet yang dibuat di sini bisa digunakan saat mendaftar ke nomor lomba."
+        />
 
-      <AthleteSayaManager
-        athletes={(athletes ?? []) as unknown as AthleteRow[]}
-        schools={(schools ?? []).map((s) => ({ id: s.id, name: s.name }))}
-        registrations={registrations}
-      />
-    </div>
+        <AthleteSayaManager
+          athletes={(athletes ?? []) as unknown as AthleteRow[]}
+          schools={(schools ?? []).map((s) => ({ id: s.id, name: s.name }))}
+          registrations={registrations}
+        />
+      </div>
+    </DashboardLayout>
   );
 }

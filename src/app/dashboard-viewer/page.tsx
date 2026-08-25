@@ -57,9 +57,9 @@ export default async function DashboardViewerPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <Breadcrumb items={[{ label: 'Dashboard Viewer' }]} className="mb-2" />
+        <Breadcrumb items={[{ label: 'Dashboard' }]} className="mb-2" />
         <PageHeader
-          title="Dashboard Viewer"
+          title="Dashboard"
           description="Selamat datang di panel Anda. Kelola atlet dan pantau pendaftaran lomba renang."
         />
 
