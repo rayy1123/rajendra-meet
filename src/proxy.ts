@@ -19,7 +19,6 @@ const PUBLIC_ROUTE_PREFIXES = [
   '/forgot-password',
   '/reset-password',
   '/auth',
-  '/daftar-lomba',
   '/kontak',
   '/program',
   '/galeri',
