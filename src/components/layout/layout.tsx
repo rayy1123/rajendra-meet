@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { SidebarNav, MobileSidebar } from '@/components/layout/sidebar';
 import { Waves, PanelLeft, PanelLeftClose } from 'lucide-react';
 import Link from 'next/link';
+import { ThemeToggle } from '@/components/modules/theme-toggle';
 
 export default function DashboardLayout({
   children,
@@ -78,6 +79,7 @@ export default function DashboardLayout({
           >
             Live
           </Link>
+          <ThemeToggle />
         </header>
 
         <main className="flex-1 p-4 md:p-6 lg:p-8">{children}</main>
