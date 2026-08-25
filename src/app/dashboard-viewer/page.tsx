@@ -78,10 +78,10 @@ export default async function DashboardViewerPage() {
         />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {stats.map((s) => {
+          {stats.map((s, i) => {
             const Icon = s.icon;
             return (
-              <Link key={s.label} href={s.href}>
+              <Link key={s.label} href={s.href} className={`reveal`} style={{ animationDelay: `${i * 80}ms` }}>
                 <Card className="elevated transition-ui hover:-translate-y-0.5 hover:shadow-pop">
                   <CardContent className="flex items-center gap-4 p-5">
                     <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -99,13 +99,14 @@ export default async function DashboardViewerPage() {
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {quickLinks.map((q) => {
+          {quickLinks.map((q, i) => {
             const Icon = q.icon;
             return (
               <Link
                 key={q.href}
                 href={q.href}
-                className="pub-card elevated flex items-center gap-3 p-4 transition-ui hover:-translate-y-0.5 hover:border-primary/40"
+                className={`pub-card elevated flex items-center gap-3 p-4 transition-ui hover:-translate-y-0.5 hover:border-primary/40 reveal`}
+                style={{ animationDelay: `${(i + 3) * 80}ms` }}
               >
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <Icon className="h-4 w-4" />

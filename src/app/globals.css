@@ -170,13 +170,13 @@
     @apply text-sm font-medium text-[var(--m-muted)] transition-colors hover:text-[var(--m-ink)];
   }
   .pub-btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-[transform,background-color,color,box-shadow] duration-150 active:scale-[0.98];
   }
   .pub-btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--m-aqua)] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--m-aqua-ink)];
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--m-aqua)] px-4 py-2 text-sm font-semibold text-white transition-[transform,background-color,box-shadow] duration-150 hover:bg-[var(--m-aqua-ink)] active:scale-[0.98];
   }
   .pub-btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] px-4 py-2 text-sm font-semibold text-[var(--m-ink)] transition-colors hover:bg-[var(--m-aqua-soft)];
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] px-4 py-2 text-sm font-semibold text-[var(--m-ink)] transition-[transform,background-color,color,box-shadow] duration-150 hover:bg-[var(--m-aqua-soft)] active:scale-[0.98];
   }
   .pub-time {
     @apply font-mono font-semibold tabular-nums tracking-tight;
