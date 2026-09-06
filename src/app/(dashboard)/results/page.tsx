@@ -100,13 +100,13 @@ export default async function ResultsPage({
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="mx-auto max-w-7xl space-y-6 p-6">
       <PageHeader
         title="Input Hasil Lomba"
         description="Input waktu tempuh per lintasan (lane). Hasil otomatis tersimpan dan terupdate secara realtime."
         icon={<Trophy className="h-6 w-6" />}
       />
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Input Hasil' }]} className="mb-1" />
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Input Hasil' }]} className="mb-2" />
 
       {!events || events.length === 0 ? (
         <EmptyState

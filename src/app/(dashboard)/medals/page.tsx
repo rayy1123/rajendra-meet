@@ -114,13 +114,13 @@ export default async function MedalsPage({
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="mx-auto max-w-7xl space-y-6 p-6">
       <PageHeader
         title="Perolehan Medali & Klasemen"
         description="Peringkat akumulasi medali Emas, Perak, dan Perunggu per kontingen/sekolah secara otomatis."
         icon={<Award className="h-6 w-6" />}
       />
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Klasemen Medali' }]} className="mb-1" />
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Klasemen Medali' }]} className="mb-2" />
 
       {!events || events.length === 0 ? (
         <Card className="p-12 text-center border-dashed">

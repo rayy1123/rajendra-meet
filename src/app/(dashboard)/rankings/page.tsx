@@ -22,20 +22,19 @@ export default async function RankingsPage() {
     .select('id, name, stroke, distance_meters, gender, grade_level, class_name, event_id')
     .order('distance_meters', { ascending: true });
 
-  // Kelompokkan nomor lomba per event
   const byEvent = (events || []).map((ev) => ({
     ...ev,
     compEvents: (compEvents || []).filter((c) => c.event_id === ev.id),
   }));
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 p-6">
+    <div className="mx-auto max-w-7xl space-y-6 p-6">
       <PageHeader
         title="Perangkingan"
         description="Peringkat otomatis per nomor lomba, dihitung lintas heat berdasarkan waktu tercepat."
         icon={<Trophy className="h-6 w-6" />}
       />
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Perangkingan' }]} className="mb-1" />
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Perangkingan' }]} className="mb-2" />
 
       {byEvent.length === 0 ? (
         <EmptyState
@@ -44,24 +43,26 @@ export default async function RankingsPage() {
           description="Buat event terlebih dahulu untuk mulai menampilkan perangkingan per nomor lomba."
         />
       ) : (
-        byEvent.map((ev) => (
-          <Card key={ev.id}>
-            <CardContent className="space-y-4 p-5">
-              <div className="flex items-center gap-2 border-b border-border pb-3">
-                <Trophy className="h-5 w-5 text-amber-500" />
-                <h2 className="text-lg font-bold">{ev.name}</h2>
-                <Badge variant="secondary" className="ml-auto">{ev.compEvents.length} Nomor Lomba</Badge>
-              </div>
-              {ev.compEvents.length === 0 ? (
-                <p className="py-6 text-center text-sm text-muted-foreground">
-                  Belum ada nomor lomba untuk kejuaraan ini.
-                </p>
-              ) : (
-                <LeaderboardView eventId={ev.id} compEvents={ev.compEvents as CompEvent[]} embedded showHeatTab={false} />
-              )}
-            </CardContent>
-          </Card>
-        ))
+        <div className="space-y-5">
+          {byEvent.map((ev) => (
+            <Card key={ev.id}>
+              <CardContent className="space-y-4 p-5">
+                <div className="flex items-center gap-2 border-b border-border pb-3">
+                  <Trophy className="h-5 w-5 text-amber-500" />
+                  <h2 className="text-lg font-bold">{ev.name}</h2>
+                  <Badge variant="secondary" className="ml-auto">{ev.compEvents.length} Nomor Lomba</Badge>
+                </div>
+                {ev.compEvents.length === 0 ? (
+                  <p className="py-6 text-center text-sm text-muted-foreground">
+                    Belum ada nomor lomba untuk kejuaraan ini.
+                  </p>
+                ) : (
+                  <LeaderboardView eventId={ev.id} compEvents={ev.compEvents as CompEvent[]} embedded showHeatTab={false} />
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       )}
     </div>
   );
