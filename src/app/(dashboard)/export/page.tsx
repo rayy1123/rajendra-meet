@@ -77,7 +77,7 @@ export default async function ExportPage({
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 print:p-0 print:m-0">
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Cetak & Ekspor' }]} className="mb-4" />
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Cetak & Ekspor' }]} className="mb-2" />
       <PageHeader
         title="Cetak & Ekspor Laporan"
         description="Unduh lembar susunan seri/lintasan dalam bentuk Excel atau cetak langsung menjadi PDF untuk panitia/juri."

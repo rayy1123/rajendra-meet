@@ -23,12 +23,12 @@ export default async function EquipmentPage() {
 
   return (
     <>
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Peralatan' }]} className="mb-4" />
-      <PageHeader
-        title="Pemeliharaan Peralatan"
-        description="Lacak kesiapan teknis peralatan: touchpad, starting block, konsol waktu, dan kalibrasinya."
-      />
-      <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6">
+      <div className="mx-auto max-w-7xl space-y-6 p-6">
+        <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Peralatan' }]} className="mb-2" />
+        <PageHeader
+          title="Pemeliharaan Peralatan"
+          description="Lacak kesiapan teknis peralatan: touchpad, starting block, konsol waktu, dan kalibrasinya."
+        />
         {items.length === 0 ? (
           <div className="pub-card p-12 text-center">
             <Wrench className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />

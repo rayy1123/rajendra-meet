@@ -121,13 +121,13 @@ export default async function AwardsPage() {
     rows.find((r) => r.school_id === id)?.school_name || 'Umum';
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 p-6">
+    <div className="mx-auto max-w-7xl space-y-6 p-6">
       <PageHeader
         title="Awards & Klasemen"
         description={`Klasemen dihitung otomatis dari hasil lomba. Poin: ${rules.map((r) => `${r.rank}=${r.points}`).join(', ')}.`}
         icon={<Building2 className="h-6 w-6" />}
       />
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Penghargaan' }]} className="mb-1" />
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Penghargaan' }]} className="mb-2" />
 
       {entries.length === 0 ? (
         <EmptyState
