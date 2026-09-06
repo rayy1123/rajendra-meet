@@ -1,23 +1,12 @@
 import { createClient } from '@/lib/supabase/server';
 import { PublicShell } from '@/components/layout/public-shell';
-import { FileText, Waves } from 'lucide-react';
-import Link from 'next/link';
+import { RouteEventSelect } from '@/components/modules/route-event-select';
+import { Waves, FileText } from 'lucide-react';
 import { PrintButton } from '@/components/modules/print-button';
 
 export const dynamic = 'force-dynamic';
 
-interface HeatRow {
-  lane_number: number;
-  registrations: {
-    seed_time_ms: number | null;
-    athletes: { full_name: string } | null;
-  } | null;
-}
-interface Heat {
-  heat_number: number;
-  heat_assignments: HeatRow[] | null;
-}
-interface CompEvent {
+interface ProgramCompEvent {
   id: string;
   name: string;
   stroke: string;
@@ -26,7 +15,16 @@ interface CompEvent {
   age_group: string;
   session_no: number;
   order_no: number;
-  heats: Heat[] | null;
+  heats: {
+    heat_number: number;
+    heat_assignments: {
+      lane_number: number;
+      registrations: {
+        seed_time_ms: number | null;
+        athletes: { full_name: string } | null;
+      } | null;
+    }[] | null;
+  }[] | null;
 }
 
 function fmtSeed(ms: number | null): string {
@@ -53,8 +51,8 @@ export default async function ProgramPage({
   const current =
     events?.find((e) => e.id === eventId) ?? events?.[0] ?? null;
 
-  let compEvents: CompEvent[] = [];
-  let bySession: Record<number, CompEvent[]> = {};
+  let compEvents: ProgramCompEvent[] = [];
+  let bySession: Record<number, ProgramCompEvent[]> = {};
   if (current) {
     const { data } = await supabase
       .from('competition_events')
@@ -65,8 +63,8 @@ export default async function ProgramPage({
       .eq('event_id', current.id)
       .order('session_no', { ascending: true })
       .order('order_no', { ascending: true });
-    compEvents = (data ?? []) as unknown as CompEvent[];
-    bySession = compEvents.reduce<Record<number, CompEvent[]>>((acc, ce) => {
+    compEvents = (data ?? []) as unknown as ProgramCompEvent[];
+    bySession = compEvents.reduce<Record<number, ProgramCompEvent[]>>((acc, ce) => {
       const k = ce.session_no || 1;
       (acc[k] ||= []).push(ce);
       return acc;
@@ -80,9 +78,9 @@ export default async function ProgramPage({
     >
       <div className="pub-container pb-16">
         {/* Event switcher */}
-        <div className="mb-6 flex flex-wrap items-center gap-2">
+        <div className="mb-6 flex flex-wrap items-center gap-2 no-print">
           {events?.map((e) => (
-            <Link
+            <a
               key={e.id}
               href={`/program?event=${e.id}`}
               className={
@@ -92,22 +90,20 @@ export default async function ProgramPage({
               }
             >
               {e.name}
-            </Link>
+            </a>
           ))}
           <PrintButton />
         </div>
 
         {!current ? (
-          <div className="pub-card p-12 text-center">
+          <div className="pub-card p-12 text-center no-print">
             <Waves className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
-            <h3 className="mt-3 font-semibold text-[var(--m-ink)]">
-              Belum ada kejuaraan
-            </h3>
+            <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Belum ada kejuaraan</h3>
           </div>
         ) : (
-          <article className="rounded-2xl border border-border bg-card shadow-sm">
+          <div className="printable-area rounded-2xl border border-border bg-card shadow-sm">
             {/* Program header */}
-            <header className="flex flex-col gap-3 border-b-2 border-primary bg-[var(--m-navy)] p-6 text-white sm:flex-row sm:items-end sm:justify-between">
+            <header className="flex flex-col gap-3 border-b-2 border-primary bg-[#0f1f3d] p-6 text-white sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <h1 className="text-2xl font-bold tracking-tight">
                   BUKU ACARA (EVENT PROGRAM)
@@ -214,7 +210,7 @@ export default async function ProgramPage({
                                                   <span
                                                     className={
                                                       isTop
-                                                        ? 'inline-flex h-5 w-5 items-center justify-center rounded-full bg-[var(--m-orange)] text-[11px] font-bold text-white'
+                                                        ? 'inline-flex h-5 w-5 items-center justify-center rounded-full bg-[var(--m-orange)] text-[11px] font-bold text-[var(--primary-foreground)]'
                                                         : 'inline-flex h-5 w-5 items-center justify-center rounded-full bg-[var(--m-soft)] text-[11px] text-[var(--m-muted)]'
                                                     }
                                                   >
@@ -249,11 +245,11 @@ export default async function ProgramPage({
                 ))}
             </div>
 
-            <footer className="flex items-center justify-between border-t border-border px-6 py-3 text-xs text-[var(--m-muted)]">
+            <footer className="printable-area flex items-center justify-between border-t border-border px-6 py-3 text-xs text-[var(--m-muted)]">
               <span>Powered by Rajendra Meet SCMS</span>
               <span className="font-mono">Program resmi</span>
             </footer>
-          </article>
+          </div>
         )}
       </div>
     </PublicShell>

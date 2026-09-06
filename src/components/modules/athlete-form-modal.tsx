@@ -37,7 +37,6 @@ export function AthleteFormModal({
 }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   if (!open) return null;
 
@@ -45,7 +44,6 @@ export function AthleteFormModal({
     e.preventDefault();
     setSaving(true);
     setError(null);
-    setFieldErrors({});
     const fd = new FormData(e.currentTarget);
     if (initial?.id) fd.set('id', initial.id);
     const res: AthleteFormState = await saveAthlete(fd);
@@ -212,7 +210,7 @@ export function AthleteFormModal({
             disabled={saving}
             className="rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary-ink disabled:opacity-50"
           >
-            {saving ? 'Menyimpan…' : 'Simpan'}
+            Simpan
           </button>
         </div>
       </form>

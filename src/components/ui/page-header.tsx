@@ -25,19 +25,19 @@ export function PageHeader({
   return (
     <div
       className={cn(
-        "flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-center sm:justify-between",
+        "flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between",
         className
       )}
       {...props}
     >
       <div className="flex items-center gap-3.5">
         {icon && (
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
             {icon}
           </span>
         )}
         <div>
-          <h1 className="text-[1.7rem] font-bold leading-tight tracking-tight text-foreground">
+          <h1 className="text-[1.7rem] font-bold leading-tight tracking-[-0.025em] text-foreground">
             {title}
           </h1>
           {description && (

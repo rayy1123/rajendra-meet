@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Save, CheckCircle2, Loader2 } from 'lucide-react';
+import { Save, CheckCircle2 } from 'lucide-react';
 
 interface HeatAssignmentRow {
   id: string;
@@ -279,9 +279,7 @@ export function ResultInputOperator({
                                 disabled={savingMap[assign.id]}
                                 className="gap-1 min-w-[80px] h-9"
                               >
-                                {savingMap[assign.id] ? (
-                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                ) : existingResult ? (
+                                {existingResult ? (
                                   <>
                                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Edit
                                   </>

@@ -52,8 +52,8 @@ export default async function GalleryPage() {
       subtitle="Dokumentasi visual: aksi perlombaan, upacara medali, dan momen di balik layar kolam renang."
     >
       <div className="pub-container pb-16">
-        <div className="mb-4 text-xs text-[var(--m-muted)]">
-          {events?.[0]?.name ?? 'Rajendra Meet'}
+        <div className="mb-4 flex items-center justify-between">
+          <div className="text-xs text-[var(--m-muted)]">{events?.[0]?.name ?? 'Rajendra Meet'}</div>
         </div>
         <GalleryGrid photos={photos} />
       </div>

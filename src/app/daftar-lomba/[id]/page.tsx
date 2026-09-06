@@ -1,8 +1,8 @@
 import { requireUser } from '@/lib/auth';
 import DashboardLayout from '@/components/layout/layout';
-import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { RegistrationWizard, type CompEventDTO, type AthleteDTO } from '@/components/modules/registration-wizard';
+import { ViewerSubHeader } from '@/components/modules/viewer-subheader';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,7 +61,7 @@ export default async function DaftarLombaEventPage({ params }: { params: Promise
           ]}
           className="mb-2"
         />
-        <PageHeader
+        <ViewerSubHeader
           title={`Daftar: ${event.name}`}
           description="Isi data atlet, pilih nomor lomba, lalu kirim bukti pembayaran untuk diverifikasi panitia."
         />

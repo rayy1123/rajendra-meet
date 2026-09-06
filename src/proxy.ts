@@ -23,6 +23,11 @@ const PUBLIC_ROUTE_PREFIXES = [
   '/program',
   '/galeri',
   '/live',
+  '/dashboard-viewer',
+  '/atlet-saya',
+  '/daftar-lomba',
+  '/pendaftaran-saya',
+  '/profile',
   '/',
 ];
 

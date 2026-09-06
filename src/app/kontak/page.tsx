@@ -1,5 +1,6 @@
 import { PublicShell } from '@/components/layout/public-shell';
 import { MapPin, MessageCircle, Camera, Play, Waves } from 'lucide-react';
+import { KontakMap } from '@/components/modules/kontak-map';
 
 const contacts = [
   {
@@ -36,17 +37,12 @@ export default function KontakPage() {
   return (
     <PublicShell>
       {/* Hero */}
-      <section
-        className="relative bg-cover bg-center text-white"
-        style={{
-          backgroundImage:
-            'linear-gradient(rgba(13,44,66,0.62), rgba(13,44,66,0.62)), url(/brand/contact-hero.png)',
-        }}
-      >
-        <div className="pub-container py-12 text-center sm:py-14">
-          <p className="pub-eyebrow !text-white/80">Rajendra Meet · Kontak</p>
+      <section className="relative bg-white text-[var(--m-ink)]">
+        <div className="absolute inset-0 bg-white/70" />
+        <div className="pub-container relative py-12 text-center sm:py-14">
+          <p className="pub-eyebrow">Rajendra Meet · Kontak</p>
           <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-4xl">Hubungi Kami</h1>
-          <p className="mx-auto mt-2 max-w-xl text-sm text-white/85 sm:text-base">
+          <p className="mx-auto mt-2 max-w-xl text-sm text-[#334155] sm:text-base">
             Kami siap membantu mewujudkan acara renang impian Anda — dari pendaftaran hingga
             live scoreboard.
           </p>
@@ -92,14 +88,7 @@ export default function KontakPage() {
 
         {/* Peta lokasi */}
         <div className="mt-8 overflow-hidden rounded-3xl shadow-soft">
-          <a
-            href="https://www.google.com/maps/search/?api=1&query=Jl.+Setu+Babakan+No.+14A+Jagakarsa+Jakarta+Selatan"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex h-40 items-center justify-center gap-2 bg-[var(--m-soft)] text-sm font-medium text-[var(--m-aqua-deep)] transition-colors hover:text-[var(--m-aqua)] hover:underline"
-          >
-            <MapPin className="h-5 w-5" /> Lihat lokasi di Google Maps
-          </a>
+          <KontakMap />
         </div>
 
         <p className="mt-6 flex items-center justify-center gap-2 text-sm text-[var(--m-muted)]">

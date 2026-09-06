@@ -1,8 +1,8 @@
 import { requireUser } from '@/lib/auth';
 import DashboardLayout from '@/components/layout/layout';
-import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { ProfileManager } from '@/components/modules/profile-manager';
+import { ViewerSubHeader } from '@/components/modules/viewer-subheader';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +25,7 @@ export default async function ProfilePage() {
           ]}
           className="mb-2"
         />
-        <PageHeader title="Profil" description="Kelola data akun Anda." />
+        <ViewerSubHeader title="Profil" description="Kelola data akun Anda." />
 
         <ProfileManager
           userId={user.id}

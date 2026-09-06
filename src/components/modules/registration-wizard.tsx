@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, ChevronLeft, ChevronRight, Upload, CreditCard, Loader2 } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Upload, CreditCard } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -297,7 +297,7 @@ export function RegistrationWizard({
           <div className="mt-5 flex items-center justify-between">
             <Button variant="outline" onClick={goBack}><ChevronLeft className="h-4 w-4" /> Kembali</Button>
             <Button onClick={handleSubmit} disabled={submitting}>
-              {submitting && <Loader2 className="h-4 w-4 animate-spin" />} Kirim Pendaftaran
+              Kirim Pendaftaran
             </Button>
           </div>
         </Card>

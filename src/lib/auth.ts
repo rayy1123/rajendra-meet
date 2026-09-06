@@ -30,8 +30,59 @@ export async function requireUser() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
-  return { supabase, user };
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .maybeSingle();
+    const role = (profile as { role?: string } | null)?.role;
+    if (role === 'super_admin' || role === 'event_admin' || role === 'operator') {
+      return { supabase, user, profile };
+    }
+    return { supabase, user, profile };
+  }
+
+  const cookieStore = await import('next/headers').then(m => m.cookies());
+  const username = cookieStore.get('x-trial-user')?.value || '';
+  if (!username) redirect('/login');
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id, username, full_name, role, avatar_url')
+    .eq('username', username)
+    .maybeSingle();
+  if (!profile) redirect('/login');
+  return { supabase, user: { id: profile.id, email: null } as any, profile };
+}
+
+export async function requireViewer() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .maybeSingle();
+    const role = (profile as { role?: string } | null)?.role;
+    if (role === 'super_admin' || role === 'event_admin' || role === 'operator') {
+      redirect('/events');
+    }
+    return { supabase, user, profile };
+  }
+
+  const cookieStore = await import('next/headers').then(m => m.cookies());
+  const username = cookieStore.get('x-trial-user')?.value || '';
+  if (!username) redirect('/login');
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id, username, full_name, role, avatar_url')
+    .eq('username', username)
+    .maybeSingle();
+  if (!profile) redirect('/login');
+  return { supabase, user: { id: profile.id, email: null } as any, profile };
 }
 
 /**

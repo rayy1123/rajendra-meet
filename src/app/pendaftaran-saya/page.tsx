@@ -1,10 +1,10 @@
 import { requireUser } from '@/lib/auth';
 import DashboardLayout from '@/components/layout/layout';
-import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Waves, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import Link from 'next/link';
+import { ViewerSubHeader } from '@/components/modules/viewer-subheader';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,7 +44,7 @@ export default async function PendaftaranSayaPage() {
           ]}
           className="mb-2"
         />
-        <PageHeader
+        <ViewerSubHeader
           title="Pendaftaran Saya"
           description="Pantau status pembayaran dan verifikasi pendaftaran lomba Anda."
         />

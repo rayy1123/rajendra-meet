@@ -26,8 +26,8 @@ export function StatCard({
   const inner = (
     <div
       className={cn(
-        "group flex h-full flex-col justify-between gap-3 rounded-2xl border border-border bg-card p-5 transition-all",
-        href && "hover:border-primary/40 hover:shadow-sm",
+        "group flex h-full flex-col justify-between gap-4 rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-card)] transition-[border-color,box-shadow]",
+        href && "hover:border-primary/40 hover:shadow-md",
         className
       )}
       {...props}
@@ -37,7 +37,7 @@ export function StatCard({
           {label}
         </span>
         {icon && (
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
             {icon}
           </span>
         )}

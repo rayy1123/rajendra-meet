@@ -23,7 +23,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, UserPlus, Loader2, Users, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
+import { Plus, Search, UserPlus, Users, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 
 export interface AthleteRow {
@@ -256,7 +256,7 @@ export function AthleteManager({
               </div>
               <DialogFooter>
                 <Button type="submit" disabled={saving}>
-                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+                  <UserPlus className="h-4 w-4" />
                   Simpan Atlet
                 </Button>
               </DialogFooter>

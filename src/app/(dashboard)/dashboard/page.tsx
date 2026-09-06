@@ -10,7 +10,6 @@ export const dynamic = 'force-dynamic';
 export default async function DashboardPage() {
   const supabase = await createClient();
 
-  // Admin (can_operate) boleh membaca semua data via RLS.
   const [
     { count: eventCount },
     { count: athleteCount },
@@ -38,7 +37,7 @@ export default async function DashboardPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-7xl space-y-6 p-6">
       <Breadcrumb items={[{ label: 'Dashboard' }]} className="mb-2" />
       <PageHeader
         title="Dashboard Panitia"
@@ -47,18 +46,13 @@ export default async function DashboardPage() {
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((s, i) => {
+        {stats.map((s) => {
           const Icon = s.icon;
           return (
-            <Link
-              key={s.label}
-              href={s.href}
-              className={`reveal`}
-              style={{ animationDelay: `${i * 80}ms` }}
-            >
+            <Link key={s.label} href={s.href} className="reveal" style={{ animationDelay: `${stats.indexOf(s) * 80}ms` }}>
               <Card className="elevated transition-ui hover:-translate-y-0.5 hover:shadow-pop">
                 <CardContent className="flex items-center gap-4 p-5">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <Icon className="h-5 w-5" />
                   </div>
                   <div>
@@ -72,8 +66,10 @@ export default async function DashboardPage() {
         })}
       </div>
 
-      <div>
-        <h2 className="h-section mb-3">Modul Cepat</h2>
+      <div className="reveal" style={{ animationDelay: `400ms` }}>
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className="h-section">Modul Cepat</h2>
+        </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {quickLinks.map((q, i) => {
             const Icon = q.icon;
@@ -81,10 +77,10 @@ export default async function DashboardPage() {
               <Link
                 key={q.href}
                 href={q.href}
-                className={`pub-card elevated flex items-center gap-3 p-4 transition-ui hover:-translate-y-0.5 hover:border-primary/40 reveal`}
+                className="pub-card elevated flex items-center gap-3 p-4 transition-ui hover:-translate-y-0.5 hover:border-primary/40 reveal"
                 style={{ animationDelay: `${(i + 4) * 80}ms` }}
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <Icon className="h-4 w-4" />
                 </div>
                 <span className="text-sm font-semibold text-[var(--m-ink)]">{q.label}</span>

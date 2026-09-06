@@ -20,7 +20,7 @@ interface HeatAssignmentRow {
 
 export interface ExportCompEvent {
   id: string;
-  event_number?: string | null;
+  order_no?: number | null;
   name?: string | null;
   gender?: string | null;
   age_group?: string | null;
@@ -49,7 +49,7 @@ export function ExportView({ events, initialEventId, exportData }: ExportViewPro
     exportData.forEach((ce) => {
       ce.heat_assignments?.forEach((ha) => {
         flatRows.push({
-          'No Acara': ce.event_number || '-',
+           'No Acara': ce.order_no != null ? String(ce.order_no) : '-',
           'Nomor Lomba': ce.name || '-',
           Kategori: `${ce.gender || '-'} - ${ce.age_group || '-'}`,
           Acara: ha.heat_number,
@@ -114,7 +114,7 @@ export function ExportView({ events, initialEventId, exportData }: ExportViewPro
               <div className="border-b-2 border-primary pb-2 mb-4 flex justify-between items-baseline print:border-black">
                 <div>
                   <h2 className="text-xl font-black tracking-tight">
-                    ACARA {ce.event_number}: {ce.name?.toUpperCase()}
+                     ACARA {ce.order_no != null ? ce.order_no : '-'}: {ce.name?.toUpperCase()}
                   </h2>
                   <p className="text-xs text-muted-foreground font-semibold print:text-black">
                     Kategori: {ce.gender} | Kelompok Umur: {ce.age_group}

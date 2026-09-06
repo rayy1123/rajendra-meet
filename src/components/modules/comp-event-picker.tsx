@@ -62,13 +62,7 @@ export function CompEventPicker({
       </Select>
 
       <div className="rounded-2xl border border-[var(--m-border)] bg-[var(--m-surface)] p-4">
-        <LeaderboardView
-          eventId={eventId}
-          compEvents={[selected]}
-          embedded
-          showHeatTab={false}
-          showEventTabs={false}
-        />
+        <LeaderboardView eventId={eventId} compEvents={[selected]} embedded showHeatTab={false} />
       </div>
     </div>
   );

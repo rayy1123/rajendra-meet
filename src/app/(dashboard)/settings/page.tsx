@@ -52,49 +52,41 @@ export default async function SettingsPage() {
             <CardContent className="space-y-4">
               <div className="rounded-md border overflow-x-auto">
                 <Table>
-                  <TableHeader>
-                    <TableRow>
-                     <TableHead className="w-24">Peringkat</TableHead>
-                      <TableHead>Medali / Deskripsi</TableHead>
-                      <TableHead className="text-right">Poin Perorangan</TableHead>
-                      <TableHead className="text-right">Poin Estafet</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {pointRules && pointRules.length > 0 ? (
-                      pointRules.map((rule) => (
-                        <TableRow key={rule.id}>
-                          <TableCell className="font-bold">Juara {rule.rank}</TableCell>
-                          <TableCell>
-                            {rule.rank === 1 && <span className="text-amber-500 font-semibold">Emas</span>}
-                            {rule.rank === 2 && <span className="text-slate-400 font-semibold">Perak</span>}
-                            {rule.rank === 3 && <span className="text-amber-700 font-semibold">Perunggu</span>}
-                            {rule.rank > 3 && <span className="text-muted-foreground">Peringkat {rule.rank}</span>}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Input
-                              type="number"
-                              defaultValue={rule.points_individual || 0}
-                              className="w-24 text-right inline-block"
-                            />
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Input
-                              type="number"
-                              defaultValue={rule.points_relay || 0}
-                              className="w-24 text-right inline-block"
-                            />
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">
-                          Belum ada aturan poin tersimpan.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
+                   <TableHeader>
+                     <TableRow>
+                      <TableHead className="w-24">Peringkat</TableHead>
+                       <TableHead>Medali / Deskripsi</TableHead>
+                       <TableHead className="text-right">Poin</TableHead>
+                     </TableRow>
+                   </TableHeader>
+                   <TableBody>
+                     {pointRules && pointRules.length > 0 ? (
+                       pointRules.map((rule) => (
+                         <TableRow key={rule.id}>
+                           <TableCell className="font-bold">Juara {rule.rank}</TableCell>
+                           <TableCell>
+                             {rule.rank === 1 && <span className="text-amber-500 font-semibold">Emas</span>}
+                             {rule.rank === 2 && <span className="text-[var(--m-muted)] font-semibold">Perak</span>}
+                             {rule.rank === 3 && <span className="text-amber-700 font-semibold">Perunggu</span>}
+                             {rule.rank > 3 && <span className="text-muted-foreground">Peringkat {rule.rank}</span>}
+                           </TableCell>
+                           <TableCell className="text-right">
+                             <Input
+                               type="number"
+                               defaultValue={rule.points ?? 0}
+                               className="w-24 text-right inline-block"
+                             />
+                           </TableCell>
+                         </TableRow>
+                       ))
+                     ) : (
+                       <TableRow>
+                         <TableCell colSpan={3} className="text-center py-6 text-muted-foreground">
+                           Belum ada aturan poin tersimpan.
+                         </TableCell>
+                       </TableRow>
+                     )}
+                   </TableBody>
                 </Table>
               </div>
               <div className="flex justify-end pt-2">
@@ -160,7 +152,7 @@ export default async function SettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="p-4 border rounded-lg bg-slate-50 flex items-center justify-between">
+              <div className="p-4 border rounded-lg bg-[var(--m-soft)] flex items-center justify-between">
                 <div>
                   <h4 className="font-semibold text-sm">Backup Data Kejuaraan</h4>
                   <p className="text-xs text-muted-foreground mt-0.5">

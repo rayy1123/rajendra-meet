@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { PublicShell } from '@/components/layout/public-shell';
 import { RouteEventSelect } from '@/components/modules/route-event-select';
 import { Medal } from 'lucide-react';
+import { PrintButton } from '@/components/modules/print-button';
 
 interface SchoolTally {
   name: string;
@@ -127,12 +128,15 @@ export default async function MedalTallyPage({
     >
       <div className="pub-container pb-16">
         {/* Pemilih kejuaraan */}
-        <div className="mb-6">
-          <RouteEventSelect events={events ?? []} current={current?.id ?? ''} basePath="/medali" />
+        <div className="mb-6 flex flex-wrap items-center gap-2 no-print">
+          <div className="flex-1">
+            <RouteEventSelect events={events ?? []} current={current?.id ?? ''} basePath="/medali" />
+          </div>
+          <PrintButton />
         </div>
 
         {rows.length === 0 ? (
-          <div className="pub-card p-12 text-center">
+          <div className="pub-card p-12 text-center no-print">
             <Medal className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
             <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Belum ada hasil</h3>
             <p className="mt-1 text-sm text-[var(--m-muted)]">
@@ -142,7 +146,7 @@ export default async function MedalTallyPage({
         ) : (
           <>
             {/* Podium */}
-            <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+            <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3 no-print">
               {podium.map((p, i) => (
                 <div
                   key={p.name}
@@ -170,7 +174,7 @@ export default async function MedalTallyPage({
             </section>
 
             {/* Tabel klasemen */}
-            <div className="overflow-hidden rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] shadow-sm">
+            <div className="printable-area overflow-hidden rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] shadow-sm">
               <table className="w-full text-left text-sm">
                 <thead className="bg-[var(--m-soft)] text-xs uppercase text-[var(--m-muted)]">
                   <tr>

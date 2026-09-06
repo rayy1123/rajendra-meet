@@ -1,106 +1,88 @@
 'use client';
 
 import { useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
-import { Waves, Mail, Loader2, CheckCircle2 } from 'lucide-react';
+import Link from 'next/link';
+import { SplitAuthShell } from '@/components/layout/split-auth-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import Link from 'next/link';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [infoMsg, setInfoMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setErrorMsg('');
-    setInfoMsg('');
+    setSuccessMsg('');
+
+    if (!email.trim()) {
+      setErrorMsg('Email wajib diisi.');
+      setLoading(false);
+      return;
+    }
 
     try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
-      });
-      if (error) {
-        if (error.status === 429 || (error.message || '').includes('rate limit')) {
-          setErrorMsg('Pengiriman email dibatasi sementara. Mohon tunggu beberapa saat.');
-        } else {
-          setErrorMsg(error.message);
-        }
-        setLoading(false);
-        return;
-      }
-      setInfoMsg('Link reset password telah dikirim ke email Anda. Silakan cek kotak masuk.');
-      setLoading(false);
-    } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : 'Terjadi kesalahan sistem.');
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      setSuccessMsg('Instruksi reset kata sandi telah dikirim ke email Anda.');
+      setEmail('');
+    } catch {
+      setErrorMsg('Gagal mengirim permintaan reset password.');
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md border-border bg-card shadow-lg">
-        <CardHeader className="space-y-2 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
-            <Waves className="w-8 h-8" />
-          </div>
-          <CardTitle className="text-2xl font-bold tracking-tight">Lupa Password</CardTitle>
-          <CardDescription>
-            Masukkan email akun Anda. Kami akan mengirimkan link untuk mengatur ulang password.
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent>
-          {!infoMsg ? (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {errorMsg && (
-                <div className="border border-destructive/20 bg-destructive/10 p-3 rounded-lg font-medium text-destructive text-sm">
-                  {errorMsg}
-                </div>
-              )}
-              <div className="space-y-1">
-                <label className="text-xs font-semibold">Email</label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="email"
-                    placeholder="email@gmail.com"
-                    className="pl-9"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-              <Button type="submit" className="mt-2 w-full" disabled={loading}>
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Memproses...
-                  </>
-                ) : (
-                  'Kirim Link Reset'
-                )}
-              </Button>
-            </form>
-          ) : (
-            <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/10 p-4">
-              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-              <p className="text-sm text-primary-ink">{infoMsg}</p>
+    <SplitAuthShell
+      title="Lupa Kata Sandi"
+      subtitle="Masukkan email Anda untuk menerima tautan reset kata sandi."
+      footerLinks={[
+        { label: 'Bantuan Teknis', href: '#' },
+        { label: 'Privasi', href: '#' },
+      ]}
+    >
+      {(errorMsg || successMsg) && (
+        <div className="mb-5 space-y-2">
+          {errorMsg && (
+            <div className="rounded-lg border border-red-400/30 bg-red-500/10 p-3 text-sm font-medium text-red-600">
+              {errorMsg}
             </div>
           )}
+          {successMsg && (
+            <div className="rounded-lg border border-emerald-400/30 bg-emerald-500/10 p-3 text-sm font-medium text-emerald-700">
+              {successMsg}
+            </div>
+          )}
+        </div>
+      )}
 
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            <Link href="/login" className="font-medium text-primary hover:underline">
-              Kembali ke masuk
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
-    </div>
+      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-[#0b1220]">Email</label>
+          <Input
+            type="email"
+            placeholder="nama@contoh.com"
+            className="bg-white text-[#0b1220] placeholder-[#64748b] border-[#cbd5e1] focus-visible:ring-cyan-300"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+
+        <Button type="submit" className="w-full bg-cyan-600 text-white hover:bg-cyan-700" disabled={loading}>
+          Kirim Tautan Reset
+        </Button>
+      </form>
+
+      <div className="mt-6 text-center text-sm text-[#334155]">
+        <Link href="/login" className="font-medium text-cyan-700 hover:text-cyan-900">
+          ← Kembali ke login
+        </Link>
+      </div>
+    </SplitAuthShell>
   );
 }

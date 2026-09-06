@@ -1,283 +1,176 @@
 import { LandingShell } from '@/components/layout/landing-shell';
-import { LandingAurora } from '@/components/modules/landing-aurora';
-import { Testimonials, type Testimonial } from '@/components/modules/testimonials';
-import { PhotoSlider, ABOUT_PHOTOS } from '@/components/modules/photo-slider';
-import { Waves, Phone, Mail, Share2, ArrowRight, Trophy, MapPin, CalendarDays, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/server';
+import { Waves, Phone, Mail, Share2, ArrowRight, Trophy, MapPin, CalendarDays, Sparkles, Users, Timer } from 'lucide-react';
+import { ResultsTableSample } from '@/components/modules/results-table-sample';
 
 export const metadata = {
-  title: 'Rajendra Meet — Sistem Manajemen Kejuaraan Renang',
+  title: 'Rajendra Project — Event Organizer & SCMS',
   description:
-    'Rajendra Meet membantu panitia menyelenggarakan kejuaraan renang dengan mudah: pendaftaran peserta, penyusunan heat, input hasil, dan live scoreboard real-time.',
+    'Wujudkan event olahraga dan spesial dengan sistem manajemen lomba renang Rajendra Meet dan jasa EO/MICE yang terpercaya.',
 };
 
-interface UpcomingEvent {
-  id: string;
-  name: string;
-  location: string | null;
-  organizer: string | null;
-  start_date: string;
-  end_date: string;
-  logo_url: string | null;
-}
-
-export const dynamic = 'force-dynamic';
-
-const BULAN = [
-  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+const STATS = [
+  { value: '10+ Thn', label: 'Pengalaman' },
+  { value: '500+', label: 'Event Terselenggara' },
+  { value: '100%', label: 'Kepuasan' },
+  { value: 'Real-time', label: 'Respons' },
 ];
 
-function formatTanggal(iso: string): { hari: string; bulan: string; tahun: string } {
-  const d = new Date(iso + 'T00:00:00');
-  return {
-    hari: String(d.getDate()).padStart(2, '0'),
-    bulan: BULAN[d.getMonth()],
-    tahun: String(d.getFullYear()),
-  };
-}
+const PILLARS = [
+  { title: 'Event Organizer & Manajemen Acara', desc: 'Manajemen acara olahraga, MICE, dan corporate end-to-end.' },
+  { title: 'Palet Spesialis Renang & Karate', desc: 'Spesialis kompetisi renang dengan standar teknis resmi.' },
+  { title: 'Jasa Crew Event Profesional', desc: 'Personalia event, panitia lapangan, dan operator acara.' },
+  { title: 'Tim Medis Siaga & Ambulance Standby', desc: 'Protokol keselamatan dan ambulance standby.' },
+  { title: 'Penyewaan Sarana & Prasarana', desc: 'Sarana dan prasarana acara siap pakai dan terawat.' },
+];
 
-function formatRentang(iso: string): string {
-  const d = new Date(iso + 'T00:00:00');
-  return `${d.getDate()} ${BULAN[d.getMonth()]} ${d.getFullYear()}`;
-}
+const FEATURES = [
+  { title: 'Auto Seeding & Heatings', desc: 'Pembagian heat otomatis berbasis seed time.' },
+  { title: 'Realtime Touchpad', desc: 'Hasil lomba tampil live dan terpercaya.' },
+  { title: 'Rekap Hasil & Rekor', desc: 'Cetak rekap per heat, series, dan rekor pertandingan.' },
+  { title: 'PDF & Akreditasi', desc: 'Hasil resmi siap cetak untuk panitia dan juri.' },
+];
 
-const TESTIMONIALS: Testimonial[] = [
-  {
-    text: 'Ini pertama kalinya anak saya ikut kompetisi yang dibantu Rajendra Meet, dan saya benar-benar menikmati setiap momennya! Suasananya mendukung, panitianya ramah, dan acaranya fun banget. Nggak sabar ikut event selanjutnya!',
-    name: 'Nadine Kusuma',
-    role: 'Orang Tua Peserta',
-  },
-  {
-    text: 'Kejuaraan renang yang diselenggarakan lewat sistem ini sangat terorganisir dengan baik. Anak saya jadi semakin percaya diri dan semangat berlatih renang. Suasana kompetisinya seru tapi tetap menyenangkan untuk anak-anak!',
-    name: 'Rina Setyawati',
-    role: 'Orang Tua Peserta',
-  },
-  {
-    text: 'Sebagai pelatih, saya sangat mengapresiasi penyelenggaraan lomba ini. Hasil muncul real-time, juri lebih cepat, dan orang tua bisa memantau langsung. Pengalaman positif untuk para atlet muda.',
-    name: 'Andi Pratama',
-    role: 'Pelatih Renang',
-  },
-  {
-    text: 'Anak saya ikut lomba renang dari sini dan senang banget! Seru, banyak teman baru, dan langsung dapat peringkat di scoreboard. Pengen ikut lagi event selanjutnya!',
-    name: 'Nayla',
-    role: 'Peserta',
-  },
+const HERO_IMAGES = [
+  { src: '/slider/hero-1.jpg', alt: 'Atlet renang di start block' },
+  { src: '/slider/hero-2.jpg', alt: 'Atlet gaya bebas mid-stroke' },
+  { src: '/slider/hero-3.jpg', alt: 'Atlet gaya dada menyentuh dinding' },
 ];
 
 export default async function HomePage() {
-  const supabase = await createClient();
-
-  const { data: events } = await supabase
-    .from('events')
-    .select(
-      'id, name, location, organizer, start_date, end_date, logo_url',
-    )
-    .eq('is_published', true)
-    .gte('start_date', new Date().toISOString().slice(0, 10))
-    .order('start_date', { ascending: true })
-    .limit(6);
-
-  const upcoming = (events ?? []) as UpcomingEvent[];
-
   return (
     <LandingShell>
       {/* ===== HERO ===== */}
-      <section className="relative overflow-hidden">
-        <LandingAurora />
-
-        <div className="pub-container grid grid-cols-1 items-center gap-10 pt-16 pb-12 sm:pt-24 sm:pb-16 lg:grid-cols-2 lg:gap-12">
-          {/* Teks */}
+      <section className="relative overflow-hidden border-b border-[var(--m-border)] bg-[var(--m-surface)] text-[var(--m-ink)]">
+        <div className="pub-container relative grid grid-cols-1 items-center gap-10 pt-16 pb-12 sm:pt-24 sm:pb-16 lg:grid-cols-2 lg:gap-12">
           <div className="text-center lg:text-left">
-            <span className="pub-chip mx-auto mb-5 w-fit lg:mx-0">
-              <Waves className="h-3.5 w-3.5 text-[var(--m-aqua)]" /> Sistem Kejuaraan Renang · Sejak 2013
+            <span className="pub-chip mx-auto mb-5 w-fit lg:mx-0 border-[var(--m-border)] bg-[var(--m-aqua-soft)] text-[var(--m-aqua-ink)]">
+              <Waves className="h-3.5 w-3.5 text-[var(--m-aqua-ink)]" /> Rajendra Project
             </span>
-            <h1 className="h-display mx-auto max-w-xl lg:mx-0">
-              Selenggarakan lomba renang jadi{' '}
-              <span className="bg-gradient-to-r from-[var(--m-aqua)] to-[var(--m-aqua-2)] bg-clip-text text-transparent">
-                lebih mudah & terukur.
-              </span>
+            <h1 className="mx-auto max-w-xl lg:mx-0 text-3xl font-bold tracking-[-0.03em] sm:text-5xl text-[var(--m-ink)]">
+              Wujudkan Event Olahraga &amp; Spesial Tanpa Beban —{' '}
+              <span className="text-[var(--m-aqua-ink)]">We Make Everything Easy</span>
             </h1>
-            <p className="mx-auto mt-5 max-w-xl text-base text-[var(--m-muted)] sm:text-lg">
-              Rajendra Meet membantu panitia mengelola pendaftaran peserta, menyusun
-              heat, menginput hasil, dan menampilkan scoreboard secara real-time —
-              semua dalam satu sistem yang ramah & menyenangkan.
+            <p className="mx-auto mt-5 max-w-xl text-sm leading-relaxed text-[var(--m-muted)] sm:text-base">
+              Rajendra Project adalah event organizer yang fokus pada olahraga, corporate event,
+              dan MICE — dengan dukungan sistem manajemen kompetisi renang Rajendra Meet agar
+              acara Anda terukur, transparan, dan profesional.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
-              <Link href="/scoreboard" className="pub-btn-primary">
-                Lihat Jadwal Lomba <ArrowRight className="h-4 w-4" />
+              <Link href="/kontak" className="pub-btn-primary">
+                Rekomendasi Event Organizer <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link href="/daftar-lomba" className="pub-btn-ghost">
-                Daftar Lomba
+              <Link href="/kontak" className="pub-btn-ghost">
+                Simulasi RAB Cepat
               </Link>
             </div>
 
-            <dl className="mx-auto mt-10 grid max-w-md grid-cols-3 gap-3 lg:mx-0">
-              {[
-                { v: 'Real-time', l: 'Live scoreboard' },
-                { v: 'Otomatis', l: 'Penyusunan heat' },
-                { v: 'Mudah', l: 'Daftar online' },
-              ].map((s) => (
-                <div key={s.l} className="pub-card rounded-2xl p-4 text-center transition-transform hover:-translate-y-1">
-                  <dt className="text-lg font-bold text-[var(--m-aqua-ink)] sm:text-xl">{s.v}</dt>
-                  <dd className="mt-0.5 text-xs text-[var(--m-muted)] sm:text-sm">{s.l}</dd>
+            <dl className="mx-auto mt-10 grid max-w-md grid-cols-4 gap-3 lg:mx-0">
+              {STATS.map((s) => (
+                <div key={s.label} className="border-l border-[var(--m-border)] px-3 text-center first:border-l-0">
+                  <dt className="text-lg font-bold text-[var(--m-ink)] sm:text-xl">{s.value}</dt>
+                  <dd className="mt-0.5 text-[11px] text-[var(--m-muted)] sm:text-xs">{s.label}</dd>
                 </div>
               ))}
             </dl>
           </div>
 
-          {/* Slider foto yang bergeser */}
           <div className="relative">
-            <div className="absolute -inset-4 -z-10 rounded-[2rem] bg-gradient-to-tr from-[var(--m-aqua-soft)] to-[var(--m-aqua-2)]/30 blur-2xl" />
-            <PhotoSlider className="aspect-[4/5] sm:aspect-[4/3] lg:aspect-[4/5]" />
-            <div className="absolute -bottom-5 -left-5 hidden items-center gap-2 rounded-2xl bg-white px-4 py-2.5 soft-shadow sm:inline-flex">
-              <Sparkles className="h-4 w-4 text-[var(--m-aqua)]" />
-              <span className="text-sm font-semibold text-[var(--m-ink)]">Seru & terukur</span>
+            <div className="grid grid-cols-3 gap-3 sm:gap-4">
+              {HERO_IMAGES.map((img) => (
+                <div key={img.src} className="aspect-[3/4] rounded-2xl bg-white">
+                  <img
+                    src={img.src}
+                    alt={img.alt}
+                    className="h-full w-full rounded-2xl object-cover"
+                    loading="eager"
+                  />
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* ===== LOMBA YANG AKAN DATANG ===== */}
+      {/* ===== LAYANAN PILAR ===== */}
       <section className="pub-container py-12 sm:py-16">
         <div className="mb-8 text-center">
-          <span className="pub-eyebrow">Event</span>
-          <h2 className="h-title mt-2">
-            Lomba Yang Akan Datang
-          </h2>
+          <span className="pub-eyebrow">Layanan</span>
+          <h2 className="h-title mt-2">5 Layanan Pilar Rajendra Project</h2>
         </div>
-
-        {upcoming.length === 0 ? (
-          <div className="pub-card p-12 text-center">
-            <Trophy className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
-            <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Belum ada lomba mendatang</h3>
-            <p className="mt-1 text-sm text-[var(--m-muted)]">
-              Pantau terus — kejuaraan berikutnya akan segera dibuka pendaftarannya.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-5">
-            {upcoming.map((ev) => {
-              const tgl = formatTanggal(ev.start_date);
-              return (
-                <div key={ev.id} className="pub-card elevated overflow-hidden transition-ui hover:-translate-y-1 hover:shadow-pop">
-                  <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center">
-                    {/* Tanggal */}
-                    <div className="flex w-full shrink-0 items-center gap-3 sm:w-32 sm:flex-col sm:items-center sm:gap-0">
-                      <div className="flex h-20 w-20 shrink-0 flex-col items-center justify-center rounded-2xl bg-[var(--m-aqua)] text-white sm:h-24 sm:w-24">
-                        <span className="text-2xl font-black leading-none sm:text-3xl">{tgl.hari}</span>
-                        <span className="text-xs font-semibold uppercase tracking-wide">{tgl.bulan.slice(0, 3)}</span>
-                        <span className="text-[10px] font-medium opacity-90">{tgl.tahun}</span>
-                      </div>
-                    </div>
-
-                    {/* Detail */}
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold leading-snug text-[var(--m-ink)]">{ev.name}</h3>
-                      {ev.organizer && (
-                        <p className="mt-0.5 text-xs font-medium text-[var(--m-aqua-ink)]">{ev.organizer}</p>
-                      )}
-                      {ev.location && (
-                        <p className="mt-1.5 flex items-center gap-2 text-sm text-[var(--m-muted)]">
-                          <MapPin className="h-4 w-4 text-[var(--m-aqua)]" /> {ev.location}
-                        </p>
-                      )}
-                      <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm text-[var(--m-muted)]">
-                        <span className="flex items-center gap-2">
-                          <CalendarDays className="h-4 w-4 text-[var(--m-aqua)]" />
-                          {formatRentang(ev.start_date)}
-                          {ev.end_date !== ev.start_date && ` s/d ${formatRentang(ev.end_date)}`}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* CTA */}
-                    <div className="shrink-0 sm:w-44">
-                      <Link
-                        href={`/scoreboard`}
-                        className="pub-btn-primary w-full"
-                      >
-                        Detail & Hasil
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          {PILLARS.map((item) => (
+            <div key={item.title} className="pub-card p-5 text-center transition-ui hover:-translate-y-1 hover:shadow-pop">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--m-aqua-soft)] text-[var(--m-aqua-ink)]">
+                <Trophy className="h-5 w-5" />
+              </div>
+              <div className="text-sm font-semibold text-[var(--m-ink)]">{item.title}</div>
+              <p className="mt-1 text-xs text-[var(--m-muted)]">{item.desc}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
-      {/* ===== TENTANG ===== */}
+      {/* ===== SCMS ===== */}
       <section className="pub-container py-12 sm:py-16">
-        <div className="pub-card overflow-hidden rounded-3xl">
+        <div className="pub-card overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-2">
             <div className="flex flex-col justify-center gap-4 p-8 sm:p-10">
-              <span className="pub-eyebrow">Tentang Rajendra Meet</span>
-              <h2 className="h-title">
-                Satu sistem untuk seluruh rangkaian kejuaraan renang
-              </h2>
-              <p className="text-sm leading-relaxed text-[var(--m-muted)] sm:text-base">
-                <b>Rajendra Meet</b> adalah sistem manajemen kejuaraan renang yang
-                dirancang ramah panitia dan peserta. Dari pendaftaran online,
-                penyusunan heat otomatis, input hasil oleh juri, hingga live
-                scoreboard yang bisa dipantau orang tua secara langsung — semua
-                terintegrasi agar lomba berjalan lancar, transparan, dan menyenangkan.
+              <span className="pub-eyebrow">Produk Digital</span>
+              <h2 className="h-title">SCMS — Swimming Competition Management System</h2>
+              <p className="text-sm leading-relaxed text-[var(--m-muted)]">
+                SCMS membantu panitia renang mengelola event mulai dari pendaftaran,
+                penjadwalan heat, input hasil juri, hingga live result dan rekap medali.
               </p>
-              <ul className="mt-2 grid grid-cols-1 gap-2 text-sm text-[var(--m-ink)] sm:grid-cols-2">
-                {[
-                  'Pendaftaran peserta online',
-                  'Penyusunan heat & lane',
-                  'Input hasil real-time',
-                  'Live scoreboard & ranking',
-                  'Rekap medali & rekor',
-                  'Ekspor hasil ke Excel/PDF',
-                ].map((f) => (
-                  <li key={f} className="flex items-center gap-2">
-                    <Trophy className="h-4 w-4 shrink-0 text-[var(--m-aqua)]" /> {f}
-                  </li>
+              <div className="mt-2 grid grid-cols-1 gap-2 text-sm text-[var(--m-ink)] sm:grid-cols-2">
+                {FEATURES.map((f) => (
+                  <div key={f.title} className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-[var(--m-aqua)]" /> {f.title}
+                  </div>
                 ))}
-              </ul>
+              </div>
+              <div className="mt-4">
+                <Link href="/scoreboard" className="pub-btn-primary">
+                  Lihat Live Scoreboard <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
             </div>
             <div className="min-h-56 sm:min-h-full">
-              <PhotoSlider photos={ABOUT_PHOTOS} className="h-full min-h-72" />
+              <ResultsTableSample />
             </div>
           </div>
         </div>
       </section>
 
-      {/* ===== TESTIMONI ===== */}
+      {/* ===== KONTAK & PROPOSAL ===== */}
       <section className="pub-container py-12 sm:py-16">
-        <div className="mb-8 text-center">
-          <span className="pub-eyebrow">Testimoni</span>
-          <h2 className="h-title mt-2">
-            Apa Kata Mereka
-          </h2>
-        </div>
-        <Testimonials items={TESTIMONIALS} />
-      </section>
-
-      {/* ===== CTA KONTAK ===== */}
-      <section className="pub-container py-12 sm:py-16">
-        <div className="pub-card flex flex-col items-center gap-4 bg-[var(--m-aqua-soft)] p-8 text-center sm:flex-row sm:text-left">
-          <Trophy className="h-10 w-10 shrink-0 text-[var(--m-aqua-ink)]" />
-          <div className="flex-1">
-            <h3 className="text-lg font-bold text-[var(--m-ink)]">Butuh bantuan menyelenggarakan lomba?</h3>
-            <p className="text-sm text-[var(--m-muted)]">
-              Hubungi tim kami untuk konsultasi kejuaraan renang Anda.
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <div className="pub-card p-6 sm:p-8">
+            <h3 className="text-lg font-bold text-[var(--m-ink)]">Rajendra Event Assistant</h3>
+            <p className="mt-2 text-sm text-[var(--m-muted)]">
+              Butuh konsultasi event atau simulasi RAB? Tim kami siap membantu.
             </p>
+            <div className="mt-4 space-y-2 text-sm text-[var(--m-muted)]">
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-[var(--m-aqua)]" /> rajendra.project25@gmail.com
+              </div>
+              <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-emerald-600" /> 0887-7151-189
+              </div>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <a href="https://wa.me/628877151189" target="_blank" rel="noreferrer" className="pub-btn-ghost">
-              <Phone className="h-4 w-4 text-emerald-600" /> 0887-7151-189
-            </a>
-            <a href="mailto:rajendra.project25@gmail.com" className="pub-btn-ghost">
-              <Mail className="h-4 w-4 text-[var(--m-aqua-ink)]" /> Email
-            </a>
-            <a href="https://instagram.com/rajendraproject25" target="_blank" rel="noreferrer" className="pub-btn-ghost">
-              <Share2 className="h-4 w-4 text-pink-600" /> Instagram
-            </a>
+          <div className="pub-card p-6 sm:p-8">
+            <h3 className="text-lg font-bold text-[var(--m-ink)]">Minta Proposal &amp; Penawaran RAB Resmi</h3>
+            <form className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <input className="w-full rounded-lg border border-border px-3 py-2 text-sm" placeholder="Nama" />
+              <input className="w-full rounded-lg border border-border px-3 py-2 text-sm" placeholder="Perusahaan" />
+              <input className="w-full rounded-lg border border-border px-3 py-2 text-sm" placeholder="Email" />
+              <input className="w-full rounded-lg border border-border px-3 py-2 text-sm" placeholder="Nomor HP" />
+              <textarea className="col-span-full h-24 w-full rounded-lg border border-border px-3 py-2 text-sm" placeholder="Pesan" />
+              <button type="button" className="col-span-full pub-btn-primary">
+                Kirim Permintaan <ArrowRight className="h-4 w-4" />
+              </button>
+            </form>
           </div>
         </div>
       </section>

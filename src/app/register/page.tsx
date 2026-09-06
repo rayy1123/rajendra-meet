@@ -1,297 +1,233 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
-import { Waves, Lock, Mail, Loader2, User, CheckCircle2, Send, Trophy, Timer, Users } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
+import Link from 'next/link';
+import { SplitAuthShell } from '@/components/layout/split-auth-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ThemeToggle } from '@/components/modules/theme-toggle';
-import Link from 'next/link';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
+
+interface SchoolOption {
+  id: string;
+  name: string;
+}
 
 export default function RegisterPage() {
-  const router = useRouter();
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirm, setConfirm] = useState('');
+  const [form, setForm] = useState({
+    full_name: '',
+    username: '',
+    password: '',
+    confirm_password: '',
+    phone: '',
+  });
+  const [selectedSchoolId, setSelectedSchoolId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [infoMsg, setInfoMsg] = useState('');
-  const [needConfirm, setNeedConfirm] = useState(false);
-  const [resending, setResending] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
+  const [schools, setSchools] = useState<SchoolOption[]>([]);
+  const [schoolsLoaded, setSchoolsLoaded] = useState(false);
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const loadSchools = async () => {
+    try {
+      const res = await fetch('/api/schools');
+      if (res.ok) {
+        const data = await res.json();
+        const schoolsData = Array.isArray(data) ? data : data?.data ?? [];
+        setSchools(
+          schoolsData.map((s: any) => ({
+            id: s.id,
+            name: s.name,
+          })),
+        );
+      }
+    } finally {
+      setSchoolsLoaded(true);
+    }
+  };
+
+  useEffect(() => {
+    if (!schoolsLoaded) {
+      loadSchools();
+    }
+  }, [schoolsLoaded]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setErrorMsg('');
-    setInfoMsg('');
+    setSuccessMsg('');
 
-    if (password.length < 6) {
-      setErrorMsg('Password minimal 6 karakter.');
+    if (!selectedSchoolId) {
+      setErrorMsg('Pilih kontingen terlebih dahulu.');
       setLoading(false);
       return;
     }
-    if (password !== confirm) {
+    if (!form.full_name || !form.username || !form.password) {
+      setErrorMsg('Nama lengkap, username, dan password wajib diisi.');
+      setLoading(false);
+      return;
+    }
+    if (form.password !== form.confirm_password) {
       setErrorMsg('Konfirmasi password tidak cocok.');
       setLoading(false);
       return;
     }
 
     try {
-      const supabase = createClient();
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { full_name: fullName },
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard-viewer`,
-        },
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          full_name: form.full_name,
+          username: form.username,
+          password: form.password,
+          school_id: selectedSchoolId,
+          phone: form.phone || null,
+        }),
       });
 
-      if (error) {
-        const msg = (error.message || '').toLowerCase();
-        if (
-          error.status === 422 ||
-          msg.includes('already registered') ||
-          msg.includes('already been registered') ||
-          msg.includes('user already') ||
-          msg.includes('email already')
-        ) {
-          setErrorMsg('Email sudah terdaftar. Silakan masuk dengan akun tersebut.');
-        } else if (error.status === 429 || msg.includes('rate limit')) {
-          setErrorMsg('Pengiriman email dibatasi sementara. Mohon tunggu beberapa saat dan coba lagi.');
-        } else {
-          setErrorMsg(error.message);
-        }
-        setLoading(false);
-        return;
+      if (!res.ok) {
+        const payload = await res.json().catch(() => ({}));
+        const msg = payload?.error || 'Gagal membuat akun.';
+        throw new Error(msg);
       }
 
-      if (data.session === null) {
-        setNeedConfirm(true);
-        setInfoMsg(
-          'Pendaftaran diterima! Silakan cek email Anda untuk verifikasi, lalu masuk. ' +
-            'Jika tidak ada email, klik "Kirim Ulang Email" di bawah.'
-        );
-        setLoading(false);
-        return;
-      }
-
-      router.push('/dashboard-viewer');
-      router.refresh();
+      setSuccessMsg('Pendaftaran berhasil.');
+      toast.success('Pendaftaran berhasil');
+      setForm({
+        full_name: '',
+        username: '',
+        password: '',
+        confirm_password: '',
+        phone: '',
+      });
+      setSelectedSchoolId(null);
+      setTimeout(() => {
+        window.location.assign('/login');
+      }, 800);
     } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : 'Terjadi kesalahan sistem.');
+      const msg = err instanceof Error ? err.message : 'Terjadi kesalahan sistem.';
+      setErrorMsg(msg);
+      toast.error(msg);
+    } finally {
       setLoading(false);
     }
   };
 
-  const handleResend = async () => {
-    setResending(true);
-    setErrorMsg('');
-    try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard-viewer` },
-      });
-      if (error) {
-        if (error.status === 429 || (error.message || '').includes('rate limit')) {
-          setErrorMsg('Pengiriman email dibatasi sementara. Mohon tunggu beberapa saat.');
-        } else {
-          setErrorMsg(error.message);
-        }
-      } else {
-        setInfoMsg('Email verifikasi telah dikirim ulang. Silakan cek kotak masuk Anda.');
-      }
-    } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : 'Gagal mengirim ulang email.');
-    } finally {
-      setResending(false);
-    }
-  };
-
   return (
-    <div className="flex min-h-screen bg-background">
-      {/* Panel brand (kiri) — tersembunyi di mobile */}
-      <div className="relative hidden w-1/2 overflow-hidden bg-gradient-to-br from-[var(--m-aqua)] via-[var(--brand-2)] to-[var(--brand-3)] lg:flex lg:flex-col lg:justify-between lg:p-12">
-        <div className="absolute -left-20 top-10 h-72 w-72 rounded-full bg-white/15 blur-3xl animate-blob" />
-        <div className="absolute -right-16 bottom-20 h-80 w-80 rounded-full bg-white/10 blur-3xl animate-blob-slow" />
-        <div className="relative flex items-center gap-3 text-white">
-          <img src="/brand/logo.png" alt="Rajendra Meet" className="h-10 w-auto rounded-lg bg-white/90 p-1" />
-          <span className="text-xl font-bold tracking-tight">Rajendra Meet</span>
-        </div>
-        <div className="relative space-y-6 text-white">
-          <h2 className="text-3xl font-bold leading-tight tracking-tight">
-            Daftar sebagai viewer untuk kelola atlet Anda sendiri.
-          </h2>
-          <ul className="space-y-3 text-white/90">
-            {[
-              { icon: Users, t: 'Kelola data atlet sendiri' },
-              { icon: Timer, t: 'Daftarkan ke nomor lomba' },
-              { icon: Trophy, t: 'Pantau hasil & peringkat' },
-            ].map((f) => (
-              <li key={f.t} className="flex items-center gap-3">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20">
-                  <f.icon className="h-4 w-4" />
-                </span>
-                {f.t}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <p className="relative text-sm text-white/70">We Organize, You Achieve.</p>
-      </div>
-
-      {/* Form (kanan) */}
-      <div className="flex w-full flex-col px-4 lg:w-1/2">
-        <div className="flex justify-end p-4">
-          <ThemeToggle />
-        </div>
-        <div className="flex flex-1 items-center justify-center pb-10">
-          <div className="w-full max-w-md">
-            <div className="mb-6 flex items-center gap-3 lg:hidden">
-              <img src="/brand/logo.png" alt="Rajendra Meet" className="h-9 w-auto rounded-md" />
-              <span className="text-lg font-bold tracking-tight text-foreground">Rajendra Meet</span>
+    <SplitAuthShell
+      title="Buat Akun Baru"
+      subtitle="Daftar untuk mengakses sistem manajemen kompetisi."
+      footerLinks={[
+        { label: 'Bantuan Teknis', href: '#' },
+        { label: 'Privasi', href: '#' },
+      ]}
+    >
+      {(errorMsg || successMsg) && (
+        <div className="mb-5 space-y-2">
+          {errorMsg && (
+            <div className="rounded-lg border border-red-400/30 bg-red-500/10 p-3 text-sm font-medium text-red-600">
+              {errorMsg}
             </div>
-
-            {!needConfirm ? (
-              <div className="rounded-3xl border border-border bg-card p-7 shadow-[var(--shadow-card)]">
-                <h1 className="text-2xl font-bold tracking-tight text-foreground">Daftar Akun Viewer</h1>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Buat akun untuk menginput data sendiri. Anda akan masuk sebagai viewer.
-                </p>
-
-                <form onSubmit={handleRegister} className="mt-6 space-y-4">
-                  {errorMsg && (
-                    <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive">
-                      {errorMsg}
-                    </div>
-                  )}
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-foreground">Nama Lengkap</label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        type="text"
-                        placeholder="Nama Anda"
-                        className="pl-9"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-foreground">Email</label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        type="email"
-                        placeholder="email@gmail.com"
-                        className="pl-9"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-foreground">Password</label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        type="password"
-                        placeholder="Buat password Anda"
-                        className="pl-9"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-foreground">Konfirmasi Password</label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        type="password"
-                        placeholder="Tulis Ulang Password Anda"
-                        className="pl-9"
-                        value={confirm}
-                        onChange={(e) => setConfirm(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <Button type="submit" className="mt-2 w-full" disabled={loading}>
-                    {loading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Memproses...
-                      </>
-                    ) : (
-                      'Daftar'
-                    )}
-                  </Button>
-                </form>
-
-                <p className="mt-5 text-center text-sm text-muted-foreground">
-                  Sudah punya akun?{' '}
-                  <Link href="/login" className="font-medium text-primary hover:underline">
-                    Masuk di sini
-                  </Link>
-                </p>
-                <p className="mt-4 text-center">
-                  <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-ui hover:text-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-                      <path d="m12 19-7-7 7-7" />
-                      <path d="M19 12H5" />
-                    </svg>
-                    Kembali ke beranda
-                  </Link>
-                </p>
-              </div>
-            ) : (
-              <div className="rounded-3xl border border-border bg-card p-7 shadow-[var(--shadow-card)]">
-                <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/10 p-4">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                  <p className="text-sm text-primary-ink">{infoMsg}</p>
-                </div>
-                {errorMsg && (
-                  <div className="mt-4 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive">
-                    {errorMsg}
-                  </div>
-                )}
-                <Button
-                  variant="outline"
-                  className="mt-5 w-full"
-                  onClick={handleResend}
-                  disabled={resending}
-                >
-                  {resending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-                  Kirim Ulang Email
-                </Button>
-                <p className="mt-5 text-center">
-                  <Link href="/login" className="font-medium text-primary hover:underline">
-                    Kembali ke halaman masuk
-                  </Link>
-                </p>
-              </div>
-            )}
-
-            <p className="mt-4 text-center text-xs text-muted-foreground">
-              Licensed By Rayvanes Arrasyid
-            </p>
-          </div>
+          )}
+          {successMsg && (
+            <div className="rounded-lg border border-emerald-400/30 bg-emerald-500/10 p-3 text-sm font-medium text-emerald-700">
+              {successMsg}
+            </div>
+          )}
         </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-[#0b1220]">Kontingen</label>
+          <Select value={selectedSchoolId ?? ''} onValueChange={(v) => setSelectedSchoolId(v || null)}>
+            <SelectTrigger className="bg-white text-[#0b1220] border-[#cbd5e1] focus-visible:ring-cyan-300">
+              <SelectValue placeholder="-- Pilih Kontingen --" />
+            </SelectTrigger>
+            <SelectContent>
+              {schools.map((s) => (
+                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-[#0b1220]">Nama Lengkap</label>
+          <Input
+            type="text"
+            placeholder="Nama sesuai identitas"
+            className="bg-white text-[#0b1220] placeholder-[#64748b] border-[#cbd5e1] focus-visible:ring-cyan-300"
+            value={form.full_name}
+            onChange={(e) => setForm((s) => ({ ...s, full_name: e.target.value }))}
+            required
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-[#0b1220]">Username</label>
+          <Input
+            type="text"
+            placeholder="Buat username untuk login"
+            className="bg-white text-[#0b1220] placeholder-[#64748b] border-[#cbd5e1] focus-visible:ring-cyan-300"
+            value={form.username}
+            onChange={(e) => setForm((s) => ({ ...s, username: e.target.value }))}
+            required
+          />
+          <p className="text-xs text-[#334155]">Gunakan huruf, angka, atau underscore.</p>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-[#0b1220]">Kata Sandi</label>
+          <Input
+            type="password"
+            placeholder="Minimal 6 karakter"
+            className="bg-white text-[#0b1220] placeholder-[#64748b] border-[#cbd5e1] focus-visible:ring-cyan-300"
+            value={form.password}
+            onChange={(e) => setForm((s) => ({ ...s, password: e.target.value }))}
+            required
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-[#0b1220]">Konfirmasi Kata Sandi</label>
+          <Input
+            type="password"
+            placeholder="Ulangi kata sandi"
+            className="bg-white text-[#0b1220] placeholder-[#64748b] border-[#cbd5e1] focus-visible:ring-cyan-300"
+            value={form.confirm_password}
+            onChange={(e) => setForm((s) => ({ ...s, confirm_password: e.target.value }))}
+            required
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-[#0b1220]">Nomor HP</label>
+          <Input
+            type="tel"
+            placeholder="Opsional"
+            className="bg-white text-[#0b1220] placeholder-[#64748b] border-[#cbd5e1] focus-visible:ring-cyan-300"
+            value={form.phone}
+            onChange={(e) => setForm((s) => ({ ...s, phone: e.target.value }))}
+          />
+        </div>
+
+        <Button type="submit" className="w-full bg-cyan-600 text-white hover:bg-cyan-700" disabled={loading}>
+          Daftar
+        </Button>
+      </form>
+
+      <div className="mt-5 space-y-2 text-center text-sm text-[#334155]">
+        <p>
+          Sudah punya akun?{' '}
+          <Link href="/login" className="font-medium text-cyan-700 hover:text-cyan-900">
+            Masuk
+          </Link>
+        </p>
       </div>
-    </div>
+    </SplitAuthShell>
   );
 }

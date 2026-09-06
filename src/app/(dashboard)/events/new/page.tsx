@@ -9,7 +9,6 @@ import { Input } from '@/components/ui/input';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 
-import { Loader2 } from 'lucide-react';
 
 export default function NewEventPage() {
   const router = useRouter();
@@ -102,7 +101,6 @@ export default function NewEventPage() {
               </div>
             </div>
             <Button type="submit" disabled={saving} className="w-full">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               Simpan Event
             </Button>
           </form>

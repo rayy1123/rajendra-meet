@@ -4,7 +4,8 @@ import { useEffect, useState, useCallback, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { formatMsToTime } from '@/lib/utils';
 import { rankResults, type RankableResult, type ResultStatus } from '@/services/ranking';
-import { Loader2, Trophy, ListOrdered, Layers, Timer, CheckCircle2 } from 'lucide-react';
+import { Trophy, ListOrdered, Layers, Timer, CheckCircle2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 export interface CompEvent {
   id: string;
@@ -58,8 +59,6 @@ interface LeaderboardViewProps {
   embedded?: boolean;
   /** Tampilkan tab Per Acara (berguna di halaman live penuh). */
   showHeatTab?: boolean;
-  /** Tampilkan tombol pilih nomor lomba. False bila pemilih sudah di luar (mis. CompEventPicker). */
-  showEventTabs?: boolean;
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -69,16 +68,14 @@ const STATUS_LABEL: Record<string, string> = {
   scr: 'SCR',
 };
 
-export function LeaderboardView({ compEvents, embedded, showHeatTab = true, showEventTabs = true }: LeaderboardViewProps) {
+export function LeaderboardView({ compEvents, embedded, showHeatTab = true }: LeaderboardViewProps) {
   const supabase = useMemo(() => createClient(), []);
   const [selectedCompEventId, setSelectedCompEventId] = useState<string>(compEvents[0]?.id || '');
   const [heats, setHeats] = useState<HeatGroup[]>([]);
-  const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<'rank' | 'heat'>('rank');
 
   const fetchData = useCallback(async () => {
     if (!selectedCompEventId) return;
-    setLoading(true);
     const { data } = await supabase
       .from('heats')
       .select(`
@@ -114,19 +111,15 @@ export function LeaderboardView({ compEvents, embedded, showHeatTab = true, show
       }))
     );
     setHeats(flat);
-    setLoading(false);
   }, [selectedCompEventId, supabase]);
 
   useEffect(() => {
-    let isMounted = true;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (selectedCompEventId) fetchData().finally(() => isMounted && setLoading(false));
+    if (selectedCompEventId) fetchData();
     const channel = supabase
       .channel(`leaderboard-${selectedCompEventId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'results' }, () => fetchData())
       .subscribe();
     return () => {
-      isMounted = false;
       supabase.removeChannel(channel);
     };
   }, [selectedCompEventId, fetchData, supabase]);
@@ -203,7 +196,7 @@ export function LeaderboardView({ compEvents, embedded, showHeatTab = true, show
 
   if (compEvents.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-[var(--m-border)] py-14 text-center text-[var(--m-muted)]">
+      <div className="rounded-2xl border border-dashed border-[var(--m-border)] bg-[var(--m-surface)] px-6 py-14 text-center text-sm text-[var(--m-muted)]">
         Belum ada nomor lomba untuk kejuaraan ini.
       </div>
     );
@@ -212,7 +205,7 @@ export function LeaderboardView({ compEvents, embedded, showHeatTab = true, show
   return (
     <div className={embedded ? 'space-y-3' : 'space-y-6'}>
       {/* Pilihan nomor lomba / acara */}
-      <div className="pub-card flex flex-col gap-3 p-4">
+      <div className="pub-card flex flex-col gap-3 p-4 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="pub-eyebrow">Pilih Acara / Nomor Lomba</p>
           <div className="flex items-center gap-2">
@@ -233,7 +226,7 @@ export function LeaderboardView({ compEvents, embedded, showHeatTab = true, show
         <select
           value={selectedCompEventId}
           onChange={(e) => { setSelectedCompEventId(e.target.value); setTab('rank'); }}
-          className="w-full rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] px-3.5 py-2.5 text-sm font-semibold text-[var(--m-ink)] shadow-sm transition-colors hover:border-[var(--m-aqua)] focus:border-[var(--m-aqua)] focus:outline-none sm:w-auto sm:min-w-[340px]"
+          className="w-full rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] px-3.5 py-2.5 text-sm font-semibold text-[var(--m-ink)] shadow-sm transition-colors hover:border-[var(--m-aqua)] focus:border-[var(--m-aqua)] focus:outline-none focus:ring-2 focus:ring-[var(--m-aqua)]/20 sm:w-auto sm:min-w-[340px]"
         >
           {sortedCompEvents.map((ce) => {
             const usia =
@@ -252,13 +245,8 @@ export function LeaderboardView({ compEvents, embedded, showHeatTab = true, show
         </select>
       </div>
 
-      {loading ? (
-        <div className="flex flex-col items-center justify-center space-y-2 py-16 text-[var(--m-muted)]">
-          <Loader2 className="h-8 w-8 animate-spin text-[var(--m-aqua)]" />
-          <p className="text-sm">Memuat hasil lomba…</p>
-        </div>
-      ) : total === 0 ? (
-        <div className="rounded-xl border border-dashed border-[var(--m-border)] py-14 text-center text-[var(--m-muted)]">
+      {total === 0 ? (
+        <div className="rounded-2xl border border-dashed border-[var(--m-border)] bg-[var(--m-surface)] px-6 py-14 text-center text-sm text-[var(--m-muted)]">
           Belum ada Acara / Jadwal Lomba untuk nomor ini.
         </div>
       ) : (
@@ -279,7 +267,7 @@ export function LeaderboardView({ compEvents, embedded, showHeatTab = true, show
 
           {/* Tab */}
           {showHeatTab && (
-            <div className="inline-flex rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] p-1">
+            <div className="inline-flex rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] p-1 shadow-sm">
               <TabBtn active={tab === 'rank'} onClick={() => setTab('rank')} icon={<ListOrdered className="h-4 w-4" />} label="Peringkat" />
               <TabBtn active={tab === 'heat'} onClick={() => setTab('heat')} icon={<Layers className="h-4 w-4" />} label="Akumulasi Acara" />
             </div>
@@ -302,7 +290,7 @@ export function LeaderboardView({ compEvents, embedded, showHeatTab = true, show
                   const isDnf = r.status !== 'finished';
                   const rankClass = r.rank === 1 ? 'rank-1' : r.rank === 2 ? 'rank-2' : r.rank === 3 ? 'rank-3' : 'rank-n';
                   return (
-                    <div key={r.registration_id} className="flex items-stretch gap-3 px-3 py-2.5 transition-colors hover:bg-[var(--m-aqua-soft)] sm:px-4">
+                    <div key={r.registration_id} className="flex items-stretch gap-3 px-3 py-3 transition-colors hover:bg-[var(--m-aqua-soft)] sm:px-4">
                       <span className={`${rankClass} h-auto w-9 shrink-0 self-center`}>{r.rank ?? '–'}</span>
                       <span className="flex w-9 shrink-0 self-center flex-col items-center justify-center rounded-lg bg-[var(--m-aqua-soft)] py-1 text-[var(--m-aqua-ink)]">
                         <span className="text-[9px] font-semibold uppercase leading-none">Lane</span>
@@ -316,7 +304,7 @@ export function LeaderboardView({ compEvents, embedded, showHeatTab = true, show
                       <div className="flex shrink-0 flex-col items-end justify-center gap-0.5">
                         <span className="pub-time text-xl leading-none text-[var(--m-aqua-ink)] sm:text-2xl">
                           {isDnf ? (
-                            <span className="rounded-md bg-red-50 px-2 py-0.5 font-mono text-xs font-bold uppercase text-red-600">{STATUS_LABEL[r.status] || r.status}</span>
+                            <Badge variant="destructive" className="font-mono text-xs font-bold uppercase">{STATUS_LABEL[r.status] || r.status}</Badge>
                           ) : h?.time_ms ? (
                             formatMsToTime(h.time_ms)
                           ) : (
@@ -353,7 +341,7 @@ export function LeaderboardView({ compEvents, embedded, showHeatTab = true, show
                           const isDnf = raw !== 'finished';
                           const rank = rankByReg.get(l.registration_id || l.id);
                           return (
-                            <div key={l.id} className="flex items-stretch gap-2.5 bg-[var(--m-surface)] px-3 py-2 sm:px-4">
+                            <div key={l.id} className="flex items-stretch gap-2.5 bg-[var(--m-surface)] px-3 py-2.5 sm:px-4">
                               <span className="flex w-8 shrink-0 self-center flex-col items-center justify-center rounded-lg bg-[var(--m-aqua-soft)] py-1 text-[var(--m-aqua-ink)]">
                                 <span className="text-[8px] font-semibold uppercase leading-none">Lane</span>
                                 <span className="text-sm font-black leading-none">{l.lane_number}</span>
@@ -365,7 +353,7 @@ export function LeaderboardView({ compEvents, embedded, showHeatTab = true, show
                               <div className="flex shrink-0 flex-col items-end justify-center gap-0.5">
                                 <div className="flex items-center gap-1">
                                   {isDnf && l.status ? (
-                                    <span className="rounded bg-red-50 px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase text-red-600">{STATUS_LABEL[l.status] || l.status}</span>
+                                    <Badge variant="destructive" className="font-mono text-[10px] font-bold uppercase rounded">{STATUS_LABEL[l.status] || l.status}</Badge>
                                   ) : l.time_ms ? (
                                     <span className="pub-time text-sm text-[var(--m-aqua-ink)]">{formatMsToTime(l.time_ms)}</span>
                                   ) : (
@@ -409,7 +397,7 @@ function TabBtn({ active, onClick, icon, label }: { active: boolean; onClick: ()
     <button
       onClick={onClick}
       className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors ${
-        active ? 'bg-[var(--m-aqua)] text-white' : 'text-[var(--m-muted)] hover:text-[var(--m-ink)]'
+        active ? 'bg-[var(--m-aqua)] text-white shadow-sm' : 'text-[var(--m-muted)] hover:bg-[var(--m-aqua-soft)] hover:text-[var(--m-ink)]'
       }`}
     >
       {icon} {label}

@@ -6,7 +6,7 @@ import { formatMsToTime } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Radio } from 'lucide-react';
+import { Radio, UsersRound } from 'lucide-react';
 
 interface LiveHeatAssignment {
   id: string;
@@ -38,7 +38,6 @@ export function LiveScoreboardView({ compEvents }: LiveScoreboardViewProps) {
   const supabase = useMemo(() => createClient(), []);
   const [selectedCompEventId, setSelectedCompEventId] = useState<string>(compEvents[0]?.id || '');
   const [heatsData, setHeatsData] = useState<LiveHeat[]>([]);
-  const [loading, setLoading] = useState(true);
 
   // Fetch data Heat & Hasil Lomba
   const fetchScores = useCallback(async () => {
@@ -74,13 +73,8 @@ export function LiveScoreboardView({ compEvents }: LiveScoreboardViewProps) {
   }, [selectedCompEventId, supabase]);
 
   useEffect(() => {
-    let isMounted = true;
-
     if (selectedCompEventId) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      fetchScores().finally(() => {
-        if (isMounted) setLoading(false);
-      });
+      fetchScores();
     }
 
     // Setup Supabase Realtime listener pada tabel 'results'
@@ -96,7 +90,6 @@ export function LiveScoreboardView({ compEvents }: LiveScoreboardViewProps) {
       .subscribe();
 
     return () => {
-      isMounted = false;
       supabase.removeChannel(channel);
     };
   }, [selectedCompEventId, fetchScores, supabase]);
@@ -104,13 +97,13 @@ export function LiveScoreboardView({ compEvents }: LiveScoreboardViewProps) {
   return (
     <div className="space-y-6">
       {/* Select Nomor Lomba */}
-      <div className="pub-card flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="pub-card flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
         <div className="w-full space-y-1 sm:w-auto">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--m-muted)]">
             Pilih Nomor Lomba
           </p>
           <Select value={selectedCompEventId} onValueChange={setSelectedCompEventId}>
-            <SelectTrigger className="w-full bg-[var(--m-surface)] font-semibold sm:w-[380px]">
+            <SelectTrigger className="w-full border-[var(--m-border)] bg-[var(--m-surface)] font-semibold text-[var(--m-ink)] shadow-sm transition-colors hover:border-[var(--m-aqua)] focus:ring-2 focus:ring-[var(--m-aqua)]/20 sm:w-[380px]">
               <SelectValue placeholder="Pilih Nomor Lomba" />
             </SelectTrigger>
             <SelectContent>
@@ -123,31 +116,30 @@ export function LiveScoreboardView({ compEvents }: LiveScoreboardViewProps) {
           </Select>
         </div>
 
-        <div className="flex items-center gap-2 rounded-full border border-[var(--m-border)] bg-[var(--m-aqua-soft)] px-3 py-1.5 text-xs font-bold text-[var(--m-aqua-ink)]">
-          <Radio className="h-3.5 w-3.5 animate-ping text-[var(--m-aqua)]" /> Realtime Aktif
+        <div className="flex items-center gap-2 self-start rounded-full border border-[var(--m-border)] bg-[var(--m-aqua-soft)] px-3 py-1.5 text-xs font-bold text-[var(--m-aqua-ink)] sm:self-auto">
+          <span className="relative inline-flex h-3.5 w-3.5 items-center justify-center" aria-hidden="true">
+            <span className="absolute inline-flex h-3.5 w-3.5 animate-ping rounded-full bg-[var(--m-aqua)]/60" />
+            <Radio className="relative h-3.5 w-3.5 text-[var(--m-aqua)]" />
+          </span>
+          Realtime Aktif
         </div>
       </div>
 
       {/* Render Heats & Leaderboard */}
-      {loading ? (
-        <div className="flex flex-col items-center justify-center space-y-2 py-20 text-[var(--m-muted)]">
-          <Loader2 className="h-8 w-8 animate-spin text-[var(--m-aqua)]" />
-          <p className="text-sm">Memuat data lintasan & hasil waktu…</p>
-        </div>
-      ) : heatsData.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-[var(--m-border)] py-16 text-center text-[var(--m-muted)]">
+      {heatsData.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-[var(--m-border)] bg-[var(--m-surface)] px-6 py-16 text-center text-sm text-[var(--m-muted)]">
           Belum ada Acara / Jadwal Lomba untuk nomor ini.
         </div>
       ) : (
         <div className="space-y-6">
           {heatsData.map((heat) => (
-            <Card key={heat.id} className="overflow-hidden border-[var(--m-border)] shadow-sm">
-              <CardHeader className="flex flex-row items-center justify-between border-b border-[var(--m-border)] bg-[var(--m-aqua-soft)] py-3">
+            <Card key={heat.id} className="overflow-hidden border-[var(--m-border)] bg-[var(--m-surface)] shadow-sm">
+              <CardHeader className="flex flex-row items-center justify-between border-b border-[var(--m-border)] bg-[var(--m-aqua-soft)] py-3 sm:px-6">
                 <CardTitle className="text-base font-black uppercase tracking-wide text-[var(--m-ink)]">
                   Acara {heat.heat_number}
                 </CardTitle>
-                <Badge variant="outline" className="border-[var(--m-border)] text-[var(--m-muted)]">
-                  {heat.heat_assignments?.length || 0} Atlet
+                <Badge variant="outline" className="gap-1 border-[var(--m-border)] text-[var(--m-muted)]">
+                  <UsersRound className="h-3 w-3" /> {heat.heat_assignments?.length || 0} Atlet
                 </Badge>
               </CardHeader>
 

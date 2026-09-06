@@ -2,8 +2,6 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -50,36 +48,33 @@
 
 /*
   =====================================================================
-  SCMS Design Tokens — "Aqua Editorial"
-  Light, refined, editorial sports-timing aesthetic. Deep ocean -> cyan
-  water palette as brand accent (elegant, not neon / not dark "AI").
-  One cohesive language for dashboard + public pages.
+  SCMS Design Tokens — Light only
   ===================================================================== */
 :root {
   /* Surfaces — soft, layered whites with a cool blue cast */
-  --background: oklch(0.985 0.012 232);
-  --foreground: oklch(0.24 0.05 245);
+  --background: oklch(0.975 0.008 90);
+  --foreground: oklch(0.255 0.035 244);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.24 0.05 245);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.24 0.05 245);
 
   /* Brand — deep ocean -> cyan water */
-  --primary: oklch(0.58 0.13 222);
+  --primary: oklch(0.49 0.105 218);
   --primary-foreground: oklch(0.99 0.005 222);
-  --primary-ink: oklch(0.42 0.11 230);
-  --primary-soft: oklch(0.96 0.04 222);
+  --primary-ink: oklch(0.37 0.08 224);
+  --primary-soft: oklch(0.945 0.025 218);
   --brand-2: oklch(0.66 0.13 205);
   --brand-3: oklch(0.5 0.12 240);
 
   /* Muted / secondary */
-  --secondary: oklch(0.955 0.015 230);
+  --secondary: oklch(0.94 0.012 90);
   --secondary-foreground: oklch(0.24 0.05 245);
-  --muted: oklch(0.962 0.012 230);
-  --muted-foreground: oklch(0.5 0.025 245);
+  --muted: oklch(0.945 0.009 90);
+  --muted-foreground: oklch(0.52 0.02 244);
 
   /* Accent (hover / subtle) */
-  --accent: oklch(0.955 0.025 222);
+  --accent: oklch(0.94 0.021 218);
   --accent-foreground: oklch(0.24 0.05 245);
 
   /* Destructive */
@@ -87,9 +82,9 @@
   --destructive-foreground: oklch(0.985 0 0);
 
   /* Lines & focus */
-  --border: oklch(0.9 0.015 232);
-  --input: oklch(0.9 0.015 232);
-  --ring: oklch(0.58 0.13 222);
+  --border: oklch(0.875 0.012 90);
+  --input: oklch(0.84 0.014 90);
+  --ring: oklch(0.49 0.105 218);
 
   /* Layered, soft elevations (Vercel/Linear/Notion feel) */
   --shadow-card: 0 1px 2px rgba(16, 40, 70, 0.04), 0 10px 30px -16px rgba(16, 40, 70, 0.18);
@@ -102,113 +97,48 @@
   --chart-4: oklch(0.7 0.11 190);
   --chart-5: oklch(0.62 0.1 265);
 
-  --radius: 1rem;
+  --radius: 0.75rem;
 
   /* Sidebar (ocean-tinted) */
-  --sidebar: oklch(0.992 0.008 230);
+  --sidebar: oklch(0.965 0.01 90);
   --sidebar-foreground: oklch(0.33 0.04 245);
   --sidebar-primary: oklch(0.58 0.13 222);
   --sidebar-primary-foreground: oklch(0.99 0.005 222);
-  --sidebar-accent: oklch(0.95 0.03 222);
+  --sidebar-accent: oklch(0.93 0.022 218);
   --sidebar-accent-foreground: oklch(0.24 0.05 245);
   --sidebar-border: oklch(0.9 0.015 232);
   --sidebar-ring: oklch(0.58 0.13 222);
 
   /* ---- Public theme aliases (Aqua) ---- */
-  --m-bg: oklch(0.985 0.012 232);
+  --m-bg: oklch(0.975 0.008 90);
   --m-surface: oklch(1 0 0);
   --m-ink: oklch(0.24 0.05 245);
   --m-muted: oklch(0.5 0.025 245);
   --m-border: oklch(0.9 0.015 232);
-  --m-aqua: oklch(0.58 0.13 222);
-  --m-aqua-ink: oklch(0.42 0.11 230);
-  --m-aqua-soft: oklch(0.96 0.04 222);
+  --m-aqua: oklch(0.49 0.105 218);
+  --m-aqua-ink: oklch(0.37 0.08 224);
+  --m-aqua-soft: oklch(0.945 0.025 218);
   --m-aqua-2: oklch(0.66 0.13 205);
   --m-navy: oklch(0.27 0.06 235);
-  --m-soft: oklch(0.97 0.012 232);
+  --m-soft: oklch(0.95 0.009 90);
   --m-orange: oklch(0.7 0.17 45);
-}
-
-/* =====================================================================
-   Dark mode — "Deep Ocean Night": navy gelap elegan (bukan neon).
-   Override token publik & shadcn saat <html> punya class .dark.
-   ===================================================================== */
-.dark {
-  --background: oklch(0.21 0.03 240);
-  --foreground: oklch(0.92 0.01 240);
-  --card: oklch(0.25 0.035 240);
-  --card-foreground: oklch(0.92 0.01 240);
-  --popover: oklch(0.25 0.035 240);
-  --popover-foreground: oklch(0.92 0.01 240);
-
-  --primary: oklch(0.68 0.13 218);
-  --primary-foreground: oklch(0.15 0.02 240);
-  --primary-ink: oklch(0.8 0.1 220);
-  --primary-soft: oklch(0.3 0.06 225);
-  --brand-2: oklch(0.72 0.13 200);
-  --brand-3: oklch(0.6 0.12 240);
-
-  --secondary: oklch(0.28 0.035 240);
-  --secondary-foreground: oklch(0.92 0.01 240);
-  --muted: oklch(0.32 0.03 240);
-  --muted-foreground: oklch(0.7 0.02 240);
-
-  --accent: oklch(0.3 0.05 225);
-  --accent-foreground: oklch(0.92 0.01 240);
-
-  --destructive: oklch(0.65 0.22 27);
-  --destructive-foreground: oklch(0.98 0 0);
-
-  --border: oklch(0.34 0.03 240);
-  --input: oklch(0.34 0.03 240);
-  --ring: oklch(0.68 0.13 218);
-
-  --chart-1: oklch(0.68 0.13 218);
-  --chart-2: oklch(0.72 0.13 200);
-  --chart-3: oklch(0.6 0.12 240);
-  --chart-4: oklch(0.75 0.11 190);
-  --chart-5: oklch(0.66 0.1 265);
-
-  --sidebar: oklch(0.18 0.025 240);
-  --sidebar-foreground: oklch(0.82 0.015 240);
-  --sidebar-primary: oklch(0.68 0.13 218);
-  --sidebar-primary-foreground: oklch(0.15 0.02 240);
-  --sidebar-accent: oklch(0.28 0.05 225);
-  --sidebar-accent-foreground: oklch(0.92 0.01 240);
-  --sidebar-border: oklch(0.32 0.03 240);
-  --sidebar-ring: oklch(0.68 0.13 218);
-
-  --m-bg: oklch(0.21 0.03 240);
-  --m-surface: oklch(0.25 0.035 240);
-  --m-ink: oklch(0.95 0.005 240);
-  --m-muted: oklch(0.7 0.02 240);
-  --m-border: oklch(0.34 0.03 240);
-  --m-aqua: oklch(0.68 0.13 218);
-  --m-aqua-ink: oklch(0.82 0.1 220);
-  --m-aqua-soft: oklch(0.3 0.06 225);
-  --m-aqua-2: oklch(0.72 0.13 200);
-  --m-navy: oklch(0.92 0.01 240);
-  --m-soft: oklch(0.26 0.035 240);
-  --m-orange: oklch(0.75 0.16 45);
-
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px -16px rgba(0, 0, 0, 0.5);
-  --shadow-pop: 0 2px 4px rgba(0, 0, 0, 0.45), 0 18px 48px -20px rgba(0, 0, 0, 0.6);
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground antialiased;
+
+  @layer base {
+    * {
+      @apply border-border outline-ring/50;
+    }
+    body {
+      @apply bg-background text-foreground antialiased;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    }
+    html {
+      @apply font-sans;
+    }
+    :focus-visible {
+      @apply outline-none ring-2 ring-ring/60 ring-offset-1 ring-offset-background;
+    }
   }
-  html {
-    @apply font-sans;
-  }
-  :focus-visible {
-    @apply outline-none ring-2 ring-ring/60 ring-offset-1 ring-offset-background;
-  }
-}
 
 /* =====================================================================
    Shared component classes (Aqua) — used by public + dashboard shells.
@@ -218,13 +148,13 @@
     @apply min-h-screen flex flex-col bg-[var(--m-bg)] text-[var(--m-ink)] antialiased;
   }
   .pub-header {
-    @apply sticky top-0 z-40 border-b border-[var(--m-border)] bg-[var(--m-bg)]/80 backdrop-blur;
+    @apply sticky top-0 z-40 border-b border-[var(--m-border)] bg-[var(--m-bg)]/95 backdrop-blur;
   }
   .pub-container {
     @apply mx-auto w-full max-w-5xl px-4 sm:px-6;
   }
   .pub-card {
-    @apply rounded-2xl border border-[var(--m-border)] bg-[var(--m-surface)] shadow-sm;
+    @apply rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] shadow-[var(--shadow-card)];
   }
   .pub-chip {
     @apply relative inline-flex items-center gap-1.5 overflow-hidden rounded-full border border-[var(--m-border)] bg-[var(--m-surface)] px-3 py-1 text-xs font-medium text-[var(--m-muted)];
@@ -236,13 +166,16 @@
     @apply text-sm font-medium text-[var(--m-muted)] transition-colors hover:text-[var(--m-ink)];
   }
   .pub-btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-[transform,background-color,color,box-shadow] duration-150 active:scale-[0.98];
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-[background-color,color,box-shadow] duration-150;
   }
   .pub-btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--m-aqua)] px-4 py-2 text-sm font-semibold text-white transition-[transform,background-color,box-shadow] duration-150 hover:bg-[var(--m-aqua-ink)] active:scale-[0.98];
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--m-aqua)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-[background-color,box-shadow] duration-150 hover:bg-[var(--m-aqua-ink)] hover:shadow-md;
   }
   .pub-btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] px-4 py-2 text-sm font-semibold text-[var(--m-ink)] transition-[transform,background-color,color,box-shadow] duration-150 hover:bg-[var(--m-aqua-soft)] active:scale-[0.98];
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-[var(--m-border)] bg-[var(--m-surface)] px-4 py-2 text-sm font-semibold text-[var(--m-ink)] transition-[background-color,color,box-shadow] duration-150 hover:bg-[var(--m-aqua-soft)];
+  }
+  .pub-field {
+    @apply h-9 rounded-lg border border-[var(--m-border)] bg-[var(--m-surface)] px-3 text-sm shadow-sm transition-[border-color,box-shadow] placeholder:text-[var(--m-muted)] hover:border-[var(--m-aqua)]/50 focus:border-[var(--m-aqua)] focus:outline-none focus:ring-3 focus:ring-[var(--m-aqua)]/20;
   }
   .pub-time {
     @apply font-mono font-semibold tabular-nums tracking-tight;
@@ -345,4 +278,20 @@
   0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7); }
   70% { box-shadow: 0 0 0 10px rgba(249, 115, 22, 0); }
   100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
+}
+
+/* Print: hide non-print UI and force readable black text */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .printable-area,
+  .printable-area * {
+    color: #000 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+  .print-break-inside-avoid {
+    break-inside: avoid;
+  }
 }

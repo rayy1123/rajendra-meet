@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { FileSpreadsheet, Loader2 } from 'lucide-react';
+import { FileSpreadsheet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { parseAndImportExcel } from '@/services/excel-parser';
 import { toast } from 'sonner';
@@ -53,11 +53,7 @@ export function ExcelImportButton() {
         disabled={loading}
         className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-sm"
       >
-        {loading ? (
-          <Loader2 className="w-4 h-4 animate-spin text-primary" />
-        ) : (
-          <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-        )}
+        <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
         Import Buku Acara (.xlsx)
       </Button>
     </>

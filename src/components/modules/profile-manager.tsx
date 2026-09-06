@@ -11,7 +11,7 @@ import {
 } from '@/app/profile/actions';
 import { AvatarUpload } from '@/components/modules/avatar-upload';
 import { ConfirmDialog } from '@/components/modules/confirm-dialog';
-import { Pencil, KeyRound, LogOut, X, Loader2 } from 'lucide-react';
+import { Pencil, KeyRound, LogOut, X } from 'lucide-react';
 
 const ROLE_LABELS: Record<string, string> = {
   super_admin: 'Super Admin',
@@ -226,8 +226,7 @@ export function ProfileManager({
                   disabled={saving}
                   className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-ink disabled:opacity-50"
                 >
-                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  {saving ? 'Menyimpan…' : 'Simpan'}
+                  Simpan
                 </button>
                 <button
                   type="button"
@@ -279,8 +278,7 @@ export function ProfileManager({
                   disabled={saving}
                   className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-ink disabled:opacity-50"
                 >
-                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  {saving ? 'Menyimpan…' : 'Simpan'}
+                  Simpan
                 </button>
                 <button
                   type="button"

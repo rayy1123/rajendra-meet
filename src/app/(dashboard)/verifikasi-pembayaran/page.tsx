@@ -13,10 +13,10 @@ interface PaymentRow {
   proof_url: string | null;
   created_at: string;
   registration: {
+    registrant_id?: string | null;
     athletes: { full_name: string } | null;
     events: { name: string } | null;
     competition_events: { name: string; distance_meters: number | null; stroke: string | null } | null;
-    profiles: { full_name: string; email: string } | null;
   } | null;
 }
 
@@ -33,10 +33,10 @@ export default async function VerifikasiPembayaranPage({
     .select(
       `id, status, amount_due, proof_url, created_at,
        registration:registrations(
+         registrant_id,
          athletes(full_name),
          events(name),
-         competition_events(name, distance_meters, stroke),
-         profiles(full_name, email)
+         competition_events(name, distance_meters, stroke)
        )`,
     )
     .order('created_at', { ascending: false });
@@ -47,6 +47,24 @@ export default async function VerifikasiPembayaranPage({
 
   const { data } = await query;
   const rows = (data ?? []) as unknown as PaymentRow[];
+
+  // registrations hanya punya FK ke auth.users (registrant_id), bukan ke
+  // tabel profiles, sehingga embed profiles tidak valid. Ambil profiles
+  // secara terpisah lalu petakan ke masing-masing pendaftaran.
+  const registrantIds = Array.from(
+    new Set(
+      rows
+        .map((r) => r.registration?.registrant_id)
+        .filter((id): id is string => Boolean(id)),
+    ),
+  );
+  const { data: profiles } = registrantIds.length
+    ? await supabase
+        .from('profiles')
+        .select('id, full_name, email')
+        .in('id', registrantIds)
+    : { data: [] as { id: string; full_name: string; email: string }[] };
+  const profileMap = new Map((profiles ?? []).map((p) => [p.id, p]));
 
   const counts = {
     pending: rows.filter((r) => r.status === 'pending').length,
@@ -87,7 +105,9 @@ export default async function VerifikasiPembayaranPage({
               const eventName = r.registration?.events?.name ?? 'Event';
               const ce = r.registration?.competition_events;
               const ceName = ce ? `${ce.distance_meters}m ${ce.stroke}` : '-';
-              const registrant = r.registration?.profiles;
+              const registrant = r.registration?.registrant_id
+                ? profileMap.get(r.registration.registrant_id)
+                : null;
               return (
                 <div key={r.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">

@@ -1,168 +1,152 @@
 import { requireUser } from '@/lib/auth';
-import { createClient } from '@/lib/supabase/server';
-import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { Card, CardContent } from '@/components/ui/card';
 import DashboardLayout from '@/components/layout/layout';
-import { User, UserCircle, ClipboardList, CalendarDays, ArrowRight } from 'lucide-react';
+import { Waves, Ticket, ReceiptText, ArrowRight, User, UserCircle, ClipboardList, CalendarDays, Info, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
+const ZERO = '00000000-0000-0000-0000-000000000000';
+
 export default async function DashboardViewerPage() {
-  const { supabase, user } = await requireUser();
+  const { supabase, profile } = await requireUser();
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('full_name')
-    .eq('id', user.id)
-    .single();
-  const displayName = profile?.full_name || user.email || 'Pengguna';
+  const fullName = (profile as any)?.full_name || 'Pengguna';
+  const username = (profile as any)?.username || 'Pengguna';
+  const avatarUrl = (profile as any)?.avatar_url || null;
+  const viewerId = (profile as any)?.id;
 
-  // Ringkasan data milik viewer
-  const [{ count: athleteCount }, { count: eventCount }] = await Promise.all([
-    supabase.from('athletes').select('id', { count: 'exact', head: true }).eq('owner_id', user.id),
+  // Atlet milik viewer -> id untuk filter pendaftaran & tagihan
+  const [{ data: myAthletes }, { count: eventCount }] = await Promise.all([
+    supabase.from('athletes').select('id').eq('owner_id', viewerId),
     supabase.from('events').select('id', { count: 'exact', head: true }).eq('is_published', true),
   ]);
+  const myIds = (myAthletes ?? []).map((a: any) => a.id);
 
-  // Ambil id atlet milik viewer untuk menghitung pendaftaran
-  const { data: myAthletes } = await supabase
-    .from('athletes')
+  const [{ count: nominalCount }] = await Promise.all([
+    supabase
+      .from('registrations')
+      .select('id', { count: 'exact', head: true })
+      .in('athlete_id', myIds.length ? myIds : [ZERO]),
+    supabase.from('competition_events').select('id', { count: 'exact', head: true }),
+  ]);
+
+  // Tagihan = pembayaran masih pending untuk pendaftaran milik viewer
+  const { data: myRegs } = await supabase
+    .from('registrations')
     .select('id')
-    .eq('owner_id', user.id);
-  const myIds = (myAthletes ?? []).map((a) => a.id);
-
-  const { count: regCount } = await supabase
-    .from('registrations')
+    .in('athlete_id', myIds.length ? myIds : [ZERO]);
+  const regIds = (myRegs ?? []).map((r: any) => r.id);
+  const { count: billCount } = await supabase
+    .from('payment_verifications')
     .select('id', { count: 'exact', head: true })
-    .in('athlete_id', myIds.length ? myIds : ['00000000-0000-0000-0000-000000000000']);
-
-  // Pendaftaran terbaru milik viewer
-  const { data: recent } = await supabase
-    .from('registrations')
-    .select(
-      'id, created_at, competition_events(name, stroke, distance_meters), events(name), athletes(full_name)'
-    )
-    .in('athlete_id', myIds.length ? myIds : ['00000000-0000-0000-0000-000000000000'])
-    .order('created_at', { ascending: false })
-    .limit(5);
-
-  interface RegRow {
-    id: string;
-    created_at: string;
-    athletes: { full_name: string }[] | null;
-    competition_events: { name: string; stroke: string; distance_meters: number }[] | null;
-    events: { name: string }[] | null;
-  }
+    .in('registration_id', regIds.length ? regIds : [ZERO])
+    .eq('status', 'pending');
 
   const stats = [
-    { label: 'Atlet Saya', value: athleteCount ?? 0, href: '/atlet-saya', icon: User },
-    { label: 'Pendaftaran', value: regCount ?? 0, href: '/pendaftaran-saya', icon: ClipboardList },
-    { label: 'Event Aktif', value: eventCount ?? 0, href: '/daftar-lomba', icon: CalendarDays },
+    { label: 'Perlombaan', value: eventCount ?? 0, unit: 'Lomba', icon: Waves, desc: 'Kejuaraan renang yang sedang berlangsung atau akan datang.' },
+    { label: 'Nomor Lomba', value: nominalCount ?? 0, unit: 'Nomor Lomba', icon: Ticket, desc: 'Jumlah nomor lomba yang tersedia untuk didaftarkan.' },
+    { label: 'Tagihan', value: billCount ?? 0, unit: 'Tagihan', icon: ReceiptText, desc: 'Pembayaran yang menunggu verifikasi panitia.' },
   ];
 
   const quickLinks = [
-    { label: 'Atlet Saya', href: '/atlet-saya', icon: User },
-    { label: 'Daftar Lomba', href: '/daftar-lomba', icon: CalendarDays },
-    { label: 'Pendaftaran', href: '/pendaftaran-saya', icon: ClipboardList },
-    { label: 'Profil', href: '/profile', icon: UserCircle },
+    { label: 'Atlet Saya', href: '/atlet-saya', icon: User, desc: 'Tambah dan kelola data atlet yang akan Anda daftarkan.' },
+    { label: 'Daftar Lomba', href: '/daftar-lomba', icon: CalendarDays, desc: 'Pilih kejuaraan dan nomor lomba untuk pendaftaran.' },
+    { label: 'Pendaftaran', href: '/pendaftaran-saya', icon: ClipboardList, desc: 'Lihat riwayat dan status pendaftaran serta pembayaran.' },
+    { label: 'Profil', href: '/profile', icon: UserCircle, desc: 'Ubah nama, username, foto profil, dan kata sandi.' },
   ];
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <Breadcrumb items={[{ label: 'Dashboard' }]} className="mb-2" />
-        <PageHeader
-          title={`Selamat datang, ${displayName}`}
-          description="Selamat datang di panel Anda. Kelola atlet dan pantau pendaftaran lomba renang."
-        />
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {stats.map((s, i) => {
-            const Icon = s.icon;
-            return (
-              <Link key={s.label} href={s.href} className={`reveal`} style={{ animationDelay: `${i * 80}ms` }}>
-                <Card className="elevated transition-ui hover:-translate-y-0.5 hover:shadow-pop">
-                  <CardContent className="flex items-center gap-4 p-5">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold tabular-nums text-[var(--m-ink)]">{s.value}</div>
-                      <div className="text-xs font-medium text-[var(--m-muted)]">{s.label}</div>
-                    </div>
-                  </CardContent>
-                </Card>
+        {/* User Banner */}
+        <div className="relative overflow-hidden rounded-2xl border border-[#d0dff0] bg-[linear-gradient(135deg,#ffffff_0%,#f0fbfc_58%,#e6f5ff_100%)] px-6 py-5 text-[#0b1220] shadow-sm">
+          <div className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-[var(--m-aqua)]/10 blur-2xl" />
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-[#eef6ff]">
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt={fullName} className="h-full w-full object-cover" />
+                ) : (
+                  <img src="/brand/logo.png" alt="Rajendra Meet" className="h-7 w-auto" />
+                )}
+              </div>
+              <div>
+                <p className="inline-flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-[#334155]">
+                  <Sparkles className="h-3 w-3 text-[var(--m-aqua-ink)]" /> Ruang Atlet
+                </p>
+                <h1 className="text-xl font-bold tracking-tight">{fullName}</h1>
+                <p className="text-xs text-[#334155]">@{username}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 text-xs">
+              <Link href="/" className="inline-flex items-center gap-1 rounded-full border border-[#cbd5e1] bg-white px-3 py-1.5 font-semibold text-[#0b1220] hover:border-[var(--m-aqua)]">
+                Beranda
               </Link>
-            );
-          })}
+              <span className="text-[#64748b]">/</span>
+              <span className="font-semibold text-[#0b1220]">Dashboard</span>
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {quickLinks.map((q, i) => {
+        <Breadcrumb items={[{ label: 'Dashboard' }]} className="mb-2" />
+
+        {/* Welcome */}
+        <div>
+          <h2 className="h-section">Semua persiapan lomba, dalam satu tempat.</h2>
+          <p className="text-sm text-[var(--m-muted)]">
+            Pilih aksi di bawah ini untuk mengelola pendaftaran dan data atlet Anda.
+          </p>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {quickLinks.map((q) => {
             const Icon = q.icon;
             return (
               <Link
                 key={q.href}
                 href={q.href}
-                className={`pub-card elevated flex items-center gap-3 p-4 transition-ui hover:-translate-y-0.5 hover:border-primary/40 reveal`}
-                style={{ animationDelay: `${(i + 3) * 80}ms` }}
+                className="group relative overflow-hidden rounded-2xl border border-[var(--m-border)] bg-white p-4 shadow-sm transition-ui hover:-translate-y-0.5 hover:border-[var(--m-aqua)]/50 hover:shadow-md"
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <Icon className="h-4 w-4" />
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--m-aqua-soft)] text-[var(--m-aqua-ink)] transition-transform duration-200 group-hover:scale-105">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-[var(--m-ink)]">{q.label}</p>
+                    <p className="truncate text-xs text-[var(--m-muted)]">{q.desc}</p>
+                  </div>
                 </div>
-                <span className="text-sm font-semibold text-[var(--m-ink)]">{q.label}</span>
               </Link>
             );
           })}
         </div>
 
-        <div>
-          <div className="mb-2 flex items-center justify-between">
-            <h2 className="h-section">Pendaftaran Terbaru</h2>
-            <Link
-              href="/pendaftaran-saya"
-              className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-            >
-              Lihat semua <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
-
-          {recent && recent.length > 0 ? (
-            <div className="space-y-2">
-              {recent.map((r: RegRow) => (
-                <Card key={r.id}>
-                  <CardContent className="flex items-center justify-between p-4">
-                    <div>
-                      <div className="font-semibold text-[var(--m-ink)]">
-                        {r.athletes?.[0]?.full_name ?? 'Atlet'}
-                      </div>
-                      <div className="text-xs text-[var(--m-muted)]">
-                        {r.competition_events?.[0]?.name ?? 'Nomor lomba'} · {r.events?.[0]?.name ?? 'Event'}
-                      </div>
+        {/* Stats */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {stats.map((s) => {
+            const Icon = s.icon;
+            return (
+              <Card key={s.label} className="elevated transition-ui hover:-translate-y-0.5 hover:shadow-pop">
+                <CardContent className="flex items-center justify-between gap-4 p-5">
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-wide text-[var(--m-muted)]">
+                      {s.label}
                     </div>
-                    <div className="text-xs text-[var(--m-muted)]">
-                      {new Date(r.created_at).toLocaleDateString('id-ID')}
+                    <div className="mt-1 text-3xl font-black tabular-nums text-[var(--m-ink)]">
+                      {s.value} <span className="text-sm font-semibold text-[var(--m-muted)]">{s.unit}</span>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="py-10 text-center text-sm text-[var(--m-muted)]">
-                Belum ada pendaftaran. Tambahkan atlet di{' '}
-                <Link href="/atlet-saya" className="font-semibold text-primary hover:underline">
-                  Atlet Saya
-                </Link>
-                , lalu daftarkan lewat{' '}
-                <Link href="/daftar-lomba" className="font-semibold text-primary hover:underline">
-                  Daftar Lomba
-                </Link>
-                .
-              </CardContent>
-            </Card>
-          )}
+                    <p className="mt-1 text-xs text-[var(--m-muted)]">{s.desc}</p>
+                  </div>
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--m-aqua-soft)] text-[var(--m-aqua-ink)]">
+                    <Icon className="h-6 w-6" />
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </div>
     </DashboardLayout>

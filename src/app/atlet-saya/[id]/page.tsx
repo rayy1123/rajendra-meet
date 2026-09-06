@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { AthleteProfileActions } from '@/components/modules/athlete-profile-actions';
 import type { AthleteFormValues } from '@/components/modules/athlete-form-modal';
 import { ArrowLeft, CalendarPlus } from 'lucide-react';
+import { ViewerSubHeader } from '@/components/modules/viewer-subheader';
 
 export const dynamic = 'force-dynamic';
 
@@ -74,6 +75,10 @@ export default async function AthleteProfilePage({
           ]}
           className="mb-2"
         />
+        <ViewerSubHeader
+          title={athlete.full_name}
+          description={`${athlete.gender === 'female' ? 'Putri' : 'Putra'}${athlete.grade_level ? ` · ${athlete.grade_level}` : ''}${athlete.class_name ? ` ${athlete.class_name}` : ''}`}
+        />
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -109,9 +114,9 @@ export default async function AthleteProfilePage({
               userId={user.id}
               initial={formValues}
               photoUrl={athlete.photo_url ?? ''}
-            schools={(schools ?? []).map((s) => ({ id: s.id, name: s.name }))}
-          />
-        </div>
+              schools={(schools ?? []).map((s) => ({ id: s.id, name: s.name }))}
+            />
+          </div>
         </div>
 
         <div className="grid gap-4 lg:grid-cols-2">

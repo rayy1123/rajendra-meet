@@ -14,7 +14,7 @@ export function RouteEventSelect({
   const router = useRouter();
   return (
     <select
-      className="rounded-lg border border-[var(--m-border)] bg-[var(--m-surface)] px-3 py-2 text-sm font-medium text-[var(--m-ink)]"
+      className="pub-field w-full min-w-52 font-medium text-[var(--m-ink)] sm:w-auto"
       value={current}
       onChange={(e) => router.push(`${basePath}?event=${e.target.value}`)}
     >

@@ -18,7 +18,6 @@ import {
 export interface SchoolWithCount {
   id: string;
   name: string;
-  code: string | null;
   city: string | null;
   created_at: string;
   athletes_count: number;
@@ -27,7 +26,6 @@ export interface SchoolWithCount {
 interface SchoolRow {
   id: string;
   name: string;
-  code: string | null;
   city: string | null;
   created_at: string;
   athletes: { count?: number }[] | null;
@@ -48,7 +46,6 @@ export default async function SchoolsPage({
     .select(`
       id,
       name,
-      code,
       city,
       created_at,
       athletes (count)
@@ -66,7 +63,6 @@ export default async function SchoolsPage({
     schoolsData?.map((school: SchoolRow) => ({
       id: school.id,
       name: school.name,
-      code: school.code,
       city: school.city,
       created_at: school.created_at,
       athletes_count: school.athletes?.[0]?.count || 0,
@@ -149,24 +145,18 @@ export default async function SchoolsPage({
               <Table>
                 <TableHeader>
                   <TableRow>
-                   <TableHead className="w-20">No</TableHead>
-                    <TableHead>Nama Sekolah / Klub</TableHead>
-                    <TableHead>Kode Kontingen</TableHead>
-                    <TableHead>Kota / Kabupaten</TableHead>
-                    <TableHead className="text-right">Jumlah Atlet</TableHead>
+                    <TableHead className="w-20">No</TableHead>
+                     <TableHead>Nama Sekolah / Klub</TableHead>
+                     <TableHead>Kota / Kabupaten</TableHead>
+                     <TableHead className="text-right">Jumlah Atlet</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {schools.map((school, index) => (
                     <TableRow key={school.id}>
                       <TableCell className="font-medium">{index + 1}</TableCell>
-                      <TableCell className="font-semibold">{school.name}</TableCell>
-                      <TableCell>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                          {school.code || '-'}
-                        </span>
-                      </TableCell>
-                      <TableCell>{school.city || '-'}</TableCell>
+                       <TableCell className="font-semibold">{school.name}</TableCell>
+                       <TableCell>{school.city || '-'}</TableCell>
                       <TableCell className="text-right font-medium">
                         {school.athletes_count} Atlet
                       </TableCell>

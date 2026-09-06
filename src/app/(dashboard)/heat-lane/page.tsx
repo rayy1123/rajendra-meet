@@ -144,7 +144,7 @@ export default async function HeatLanePage({
                   return (
                     <tr key={r.lane} className={scratched ? 'bg-red-50/50' : 'hover:bg-[var(--m-soft)]'}>
                       <td className="px-4 py-3 text-center">
-                        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--m-aqua)] text-sm font-bold text-white">
+                        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--m-aqua)] text-sm font-bold text-[var(--primary-foreground)]">
                           {r.lane}
                         </span>
                       </td>

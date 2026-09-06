@@ -1,9 +1,9 @@
 import { requireUser } from '@/lib/auth';
-import { createClient } from '@/lib/supabase/server';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import DashboardLayout from '@/components/layout/layout';
 import { AthleteSayaManager } from '@/components/modules/athlete-saya-manager';
+import { ViewerSubHeader } from '@/components/modules/viewer-subheader';
 
 export const dynamic = 'force-dynamic';
 
@@ -66,7 +66,7 @@ export default async function AtletSayaPage() {
           ]}
           className="mb-2"
         />
-        <PageHeader
+        <ViewerSubHeader
           title="Atlet Saya"
           description="Kelola data atlet Anda secara manual. Atlet yang dibuat di sini bisa digunakan saat mendaftar ke nomor lomba."
         />

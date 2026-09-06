@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Trophy, Loader2 } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 
 interface MedalStat {
   id: string;
@@ -71,12 +71,6 @@ export function MedalLeaderboardView({
 
       {/* Tabel Perolehan Medali */}
       <Card className="shadow-sm border relative overflow-hidden">
-        {/* Loading Overlay saat berpindah Event */}
-        {isPending && (
-          <div className="absolute inset-0 bg-background/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
-          </div>
-        )}
 
         <CardHeader className="bg-muted/20 pb-4">
           <CardTitle className="text-lg font-bold flex items-center gap-2">
@@ -121,13 +115,13 @@ export function MedalLeaderboardView({
                       <TableCell className="font-bold text-sm">
                         {stat.name}
                       </TableCell>
-                      <TableCell className="text-center font-bold text-amber-600 bg-amber-50/50 dark:bg-amber-950/20">
+                      <TableCell className="text-center font-bold text-amber-600 bg-amber-50/50">
                         {stat.gold}
                       </TableCell>
-                      <TableCell className="text-center font-bold text-slate-500 bg-slate-50/50 dark:bg-slate-900/20">
+                      <TableCell className="text-center font-bold text-slate-500 bg-slate-50/50">
                         {stat.silver}
                       </TableCell>
-                      <TableCell className="text-center font-bold text-amber-800 bg-amber-900/10 dark:bg-amber-950/30">
+                      <TableCell className="text-center font-bold text-amber-800 bg-amber-900/10">
                         {stat.bronze}
                       </TableCell>
                       <TableCell className="text-center font-black text-base">

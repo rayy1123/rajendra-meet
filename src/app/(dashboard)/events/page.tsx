@@ -1,16 +1,17 @@
-import Link from 'next/link';
+import { Card, CardContent } from '@/components/ui/card';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { Waves, Plus, MapPin, CalendarDays, ExternalLink, Trophy } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { MapPin, CalendarDays, ExternalLink, Trophy, Waves } from 'lucide-react';
+import Link from 'next/link';
+import { ProfileMenu } from '@/components/layout/logout-button';
 import { Button } from '@/components/ui/button';
-import { LogoutButton } from '@/components/layout/logout-button';
-import { Breadcrumb } from '@/components/ui/breadcrumb';
+
+export const dynamic = 'force-dynamic';
 
 export default async function EventsPage() {
   const supabase = await createClient();
 
-  // 1. Cek User Session
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -19,14 +20,12 @@ export default async function EventsPage() {
     redirect('/login');
   }
 
-  // 2. Fetch Data Events dari Supabase
   const { data: events } = await supabase
     .from('events')
     .select('*')
     .order('created_at', { ascending: false })
     .limit(1000);
 
-  // 3. Hitung jumlah nomor lomba per event untuk ringkasan
   const { data: compEvents } = await supabase
     .from('competition_events')
     .select('event_id');
@@ -41,7 +40,6 @@ export default async function EventsPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
       <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Kejuaraan / Events' }]} className="mb-2" />
-      {/* Header Bar */}
       <div className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
@@ -61,19 +59,18 @@ export default async function EventsPage() {
               <ExternalLink className="h-4 w-4" /> Live Scoreboard
             </Button>
           </Link>
-          <LogoutButton />
+          <ProfileMenu />
           <Link href="/events/new">
             <Button className="gap-2">
-              <Plus className="h-4 w-4" /> Buat Event Baru
+              Buat Event Baru
             </Button>
           </Link>
         </div>
       </div>
 
-      {/* Event Cards Grid */}
       {!events || events.length === 0 ? (
         <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center gap-3 py-16 text-center">
+          <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
             <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
               <Waves className="h-6 w-6" />
             </span>
@@ -82,7 +79,7 @@ export default async function EventsPage() {
             </p>
             <Link href="/events/new">
               <Button className="gap-2">
-                <Plus className="h-4 w-4" /> Buat Event Baru
+                Buat Event Baru
               </Button>
             </Link>
           </CardContent>

@@ -29,32 +29,54 @@ export default async function ExportPage({
       .from('competition_events')
       .select(`
         id,
-        event_number,
+        order_no,
         name,
         gender,
         age_group,
-        heat_assignments (
+        heats (
           heat_number,
-          lane_number,
-          registrations (
-            seed_time_ms,
-            athletes (
-              full_name,
-              schools (name)
+          heat_assignments (
+            lane_number,
+            registrations (
+              seed_time_ms,
+              athletes (
+                full_name,
+                schools (name)
+              )
             )
           )
         )
       `)
       .eq('event_id', activeEventId)
-      .order('event_number', { ascending: true });
+      .order('order_no', { ascending: true });
 
     if (compEvents) {
-      exportData = compEvents as unknown as ExportCompEvent[];
+      // Ratakan struktur heats -> heat_assignments agar sesuai bentuk ExportCompEvent
+      exportData = compEvents.map((ce) => {
+        const heats = (ce.heats ?? []) as Array<{
+          heat_number: number;
+          heat_assignments?: Array<Record<string, unknown>> | null;
+        }>;
+        const heat_assignments = heats.flatMap((h) =>
+          (h.heat_assignments ?? []).map((ha) => ({
+            ...(ha as object),
+            heat_number: h.heat_number,
+          })),
+        );
+        return {
+          id: ce.id,
+          order_no: ce.order_no,
+          name: ce.name,
+          gender: ce.gender,
+          age_group: ce.age_group,
+          heat_assignments,
+        } as ExportCompEvent;
+      });
     }
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto print:p-0 print:m-0">
+    <div className="mx-auto max-w-7xl space-y-6 p-6 print:p-0 print:m-0">
       <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Cetak & Ekspor' }]} className="mb-4" />
       <PageHeader
         title="Cetak & Ekspor Laporan"

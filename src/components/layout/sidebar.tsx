@@ -6,25 +6,12 @@ import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import {
-  CalendarDays,
   LayoutDashboard,
+  CalendarDays,
   Users,
-  School,
-  FileSpreadsheet,
-  Layers,
-  Trophy,
-  Award,
-  Medal,
-  Menu,
-  Printer,
-  User,
+  ClipboardList,
   UserCircle,
-  Settings,
-  Timer,
-  BookOpen,
-  CreditCard,
-  Wrench,
-  ShieldCheck,
+  Waves,
   type LucideIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -35,157 +22,61 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import { Menu } from 'lucide-react';
 
-/**
- * Struktur navigasi, dikelompokkan agar alur kerja panitia mudah diikuti.
- * Setiap href WAJIB punya halaman nyata di src/app/(dashboard).
- */
 interface NavItem {
   title: string;
   href: string;
   icon: LucideIcon;
-}
-interface NavGroup {
-  label: string;
-  items: NavItem[];
+  description?: string;
 }
 
-const navGroups: NavGroup[] = [
-  {
-    label: 'Ikhtisar',
-    items: [
-      { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-      { title: 'Kejuaraan / Events', href: '/events', icon: CalendarDays },
-    ],
-  },
-  {
-    label: 'Akun Saya',
-    items: [
-      { title: 'Dashboard', href: '/dashboard-viewer', icon: LayoutDashboard },
-      { title: 'Daftar Lomba', href: '/daftar-lomba', icon: CalendarDays },
-      { title: 'Atlet Saya', href: '/atlet-saya', icon: User },
-      { title: 'Pendaftaran Saya', href: '/pendaftaran-saya', icon: CreditCard },
-      { title: 'Profil', href: '/profile', icon: UserCircle },
-    ],
-  },
-  {
-    label: 'Data Peserta',
-    items: [
-      { title: 'Atlet', href: '/athletes', icon: Users },
-      { title: 'Sekolah / Klub', href: '/schools', icon: School },
-    ],
-  },
-  {
-    label: 'Operasional Lomba',
-    items: [
-      { title: 'Acara & Heat', href: '/heats', icon: Layers },
-      { title: 'Heat & Lane', href: '/heat-lane', icon: Layers },
-      { title: 'Input Hasil', href: '/results', icon: Trophy },
-      { title: 'Perangkingan', href: '/rankings', icon: Timer },
-      { title: 'Klasemen Medali', href: '/medals', icon: Medal },
-    ],
-  },
-  {
-    label: 'Hasil & Penghargaan',
-    items: [
-      { title: 'Penghargaan', href: '/awards', icon: Award },
-      { title: 'Sertifikat', href: '/sertifikat', icon: Award },
-      { title: 'Rajendra Record', href: '/rajendra-record', icon: FileSpreadsheet },
-      { title: 'Cetak & Ekspor', href: '/export', icon: Printer },
-    ],
-  },
-  {
-    label: 'Sistem',
-    items: [
-      { title: 'Verifikasi Pembayaran', href: '/verifikasi-pembayaran', icon: CreditCard },
-      { title: 'Peralatan', href: '/equipment', icon: Wrench },
-      { title: 'Log Audit', href: '/audit', icon: ShieldCheck },
-      { title: 'Pengaturan', href: '/settings', icon: Settings },
-      { title: 'Panduan', href: '/panduan', icon: BookOpen },
-    ],
-  },
+const navItems: NavItem[] = [
+  { title: 'Dashboard', href: '/dashboard-viewer', icon: LayoutDashboard, description: 'Ringkasan akun dan akses cepat' },
+  { title: 'Daftar Lomba', href: '/daftar-lomba', icon: CalendarDays, description: 'Pilih kejuaraan untuk mendaftar' },
+  { title: 'Atlet Saya', href: '/atlet-saya', icon: Users, description: 'Kelola data atlat Anda' },
+  { title: 'Pendaftaran', href: '/pendaftaran-saya', icon: ClipboardList, description: 'Pantau status pembayaran & verifikasi' },
+  { title: 'Profil', href: '/profile', icon: UserCircle, description: 'Kelola data akun Anda' },
 ];
 
-interface SidebarNavProps {
-  onItemClick?: () => void;
-  collapsed?: boolean;
-}
-
-export function SidebarNav({ onItemClick, collapsed = false }: SidebarNavProps) {
+export function SidebarNav({ onItemClick, collapsed = false }: { onItemClick?: () => void; collapsed?: boolean }) {
   const pathname = usePathname();
-  const [role, setRole] = useState<string | null>(null);
-  const supabase = createClient();
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
-        if (profile?.role) setRole(profile.role);
-      }
-    };
-    fetchUser();
-  }, [supabase]);
-
-  const isAdmin =
-    role && ['super_admin', 'event_admin', 'operator'].includes(role);
-  // Viewer hanya melihat grup "Akun Saya"; panitia/admin melihat semua menu.
-  const visibleGroups = isAdmin
-    ? navGroups
-    : navGroups.filter((g) => g.label === 'Akun Saya');
 
   return (
     <div className="flex h-full flex-col justify-between py-4">
-      <nav className="space-y-5 px-3">
-        {visibleGroups.map((group) => (
-          <div key={group.label} className="space-y-1">
-            {!collapsed && (
-              <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">
-                {group.label}
-              </p>
-            )}
-            {group.items.map((item) => {
-              const Icon = item.icon;
-              const isActive =
-                item.href === '/'
-                  ? pathname === '/'
-                  : pathname.startsWith(item.href);
+      <nav className="space-y-1.5 px-3">
+        <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70">Akun Saya</p>
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={onItemClick}
-                  title={collapsed ? item.title : undefined}
-                  className={cn(
-                    'relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-ui',
-                    collapsed && 'justify-center px-0',
-                    isActive
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-                  )}
-                >
-                  {isActive && !collapsed && (
-                    <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-primary" />
-                  )}
-                  <Icon
-                    className={cn(
-                      'h-4 w-4 shrink-0',
-                      isActive ? 'text-primary' : 'text-[var(--m-muted)]'
-                    )}
-                  />
-                  {!collapsed && item.title}
-                </Link>
-              );
-            })}
-          </div>
-        ))}
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={onItemClick}
+              title={item.title}
+              className={cn(
+                'relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-ui',
+                collapsed && 'justify-center px-0',
+                isActive
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+              )}
+            >
+              {isActive && !collapsed && (
+                <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-primary" />
+              )}
+              <Icon
+                className={cn(
+                  'h-4 w-4 shrink-0',
+                  isActive ? 'text-primary' : 'text-[var(--m-muted)]'
+                )}
+              />
+              {!collapsed && item.title}
+            </Link>
+          );
+        })}
       </nav>
     </div>
   );
@@ -207,7 +98,7 @@ export function MobileSidebar() {
           <img
             src="/brand/logo.png"
             alt="Rajendra Meet"
-            className="h-7 w-auto rounded-md"
+            className="h-7 w-auto"
           />
           <SheetTitle className="font-bold text-lg tracking-tight">
             Rajendra Meet

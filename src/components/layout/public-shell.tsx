@@ -1,13 +1,12 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Waves } from 'lucide-react';
 import { LandingNav } from '@/components/layout/landing-nav';
+import { createClient } from '@/lib/supabase/client';
+import { ProfileMenu } from '@/components/layout/logout-button';
 
-/**
- * Kerangka halaman publik yang konsisten untuk scoreboard, live board, dan
- * panduan. Tema "Marine" (lihat globals.css). Header memuat logo, tombol
- * Menu (drawer navigasi, konsisten dengan beranda) di mobile, serta tautan
- * masuk/daftar; footer ringkas. Konten disisipkan via children.
- */
 export function PublicShell({
   children,
   title,
@@ -17,6 +16,22 @@ export function PublicShell({
   title?: string;
   subtitle?: string;
 }) {
+  const [user, setUser] = useState<any>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const supabase = createClient();
+    supabase.auth.getUser().then((result: { data: { user: any } }) => {
+      if (!active) return;
+      setUser(result.data.user ?? null);
+      setReady(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   return (
     <div className="pub-shell">
       <header className="pub-header">
@@ -30,14 +45,21 @@ export function PublicShell({
           </Link>
 
           <nav className="flex items-center gap-2 sm:gap-3">
-            {/* Drawer navigasi (sidebar samping) — semua tautan halaman ada di sini */}
             <LandingNav />
-            <Link href="/login" className="pub-btn-ghost">
-              Masuk
-            </Link>
-            <Link href="/register" className="pub-btn-primary">
-              Daftar
-            </Link>
+            {ready && user ? (
+              <ProfileMenu />
+            ) : ready && !user ? (
+              <>
+                <Link href="/login" className="pub-btn-ghost">
+                  Masuk
+                </Link>
+                <Link href="/register" className="pub-btn-primary">
+                  Daftar
+                </Link>
+              </>
+            ) : (
+              <span className="h-8 w-24 animate-pulse rounded-full bg-[var(--m-soft)]" />
+            )}
           </nav>
         </div>
       </header>

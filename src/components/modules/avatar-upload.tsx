@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { Camera, Loader2 } from 'lucide-react';
+import { Camera } from 'lucide-react';
 
 export function AvatarUpload({
   folder,
@@ -45,8 +45,8 @@ export function AvatarUpload({
   return (
     <div className="flex flex-col items-center gap-2">
       <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold transition-colors hover:bg-accent">
-        {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Camera className="h-3.5 w-3.5" />}
-        {busy ? 'Mengunggah…' : currentUrl ? 'Ganti Foto' : 'Unggah Foto'}
+        <Camera className="h-3.5 w-3.5" />
+        {currentUrl ? 'Ganti Foto' : 'Unggah Foto'}
         <input type="file" accept="image/*" className="hidden" onChange={handleFile} disabled={busy} />
       </label>
       {err && <p className="text-xs text-red-600">{err}</p>}

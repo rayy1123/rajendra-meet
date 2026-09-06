@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
+import { PublicShell } from '@/components/layout/public-shell';
 import { LiveBoard, type LiveRow, type LiveOption } from '@/components/modules/live-board';
+import { Waves } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -93,17 +95,30 @@ export default async function LivePage({
   }
 
   return (
-    <LiveBoard
-      eventName={eventName}
-      compEventName={compEventName}
-      heatLabel={heatLabel}
-      rows={rows}
-      eventOpts={eventOpts}
-      compOpts={compOpts}
-      heatOpts={heatOpts}
-      currentEvent={current?.id ?? ''}
-      currentCe={compOpts[0]?.id ?? ''}
-      currentHeat={heatOpts[0]?.id ?? ''}
-    />
+    <PublicShell
+      title="Live Board"
+      subtitle="Papan hasil langsung. Pilih event, nomor lomba, dan heat untuk melihat perkembangan waktu per lintasan."
+    >
+      {!current ? (
+        <div className="pub-card p-12 text-center">
+          <Waves className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
+          <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Belum ada kejuaraan</h3>
+          <p className="mt-1 text-sm text-[var(--m-muted)]">Panitia belum mempublikasikan kejuaraan apa pun.</p>
+        </div>
+      ) : (
+        <LiveBoard
+          eventName={eventName}
+          compEventName={compEventName}
+          heatLabel={heatLabel}
+          rows={rows}
+          eventOpts={eventOpts}
+          compOpts={compOpts}
+          heatOpts={heatOpts}
+          currentEvent={current?.id ?? ''}
+          currentCe={compOpts[0]?.id ?? ''}
+          currentHeat={heatOpts[0]?.id ?? ''}
+        />
+      )}
+    </PublicShell>
   );
 }

@@ -73,10 +73,10 @@ export default function GuidePage() {
                 <h2 className="text-lg font-bold text-[var(--m-ink)]">{s.title}</h2>
                 <ul className="space-y-1.5 text-sm text-[var(--m-muted)]">
                   {s.body.map((b, i) => (
-                    <li key={i} className="flex gap-2">
+                    <div key={i} className="flex gap-2">
                       <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[var(--m-aqua)]" />
                       <span>{b}</span>
-                    </li>
+                    </div>
                   ))}
                 </ul>
               </div>

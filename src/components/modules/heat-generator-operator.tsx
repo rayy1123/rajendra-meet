@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Sparkles, Trash2, Users, Loader2 } from 'lucide-react';
+import { Sparkles, Trash2, Users } from 'lucide-react';
 
 interface AthleteRef {
   id?: string | null;
@@ -239,7 +239,7 @@ export function HeatGeneratorOperator({
               disabled={deleting || generating}
               className="text-red-600 hover:bg-red-50 hover:text-red-700"
             >
-              {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4 mr-1" />}
+              <Trash2 className="w-4 h-4 mr-1" />
               Reset Acara
             </Button>
           )}
@@ -249,7 +249,7 @@ export function HeatGeneratorOperator({
             disabled={generating || registrations.length === 0}
             className="gap-2 bg-primary hover:bg-primary/90 font-semibold"
           >
-            {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            <Sparkles className="w-4 h-4" />
             {existingHeats.length > 0 ? 'Re-Generate Acara' : 'Generate Acara Otomatis'}
           </Button>
         </div>
