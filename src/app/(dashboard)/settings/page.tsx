@@ -19,8 +19,8 @@ export default async function SettingsPage() {
   ]);
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Pengaturan' }]} className="mb-4" />
+    <div className="mx-auto max-w-7xl space-y-6 p-6">
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Pengaturan' }]} className="mb-2" />
       <PageHeader
         title="Pengaturan Sistem"
         description="Konfigurasi aturan poin kejuaraan, tata letak lintasan kolam, dan pemeliharaan sistem."

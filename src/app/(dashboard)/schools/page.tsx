@@ -69,7 +69,7 @@ export default async function SchoolsPage({
     })) || [];
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="mx-auto max-w-7xl space-y-6 p-6">
       <PageHeader
         title="Master Sekolah / Klub"
         description="Kelola daftar kontingen sekolah dan klub renang yang terdaftar dalam kejuaraan."
@@ -81,7 +81,7 @@ export default async function SchoolsPage({
         }
       />
 
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Sekolah / Klub' }]} className="mb-1" />
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Sekolah / Klub' }]} className="mb-2" />
 
       {/* Ringkasan Statistik */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

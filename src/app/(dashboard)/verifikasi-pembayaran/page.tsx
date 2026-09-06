@@ -73,7 +73,7 @@ export default async function VerifikasiPembayaranPage({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-7xl space-y-6 p-6">
       <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Verifikasi Pembayaran' }]} className="mb-2" />
       <PageHeader
         title="Verifikasi Pembayaran"
