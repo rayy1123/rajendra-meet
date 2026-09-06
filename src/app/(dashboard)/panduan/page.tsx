@@ -73,46 +73,44 @@ const SECTIONS = [
 
 export default function PanduanAdminPage() {
   return (
-    <>
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Panduan' }]} className="mb-4" />
+    <div className="mx-auto max-w-7xl space-y-6 p-6">
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Panduan' }]} className="mb-2" />
       <PageHeader
         title="Panduan Operasional Panitia"
         description="Panduan teknis untuk pengelola kejuaraan: atlet, heat, input hasil, verifikasi pembayaran, hingga audit. Halaman ini hanya untuk akun yang masuk."
       />
-      <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6">
-        <div className="space-y-4">
-          {SECTIONS.map((s) => (
-            <section key={s.title} className="rounded-xl border border-border bg-card p-6 shadow-sm">
-              <div className="flex items-start gap-3">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--m-aqua-soft)] text-[var(--m-aqua-ink)]">
-                  <s.icon className="h-5 w-5" />
-                </span>
-                <div className="space-y-2">
-                  <h2 className="text-lg font-bold text-[var(--m-ink)]">{s.title}</h2>
-                  <ul className="space-y-1.5 text-sm text-[var(--m-muted)]">
-                    {s.body.map((b, i) => (
-                      <li key={i} className="flex gap-2">
-                        <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[var(--m-aqua)]" />
-                        <span>{b}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+      <div className="space-y-4">
+        {SECTIONS.map((s) => (
+          <section key={s.title} className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <div className="flex items-start gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--m-aqua-soft)] text-[var(--m-aqua-ink)]">
+                <s.icon className="h-5 w-5" />
+              </span>
+              <div className="space-y-2">
+                <h2 className="text-lg font-bold text-[var(--m-ink)]">{s.title}</h2>
+                <ul className="space-y-1.5 text-sm text-[var(--m-muted)]">
+                  {s.body.map((b, i) => (
+                    <li key={i} className="flex gap-2">
+                      <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[var(--m-aqua)]" />
+                      <span>{b}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </section>
-          ))}
-        </div>
-
-        <div className="mt-6 flex flex-col items-center gap-3 rounded-xl bg-[var(--m-aqua-soft)] p-8 text-center">
-          <BookOpen className="h-8 w-8 text-[var(--m-aqua-ink)]" />
-          <p className="max-w-md text-sm text-[var(--m-ink)]">
-            Butuh panduan untuk pengunjung & pendaftar? Buka halaman Panduan publik di bawah ini.
-          </p>
-          <Link href="/guide" className="pub-btn-ghost">
-            Lihat Panduan Publik
-          </Link>
-        </div>
+            </div>
+          </section>
+        ))}
       </div>
-    </>
+
+      <div className="flex flex-col items-center gap-3 rounded-xl bg-[var(--m-aqua-soft)] p-8 text-center">
+        <BookOpen className="h-8 w-8 text-[var(--m-aqua-ink)]" />
+        <p className="max-w-md text-sm text-[var(--m-ink)]">
+          Butuh panduan untuk pengunjung & pendaftar? Buka halaman Panduan publik di bawah ini.
+        </p>
+        <Link href="/guide" className="pub-btn-ghost">
+          Lihat Panduan Publik
+        </Link>
+      </div>
+    </div>
   );
 }

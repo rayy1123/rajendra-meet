@@ -70,8 +70,8 @@ export default async function RajendraRecordPage() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 p-6">
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Rajendra Record' }]} className="mb-4" />
+    <div className="mx-auto max-w-7xl space-y-6 p-6">
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Rajendra Record' }]} className="mb-2" />
       <PageHeader
         title="Rajendra Record"
         description="Deteksi otomatis rekor baru per nomor lomba. Rekor memecahkan catatan tercepat sebelumnya."

@@ -60,16 +60,13 @@ export default async function CertificatePage({
         .select('id, heat_id, registration_id')
         .in(
           'heat_id',
-          // ambil semua heat dari comp_event
-          (
-            await supabase
-              .from('heats')
-              .select('id')
-              .eq('competition_event_id', ceCur.id)
+          (await supabase
+            .from('heats')
+            .select('id')
+            .eq('competition_event_id', ceCur.id)
           ).data?.map((h) => h.id) ?? [],
         );
       const ids = (assigns ?? []).map((a) => a.id);
-      // Map assignment -> registration (kolom langsung)
       const regOfAssign: Record<string, string> = {};
       (assigns ?? []).forEach((a: any) => (regOfAssign[a.id] = a.registration_id));
       const regIds = (assigns ?? []).map((a: any) => a.registration_id).filter(Boolean);
@@ -109,8 +106,6 @@ export default async function CertificatePage({
           .eq('status', 'finished')
           .order('time_ms', { ascending: true })
           .limit(50);
-        // Ambil 3 atlet BERBEDA tercepat (hindari atlet sama muncul berulang
-        // karena seed bisa menempatkan satu atlet di beberapa lane/heat).
         const seen = new Set<string>();
         const picked: any[] = [];
         for (const r of res ?? []) {
@@ -133,76 +128,74 @@ export default async function CertificatePage({
   const medals = ['🥇', '🥈', '🥉'];
 
   return (
-    <>
+    <div className="mx-auto max-w-7xl space-y-6 p-6">
       <PageHeader
         title="Sertifikat Penghargaan"
         description="Cetak sertifikat juara 1–3 per nomor lomba. Gunakan tombol Cetak untuk menyimpan / kirim PDF."
       />
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Sertifikat' }]} className="mb-1" />
-      <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6">
-        <div className="mb-6 flex flex-wrap items-center gap-3">
-          <span className="rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-[var(--m-ink)]">
-            {current?.name ?? '—'}
-          </span>
-          <span className="rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-[var(--m-ink)]">
-            {compEvents[0]?.label ?? '—'}
-          </span>
-          <PrintButton />
-        </div>
-
-        {certs.length === 0 ? (
-          <div className="pub-card p-12 text-center">
-            <Trophy className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
-            <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Belum ada hasil</h3>
-            <p className="mt-1 text-sm text-[var(--m-muted)]">
-              Nomor lomba ini belum memiliki hasil finished untuk dibuat sertifikat.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-6">
-            {certs.map((c) => (
-              <div
-                key={c.rank}
-                className="relative overflow-hidden rounded-2xl border-4 border-[#D4AF37] bg-white p-8 shadow-lg"
-              >
-                <div className="absolute left-4 top-4 h-10 w-10 border-l-4 border-t-4 border-[#006780]/40" />
-                <div className="absolute right-4 top-4 h-10 w-10 border-r-4 border-t-4 border-[#006780]/40" />
-                <div className="absolute bottom-4 left-4 h-10 w-10 border-b-4 border-l-4 border-[#006780]/40" />
-                <div className="absolute bottom-4 right-4 h-10 w-10 border-b-4 border-r-4 border-[#006780]/40" />
-                <div className="flex flex-col items-center text-center">
-                  <div className="text-5xl">{medals[c.rank - 1]}</div>
-                  <h2 className="mt-3 text-2xl font-bold uppercase tracking-[0.2em] text-[#0f172a]">
-                    Certificate of Achievement
-                  </h2>
-                  <div className="my-2 h-1 w-32 rounded-full bg-[#F97316]" />
-                  <p className="text-sm italic text-[var(--m-muted)]">This is to certify that</p>
-                  <h3 className="mt-1 bg-gradient-to-r from-[#0f172a] to-[#006780] bg-clip-text text-3xl font-bold text-transparent">
-                    {c.swimmer.toUpperCase()}
-                  </h3>
-                  <p className="mt-1 text-sm">
-                    representing <span className="font-semibold">{c.school ?? '—'}</span>
-                  </p>
-                  <div className="mt-4 rounded-xl bg-[var(--m-soft)] px-6 py-4">
-                    <p className="text-xs uppercase tracking-wide text-[var(--m-muted)]">
-                      meraih peringkat ke-{c.rank} pada
-                    </p>
-                    <p className="text-lg font-semibold text-[var(--m-aqua-ink)]">
-                      {compLabel}
-                    </p>
-                    <p className="mt-2 text-sm text-[var(--m-muted)]">
-                      dengan waktu resmi{' '}
-                      <span className="rounded bg-[var(--m-aqua-soft)] px-2 py-0.5 font-mono font-bold text-[var(--m-ink)]">
-                        {fmt(c.finish)}
-                      </span>
-                    </p>
-                  </div>
-                  <p className="mt-4 text-sm text-[var(--m-muted)]">{eventLabel}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Sertifikat' }]} className="mb-2" />
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <span className="rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-[var(--m-ink)]">
+          {current?.name ?? '—'}
+        </span>
+        <span className="rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-[var(--m-ink)]">
+          {compEvents[0]?.label ?? '—'}
+        </span>
+        <PrintButton />
       </div>
-    </>
+
+      {certs.length === 0 ? (
+        <div className="pub-card p-12 text-center">
+          <Trophy className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
+          <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Belum ada hasil</h3>
+          <p className="mt-1 text-sm text-[var(--m-muted)]">
+            Nomor lomba ini belum memiliki hasil finished untuk dibuat sertifikat.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-6">
+          {certs.map((c) => (
+            <div
+              key={c.rank}
+              className="relative overflow-hidden rounded-2xl border-4 border-[#D4AF37] bg-white p-8 shadow-lg"
+            >
+              <div className="absolute left-4 top-4 h-10 w-10 border-l-4 border-t-4 border-[#006780]/40" />
+              <div className="absolute right-4 top-4 h-10 w-10 border-r-4 border-t-4 border-[#006780]/40" />
+              <div className="absolute bottom-4 left-4 h-10 w-10 border-b-4 border-l-4 border-[#006780]/40" />
+              <div className="absolute bottom-4 right-4 h-10 w-10 border-b-4 border-r-4 border-[#006780]/40" />
+              <div className="flex flex-col items-center text-center">
+                <div className="text-5xl">{medals[c.rank - 1]}</div>
+                <h2 className="mt-3 text-2xl font-bold uppercase tracking-[0.2em] text-[#0f172a]">
+                  Certificate of Achievement
+                </h2>
+                <div className="my-2 h-1 w-32 rounded-full bg-[#F97316]" />
+                <p className="text-sm italic text-[var(--m-muted)]">This is to certify that</p>
+                <h3 className="mt-1 bg-gradient-to-r from-[#0f172a] to-[#006780] bg-clip-text text-3xl font-bold text-transparent">
+                  {c.swimmer.toUpperCase()}
+                </h3>
+                <p className="mt-1 text-sm">
+                  representing <span className="font-semibold">{c.school ?? '—'}</span>
+                </p>
+                <div className="mt-4 rounded-xl bg-[var(--m-soft)] px-6 py-4">
+                  <p className="text-xs uppercase tracking-wide text-[var(--m-muted)]">
+                    meraih peringkat ke-{c.rank} pada
+                  </p>
+                  <p className="text-lg font-semibold text-[var(--m-aqua-ink)]">
+                    {compLabel}
+                  </p>
+                  <p className="mt-2 text-sm text-[var(--m-muted)]">
+                    dengan waktu resmi{' '}
+                    <span className="rounded bg-[var(--m-aqua-soft)] px-2 py-0.5 font-mono font-bold text-[var(--m-ink)]">
+                      {fmt(c.finish)}
+                    </span>
+                  </p>
+                </div>
+                <p className="mt-4 text-sm text-[var(--m-muted)]">{eventLabel}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

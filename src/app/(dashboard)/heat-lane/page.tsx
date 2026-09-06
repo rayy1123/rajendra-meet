@@ -58,7 +58,6 @@ export default async function HeatLanePage({
           .eq('heat_id', heatCur.id)
           .order('lane_number', { ascending: true });
 
-        // Resolve school via kolom langsung (nested schools(name) tdk ter-infer)
         const regIds = (assigns ?? []).map((a: any) => a.registration_id).filter(Boolean);
         const { data: regRows } = await supabase
           .from('registrations')
@@ -101,86 +100,83 @@ export default async function HeatLanePage({
     n.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 
   return (
-    <>
+    <div className="mx-auto max-w-7xl space-y-6 p-6">
       <PageHeader
         title="Heat & Lane Management"
         description="Pantau pembagian lintasan per heat. Data diambil langsung dari hasil seeding & penugasan lintasan."
       />
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Heat & Lane' }]} className="mb-1" />
-      <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6">
-        {/* Selectors */}
-        <HeatLaneSelectors
-          eventOpts={eventOpts}
-          compOpts={compEvents}
-          heatOpts={heats.map((h) => ({ id: h.id, label: `Heat ${h.heat_number}` }))}
-          currentEvent={current?.id ?? ''}
-          currentCe={compEvents[0]?.id ?? ''}
-          currentHeat={heats[0]?.id ?? ''}
-        />
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Heat & Lane' }]} className="mb-2" />
+      <HeatLaneSelectors
+        eventOpts={eventOpts}
+        compOpts={compEvents}
+        heatOpts={heats.map((h) => ({ id: h.id, label: `Heat ${h.heat_number}` }))}
+        currentEvent={current?.id ?? ''}
+        currentCe={compEvents[0]?.id ?? ''}
+        currentHeat={heats[0]?.id ?? ''}
+      />
 
-        {rows.length === 0 ? (
-          <div className="pub-card p-12 text-center">
-            <Layers className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
-            <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Belum ada lintasan</h3>
-            <p className="mt-1 text-sm text-[var(--m-muted)]">
-              Heat ini belum memiliki penugasan lintasan.
-            </p>
-          </div>
-        ) : (
-          <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-[var(--m-soft)] text-xs uppercase text-[var(--m-muted)]">
-                <tr>
-                  <th className="w-16 px-4 py-3 text-center">Lane</th>
-                  <th className="px-4 py-3">Swimmer</th>
-                  <th className="px-4 py-3">School / Club</th>
-                  <th className="w-32 px-4 py-3 text-right">Seed</th>
-                  <th className="w-40 px-4 py-3 text-center">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {rows.map((r) => {
-                  const scratched = r.status === 'scratched' || r.status === 'dns';
-                  return (
-                    <tr key={r.lane} className={scratched ? 'bg-red-50/50' : 'hover:bg-[var(--m-soft)]'}>
-                      <td className="px-4 py-3 text-center">
-                        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--m-aqua)] text-sm font-bold text-[var(--primary-foreground)]">
-                          {r.lane}
+      {rows.length === 0 ? (
+        <div className="pub-card p-12 text-center">
+          <Layers className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
+          <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Belum ada lintasan</h3>
+          <p className="mt-1 text-sm text-[var(--m-muted)]">
+            Heat ini belum memiliki penugasan lintasan.
+          </p>
+        </div>
+      ) : (
+        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-[var(--m-soft)] text-xs uppercase text-[var(--m-muted)]">
+              <tr>
+                <th className="w-16 px-4 py-3 text-center">Lane</th>
+                <th className="px-4 py-3">Swimmer</th>
+                <th className="px-4 py-3">School / Club</th>
+                <th className="w-32 px-4 py-3 text-right">Seed</th>
+                <th className="w-40 px-4 py-3 text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {rows.map((r) => {
+                const scratched = r.status === 'scratched' || r.status === 'dns';
+                return (
+                  <tr key={r.lane} className={scratched ? 'bg-red-50/50' : 'hover:bg-[var(--m-soft)]'}>
+                    <td className="px-4 py-3 text-center">
+                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--m-aqua)] text-sm font-bold text-[var(--primary-foreground)]">
+                        {r.lane}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--m-soft)] text-xs font-semibold text-[var(--m-aqua-ink)]">
+                          {initials(r.swimmer)}
                         </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--m-soft)] text-xs font-semibold text-[var(--m-aqua-ink)]">
-                            {initials(r.swimmer)}
-                          </span>
-                          <span className={scratched ? 'font-medium text-[var(--m-muted)] line-through' : 'font-medium text-[var(--m-ink)]'}>
-                            {r.swimmer}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-[var(--m-muted)]">{r.school ?? '—'}</td>
-                      <td className="px-4 py-3 text-right font-mono text-xs text-[var(--m-muted)]">
-                        {fmt(r.seed)}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        {scratched ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-1 text-xs font-semibold text-red-700">
-                            <UserX className="h-3.5 w-3.5" /> Scratch
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-[var(--m-aqua-soft)] px-2 py-1 text-xs font-semibold text-[var(--m-aqua-ink)]">
-                            Assigned
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-    </>
+                        <span className={scratched ? 'font-medium text-[var(--m-muted)] line-through' : 'font-medium text-[var(--m-ink)]'}>
+                          {r.swimmer}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-[var(--m-muted)]">{r.school ?? '—'}</td>
+                    <td className="px-4 py-3 text-right font-mono text-xs text-[var(--m-muted)]">
+                      {fmt(r.seed)}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {scratched ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-1 text-xs font-semibold text-red-700">
+                          <UserX className="h-3.5 w-3.5" /> Scratch
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[var(--m-aqua-soft)] px-2 py-1 text-xs font-semibold text-[var(--m-aqua-ink)]">
+                          Assigned
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
   );
 }
