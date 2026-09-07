@@ -2,17 +2,17 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Waves } from 'lucide-react';
 
 const PUBLIC_LINKS = [
   { href: '/', label: 'Beranda' },
-  { href: '/scoreboard', label: 'Live Scoreboard' },
+  { href: '/scoreboard', label: 'Jadwal Lomba' },
   { href: '/daftar-lomba', label: 'Daftar Lomba' },
+  { href: '/guide', label: 'Panduan' },
   { href: '/kontak', label: 'Kontak' },
   { href: '/program', label: 'Buku Acara' },
   { href: '/galeri', label: 'Galeri' },
   { href: '/medali', label: 'Medali' },
-  { href: '/guide', label: 'Panduan' },
 ];
 
 /**
@@ -50,11 +50,10 @@ export function LandingNav() {
           {/* Panel */}
           <div className="relative flex h-full w-72 max-w-[85vw] flex-col bg-[var(--m-surface)] shadow-xl">
             <div className="flex flex-row items-center gap-2 border-b border-[var(--m-border)] px-6 py-4">
-              <img
-                src="/brand/logo.png"
-                alt="Rajendra Meet"
-                className="h-7 w-auto"
-              />
+              <Waves className="h-6 w-6 text-[var(--m-aqua)]" />
+              <span className="font-bold text-lg tracking-tight text-[var(--m-ink)]">
+                Rajendra Meet
+              </span>
               <button
                 type="button"
                 aria-label="Tutup"
