@@ -1,6 +1,11 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Phone, Mail } from 'lucide-react';
 import { LandingNav } from '@/components/layout/landing-nav';
+import { createClient } from '@/lib/supabase/client';
+import { ProfileMenu } from '@/components/layout/logout-button';
 
 function InstagramIcon({ className }: { className?: string }) {
   return (
@@ -22,6 +27,22 @@ function InstagramIcon({ className }: { className?: string }) {
 }
 
 export function LandingShell({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<any>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const supabase = createClient();
+    supabase.auth.getUser().then((result: { data: { user: any } }) => {
+      if (!active) return;
+      setUser(result.data.user ?? null);
+      setReady(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   return (
     <div className="pub-shell">
       <header className="pub-header">
@@ -30,18 +51,26 @@ export function LandingShell({ children }: { children: React.ReactNode }) {
             <img
               src="/brand/logo.png"
               alt="Rajendra Meet"
-              className="h-9 w-auto rounded-md"
+              className="h-9 w-auto"
             />
           </Link>
 
           <nav className="flex items-center gap-1 sm:gap-2">
             <LandingNav />
-            <Link href="/login" className="pub-btn-ghost">
-              Masuk
-            </Link>
-            <Link href="/register" className="pub-btn-primary">
-              Daftar
-            </Link>
+            {ready && user ? (
+              <ProfileMenu />
+            ) : ready && !user ? (
+              <>
+                <Link href="/login" className="pub-btn-ghost">
+                  Masuk
+                </Link>
+                <Link href="/register" className="pub-btn-primary">
+                  Daftar
+                </Link>
+              </>
+            ) : (
+              <span className="h-8 w-24 animate-pulse rounded-full bg-[var(--m-soft)]" />
+            )}
           </nav>
         </div>
       </header>
@@ -55,7 +84,7 @@ export function LandingShell({ children }: { children: React.ReactNode }) {
               <img
                 src="/brand/logo.png"
                 alt="Rajendra Project"
-                className="h-9 w-auto rounded-md"
+                className="h-9 w-auto"
               />
             </Link>
             <p className="mt-3 max-w-md text-sm text-[var(--m-muted)]">
