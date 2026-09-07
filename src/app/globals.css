@@ -280,6 +280,17 @@
   100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
 }
 
+/* Global loading overlay fade */
+@keyframes loading-fade {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  75% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.animate-fade-in-out {
+  animation: loading-fade 420ms ease-in-out forwards;
+}
+
 /* Print: hide non-print UI and force readable black text */
 @media print {
   .no-print {
