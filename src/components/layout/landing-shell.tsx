@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Phone, Mail } from 'lucide-react';
-import { Menu, X } from 'lucide-react';
+import { Phone, Mail, Menu, X } from 'lucide-react';
+import { ProfileMenu } from '@/components/layout/logout-button';
 
 function InstagramIcon({ className }: { className?: string }) {
   return (
@@ -37,14 +37,36 @@ const PUBLIC_LINKS = [
 
 export function LandingShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const init = async () => {
+      const { createClient } = await import('@/lib/supabase/client');
+      const supabase = createClient();
+      const result = await supabase.auth.getUser();
+      if (!active) return;
+      setUser(result.data.user ?? null);
+      setReady(true);
+    };
+    init();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <div className="pub-shell">
       <header className="pub-header">
         <div className="pub-container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <span className="text-sm font-bold tracking-tight text-[var(--m-ink)]">Rajendra Meet</span>
-          </div>
+          <Link href="/" className="flex items-center gap-2.5">
+            <img
+              src="/brand/logo.png"
+              alt="Rajendra Meet"
+              className="h-9 w-auto"
+            />
+          </Link>
 
           <nav className="hidden items-center gap-1 sm:gap-2 md:flex">
             {PUBLIC_LINKS.map((l) => (
@@ -70,6 +92,23 @@ export function LandingShell({ children }: { children: React.ReactNode }) {
               <span className="sr-only">Menu</span>
             </button>
           </div>
+
+          <div className="hidden items-center gap-2 md:flex">
+            {ready && user ? (
+              <ProfileMenu />
+            ) : ready && !user ? (
+              <>
+                <Link href="/login" className="pub-btn-ghost">
+                  Masuk
+                </Link>
+                <Link href="/register" className="pub-btn-primary">
+                  Daftar
+                </Link>
+              </>
+            ) : (
+              <span className="h-8 w-24 animate-pulse rounded-full bg-[var(--m-soft)]" />
+            )}
+          </div>
         </div>
       </header>
 
@@ -83,6 +122,11 @@ export function LandingShell({ children }: { children: React.ReactNode }) {
           />
           <div className="relative flex h-full w-72 max-w-[85vw] flex-col bg-[var(--m-surface)] shadow-xl">
             <div className="flex flex-row items-center gap-2 border-b border-[var(--m-border)] px-6 py-4">
+              <img
+                src="/brand/logo.png"
+                alt="Rajendra Meet"
+                className="h-7 w-auto"
+              />
               <span className="text-sm font-bold tracking-tight text-[var(--m-ink)]">Rajendra Meet</span>
               <button
                 type="button"
@@ -106,6 +150,23 @@ export function LandingShell({ children }: { children: React.ReactNode }) {
                 </Link>
               ))}
             </nav>
+
+            <div className="mt-auto flex flex-col gap-2 border-t border-[var(--m-border)] p-4">
+              {ready && user ? (
+                <ProfileMenu />
+              ) : ready && !user ? (
+                <>
+                  <Link href="/login" onClick={() => setOpen(false)} className="pub-btn-ghost w-full justify-center">
+                    Masuk
+                  </Link>
+                  <Link href="/register" onClick={() => setOpen(false)} className="pub-btn-primary w-full justify-center">
+                    Daftar
+                  </Link>
+                </>
+              ) : (
+                <span className="h-8 w-full animate-pulse rounded-full bg-[var(--m-soft)]" />
+              )}
+            </div>
           </div>
         </div>
       )}
