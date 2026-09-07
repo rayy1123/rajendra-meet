@@ -58,12 +58,7 @@ export default function DashboardLayout({
         <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-border bg-background/90 px-4 backdrop-blur-xl sm:px-6">
           <div className="flex items-center gap-2">
             <MobileSidebar />
-            <Link href="/" className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm ring-4 ring-primary/10">
-                <Waves className="h-4 w-4" />
-              </span>
-              <span className="text-sm font-bold tracking-tight text-foreground">Rajendra Meet</span>
-            </Link>
+            <span className="text-sm font-bold tracking-tight text-foreground">Rajendra Meet</span>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/scoreboard" className="rounded-full bg-[var(--m-aqua-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--m-aqua-ink)] transition-colors hover:bg-[var(--m-aqua)] hover:text-white">

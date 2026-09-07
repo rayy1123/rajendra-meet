@@ -1,11 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Phone, Mail } from 'lucide-react';
-import { LandingNav } from '@/components/layout/landing-nav';
-import { createClient } from '@/lib/supabase/client';
-import { ProfileMenu } from '@/components/layout/logout-button';
+import { Menu, X } from 'lucide-react';
 
 function InstagramIcon({ className }: { className?: string }) {
   return (
@@ -26,67 +24,97 @@ function InstagramIcon({ className }: { className?: string }) {
   );
 }
 
-export function LandingShell({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<any>(null);
-  const [ready, setReady] = useState(false);
+const PUBLIC_LINKS = [
+  { href: '/', label: 'Beranda' },
+  { href: '/scoreboard', label: 'Live Scoreboard' },
+  { href: '/daftar-lomba', label: 'Daftar Lomba' },
+  { href: '/kontak', label: 'Kontak' },
+  { href: '/program', label: 'Buku Acara' },
+  { href: '/galeri', label: 'Galeri' },
+  { href: '/medali', label: 'Medali' },
+  { href: '/guide', label: 'Panduan' },
+];
 
-  useEffect(() => {
-    let active = true;
-    const supabase = createClient();
-    supabase.auth.getUser().then((result: { data: { user: any } }) => {
-      if (!active) return;
-      setUser(result.data.user ?? null);
-      setReady(true);
-    });
-    return () => {
-      active = false;
-    };
-  }, []);
+export function LandingShell({ children }: { children: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
 
   return (
     <div className="pub-shell">
       <header className="pub-header">
         <div className="pub-container flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
-            <img
-              src="/brand/logo.png"
-              alt="Rajendra Meet"
-              className="h-9 w-auto"
-            />
-          </Link>
+          <div className="flex items-center gap-2.5">
+            <span className="text-sm font-bold tracking-tight text-[var(--m-ink)]">Rajendra Meet</span>
+          </div>
 
-          <nav className="flex items-center gap-1 sm:gap-2">
-            <LandingNav />
-            {ready && user ? (
-              <ProfileMenu />
-            ) : ready && !user ? (
-              <>
-                <Link href="/login" className="pub-btn-ghost">
-                  Masuk
-                </Link>
-                <Link href="/register" className="pub-btn-primary">
-                  Daftar
-                </Link>
-              </>
-            ) : (
-              <span className="h-8 w-24 animate-pulse rounded-full bg-[var(--m-soft)]" />
-            )}
+          <nav className="hidden items-center gap-1 sm:gap-2 md:flex">
+            {PUBLIC_LINKS.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-[var(--m-ink)] transition-colors hover:bg-[var(--m-soft)]"
+              >
+                {l.label}
+              </Link>
+            ))}
           </nav>
+
+          <div className="flex items-center gap-1 sm:gap-2 md:hidden">
+            <button
+              type="button"
+              aria-label="Buka menu"
+              aria-expanded={open}
+              onClick={() => setOpen(true)}
+              className="pub-btn-ghost flex items-center gap-2 px-3"
+            >
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Menu</span>
+            </button>
+          </div>
         </div>
       </header>
+
+      {open && (
+        <div className="fixed inset-0 z-50 flex justify-end md:hidden" role="dialog" aria-modal="true">
+          <button
+            type="button"
+            aria-label="Tutup menu"
+            onClick={() => setOpen(false)}
+            className="absolute inset-0 bg-black/30"
+          />
+          <div className="relative flex h-full w-72 max-w-[85vw] flex-col bg-[var(--m-surface)] shadow-xl">
+            <div className="flex flex-row items-center gap-2 border-b border-[var(--m-border)] px-6 py-4">
+              <span className="text-sm font-bold tracking-tight text-[var(--m-ink)]">Rajendra Meet</span>
+              <button
+                type="button"
+                aria-label="Tutup"
+                onClick={() => setOpen(false)}
+                className="ml-auto rounded-lg p-1.5 text-[var(--m-muted)] hover:bg-[var(--m-soft)]"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <nav className="flex flex-col p-3">
+              {PUBLIC_LINKS.map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg px-3 py-2.5 text-sm font-medium text-[var(--m-ink)] transition-colors hover:bg-[var(--m-soft)]"
+                >
+                  {l.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+        </div>
+      )}
 
       <main className="flex-1">{children}</main>
 
       <footer className="border-t border-[var(--m-border)] bg-[var(--m-surface)]">
         <div className="pub-container grid grid-cols-1 gap-8 py-10 sm:grid-cols-2 lg:grid-cols-3">
           <div>
-            <Link href="/" className="flex items-center gap-2.5">
-              <img
-                src="/brand/logo.png"
-                alt="Rajendra Project"
-                className="h-9 w-auto"
-              />
-            </Link>
             <p className="mt-3 max-w-md text-sm text-[var(--m-muted)]">
               Event organizer olahraga, MICE, dan sistem manajemen kejuaraan renang — profesional, terukur, dan mudah.
             </p>

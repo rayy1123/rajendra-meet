@@ -36,19 +36,6 @@ export const metadata = {
 export default function KontakPage() {
   return (
     <PublicShell>
-      {/* Hero */}
-      <section className="relative bg-white text-[var(--m-ink)]">
-        <div className="absolute inset-0 bg-white/70" />
-        <div className="pub-container relative py-12 text-center sm:py-14">
-          <p className="pub-eyebrow">Rajendra Meet · Kontak</p>
-          <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-4xl">Hubungi Kami</h1>
-          <p className="mx-auto mt-2 max-w-xl text-sm text-[#334155] sm:text-base">
-            Kami siap membantu mewujudkan acara renang impian Anda — dari pendaftaran hingga
-            live scoreboard.
-          </p>
-        </div>
-      </section>
-
       {/* Kontak cards */}
       <section className="pub-container -mt-8 pb-12">
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
