@@ -20,7 +20,7 @@ export function ViewerSubHeader({ title, description, badge }: ViewerSubHeaderPr
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--m-aqua-soft)] text-[var(--m-aqua-ink)]">
-              <img src="/brand/logo.png" alt="Rajendra Meet" className="h-6 w-auto rounded-sm" />
+              <img src="/brand/logo.png" alt="Rajendra Meet" className="h-6 w-auto" />
             </div>
             <div>
               <div className="flex items-center gap-2">

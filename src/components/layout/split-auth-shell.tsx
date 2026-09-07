@@ -19,7 +19,7 @@ export function SplitAuthShell({ children, title, subtitle, footerLinks = [] }: 
         {/* Top bar */}
         <header className="flex h-16 items-center justify-between px-6 sm:px-10">
           <div className="flex items-center gap-2.5">
-            <img src="/brand/logo.png" alt="Rajendra SCMS" className="h-8 w-auto rounded-md" />
+            <img src="/brand/logo.png" alt="Rajendra SCMS" className="h-8 w-auto" />
             <span className="text-sm font-semibold tracking-tight text-[#0b1220]">
               Rajendra SCMS
             </span>

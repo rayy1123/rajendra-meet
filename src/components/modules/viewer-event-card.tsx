@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { Waves, CalendarDays, MapPin, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -33,12 +32,10 @@ export function ViewerEventCard({
         <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/40 blur-2xl" />
         <div className="absolute -left-4 -bottom-6 h-24 w-24 rounded-full bg-[var(--m-aqua)]/10 blur-2xl" />
         <div className="absolute inset-0">
-          <Image
+          <img
             src="/brand/logo.png"
             alt="Rajendra Meet"
-            fill
             className="h-full w-full object-contain p-4 opacity-80"
-            sizes="(max-width: 640px) 100vw, 400px"
           />
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />

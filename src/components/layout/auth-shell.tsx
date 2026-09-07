@@ -13,7 +13,7 @@ export function AuthShell({ children, title, subtitle }: AuthShellProps) {
       <header className="fixed top-0 left-0 right-0 z-40 h-16 border-b border-border bg-background/95 backdrop-blur">
         <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2.5">
-            <img src="/brand/logo.png" alt="Rajendra Project" className="h-9 w-auto rounded-md" />
+            <img src="/brand/logo.png" alt="Rajendra Project" className="h-9 w-auto" />
             <span className="text-sm font-semibold tracking-tight text-foreground">Rajendra Project</span>
           </Link>
           <nav className="flex items-center gap-2 sm:gap-3">
