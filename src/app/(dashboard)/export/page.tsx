@@ -84,7 +84,7 @@ export default async function ExportPage({
             <FileSpreadsheet className="h-6 w-6" />
           </span>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Cetak & Ekspor Laporan</h1>
+            <h1 className="text-gradient-hero">Cetak & Ekspor Laporan</h1>
             <p className="text-sm text-muted-foreground">
               Unduh lembar susunan seri/lintasan dalam bentuk Excel atau cetak langsung menjadi PDF untuk panitia/juri.
             </p>

@@ -8,6 +8,8 @@ interface PageHeaderProps extends React.ComponentProps<"div"> {
   icon?: React.ReactNode;
   /** Aksi di sisi kanan (tombol, link, dsb). */
   actions?: React.ReactNode;
+  /** Terapkan gradient hero text pada judul. */
+  gradient?: boolean;
 }
 
 /**
@@ -19,6 +21,7 @@ export function PageHeader({
   description,
   icon,
   actions,
+  gradient = true,
   className,
   ...props
 }: PageHeaderProps) {
@@ -37,7 +40,12 @@ export function PageHeader({
           </span>
         )}
         <div>
-          <h1 className="text-[1.7rem] font-bold leading-tight tracking-[-0.025em] text-foreground">
+          <h1
+            className={cn(
+              "text-[1.7rem] font-bold leading-tight tracking-[-0.025em] text-foreground",
+              gradient && "text-gradient-hero"
+            )}
+          >
             {title}
           </h1>
           {description && (

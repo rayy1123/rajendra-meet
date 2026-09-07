@@ -61,8 +61,7 @@ export default async function DashboardViewerPage() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* User Banner */}
-        <div className="relative overflow-hidden rounded-2xl border border-[var(--m-border)] bg-[var(--m-surface)] px-6 py-5 text-[var(--m-ink)] shadow-sm">
-          <div className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-[var(--m-aqua)]/10 blur-2xl" />
+        <div className="glass-panel px-6 py-5 text-[var(--m-ink)]">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--m-soft)]">

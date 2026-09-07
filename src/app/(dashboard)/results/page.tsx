@@ -103,6 +103,7 @@ export default async function ResultsPage({
     <div className="mx-auto max-w-7xl space-y-6 p-6">
       <PageHeader
         title="Input Hasil Lomba"
+        gradient={true}
         description="Input waktu tempuh per lintasan (lane). Hasil otomatis tersimpan dan terupdate secara realtime."
         icon={<Trophy className="h-6 w-6" />}
       />

@@ -98,6 +98,7 @@ export default async function HeatsPage({
     <div className="mx-auto max-w-7xl space-y-6 p-6">
       <PageHeader
         title="Auto-Acara Generator"
+        gradient={true}
         description="Bagi peserta lomba ke dalam Acara dan Lintasan secara otomatis menggunakan algoritma Spearhead Seeding standar FINA/Aquatics."
         icon={<Layers className="h-6 w-6" />}
       />

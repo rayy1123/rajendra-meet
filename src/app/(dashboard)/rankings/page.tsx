@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { LeaderboardView, type CompEvent } from '@/components/modules/leaderboard-view';
 import { Card, CardContent } from '@/components/ui/card';
+import { GlassCard } from '@/components/ui/glass-card';
 import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';

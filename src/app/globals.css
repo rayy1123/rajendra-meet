@@ -257,6 +257,19 @@
   }
 }
 
+/* Gradient hero text */
+.text-gradient-hero {
+  @apply bg-gradient-to-r from-[var(--primary)] to-[var(--brand-2)] bg-clip-text font-extrabold tracking-tight text-transparent;
+}
+
+/* Soft glassmorphism cards — light-only */
+.glass-card {
+  @apply rounded-2xl border border-white/60 bg-white/75 shadow-sm backdrop-blur-md;
+}
+.glass-panel {
+  @apply rounded-2xl border border-white/60 bg-white/70 shadow-sm backdrop-blur;
+}
+
 /* Loading skeleton shimmer — lembut, tidak mencolok (Aqua Editorial) */
 @keyframes scms-shimmer {
   0% { background-position: 200% 0; }

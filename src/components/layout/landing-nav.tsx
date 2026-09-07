@@ -1,8 +1,6 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
-import { Menu, X } from 'lucide-react';
 
 const PUBLIC_LINKS = [
   { href: '/', label: 'Beranda' },
@@ -16,83 +14,20 @@ const PUBLIC_LINKS = [
 ];
 
 /**
- * Navigasi beranda (publik, belum login).
- * Di layar kecil hanya logo + Masuk/Daftar yang tampil, sehingga tombol
- * hamburger ini memberi akses ke seluruh menu publik tanpa memenuhi header.
- * Menggunakan drawer manual (useState) agar tidak bergantung pada
- * komponen Sheet/radix yang bermasalah di beberapa setup.
+ * Navigasi publik statis tanpa tombol menu/drawer.
  */
 export function LandingNav() {
-  const [open, setOpen] = useState(false);
-
   return (
-    <>
-      <button
-        type="button"
-        aria-label="Buka menu"
-        aria-expanded={open}
-        onClick={() => setOpen(true)}
-        className="pub-btn-ghost flex items-center gap-2 px-3"
-      >
-        <Menu className="h-5 w-5" />
-        <span className="sr-only sm:not-sr-only sm:inline">Menu</span>
-      </button>
-
-      {open && (
-        <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true">
-          {/* Backdrop */}
-          <button
-            type="button"
-            aria-label="Tutup menu"
-            onClick={() => setOpen(false)}
-            className="absolute inset-0 bg-black/30"
-          />
-          {/* Panel */}
-          <div className="relative flex h-full w-72 max-w-[85vw] flex-col bg-[var(--m-surface)] shadow-xl">
-            <div className="flex flex-row items-center gap-2 border-b border-[var(--m-border)] px-6 py-4">
-              <img
-                src="/brand/logo.png"
-                alt="Rajendra Meet"
-                className="h-7 w-auto rounded-md"
-              />
-              <button
-                type="button"
-                aria-label="Tutup"
-                onClick={() => setOpen(false)}
-                className="ml-auto rounded-lg p-1.5 text-[var(--m-muted)] hover:bg-[var(--m-soft)]"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <nav className="flex flex-col p-3">
-              {PUBLIC_LINKS.map((l) => (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  onClick={() => setOpen(false)}
-                  className="rounded-lg px-3 py-2.5 text-sm font-medium text-[var(--m-ink)] transition-colors hover:bg-[var(--m-soft)]"
-                >
-                  {l.label}
-                </Link>
-              ))}
-            </nav>
-
-            <div className="mt-auto border-t border-[var(--m-border)] p-3">
-              <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70">
-                Akun
-              </p>
-              <Link
-                href="/profile"
-                onClick={() => setOpen(false)}
-                className="rounded-lg px-3 py-2.5 text-sm font-medium text-[var(--m-ink)] transition-colors hover:bg-[var(--m-soft)]"
-              >
-                Profil
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
+    <nav className="flex items-center gap-2 sm:gap-3">
+      {PUBLIC_LINKS.map((l) => (
+        <Link
+          key={l.href}
+          href={l.href}
+          className="rounded-lg px-2.5 py-1.5 text-sm font-medium text-[var(--m-muted)] transition-colors hover:bg-[var(--m-soft)] hover:text-[var(--m-ink)]"
+        >
+          {l.label}
+        </Link>
+      ))}
+    </nav>
   );
 }

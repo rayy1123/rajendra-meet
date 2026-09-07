@@ -1,4 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card';
+import { GlassCard } from '@/components/ui/glass-card';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
@@ -46,7 +47,7 @@ export default async function EventsPage() {
             <Trophy className="h-6 w-6" />
           </span>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Kejuaraan / Events</h1>
+            <h1 className="text-gradient-hero">Kejuaraan / Events</h1>
             <p className="text-sm text-muted-foreground">
               Kelola kejuaraan renang, pengaturan kolam, dan jadwal perlombaan.
             </p>

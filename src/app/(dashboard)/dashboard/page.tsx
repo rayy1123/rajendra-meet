@@ -1,4 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card';
+import { GlassCard } from '@/components/ui/glass-card';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { LayoutDashboard, CalendarDays, Users, ClipboardList, School, Trophy, Timer, Award } from 'lucide-react';
@@ -45,7 +46,7 @@ export default async function DashboardPage() {
             <LayoutDashboard className="h-6 w-6" />
           </span>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Dashboard Panitia</h1>
+            <h1 className="text-gradient-hero">Dashboard Panitia</h1>
             <p className="text-sm text-muted-foreground">
               Kelola seluruh rangkaian kejuaraan renang dari satu panel.
             </p>

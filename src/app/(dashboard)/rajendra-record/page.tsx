@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { detectBrokenRecords, type RecordCandidate, type ExistingRecord } from '@/services/records';
 import { formatMsToTime } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
+import { GlassCard } from '@/components/ui/glass-card';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { Crown } from 'lucide-react';
