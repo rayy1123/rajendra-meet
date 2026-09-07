@@ -40,7 +40,7 @@ export function PublicShell({
             <img
               src="/brand/logo.png"
               alt="Rajendra Meet"
-              className="h-9 w-auto rounded-md"
+              className="h-9 w-auto"
             />
           </Link>
 
@@ -74,7 +74,9 @@ export function PublicShell({
             )}
           </div>
         )}
-        {children}
+        <div className="pub-container pb-16">
+          {children}
+        </div>
       </main>
 
       <footer className="border-t border-[var(--m-border)] py-6">

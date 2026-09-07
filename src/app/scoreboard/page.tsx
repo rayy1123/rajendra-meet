@@ -37,43 +37,41 @@ export default async function ScoreboardPage({
       title="Scoreboard Kejuaraan"
       subtitle="Pantau hasil perlombaan secara langsung. Pilih kejuaraan lalu nomor lomba untuk melihat peringkat per acara."
     >
-      <div className="pub-container pb-16">
-        {!events || events.length === 0 ? (
-          <div className="pub-card p-12 text-center">
-            <Waves className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
-            <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Belum ada kejuaraan</h3>
-            <p className="mt-1 text-sm text-[var(--m-muted)]">
-              Panitia belum mempublikasikan kejuaraan apa pun.
-            </p>
+      {!events || events.length === 0 ? (
+        <div className="pub-card p-12 text-center">
+          <Waves className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
+          <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Belum ada kejuaraan</h3>
+          <p className="mt-1 text-sm text-[var(--m-muted)]">
+            Panitia belum mempublikasikan kejuaraan apa pun.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="mb-6 flex flex-wrap items-center gap-3">
+            <RouteEventSelect events={events ?? []} current={current?.id ?? ''} basePath="/scoreboard" />
+            <span className="pub-chip">{current?.lane_count || 8} lintasan</span>
+            {current?.pool_type && <span className="pub-chip">{current.pool_type}</span>}
           </div>
-        ) : (
-          <>
-            <div className="mb-6 flex flex-wrap items-center gap-3">
-              <RouteEventSelect events={events ?? []} current={current?.id ?? ''} basePath="/scoreboard" />
-              <span className="pub-chip">{current?.lane_count || 8} lintasan</span>
-              {current?.pool_type && <span className="pub-chip">{current.pool_type}</span>}
-            </div>
 
-            {current && compEvents.length > 0 ? (
-              <div className="live-card overflow-hidden p-1">
-                <LeaderboardView eventId={current.id} compEvents={compEvents} showHeatTab={false} />
-              </div>
-            ) : (
-              <div className="pub-card p-12 text-center">
-                <Waves className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
-                <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Belum ada nomor lomba</h3>
-                <p className="mt-1 text-sm text-[var(--m-muted)]">Kejuaraan ini belum memiliki nomor lomba.</p>
-              </div>
-            )}
-
-            <div className="mt-8 text-center">
-              <Link href={current ? `/public-live/${current.id}` : '/live'} className="pub-btn-ghost">
-                Buka Live Board lengkap
-              </Link>
+          {current && compEvents.length > 0 ? (
+            <div className="live-card overflow-hidden p-1">
+              <LeaderboardView eventId={current.id} compEvents={compEvents} showHeatTab={false} />
             </div>
-          </>
-        )}
-      </div>
+          ) : (
+            <div className="pub-card p-12 text-center">
+              <Waves className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
+              <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Belum ada nomor lomba</h3>
+              <p className="mt-1 text-sm text-[var(--m-muted)]">Kejuaraan ini belum memiliki nomor lomba.</p>
+            </div>
+          )}
+
+          <div className="mt-8 text-center">
+            <Link href={current ? `/public-live/${current.id}` : '/live'} className="pub-btn-ghost">
+              Buka Live Board lengkap
+            </Link>
+          </div>
+        </>
+      )}
     </PublicShell>
   );
 }
