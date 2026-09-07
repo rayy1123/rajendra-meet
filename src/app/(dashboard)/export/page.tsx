@@ -78,11 +78,19 @@ export default async function ExportPage({
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 print:p-0 print:m-0">
       <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Cetak & Ekspor' }]} className="mb-2" />
-      <PageHeader
-        title="Cetak & Ekspor Laporan"
-        description="Unduh lembar susunan seri/lintasan dalam bentuk Excel atau cetak langsung menjadi PDF untuk panitia/juri."
-        icon={<FileSpreadsheet className="h-6 w-6" />}
-      />
+      <div className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
+            <FileSpreadsheet className="h-6 w-6" />
+          </span>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Cetak & Ekspor Laporan</h1>
+            <p className="text-sm text-muted-foreground">
+              Unduh lembar susunan seri/lintasan dalam bentuk Excel atau cetak langsung menjadi PDF untuk panitia/juri.
+            </p>
+          </div>
+        </div>
+      </div>
 
       {!events || events.length === 0 ? (
         <Card className="p-12 text-center border-dashed print:hidden">

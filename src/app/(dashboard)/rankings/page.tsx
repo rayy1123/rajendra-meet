@@ -29,12 +29,12 @@ export default async function RankingsPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Perangkingan' }]} className="mb-2" />
       <PageHeader
         title="Perangkingan"
         description="Peringkat otomatis per nomor lomba, dihitung lintas heat berdasarkan waktu tercepat."
         icon={<Trophy className="h-6 w-6" />}
       />
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Perangkingan' }]} className="mb-2" />
 
       {byEvent.length === 0 ? (
         <EmptyState
