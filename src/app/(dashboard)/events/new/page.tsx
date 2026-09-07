@@ -53,14 +53,14 @@ export default function NewEventPage() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6 p-6">
+    <div className="mx-auto max-w-7xl space-y-6 p-6">
       <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Kejuaraan / Events', href: '/events' }, { label: 'Buat Event Baru' }]} className="mb-2" />
       <PageHeader
         title="Buat Event Kejuaraan Baru"
         description="Isi detail kejuaraan renang: nama, penyenggara, lokasi, jadwal, dan konfigurasi kolam."
       />
       <Card>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
             {error && <div className="rounded-lg bg-destructive/15 px-3 py-2 text-sm text-destructive">{error}</div>}
             <div className="space-y-1">
               <label htmlFor="name" className="text-sm font-medium">Nama Kejuaraan</label>

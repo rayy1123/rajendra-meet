@@ -70,7 +70,7 @@ export default async function EventsPage() {
 
       {!events || events.length === 0 ? (
         <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
+          <CardContent className="flex flex-col items-center gap-4 py-14 text-center">
             <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
               <Waves className="h-6 w-6" />
             </span>
@@ -85,14 +85,14 @@ export default async function EventsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {events.map((event) => (
             <Card
               key={event.id}
-              className="flex flex-col justify-between gap-4 transition-shadow hover:shadow-md"
+              className="flex flex-col justify-between gap-5 transition-shadow hover:shadow-md"
             >
-              <CardContent className="space-y-3 p-5">
-                <div className="flex items-start justify-between gap-2">
+              <CardContent className="space-y-4 p-6">
+                <div className="flex items-start justify-between gap-3">
                   <h3 className="font-bold leading-snug text-foreground">{event.name}</h3>
                   <span className="shrink-0 rounded-lg bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary">
                     {event.lane_count || 8} Lintasan
@@ -102,7 +102,7 @@ export default async function EventsPage() {
                   {event.organizer || 'Panitia Pelaksana'}
                 </p>
 
-                <div className="space-y-1.5 border-y border-border py-3 text-xs text-muted-foreground">
+                <div className="space-y-2 border-y border-border py-4 text-xs text-muted-foreground">
                   {event.location && (
                     <p className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 shrink-0 text-primary" /> {event.location}
@@ -123,7 +123,7 @@ export default async function EventsPage() {
                 </p>
               </CardContent>
 
-              <div className="grid grid-cols-2 gap-2 px-5 pb-5">
+              <div className="grid grid-cols-2 gap-3 px-6 pb-6">
                 <Link
                   href={`/events/${event.id}`}
                   className="w-full rounded-lg bg-primary px-3 py-2 text-center text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"

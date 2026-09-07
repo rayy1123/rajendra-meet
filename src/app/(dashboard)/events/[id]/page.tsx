@@ -64,7 +64,7 @@ export default async function EventDetailPage({ params }: PageProps) {
       </div>
 
       <div className="rounded-2xl border bg-card p-6">
-        <h2 className="mb-4 text-lg font-semibold">Nomor Lomba ({compEvents?.length || 0})</h2>
+        <h2 className="mb-2 text-lg font-semibold">Nomor Lomba ({compEvents?.length || 0})</h2>
         {!compEvents || compEvents.length === 0 ? (
           <p className="text-sm text-muted-foreground">Belum ada nomor lomba. Tambahkan lewat menu yang sesuai.</p>
         ) : (
