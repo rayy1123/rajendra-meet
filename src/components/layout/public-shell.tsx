@@ -7,6 +7,11 @@ import { LandingNav } from '@/components/layout/landing-nav';
 import { createClient } from '@/lib/supabase/client';
 import { ProfileMenu } from '@/components/layout/logout-button';
 
+/**
+ * Kerangka halaman publik yang konsisten untuk scoreboard, live board, dan
+ * panduan. Tema "Marine" (lihat globals.css). Header memuat logo dan tautan
+ * masuk/daftar; footer ringkas. Konten disisipkan via children.
+ */
 export function PublicShell({
   children,
   title,
@@ -40,7 +45,7 @@ export function PublicShell({
             <img
               src="/brand/logo.png"
               alt="Rajendra Meet"
-              className="h-9 w-auto"
+              className="h-9 w-auto rounded-md"
             />
           </Link>
 
@@ -68,15 +73,15 @@ export function PublicShell({
         {title && (
           <div className="pub-container pt-10 pb-6">
             <p className="pub-eyebrow">Rajendra Meet · Hasil Langsung</p>
-            <h1 className="h-display mt-2">{title}</h1>
+            <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--m-ink)] sm:text-4xl">
+              {title}
+            </h1>
             {subtitle && (
               <p className="mt-2 max-w-2xl text-[var(--m-muted)]">{subtitle}</p>
             )}
           </div>
         )}
-        <div className="pub-container pb-16">
-          {children}
-        </div>
+        {children}
       </main>
 
       <footer className="border-t border-[var(--m-border)] py-6">
