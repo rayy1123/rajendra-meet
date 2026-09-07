@@ -61,11 +61,11 @@ export default async function DashboardViewerPage() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* User Banner */}
-        <div className="relative overflow-hidden rounded-2xl border border-[#d0dff0] bg-[linear-gradient(135deg,#ffffff_0%,#f0fbfc_58%,#e6f5ff_100%)] px-6 py-5 text-[#0b1220] shadow-sm">
+        <div className="relative overflow-hidden rounded-2xl border border-[var(--m-border)] bg-[var(--m-surface)] px-6 py-5 text-[var(--m-ink)] shadow-sm">
           <div className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-[var(--m-aqua)]/10 blur-2xl" />
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-[#eef6ff]">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--m-soft)]">
                 {avatarUrl ? (
                   <img src={avatarUrl} alt={fullName} className="h-full w-full object-cover" />
                 ) : (
@@ -73,19 +73,19 @@ export default async function DashboardViewerPage() {
                 )}
               </div>
               <div>
-                <p className="inline-flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-[#334155]">
+                <p className="inline-flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-[var(--m-muted)]">
                   <Sparkles className="h-3 w-3 text-[var(--m-aqua-ink)]" /> Ruang Atlet
                 </p>
                 <h1 className="text-xl font-bold tracking-tight">{fullName}</h1>
-                <p className="text-xs text-[#334155]">@{username}</p>
+                <p className="text-xs text-[var(--m-muted)]">@{username}</p>
               </div>
             </div>
             <div className="flex items-center gap-3 text-xs">
-              <Link href="/" className="inline-flex items-center gap-1 rounded-full border border-[#cbd5e1] bg-white px-3 py-1.5 font-semibold text-[#0b1220] hover:border-[var(--m-aqua)]">
+              <Link href="/" className="inline-flex items-center gap-1 rounded-full border border-[var(--m-border)] bg-white px-3 py-1.5 font-semibold text-[var(--m-ink)] hover:border-[var(--m-aqua)]">
                 Beranda
               </Link>
-              <span className="text-[#64748b]">/</span>
-              <span className="font-semibold text-[#0b1220]">Dashboard</span>
+              <span className="text-[var(--m-muted)]">/</span>
+              <span className="font-semibold text-[var(--m-ink)]">Dashboard</span>
             </div>
           </div>
         </div>
