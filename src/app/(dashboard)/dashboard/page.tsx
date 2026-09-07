@@ -39,11 +39,19 @@ export default async function DashboardPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
       <Breadcrumb items={[{ label: 'Dashboard' }]} className="mb-2" />
-      <PageHeader
-        title="Dashboard Panitia"
-        description="Kelola seluruh rangkaian kejuaraan renang dari satu panel."
-        icon={<LayoutDashboard className="h-6 w-6" />}
-      />
+      <div className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
+            <LayoutDashboard className="h-6 w-6" />
+          </span>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Dashboard Panitia</h1>
+            <p className="text-sm text-muted-foreground">
+              Kelola seluruh rangkaian kejuaraan renang dari satu panel.
+            </p>
+          </div>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((s) => {

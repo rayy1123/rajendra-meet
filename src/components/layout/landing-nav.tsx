@@ -78,20 +78,16 @@ export function LandingNav() {
               ))}
             </nav>
 
-            <div className="mt-auto flex flex-col gap-2 border-t border-[var(--m-border)] p-4">
+            <div className="mt-auto border-t border-[var(--m-border)] p-3">
+              <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70">
+                Akun
+              </p>
               <Link
-                href="/login"
+                href="/profile"
                 onClick={() => setOpen(false)}
-                className="pub-btn-ghost w-full justify-center"
+                className="rounded-lg px-3 py-2.5 text-sm font-medium text-[var(--m-ink)] transition-colors hover:bg-[var(--m-soft)]"
               >
-                Masuk
-              </Link>
-              <Link
-                href="/register"
-                onClick={() => setOpen(false)}
-                className="pub-btn-primary w-full justify-center"
-              >
-                Daftar
+                Profil
               </Link>
             </div>
           </div>

@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { PublicShell } from '@/components/layout/public-shell';
 import { LiveBoard, type LiveRow, type LiveOption } from '@/components/modules/live-board';
 import { Waves } from 'lucide-react';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
@@ -106,18 +107,46 @@ export default async function LivePage({
           <p className="mt-1 text-sm text-[var(--m-muted)]">Panitia belum mempublikasikan kejuaraan apa pun.</p>
         </div>
       ) : (
-        <LiveBoard
-          eventName={eventName}
-          compEventName={compEventName}
-          heatLabel={heatLabel}
-          rows={rows}
-          eventOpts={eventOpts}
-          compOpts={compOpts}
-          heatOpts={heatOpts}
-          currentEvent={current?.id ?? ''}
-          currentCe={compOpts[0]?.id ?? ''}
-          currentHeat={heatOpts[0]?.id ?? ''}
-        />
+        <div className="space-y-5">
+          <div className="flex flex-wrap items-center gap-2">
+            <form
+              action="/live"
+              className="flex items-center gap-2"
+            >
+              <select
+                name="event"
+                defaultValue={current?.id ?? ''}
+                className="h-9 rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] px-3 text-sm font-semibold text-[var(--m-ink)] shadow-sm"
+              >
+                {eventOpts.map((e) => (
+                  <option key={e.id} value={e.id}>{e.label}</option>
+                ))}
+              </select>
+              <button
+                type="submit"
+                className="rounded-xl border border-[var(--m-border)] bg-white px-3 py-1.5 text-sm font-semibold text-[var(--m-ink)] shadow-sm hover:border-[var(--m-aqua)]"
+              >
+                Pilih
+              </button>
+            </form>
+            <Link href="/scoreboard" className="pub-btn-ghost">
+              Buka Scoreboard
+            </Link>
+          </div>
+
+          <LiveBoard
+            eventName={eventName}
+            compEventName={compEventName}
+            heatLabel={heatLabel}
+            rows={rows}
+            eventOpts={eventOpts}
+            compOpts={compOpts}
+            heatOpts={heatOpts}
+            currentEvent={current?.id ?? ''}
+            currentCe={compOpts[0]?.id ?? ''}
+            currentHeat={heatOpts[0]?.id ?? ''}
+          />
+        </div>
       )}
     </PublicShell>
   );
