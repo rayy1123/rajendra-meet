@@ -3,7 +3,7 @@ import { Settings, Shield, Sliders, Database, Save, Server } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
@@ -27,7 +27,7 @@ export default async function SettingsPage() {
         icon={<Settings className="h-6 w-6" />}
       />
 
-      <Tabs defaultValue="points" className="space-y-6">
+      <Tabs defaultValue="points" className="space-y-4">
         <TabsList className="grid w-full sm:w-auto grid-cols-3">
           <TabsTrigger value="points" className="flex items-center gap-2">
             <Sliders className="w-4 h-4" /> Aturan Poin
@@ -41,7 +41,7 @@ export default async function SettingsPage() {
         </TabsList>
 
         {/* TAB 1: Aturan Poin Kejuaraan */}
-        <TabsContent value="points">
+        <div data-value="points">
           <Card>
             <CardHeader>
               <CardTitle>Bobot Poin Peringkat (Point System)</CardTitle>
@@ -96,10 +96,10 @@ export default async function SettingsPage() {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
+        </div>
 
         {/* TAB 2: Konfigurasi Default Kolam & Lane */}
-        <TabsContent value="pool">
+        <div data-value="pool">
           <Card>
             <CardHeader>
               <CardTitle>Default Konfigurasi Arena / Kolam Renang</CardTitle>
@@ -140,10 +140,10 @@ export default async function SettingsPage() {
               </Button>
             </CardContent>
           </Card>
-        </TabsContent>
+        </div>
 
         {/* TAB 3: Maintenance & Database */}
-        <TabsContent value="database">
+        <div data-value="database">
           <Card>
             <CardHeader>
               <CardTitle>Pemeliharaan Sistem & Log Aktivitas</CardTitle>
@@ -174,7 +174,7 @@ export default async function SettingsPage() {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
+        </div>
       </Tabs>
     </div>
   );

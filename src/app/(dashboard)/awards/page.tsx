@@ -136,7 +136,7 @@ export default async function AwardsPage() {
           description="Input hasil di menu Results untuk melihat klasemen penghargaan."
         />
       ) : (
-        <Tabs defaultValue="overall">
+        <Tabs defaultValue="overall" className="space-y-4">
           <TabsList>
             <TabsTrigger value="overall"><Building2 className="h-4 w-4" /> Overall</TabsTrigger>
             <TabsTrigger value="grade"><School className="h-4 w-4" /> Per Tingkat</TabsTrigger>
@@ -144,17 +144,17 @@ export default async function AwardsPage() {
             <TabsTrigger value="swimmer"><User className="h-4 w-4" /> Best Swimmer</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overall">
-            <StandingTable rows={overall} schoolName={schoolName} title="Klasemen Overall" />
-          </TabsContent>
-          <TabsContent value="grade">
-            <StandingTable rows={byGrade} schoolName={schoolName} title="Klasemen per Tingkat" />
-          </TabsContent>
-          <TabsContent value="class">
-            <StandingTable rows={byClass} schoolName={schoolName} title="Klasemen per Kelas" />
-          </TabsContent>
-          <TabsContent value="swimmer">
-            <div className="space-y-4">
+          <div className="space-y-4">
+            <div data-value="overall">
+              <StandingTable rows={overall} schoolName={schoolName} title="Klasemen Overall" />
+            </div>
+            <div data-value="grade">
+              <StandingTable rows={byGrade} schoolName={schoolName} title="Klasemen per Tingkat" />
+            </div>
+            <div data-value="class">
+              <StandingTable rows={byClass} schoolName={schoolName} title="Klasemen per Kelas" />
+            </div>
+            <div data-value="swimmer">
               {bestSwimmers.map((g) => (
                 <Card key={g.group_key}>
                   <CardHeader>
@@ -182,7 +182,7 @@ export default async function AwardsPage() {
                 </Card>
               ))}
             </div>
-          </TabsContent>
+          </div>
         </Tabs>
       )}
     </div>
