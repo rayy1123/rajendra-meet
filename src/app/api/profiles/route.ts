@@ -17,10 +17,13 @@ export async function GET(request: Request) {
       .select('id, username, full_name')
       .eq('school_id', schoolId)
       .order('full_name', { ascending: true });
+    
     if (error) {
       return new Response(JSON.stringify({ error: error.message }), { status: 500 });
     }
-    return new Response(JSON.stringify(data ?? []), { status: 200, headers: { 'content-type': 'application/json' } });
+    
+    const limited = (data ?? []).slice(0, 200);
+    return new Response(JSON.stringify(limited), { status: 200, headers: { 'content-type': 'application/json' } });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Terjadi kesalahan sistem.';
     return new Response(JSON.stringify({ error: msg }), { status: 500 });
