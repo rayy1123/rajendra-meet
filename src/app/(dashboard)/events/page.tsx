@@ -85,13 +85,13 @@ export default async function EventsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
           {events.map((event) => (
             <Card
               key={event.id}
-              className="flex flex-col justify-between gap-5 transition-shadow hover:shadow-md"
+              className="flex flex-col justify-between gap-4 transition-shadow hover:shadow-md"
             >
-              <CardContent className="space-y-4 p-6">
+              <CardContent className="space-y-4 p-5">
                 <div className="flex items-start justify-between gap-3">
                   <h3 className="font-bold leading-snug text-foreground">{event.name}</h3>
                   <span className="shrink-0 rounded-lg bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary">
