@@ -52,7 +52,6 @@ export function LandingShell({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center gap-1 sm:gap-2 md:hidden">
             <MenuButton onClick={() => setOpen(true)} />
-            {authActions}
           </div>
 
           <nav className="hidden items-center gap-2 sm:gap-3 md:flex">
