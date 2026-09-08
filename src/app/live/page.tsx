@@ -120,14 +120,6 @@ export default async function LivePage({
                 Gunakan kontrol di bawah untuk mengganti nomor lomba atau heat.
               </p>
             </div>
-            <div className="flex items-center gap-2">
-              <Link
-                href="/scoreboard"
-                className="inline-flex items-center gap-1 rounded-xl border border-[var(--m-border)] bg-white px-3 py-2 text-xs font-semibold text-[var(--m-ink)] shadow-sm transition-colors hover:border-[var(--m-aqua)]"
-              >
-                Buka Scoreboard
-              </Link>
-            </div>
           </div>
 
           <LiveBoard

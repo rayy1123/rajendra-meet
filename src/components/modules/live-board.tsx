@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Waves, Clock, Activity, RefreshCcw } from 'lucide-react';
 
 export interface LiveRow {
   rank: number | null;
@@ -64,130 +65,153 @@ export function LiveBoard({
     router.push(`/live?event=${e}&ce=${c}&heat=${h}`);
 
   return (
-    <div className="min-h-screen bg-[#0b1c30] font-sans text-white">
+    <div className="min-h-screen bg-white text-[var(--m-ink)]">
       {/* Header */}
-      <header className="flex h-24 items-center justify-between border-b border-white/15 px-8">
-        <div className="flex items-center gap-4">
-          <span className="text-4xl text-[#38bdf8]">🌊</span>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Rajendra SCMS</h1>
-            <p className="text-sm text-white/60">Live Public Scoreboard</p>
+      <header className="border-b border-[var(--m-border)] bg-white/80 backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--m-aqua-soft)] text-[var(--m-aqua-ink)]">
+              <Waves className="h-5 w-5" />
+            </span>
+            <div>
+              <h1 className="text-lg font-bold tracking-tight">Live Board</h1>
+              <p className="text-xs text-[var(--m-muted)]">Hasil langsung · Rajendra Meet</p>
+            </div>
           </div>
-        </div>
-        <div className="text-right">
-          <div className="text-xs uppercase text-white/50">Current Time</div>
-          <div className="font-mono text-3xl font-semibold tabular-nums">{now || '14:32:45'}</div>
+          <div className="flex items-center gap-3 text-xs">
+            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--m-aqua-soft)] px-2.5 py-1 font-semibold text-[var(--m-aqua-ink)]">
+              <Activity className="h-3.5 w-3.5" /> Live
+            </span>
+            <span className="flex items-center gap-1 font-mono text-[var(--m-muted)]">
+              <Clock className="h-3.5 w-3.5" /> {now || '--:--:--'}
+            </span>
+          </div>
         </div>
       </header>
 
-      {/* Selectors */}
-      <div className="flex flex-wrap gap-3 border-b border-white/10 px-8 py-3">
-        <select
-          className="rounded-lg bg-white/10 px-3 py-2 text-sm text-white outline-none"
-          value={currentEvent}
-          onChange={(e) => go(e.target.value, compOpts[0]?.id ?? '', heatOpts[0]?.id ?? '')}
-        >
-          {eventOpts.map((o) => (
-            <option key={o.id} value={o.id} className="text-black">
-              {o.label}
-            </option>
-          ))}
-        </select>
-        <select
-          className="rounded-lg bg-white/10 px-3 py-2 text-sm text-white outline-none"
-          value={currentCe}
-          onChange={(e) => go(currentEvent, e.target.value, heatOpts[0]?.id ?? '')}
-        >
-          {compOpts.map((o) => (
-            <option key={o.id} value={o.id} className="text-black">
-              {o.label}
-            </option>
-          ))}
-        </select>
-        <select
-          className="rounded-lg bg-white/10 px-3 py-2 text-sm text-white outline-none"
-          value={currentHeat}
-          onChange={(e) => go(currentEvent, currentCe, e.target.value)}
-        >
-          {heatOpts.map((o) => (
-            <option key={o.id} value={o.id} className="text-black">
-              {o.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <main className="flex flex-col gap-6 p-8">
-        {/* Event / Heat info */}
-        <div className="flex flex-wrap items-end justify-between rounded-xl border border-white/10 bg-white/5 p-6">
-          <div>
-            <div className="mb-2">
-              <span className="rounded bg-[#006780] px-2 py-0.5 text-xs font-semibold uppercase tracking-wider">
-                {compEventName || '—'}
-              </span>
+      <main className="mx-auto max-w-7xl px-4 py-6">
+        {/* Selector */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="space-y-1">
+              <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--m-muted)]">Event</p>
+              <select
+                className="h-10 w-full rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] px-3 text-sm font-semibold text-[var(--m-ink)] shadow-sm"
+                value={currentEvent}
+                onChange={(e) => go(e.target.value, compOpts[0]?.id ?? '', heatOpts[0]?.id ?? '')}
+              >
+                {eventOpts.map((o) => (
+                  <option key={o.id} value={o.id}>{o.label}</option>
+                ))}
+              </select>
             </div>
-            <h2 className="text-4xl font-bold">{eventName || 'Pilih nomor lomba'}</h2>
+            <div className="space-y-1">
+              <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--m-muted)]">Acara</p>
+              <select
+                className="h-10 w-full rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] px-3 text-sm font-semibold text-[var(--m-ink)] shadow-sm"
+                value={currentCe}
+                onChange={(e) => go(currentEvent, e.target.value, heatOpts[0]?.id ?? '')}
+              >
+                {compOpts.map((o) => (
+                  <option key={o.id} value={o.id}>{o.label}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1">
+              <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--m-muted)]">Heat</p>
+              <select
+                className="h-10 w-full rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] px-3 text-sm font-semibold text-[var(--m-ink)] shadow-sm"
+                value={currentHeat}
+                onChange={(e) => go(currentEvent, currentCe, e.target.value)}
+              >
+                {heatOpts.map((o) => (
+                  <option key={o.id} value={o.id}>{o.label}</option>
+                ))}
+              </select>
+            </div>
           </div>
-          <div className="text-right">
-            <div className="text-xs uppercase text-white/50">Heat</div>
-            <div className="font-mono text-3xl font-semibold text-[#38bdf8] tabular-nums">
-              {heatLabel || '-'}
-            </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => router.refresh()}
+              className="inline-flex items-center gap-1 rounded-xl border border-[var(--m-border)] bg-white px-3 py-2 text-xs font-semibold text-[var(--m-ink)] shadow-sm transition-colors hover:border-[var(--m-aqua)]"
+            >
+              <RefreshCcw className="h-3.5 w-3.5" /> Refresh
+            </button>
           </div>
         </div>
 
-        {/* New Record banner */}
+        {/* Context */}
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="space-y-1">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--m-muted)]">
+              {compEventName || 'Pilih nomor lomba'}
+            </p>
+            <h2 className="text-2xl font-bold tracking-tight text-[var(--m-ink)]">{eventName || 'Live Board'}</h2>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="rounded-full bg-[var(--m-aqua-soft)] px-3 py-1 text-xs font-semibold text-[var(--m-aqua-ink)]">
+              Heat {heatLabel || '-'}
+            </span>
+          </div>
+        </div>
+
+        {/* Record */}
         {hasRecord && (
-          <div className="flex items-center justify-between rounded-lg border-2 border-[#F97316] bg-[#ffdbca] p-4 text-[#341100] shadow-[0_0_0_0_rgba(249,115,22,0.7)] animate-[pulse-border_2s_infinite]">
-            <div className="flex items-center gap-3">
-              <span className="text-3xl">⭐</span>
-              <h3 className="text-xl font-bold uppercase">New Meet Record!</h3>
-            </div>
-            <div className="font-mono text-2xl font-bold tabular-nums">
-              {fmt(rows.find((r) => r.isRecord)?.finish ?? null)}
+          <div className="mt-5 rounded-2xl border border-[var(--m-aqua)]/40 bg-[var(--m-aqua-soft)] px-5 py-4 text-[var(--m-aqua-ink)]">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">⭐</span>
+                <h3 className="text-lg font-bold uppercase">Rekor Baru</h3>
+              </div>
+              <div className="font-mono text-2xl font-bold tabular-nums">
+                {fmt(rows.find((r) => r.isRecord)?.finish ?? null)}
+              </div>
             </div>
           </div>
         )}
 
         {/* Table */}
-        <div className="flex-1 overflow-hidden rounded-xl border border-white/10 bg-white/5">
-          <div className="grid grid-cols-12 gap-2 border-b border-white/10 bg-white/10 px-4 py-2 text-xs font-bold uppercase text-white/60">
+        <div className="mt-5 overflow-hidden rounded-2xl border border-[var(--m-border)] bg-white shadow-sm">
+          <div className="grid grid-cols-12 gap-2 border-b border-[var(--m-border)] bg-[var(--m-soft)] px-4 py-2 text-xs font-bold uppercase tracking-wide text-[var(--m-muted)]">
             <div className="col-span-1 text-center">Rank</div>
-            <div className="col-span-1 text-center">Lane</div>
-            <div className="col-span-4">Swimmer</div>
-            <div className="col-span-3">School</div>
-            <div className="col-span-3 text-right">Finish</div>
+            <div className="col-span-1 text-center">Ln</div>
+            <div className="col-span-4">Atlet</div>
+            <div className="col-span-3">Sekolah</div>
+            <div className="col-span-3 text-right">Waktu</div>
           </div>
-          <div className="max-h-[55vh] overflow-y-auto">
+          <div className="max-h-[60vh] overflow-y-auto">
             {rows.length === 0 ? (
-              <div className="p-8 text-center text-white/50">Belum ada hasil untuk heat ini.</div>
+              <div className="flex flex-col items-center justify-center gap-2 p-10 text-center text-[var(--m-muted)]">
+                <Waves className="h-8 w-8 text-[var(--m-aqua)]" />
+                <p className="text-sm font-medium">Belum ada hasil untuk heat ini.</p>
+              </div>
             ) : (
               rows.map((r, i) => (
                 <div
                   key={i}
                   className={
-                    'grid grid-cols-12 items-center gap-2 border-b border-white/10 px-4 py-3 text-sm ' +
-                    (r.isRecord ? 'bg-[#ffb690]/20' : 'hover:bg-white/5')
+                    'grid grid-cols-12 items-center gap-2 border-b border-[var(--m-border)] px-4 py-3 text-sm transition-colors ' +
+                    (r.isRecord ? 'bg-[var(--m-aqua-soft)]' : 'hover:bg-[var(--m-soft)]')
                   }
                 >
-                  <div className="col-span-1 text-center font-semibold text-white">
-                    {r.rank ?? '-'}
-                  </div>
-                  <div className="col-span-1 text-center">
+                  <div className="col-span-1 text-center font-bold text-[var(--m-ink)]">{r.rank ?? '-'}</div>
+                  <div className="col-span-1 flex justify-center">
                     <span
                       className={
-                        'inline-flex h-8 w-8 items-center justify-center rounded-full font-mono text-sm font-bold ' +
-                        (r.isRecord ? 'bg-[#F97316] text-white' : 'bg-white/15 text-white')
+                        'inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ' +
+                        (r.isRecord ? 'bg-[var(--m-aqua)] text-white' : 'bg-[var(--m-soft)] text-[var(--m-muted)]')
                       }
                     >
                       {r.lane}
                     </span>
                   </div>
-                  <div className="col-span-4 font-medium">{r.swimmer}</div>
-                  <div className="col-span-3 text-white/60">{r.school ?? '—'}</div>
-                  <div className="col-span-3 flex items-center justify-end gap-1 font-mono text-lg font-bold tabular-nums">
+                  <div className="col-span-4 font-medium text-[var(--m-ink)]">{r.swimmer}</div>
+                  <div className="col-span-3 text-[var(--m-muted)]">{r.school ?? '—'}</div>
+                  <div className="col-span-3 flex items-center justify-end gap-1 font-mono text-base font-bold tabular-nums text-[var(--m-ink)]">
                     {fmt(r.finish)}
-                    {r.isRecord && <span className="text-[#F97316]">⭐</span>}
+                    {r.isRecord && <span className="text-[var(--m-aqua-ink)]">⭐</span>}
                   </div>
                 </div>
               ))
