@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Phone, Mail, Instagram } from 'lucide-react';
+import { Phone, Mail } from 'lucide-react';
 import { MenuButton, LandingDrawer, LandingNav } from '@/components/layout/landing-nav';
 import { ProfileMenu } from '@/components/layout/logout-button';
 import { createClient } from '@/lib/supabase/client';
@@ -111,11 +111,6 @@ export function LandingShell({ children }: { children: React.ReactNode }) {
               <li>
                 <a href="mailto:rajendra.project25@gmail.com" className="inline-flex items-center gap-2 transition-colors hover:text-[var(--m-aqua-ink)]">
                   <Mail className="h-4 w-4 text-[var(--m-aqua-ink)]" /> rajendra.project25@gmail.com
-                </a>
-              </li>
-              <li>
-                <a href="https://instagram.com/rajendraproject25" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 transition-colors hover:text-[var(--m-aqua-ink)]">
-                  <Instagram className="h-4 w-4 text-pink-600" /> @rajendraproject25
                 </a>
               </li>
             </ul>

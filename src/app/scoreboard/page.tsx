@@ -47,8 +47,22 @@ export default async function ScoreboardPage({
         </div>
       ) : (
         <>
-          <div className="mb-6 flex flex-wrap items-center gap-3">
+          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="space-y-1">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[var(--m-muted)]">
+                Event Terpilih
+              </p>
+              <p className="text-sm font-bold text-[var(--m-ink)]">{current?.name}</p>
+              <p className="text-xs text-[var(--m-muted)]">
+                {current?.location ? `${current.location} · ` : ''}
+                {current?.start_date && new Date(current.start_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                {current?.end_date ? ` - ${new Date(current.end_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}` : ''}
+              </p>
+            </div>
             <RouteEventSelect events={events ?? []} current={current?.id ?? ''} basePath="/scoreboard" />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
             <span className="pub-chip">{current?.lane_count || 8} lintasan</span>
             {current?.pool_type && <span className="pub-chip">{current.pool_type}</span>}
           </div>

@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { PublicShell } from '@/components/layout/public-shell';
 import { LiveBoard, type LiveRow, type LiveOption } from '@/components/modules/live-board';
-import { Waves } from 'lucide-react';
+import { Waves, Info } from 'lucide-react';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
@@ -40,8 +40,10 @@ export default async function LivePage({
   let eventName = '';
   let compEventName = '';
   let heatLabel = '';
+  let selectedEventName = '';
 
   if (current) {
+    selectedEventName = current.name;
     const { data: ce } = await supabase
       .from('competition_events')
       .select('id, name, stroke, distance_meters, gender')
@@ -68,7 +70,7 @@ export default async function LivePage({
           .from('heat_assignments')
           .select('id')
           .eq('heat_id', heatCur.id);
-        const ids = (assigns ?? []).map((a) => a.id);
+        const ids = (assigns ?? []).map((a: any) => a.id);
         if (ids.length > 0) {
           const { data: res } = await supabase
             .from('results')
@@ -108,30 +110,24 @@ export default async function LivePage({
         </div>
       ) : (
         <div className="space-y-5">
-          <div className="flex flex-wrap items-center gap-2">
-            <form
-              action="/live"
-              className="flex items-center gap-2"
-            >
-              <select
-                name="event"
-                defaultValue={current?.id ?? ''}
-                className="h-9 rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] px-3 text-sm font-semibold text-[var(--m-ink)] shadow-sm"
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="space-y-1">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[var(--m-muted)]">
+                Event Terpilih
+              </p>
+              <p className="text-sm font-bold text-[var(--m-ink)]">{selectedEventName}</p>
+              <p className="text-xs text-[var(--m-muted)]">
+                Gunakan kontrol di bawah untuk mengganti nomor lomba atau heat.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/scoreboard"
+                className="inline-flex items-center gap-1 rounded-xl border border-[var(--m-border)] bg-white px-3 py-2 text-xs font-semibold text-[var(--m-ink)] shadow-sm transition-colors hover:border-[var(--m-aqua)]"
               >
-                {eventOpts.map((e) => (
-                  <option key={e.id} value={e.id}>{e.label}</option>
-                ))}
-              </select>
-              <button
-                type="submit"
-                className="rounded-xl border border-[var(--m-border)] bg-white px-3 py-1.5 text-sm font-semibold text-[var(--m-ink)] shadow-sm hover:border-[var(--m-aqua)]"
-              >
-                Pilih
-              </button>
-            </form>
-            <Link href="/scoreboard" className="pub-btn-ghost">
-              Buka Scoreboard
-            </Link>
+                Buka Scoreboard
+              </Link>
+            </div>
           </div>
 
           <LiveBoard
