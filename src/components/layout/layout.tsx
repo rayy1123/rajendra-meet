@@ -59,6 +59,8 @@ export default function DashboardLayout({
           <div className="flex items-center gap-2">
             <MobileSidebar />
             <span className="text-sm font-bold tracking-tight text-foreground">Rajendra Meet</span>
+            <span className="text-xs text-muted-foreground">/</span>
+            <span className="text-xs font-medium text-muted-foreground">Dasbor Panitia</span>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/scoreboard" className="rounded-full bg-[var(--m-aqua-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--m-aqua-ink)] transition-colors hover:bg-[var(--m-aqua)] hover:text-white">

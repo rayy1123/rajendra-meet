@@ -3,15 +3,10 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Waves } from 'lucide-react';
-import { LandingNav } from '@/components/layout/landing-nav';
+import { MenuButton, LandingDrawer, LandingNav } from '@/components/layout/landing-nav';
 import { createClient } from '@/lib/supabase/client';
 import { ProfileMenu } from '@/components/layout/logout-button';
 
-/**
- * Kerangka halaman publik yang konsisten untuk scoreboard, live board, dan
- * panduan. Tema "Marine" (lihat globals.css). Header memuat logo dan tautan
- * masuk/daftar; footer ringkas. Konten disisipkan via children.
- */
 export function PublicShell({
   children,
   title,
@@ -21,6 +16,7 @@ export function PublicShell({
   title?: string;
   subtitle?: string;
 }) {
+  const [open, setOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [ready, setReady] = useState(false);
 
@@ -37,37 +33,57 @@ export function PublicShell({
     };
   }, []);
 
+  const authActions = (
+    <>
+      {ready && user ? (
+        <ProfileMenu />
+      ) : ready && !user ? (
+        <>
+          <Link href="/login" className="pub-btn-ghost">Masuk</Link>
+          <Link href="/register" className="pub-btn-primary">Daftar</Link>
+        </>
+      ) : (
+        <span className="h-8 w-24 animate-pulse rounded-full bg-[var(--m-soft)]" />
+      )}
+    </>
+  );
+
   return (
     <div className="pub-shell">
       <header className="pub-header">
         <div className="pub-container flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
-            <img
-              src="/brand/logo.png"
-              alt="Rajendra Meet"
-              className="h-9 w-auto rounded-md"
-            />
+            <img src="/brand/logo.png" alt="Rajendra Meet" className="h-9 w-auto" />
           </Link>
 
-          <nav className="flex items-center gap-2 sm:gap-3">
-            <LandingNav />
-            {ready && user ? (
-              <ProfileMenu />
-            ) : ready && !user ? (
-              <>
-                <Link href="/login" className="pub-btn-ghost">
-                  Masuk
-                </Link>
-                <Link href="/register" className="pub-btn-primary">
-                  Daftar
-                </Link>
-              </>
-            ) : (
-              <span className="h-8 w-24 animate-pulse rounded-full bg-[var(--m-soft)]" />
-            )}
+          <div className="flex items-center gap-1 sm:gap-2 md:hidden">
+            <MenuButton onClick={() => setOpen(true)} />
+            {authActions}
+          </div>
+
+          <nav className="hidden items-center gap-2 sm:gap-3 md:flex">
+            <LandingNav onClose={() => setOpen(false)} />
+            {authActions}
           </nav>
         </div>
       </header>
+
+      <LandingDrawer open={open} onClose={() => setOpen(false)}>
+        <LandingNav onClose={() => setOpen(false)} />
+        <div className="mt-auto border-t border-[var(--m-border)] p-3">
+          <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70">Akun</p>
+          {ready && user ? (
+            <ProfileMenu />
+          ) : ready && !user ? (
+            <>
+              <Link href="/login" onClick={() => setOpen(false)} className="pub-btn-ghost w-full justify-center">Masuk</Link>
+              <Link href="/register" onClick={() => setOpen(false)} className="pub-btn-primary w-full justify-center">Daftar</Link>
+            </>
+          ) : (
+            <span className="h-8 w-full animate-pulse rounded-full bg-[var(--m-soft)]" />
+          )}
+        </div>
+      </LandingDrawer>
 
       <main className="flex-1">
         {title && (
