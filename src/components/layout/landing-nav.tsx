@@ -35,7 +35,7 @@ export function LandingNav({ onClose }: { onClose?: () => void }) {
         ))}
       </nav>
 
-      <div className="mt-auto flex flex-col gap-2 border-t border-[var(--m-border)] p-4">
+      <div className="mt-auto border-t border-[var(--m-border)] p-3">
         <Link href="/login" onClick={onClose} className="pub-btn-ghost w-full justify-center">
           Masuk
         </Link>
