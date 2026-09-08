@@ -123,6 +123,39 @@ export default async function DashboardViewerPage() {
           })}
         </div>
 
+        {/* Event comfort: upcoming event summary */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <div className="lg:col-span-2 space-y-4">
+            <div className="glass-panel p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[var(--m-muted)]">
+                    Event Berikutnya
+                  </p>
+                  <p className="mt-1 text-sm font-bold text-[var(--m-ink)]">Menyesuaikan jadwal terdekat</p>
+                  <p className="mt-1 text-xs text-[var(--m-muted)]">
+                    Cek Daftar Lomba untuk memilih event dan melihat nomor lomba yang tersedia.
+                  </p>
+                </div>
+                <Link href="/daftar-lomba" className="pub-btn-ghost">
+                  Lihat Daftar Lomba
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="glass-panel p-5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--m-muted)]">
+              Ringkasan
+            </p>
+            <div className="mt-3 space-y-2 text-xs text-[var(--m-muted)]">
+              <p>Total atlet terdaftar: <span className="font-semibold text-[var(--m-ink)]">{myAthletes?.length ?? 0}</span></p>
+              <p>Pendaftaran aktif: <span className="font-semibold text-[var(--m-ink)]">{nominalCount ?? 0}</span></p>
+              <p>Tagihan tertunda: <span className="font-semibold text-[var(--m-ink)]">{billCount ?? 0}</span></p>
+            </div>
+          </div>
+        </div>
+
         {/* Stats */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {stats.map((s) => {
