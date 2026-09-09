@@ -1,12 +1,12 @@
-import { Card, CardContent } from '@/components/ui/card';
-import { GlassCard } from '@/components/ui/glass-card';
-import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { MapPin, CalendarDays, ExternalLink, Trophy, Waves } from 'lucide-react';
 import Link from 'next/link';
 import { ProfileMenu } from '@/components/layout/logout-button';
 import { Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/ui/page-header';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,50 +41,36 @@ export default async function EventsPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
       <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Kejuaraan / Events' }]} className="mb-2" />
-      <div className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
-            <Trophy className="h-6 w-6" />
-          </span>
-          <div>
-            <h1 className="text-gradient-hero">Kejuaraan / Events</h1>
-            <p className="text-sm text-muted-foreground">
-              Kelola kejuaraan renang, pengaturan kolam, dan jadwal perlombaan.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Link href="/scoreboard" target="_blank">
-            <Button variant="outline" className="gap-2">
-              <ExternalLink className="h-4 w-4" /> Live Scoreboard
-            </Button>
-          </Link>
-          <ProfileMenu />
-          <Link href="/events/new">
-            <Button className="gap-2">
-              Buat Event Baru
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      {!events || events.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center gap-4 py-14 text-center">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <Waves className="h-6 w-6" />
-            </span>
-            <p className="text-sm text-muted-foreground">
-              Belum ada event kejuaraan yang dibuat.
-            </p>
-            <Link href="/events/new">
-              <Button className="gap-2">
-                Buat Event Baru
+      <PageHeader
+        title="Kejuaraan / Events"
+        description="Kelola kejuaraan renang, pengaturan kolam, dan jadwal perlombaan."
+        icon={<Trophy className="h-6 w-6" />}
+        actions={
+          <div className="flex items-center gap-2">
+            <Link href="/scoreboard" target="_blank">
+              <Button variant="outline" className="gap-2">
+                <ExternalLink className="h-4 w-4" /> Live Scoreboard
               </Button>
             </Link>
-          </CardContent>
-        </Card>
+            <ProfileMenu />
+            <Link href="/events/new">
+              <Button className="gap-2">Buat Event Baru</Button>
+            </Link>
+          </div>
+        }
+      />
+
+      {!events || events.length === 0 ? (
+        <EmptyState
+          icon={<Waves className="h-6 w-6" />}
+          title="Belum ada event kejuaraan"
+          description="Silakan buat event terlebih dahulu untuk mengelola nomor lomba dan hasil."
+          action={
+            <Link href="/events/new">
+              <Button className="gap-2">Buat Event Baru</Button>
+            </Link>
+          }
+        />
       ) : (
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
           {events.map((event) => (

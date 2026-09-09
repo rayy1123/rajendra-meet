@@ -24,11 +24,11 @@ export default async function EquipmentPage() {
   return (
     <>
       <div className="mx-auto max-w-7xl space-y-6 p-6">
-        <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Peralatan' }]} className="mb-2" />
         <PageHeader
           title="Pemeliharaan Peralatan"
           description="Lacak kesiapan teknis peralatan: touchpad, starting block, konsol waktu, dan kalibrasinya."
         />
+        <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Peralatan' }]} className="mb-2" />
         {items.length === 0 ? (
           <div className="pub-card p-12 text-center">
             <Wrench className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
@@ -40,7 +40,7 @@ export default async function EquipmentPage() {
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((it: any) => (
-              <div key={it.id} className="rounded-xl border border-border bg-card p-4 shadow-sm">
+              <div key={it.id} className="glass-panel p-4">
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-[var(--m-ink)]">{it.name}</span>
                   <span

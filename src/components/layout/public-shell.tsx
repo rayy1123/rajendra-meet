@@ -69,19 +69,6 @@ export function PublicShell({
 
       <LandingDrawer open={open} onClose={() => setOpen(false)}>
         <LandingNav onClose={() => setOpen(false)} />
-        <div className="mt-auto border-t border-[var(--m-border)] p-3">
-          <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70">Akun</p>
-          {ready && user ? (
-            <ProfileMenu />
-          ) : ready && !user ? (
-            <>
-              <Link href="/login" onClick={() => setOpen(false)} className="pub-btn-ghost w-full justify-center">Masuk</Link>
-              <Link href="/register" onClick={() => setOpen(false)} className="pub-btn-primary w-full justify-center">Daftar</Link>
-            </>
-          ) : (
-            <span className="h-8 w-full animate-pulse rounded-full bg-[var(--m-soft)]" />
-          )}
-        </div>
       </LandingDrawer>
 
       <main className="flex-1">

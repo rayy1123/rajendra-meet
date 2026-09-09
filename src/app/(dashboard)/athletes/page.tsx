@@ -36,12 +36,12 @@ export default async function AthletesPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Atlet' }]} className="mb-2" />
       <PageHeader
         title="Master Data Atlet"
         description="Kelompok Umur (KU) dihitung otomatis dari tanggal lahir saat disimpan."
         icon={<Users className="h-6 w-6" />}
       />
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Atlet' }]} className="mb-2" />
 
       <AthleteManager
         athletes={(athletes || []) as unknown as AthleteRow[]}

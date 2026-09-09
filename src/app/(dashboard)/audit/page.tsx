@@ -39,7 +39,7 @@ export default async function AuditPage() {
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+        <div className="glass-panel overflow-hidden">
           <table className="w-full text-left text-sm">
             <thead className="bg-[var(--m-soft)] text-xs uppercase text-[var(--m-muted)]">
               <tr>
@@ -50,7 +50,7 @@ export default async function AuditPage() {
                 <th className="px-4 py-3">Detail</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-[var(--m-border)]">
               {rows.map((r: any) => (
                 <tr key={r.id} className="hover:bg-[var(--m-soft)]">
                   <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-[var(--m-muted)]">

@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from '@/lib/supabase/server';
 import { PageHeader } from '@/components/ui/page-header';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { HeatLaneSelectors, type Opt } from '@/components/modules/heat-lane-selectors';
 import { Layers, UserX } from 'lucide-react';
-import { Breadcrumb } from '@/components/ui/breadcrumb';
 
 export const dynamic = 'force-dynamic';
 
@@ -94,18 +94,17 @@ export default async function HeatLanePage({
     }
   }
 
-  const fmt = (ms: number | null) =>
-    !ms || ms <= 0 ? '—' : (ms / 1000).toFixed(2);
+  const fmt = (ms: number | null) => (!ms || ms <= 0 ? '—' : (ms / 1000).toFixed(2));
   const initials = (n: string) =>
     n.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Heat & Lane' }]} className="mb-2" />
       <PageHeader
         title="Heat & Lane Management"
         description="Pantau pembagian lintasan per heat. Data diambil langsung dari hasil seeding & penugasan lintasan."
       />
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Heat & Lane' }]} className="mb-2" />
       <HeatLaneSelectors
         eventOpts={eventOpts}
         compOpts={compEvents}
@@ -116,15 +115,13 @@ export default async function HeatLanePage({
       />
 
       {rows.length === 0 ? (
-        <div className="pub-card p-12 text-center">
+        <div className="glass-panel p-12 text-center">
           <Layers className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
           <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Belum ada lintasan</h3>
-          <p className="mt-1 text-sm text-[var(--m-muted)]">
-            Heat ini belum memiliki penugasan lintasan.
-          </p>
+          <p className="mt-1 text-sm text-[var(--m-muted)]">Heat ini belum memiliki penugasan lintasan.</p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+        <div className="glass-panel overflow-hidden">
           <table className="w-full text-left text-sm">
             <thead className="bg-[var(--m-soft)] text-xs uppercase text-[var(--m-muted)]">
               <tr>
@@ -135,13 +132,13 @@ export default async function HeatLanePage({
                 <th className="w-40 px-4 py-3 text-center">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-[var(--m-border)]">
               {rows.map((r) => {
                 const scratched = r.status === 'scratched' || r.status === 'dns';
                 return (
                   <tr key={r.lane} className={scratched ? 'bg-red-50/50' : 'hover:bg-[var(--m-soft)]'}>
                     <td className="px-4 py-3 text-center">
-                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--m-aqua)] text-sm font-bold text-[var(--primary-foreground)]">
+                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--m-aqua)] text-sm font-bold text-white">
                         {r.lane}
                       </span>
                     </td>
@@ -156,9 +153,7 @@ export default async function HeatLanePage({
                       </div>
                     </td>
                     <td className="px-4 py-3 text-[var(--m-muted)]">{r.school ?? '—'}</td>
-                    <td className="px-4 py-3 text-right font-mono text-xs text-[var(--m-muted)]">
-                      {fmt(r.seed)}
-                    </td>
+                    <td className="px-4 py-3 text-right font-mono text-xs text-[var(--m-muted)]">{fmt(r.seed)}</td>
                     <td className="px-4 py-3 text-center">
                       {scratched ? (
                         <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-1 text-xs font-semibold text-red-700">

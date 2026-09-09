@@ -1,6 +1,5 @@
 import { requireRole } from '@/lib/auth';
 import { Settings, Shield, Sliders, Database, Save, Server } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -9,10 +8,8 @@ import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 
 export default async function SettingsPage() {
-  // Defense-in-depth: pengaturan sistem hanya untuk admin event / super admin.
   const { supabase } = await requireRole(['event_admin', 'super_admin']);
 
-  // 1. Fetch data setting sistem & aturan poin
   const [{ data: pointRules }, { data: systemConfigs }] = await Promise.all([
     supabase.from('point_rules').select('*').order('rank', { ascending: true }),
     supabase.from('system_configs').select('*').maybeSingle(),
@@ -30,86 +27,78 @@ export default async function SettingsPage() {
       <Tabs defaultValue="points" className="space-y-4">
         <TabsList className="grid w-full sm:w-auto grid-cols-3">
           <TabsTrigger value="points" className="flex items-center gap-2">
-            <Sliders className="w-4 h-4" /> Aturan Poin
+            <Sliders className="h-4 w-4" /> Aturan Poin
           </TabsTrigger>
           <TabsTrigger value="pool" className="flex items-center gap-2">
-            <Server className="w-4 h-4" /> Konfigurasi Kolam
+            <Server className="h-4 w-4" /> Konfigurasi Kolam
           </TabsTrigger>
           <TabsTrigger value="database" className="flex items-center gap-2">
-            <Database className="w-4 h-4" /> Backup & Database
+            <Database className="h-4 w-4" /> Backup & Database
           </TabsTrigger>
         </TabsList>
 
-        {/* TAB 1: Aturan Poin Kejuaraan */}
         <div data-value="points">
-          <Card>
-            <CardHeader>
-              <CardTitle>Bobot Poin Peringkat (Point System)</CardTitle>
-              <CardDescription>
-                Tentukan jumlah poin yang didapatkan atlet/klub berdasarkan urutan peringkat akhir untuk menentukan Juara Umum & Best Swimmer.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="rounded-md border overflow-x-auto">
-                <Table>
-                   <TableHeader>
-                     <TableRow>
-                      <TableHead className="w-24">Peringkat</TableHead>
-                       <TableHead>Medali / Deskripsi</TableHead>
-                       <TableHead className="text-right">Poin</TableHead>
-                     </TableRow>
-                   </TableHeader>
-                   <TableBody>
-                     {pointRules && pointRules.length > 0 ? (
-                       pointRules.map((rule) => (
-                         <TableRow key={rule.id}>
-                           <TableCell className="font-bold">Juara {rule.rank}</TableCell>
-                           <TableCell>
-                             {rule.rank === 1 && <span className="text-amber-500 font-semibold">Emas</span>}
-                             {rule.rank === 2 && <span className="text-[var(--m-muted)] font-semibold">Perak</span>}
-                             {rule.rank === 3 && <span className="text-amber-700 font-semibold">Perunggu</span>}
-                             {rule.rank > 3 && <span className="text-muted-foreground">Peringkat {rule.rank}</span>}
-                           </TableCell>
-                           <TableCell className="text-right">
-                             <Input
-                               type="number"
-                               defaultValue={rule.points ?? 0}
-                               className="w-24 text-right inline-block"
-                             />
-                           </TableCell>
-                         </TableRow>
-                       ))
-                     ) : (
-                       <TableRow>
-                         <TableCell colSpan={3} className="text-center py-6 text-muted-foreground">
-                           Belum ada aturan poin tersimpan.
-                         </TableCell>
-                       </TableRow>
-                     )}
-                   </TableBody>
-                </Table>
-              </div>
-              <div className="flex justify-end pt-2">
-                <Button className="flex items-center gap-2">
-                  <Save className="w-4 h-4" /> Simpan Perubahan Poin
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="glass-panel p-5">
+            <h3 className="text-base font-semibold text-[var(--m-ink)]">Bobot Poin Peringkat</h3>
+            <p className="mt-1 text-sm text-[var(--m-muted)]">
+              Tentukan jumlah poin berdasarkan urutan peringkat akhir untuk Juara Umum & Best Swimmer.
+            </p>
+            <div className="mt-4 rounded-lg border border-[var(--m-border)] overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-24">Peringkat</TableHead>
+                    <TableHead>Medali / Deskripsi</TableHead>
+                    <TableHead className="text-right">Poin</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pointRules && pointRules.length > 0 ? (
+                    pointRules.map((rule) => (
+                      <TableRow key={rule.id}>
+                        <TableCell className="font-bold">Juara {rule.rank}</TableCell>
+                        <TableCell>
+                          {rule.rank === 1 && <span className="text-amber-500 font-semibold">Emas</span>}
+                          {rule.rank === 2 && <span className="text-[var(--m-muted)] font-semibold">Perak</span>}
+                          {rule.rank === 3 && <span className="text-amber-700 font-semibold">Perunggu</span>}
+                          {rule.rank > 3 && <span className="text-muted-foreground">Peringkat {rule.rank}</span>}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Input
+                            type="number"
+                            defaultValue={rule.points ?? 0}
+                            className="w-24 text-right inline-block"
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={3} className="text-center py-6 text-muted-foreground">
+                        Belum ada aturan poin tersimpan.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+            <div className="mt-4 flex justify-end">
+              <Button className="flex items-center gap-2">
+                <Save className="h-4 w-4" /> Simpan Perubahan Poin
+              </Button>
+            </div>
+          </div>
         </div>
 
-        {/* TAB 2: Konfigurasi Default Kolam & Lane */}
         <div data-value="pool">
-          <Card>
-            <CardHeader>
-              <CardTitle>Default Konfigurasi Arena / Kolam Renang</CardTitle>
-              <CardDescription>
-                Pengaturan standar untuk pembuatan event baru dan alokasi lintasan otomatis.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6 max-w-xl">
+          <div className="glass-panel p-5">
+            <h3 className="text-base font-semibold text-[var(--m-ink)]">Default Konfigurasi Arena / Kolam Renang</h3>
+            <p className="mt-1 text-sm text-[var(--m-muted)]">
+              Pengaturan standar untuk pembuatan event baru dan alokasi lintasan otomatis.
+            </p>
+            <div className="mt-4 max-w-xl space-y-4">
               <div className="space-y-2">
-                <label htmlFor="default_lanes" className="text-sm font-medium leading-none block">
+                <label htmlFor="default_lanes" className="text-sm font-medium block">
                   Jumlah Lintasan Kolam (Default Lane Count)
                 </label>
                 <Input
@@ -124,7 +113,7 @@ export default async function SettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="pool_length" className="text-sm font-medium leading-none block">
+                <label htmlFor="pool_length" className="text-sm font-medium block">
                   Panjang Kolam Default (Meters)
                 </label>
                 <Input
@@ -136,44 +125,41 @@ export default async function SettingsPage() {
               </div>
 
               <Button className="flex items-center gap-2">
-                <Save className="w-4 h-4" /> Simpan Konfigurasi Kolam
+                <Save className="h-4 w-4" /> Simpan Konfigurasi Kolam
               </Button>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
-        {/* TAB 3: Maintenance & Database */}
         <div data-value="database">
-          <Card>
-            <CardHeader>
-              <CardTitle>Pemeliharaan Sistem & Log Aktivitas</CardTitle>
-              <CardDescription>
-                Unduh salinan cadangan data atau periksa catatan aktivitas sistem.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="p-4 border rounded-lg bg-[var(--m-soft)] flex items-center justify-between">
+          <div className="glass-panel p-5">
+            <h3 className="text-base font-semibold text-[var(--m-ink)]">Pemeliharaan Sistem & Log Aktivitas</h3>
+            <p className="mt-1 text-sm text-[var(--m-muted)]">
+              Unduh salinan cadangan data atau periksa catatan aktivitas sistem.
+            </p>
+            <div className="mt-4 space-y-3">
+              <div className="flex items-center justify-between rounded-lg border border-[var(--m-border)] bg-[var(--m-soft)] p-4">
                 <div>
-                  <h4 className="font-semibold text-sm">Backup Data Kejuaraan</h4>
-                  <p className="text-xs text-muted-foreground mt-0.5">
+                  <h4 className="text-sm font-semibold">Backup Data Kejuaraan</h4>
+                  <p className="text-xs text-[var(--m-muted)]">
                     Ekspor seluruh tabel Supabase (Event, Atlet, Results, Record) ke format JSON/SQL.
                   </p>
                 </div>
                 <Button variant="outline" className="flex items-center gap-2">
-                  <Database className="w-4 h-4" /> Ekspor Backup
+                  <Database className="h-4 w-4" /> Ekspor Backup
                 </Button>
               </div>
 
-              <div className="p-4 border rounded-lg bg-amber-50/50 border-amber-200 flex items-center justify-between">
+              <div className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 p-4">
                 <div>
-                  <h4 className="font-semibold text-sm text-amber-900">Hak Akses & Log Sistem</h4>
-                  <p className="text-xs text-amber-700 mt-0.5">
-                    Hanya pengguna dengan peran <Shield className="w-3 h-3 inline text-amber-600" /> Chief Admin yang dapat mengubah konfigurasi ini.
+                  <h4 className="text-sm font-semibold text-amber-900">Hak Akses & Log Sistem</h4>
+                  <p className="text-xs text-amber-700">
+                    Hanya pengguna dengan peran <Shield className="inline h-3.5 w-3.5 text-amber-600" /> Chief Admin yang dapat mengubah konfigurasi ini.
                   </p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </Tabs>
     </div>

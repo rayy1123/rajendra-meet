@@ -48,9 +48,6 @@ export default async function VerifikasiPembayaranPage({
   const { data } = await query;
   const rows = (data ?? []) as unknown as PaymentRow[];
 
-  // registrations hanya punya FK ke auth.users (registrant_id), bukan ke
-  // tabel profiles, sehingga embed profiles tidak valid. Ambil profiles
-  // secara terpisah lalu petakan ke masing-masing pendaftaran.
   const registrantIds = Array.from(
     new Set(
       rows
@@ -81,7 +78,6 @@ export default async function VerifikasiPembayaranPage({
         icon={<CreditCard className="h-6 w-6" />}
       />
 
-      {/* Filter status */}
       <div className="flex flex-wrap items-center gap-2">
         <FilterChip href="/verifikasi-pembayaran" label="Semua" active={!status} />
         <FilterChip href="/verifikasi-pembayaran?status=pending" label={`Menunggu (${counts.pending})`} active={status === 'pending'} />
@@ -90,16 +86,14 @@ export default async function VerifikasiPembayaranPage({
       </div>
 
       {rows.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-card p-12 text-center">
+        <div className="glass-panel p-12 text-center">
           <CreditCard className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
           <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Belum ada pembayaran</h3>
-          <p className="mt-1 text-sm text-[var(--m-muted)]">
-            Pembayaran akan muncul saat peserta mendaftarkan atlet ke lomba.
-          </p>
+          <p className="mt-1 text-sm text-[var(--m-muted)]">Pembayaran akan muncul saat peserta mendaftarkan atlet ke lomba.</p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
-          <div className="divide-y divide-border">
+        <div className="glass-panel overflow-hidden">
+          <div className="divide-y divide-[var(--m-border)]">
             {rows.map((r) => {
               const athlete = r.registration?.athletes?.full_name ?? 'Atlet';
               const eventName = r.registration?.events?.name ?? 'Event';
@@ -127,7 +121,7 @@ export default async function VerifikasiPembayaranPage({
                           href={r.proof_url}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1 font-medium text-[#006780] hover:underline"
+                          className="inline-flex items-center gap-1 font-medium text-[var(--m-aqua-ink)] hover:underline"
                         >
                           <Eye className="h-3.5 w-3.5" /> Lihat bukti
                         </a>
@@ -136,9 +130,7 @@ export default async function VerifikasiPembayaranPage({
                   </div>
                   <div className="flex items-center gap-3">
                     <StatusBadge status={r.status} />
-                    {r.status === 'pending' && (
-                      <PaymentVerifyActions id={r.id} />
-                    )}
+                    {r.status === 'pending' && <PaymentVerifyActions id={r.id} />}
                   </div>
                 </div>
               );
@@ -156,8 +148,8 @@ function FilterChip({ href, label, active }: { href: string; label: string; acti
       href={href}
       className={
         active
-          ? 'rounded-full bg-[#006780] px-4 py-1.5 text-sm font-semibold text-white'
-          : 'rounded-full border border-[var(--m-border)] px-4 py-1.5 text-sm text-[var(--m-muted)] transition-ui hover:border-[#006780] hover:text-[#006780]'
+          ? 'rounded-full bg-[var(--m-aqua)] px-4 py-1.5 text-sm font-semibold text-white'
+          : 'rounded-full border border-[var(--m-border)] px-4 py-1.5 text-sm text-[var(--m-muted)] transition-colors hover:border-[var(--m-aqua)] hover:text-[var(--m-aqua-ink)]'
       }
     >
       {label}

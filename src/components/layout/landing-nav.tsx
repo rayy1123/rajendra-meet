@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
+import { MobileNavDrawer } from '@/components/layout/mobile-nav-drawer';
+import { Button } from '@/components/ui/button';
 
 const NAV_LINKS = [
   { href: '/', label: 'Beranda' },
@@ -18,13 +20,13 @@ const MENU_LINKS = [
   { href: '/guide', label: 'Panduan' },
 ];
 
-/**
- * Navigasi publik drawer untuk mobile.
- * Gunakan di dalam shell yang sudah mengelola state auth sendiri.
- */
 export function LandingNav({ onClose }: { onClose?: () => void }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
+
+  const handleMenuClick = () => {
+    setIsMenuOpen((prev) => !prev);
+  };
+
   return (
     <>
       <nav className="flex flex-col p-3">
@@ -39,15 +41,15 @@ export function LandingNav({ onClose }: { onClose?: () => void }) {
           </Link>
         ))}
 
-        <div className="relative">
+        <div>
           <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            onClick={handleMenuClick}
             className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium text-[var(--m-ink)] transition-colors hover:bg-[var(--m-soft)]"
           >
             Menu
             <ChevronDown className={`h-4 w-4 transition-transform ${isMenuOpen ? 'rotate-180' : ''}`} />
           </button>
-          
+
           {isMenuOpen && (
             <div className="mt-1 ml-3 flex flex-col gap-1 border-l-2 border-[var(--m-border)] pl-3">
               {MENU_LINKS.map((l) => (
@@ -80,45 +82,18 @@ export function LandingNav({ onClose }: { onClose?: () => void }) {
   );
 }
 
-/**
- * Tombol menu untuk mobile.
- */
 export function MenuButton({ onClick }: { onClick: () => void }) {
   return (
-    <button
-      type="button"
-      aria-label="Buka menu"
-      aria-expanded={false}
-      onClick={onClick}
-      className="pub-btn-ghost flex items-center gap-2 px-3"
-    >
-      <Menu className="h-5 w-5" />
-      <span className="sr-only sm:not-sr-only sm:inline">Menu</span>
-    </button>
+    <Button variant="ghost" size="sm" onClick={onClick} className="px-3">
+      Menu
+    </Button>
   );
 }
 
-/**
- * Drawer manual untuk navigasi publik.
- */
 export function LandingDrawer({ open, onClose, children }: { open: boolean; onClose: () => void; children: React.ReactNode }) {
   return (
-    <div className={`fixed inset-0 z-50 flex justify-end md:hidden ${open ? '' : 'pointer-events-none'}`} role="dialog" aria-modal="true">
-      {open && (
-        <>
-          <button type="button" aria-label="Tutup menu" onClick={onClose} className="absolute inset-0 bg-black/30" />
-          <div className="relative flex h-full w-72 max-w-[85vw] flex-col bg-[var(--m-surface)] shadow-xl">
-            <div className="flex flex-row items-center gap-2 border-b border-[var(--m-border)] px-6 py-4">
-              <img src="/brand/logo.png" alt="Rajendra Meet" className="h-7 w-auto" />
-              <span className="text-sm font-bold tracking-tight text-[var(--m-ink)]">Rajendra Meet</span>
-              <button type="button" aria-label="Tutup" onClick={onClose} className="ml-auto rounded-lg p-1.5 text-[var(--m-muted)] hover:bg-[var(--m-soft)]">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            {children}
-          </div>
-        </>
-      )}
-    </div>
+    <MobileNavDrawer open={open} onClose={onClose} title="Menu">
+      {children}
+    </MobileNavDrawer>
   );
 }

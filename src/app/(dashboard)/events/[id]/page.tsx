@@ -42,7 +42,7 @@ export default async function EventDetailPage({ params }: PageProps) {
         description={event.organizer || 'Panitia Pelaksana'}
       />
 
-      <div className="rounded-2xl border bg-card p-6">
+      <div className="glass-panel p-6">
         <div className="mt-4 flex flex-wrap gap-4 text-sm text-[var(--m-muted)]">
           {event.location && (
             <span className="flex items-center gap-1.5"><Waves className="h-4 w-4" /> {event.location}</span>
@@ -51,7 +51,7 @@ export default async function EventDetailPage({ params }: PageProps) {
           <span>{event.pool_type} ({event.pool_length_meters}m)</span>
         </div>
         <div className="mt-5 flex flex-wrap gap-2">
-          <Link href={`/heats?eventId=${event.id}`} className="inline-flex items-center gap-2 rounded-lg bg-[#006780] px-4 py-2 text-sm font-semibold text-white hover:bg-[#00556a]">
+          <Link href={`/heats?eventId=${event.id}`} className="inline-flex items-center gap-2 rounded-lg bg-[var(--m-aqua)] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--m-aqua-ink)]">
             <Layers className="h-4 w-4" /> Atur Acara
           </Link>
           <Link href={`/results?eventId=${event.id}`} className="inline-flex items-center gap-2 rounded-lg border border-[var(--m-border)] px-4 py-2 text-sm font-semibold text-[var(--m-ink)] transition-ui hover:border-[var(--m-muted)]">
