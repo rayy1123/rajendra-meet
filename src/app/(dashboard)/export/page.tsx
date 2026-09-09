@@ -85,7 +85,7 @@ export default async function ExportPage({
           </span>
           <div>
             <h1 className="text-gradient-hero">Cetak & Ekspor Laporan</h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-[var(--m-muted)]">
               Unduh lembar susunan seri/lintasan dalam bentuk Excel atau cetak langsung menjadi PDF untuk panitia/juri.
             </p>
           </div>
@@ -94,9 +94,9 @@ export default async function ExportPage({
 
       {!events || events.length === 0 ? (
         <Card className="p-12 text-center border-dashed print:hidden">
-          <Printer className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
+          <Printer className="w-12 h-12 mx-auto text-[var(--m-muted)]/50 mb-3" />
           <h3 className="font-semibold text-lg">Belum Ada Event</h3>
-          <p className="text-sm text-muted-foreground mt-1">Silakan buat event terlebih dahulu.</p>
+          <p className="text-sm text-[var(--m-muted)] mt-1">Silakan buat event terlebih dahulu.</p>
         </Card>
       ) : (
         <ExportView

@@ -48,13 +48,13 @@ export default async function RankingsPage() {
           {byEvent.map((ev) => (
             <Card key={ev.id}>
               <CardContent className="space-y-4 p-5">
-                <div className="flex items-center gap-2 border-b border-border pb-3">
+                <div className="flex items-center gap-2 border-b border-[var(--m-border)] pb-3">
                   <Trophy className="h-5 w-5 text-amber-500" />
                   <h2 className="text-lg font-bold">{ev.name}</h2>
                   <Badge variant="secondary" className="ml-auto">{ev.compEvents.length} Nomor Lomba</Badge>
                 </div>
                 {ev.compEvents.length === 0 ? (
-                  <p className="py-6 text-center text-sm text-muted-foreground">
+                  <p className="py-6 text-center text-sm text-[var(--m-muted)]">
                     Belum ada nomor lomba untuk kejuaraan ini.
                   </p>
                 ) : (

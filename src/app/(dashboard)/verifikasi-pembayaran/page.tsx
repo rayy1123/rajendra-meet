@@ -127,7 +127,7 @@ export default async function VerifikasiPembayaranPage({
                           href={r.proof_url}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+                          className="inline-flex items-center gap-1 font-medium text-[#006780] hover:underline"
                         >
                           <Eye className="h-3.5 w-3.5" /> Lihat bukti
                         </a>
@@ -156,8 +156,8 @@ function FilterChip({ href, label, active }: { href: string; label: string; acti
       href={href}
       className={
         active
-          ? 'rounded-full bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground'
-          : 'rounded-full border border-border px-4 py-1.5 text-sm text-[var(--m-muted)] transition-ui hover:border-primary hover:text-primary'
+          ? 'rounded-full bg-[#006780] px-4 py-1.5 text-sm font-semibold text-white'
+          : 'rounded-full border border-[var(--m-border)] px-4 py-1.5 text-sm text-[var(--m-muted)] transition-ui hover:border-[#006780] hover:text-[#006780]'
       }
     >
       {label}

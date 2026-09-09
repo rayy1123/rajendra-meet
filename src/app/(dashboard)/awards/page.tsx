@@ -122,12 +122,12 @@ export default async function AwardsPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Penghargaan' }]} className="mb-2" />
       <PageHeader
         title="Awards & Klasemen"
         description={`Klasemen dihitung otomatis dari hasil lomba. Poin: ${rules.map((r) => `${r.rank}=${r.points}`).join(', ')}.`}
         icon={<Building2 className="h-6 w-6" />}
       />
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Penghargaan' }]} className="mb-2" />
 
       {entries.length === 0 ? (
         <EmptyState

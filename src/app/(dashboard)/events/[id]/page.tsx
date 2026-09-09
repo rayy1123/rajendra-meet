@@ -43,7 +43,7 @@ export default async function EventDetailPage({ params }: PageProps) {
       />
 
       <div className="rounded-2xl border bg-card p-6">
-        <div className="mt-4 flex flex-wrap gap-4 text-sm text-muted-foreground">
+        <div className="mt-4 flex flex-wrap gap-4 text-sm text-[var(--m-muted)]">
           {event.location && (
             <span className="flex items-center gap-1.5"><Waves className="h-4 w-4" /> {event.location}</span>
           )}
@@ -51,19 +51,19 @@ export default async function EventDetailPage({ params }: PageProps) {
           <span>{event.pool_type} ({event.pool_length_meters}m)</span>
         </div>
         <div className="mt-5 flex flex-wrap gap-2">
-          <Link href={`/heats?eventId=${event.id}`} className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
+          <Link href={`/heats?eventId=${event.id}`} className="inline-flex items-center gap-2 rounded-lg bg-[#006780] px-4 py-2 text-sm font-semibold text-white hover:bg-[#00556a]">
             <Layers className="h-4 w-4" /> Atur Acara
           </Link>
-          <Link href={`/results?eventId=${event.id}`} className="inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold">
+          <Link href={`/results?eventId=${event.id}`} className="inline-flex items-center gap-2 rounded-lg border border-[var(--m-border)] px-4 py-2 text-sm font-semibold text-[var(--m-ink)] transition-ui hover:border-[var(--m-muted)]">
             <Clock className="h-4 w-4" /> Input Hasil
           </Link>
-          <Link href={`/public-live/${event.id}`} target="_blank" className="inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold">
+          <Link href={`/public-live/${event.id}`} target="_blank" className="inline-flex items-center gap-2 rounded-lg border border-[var(--m-border)] px-4 py-2 text-sm font-semibold text-[var(--m-ink)] transition-ui hover:border-[var(--m-muted)]">
             <Radio className="h-4 w-4" /> Buka Live Board
           </Link>
         </div>
       </div>
 
-      <div className="rounded-2xl border bg-card p-6">
+      <div className="rounded-2xl border border-[var(--m-border)] bg-[var(--m-soft)] p-6">
         <h2 className="mb-2 text-lg font-semibold">Nomor Lomba ({compEvents?.length || 0})</h2>
         {!compEvents || compEvents.length === 0 ? (
           <p className="text-sm text-muted-foreground">Belum ada nomor lomba. Tambahkan lewat menu yang sesuai.</p>
