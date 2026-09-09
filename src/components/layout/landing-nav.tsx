@@ -2,12 +2,15 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ChevronDown } from 'lucide-react';
 
-const PUBLIC_LINKS = [
+const NAV_LINKS = [
   { href: '/', label: 'Beranda' },
   { href: '/scoreboard', label: 'Live Scoreboard' },
   { href: '/daftar-lomba', label: 'Daftar Lomba' },
+];
+
+const MENU_LINKS = [
   { href: '/kontak', label: 'Kontak' },
   { href: '/program', label: 'Buku Acara' },
   { href: '/galeri', label: 'Galeri' },
@@ -20,10 +23,12 @@ const PUBLIC_LINKS = [
  * Gunakan di dalam shell yang sudah mengelola state auth sendiri.
  */
 export function LandingNav({ onClose }: { onClose?: () => void }) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
   return (
     <>
       <nav className="flex flex-col p-3">
-        {PUBLIC_LINKS.map((l) => (
+        {NAV_LINKS.map((l) => (
           <Link
             key={l.href}
             href={l.href}
@@ -33,6 +38,34 @@ export function LandingNav({ onClose }: { onClose?: () => void }) {
             {l.label}
           </Link>
         ))}
+
+        <div className="relative">
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium text-[var(--m-ink)] transition-colors hover:bg-[var(--m-soft)]"
+          >
+            Menu
+            <ChevronDown className={`h-4 w-4 transition-transform ${isMenuOpen ? 'rotate-180' : ''}`} />
+          </button>
+          
+          {isMenuOpen && (
+            <div className="mt-1 ml-3 flex flex-col gap-1 border-l-2 border-[var(--m-border)] pl-3">
+              {MENU_LINKS.map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => {
+                    onClose?.();
+                    setIsMenuOpen(false);
+                  }}
+                  className="rounded-lg px-3 py-2 text-xs font-medium text-[var(--m-muted)] transition-colors hover:text-[var(--m-ink)] hover:bg-[var(--m-soft)]"
+                >
+                  {l.label}
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
       </nav>
 
       <div className="mt-auto border-t border-[var(--m-border)] p-3">

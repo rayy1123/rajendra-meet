@@ -34,7 +34,7 @@ export default async function DashboardPage() {
     { label: 'Acara & Heat', href: '/heats', icon: Timer },
     { label: 'Input Hasil', href: '/results', icon: Trophy },
     { label: 'Perangkingan', href: '/rankings', icon: Award },
-    { label: 'Klasemen Medali', href: '/medals', icon: Award },
+    { label: 'Klasemen Medali', href: '/medals', icon: Trophy },
   ];
 
   return (

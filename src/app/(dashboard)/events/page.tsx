@@ -88,57 +88,57 @@ export default async function EventsPage() {
       ) : (
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
           {events.map((event) => (
-            <Card
+            <div
               key={event.id}
-              className="flex flex-col justify-between gap-4 transition-shadow hover:shadow-md"
+              className="glass-panel elevated transition-ui hover:-translate-y-0.5 hover:shadow-pop"
             >
-              <CardContent className="space-y-4 p-5">
+              <div className="p-5 space-y-4">
                 <div className="flex items-start justify-between gap-3">
-                  <h3 className="font-bold leading-snug text-foreground">{event.name}</h3>
-                  <span className="shrink-0 rounded-lg bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary">
+                  <h3 className="font-bold leading-snug text-[var(--m-ink)]">{event.name}</h3>
+                  <span className="shrink-0 rounded-lg bg-[var(--m-aqua-soft)] px-2.5 py-1 text-[11px] font-semibold text-[var(--m-aqua-ink)]">
                     {event.lane_count || 8} Lintasan
                   </span>
                 </div>
-                <p className="text-xs font-medium text-muted-foreground">
+                <p className="text-xs font-medium text-[var(--m-muted)]">
                   {event.organizer || 'Panitia Pelaksana'}
                 </p>
 
-                <div className="space-y-2 border-y border-border py-4 text-xs text-muted-foreground">
+                <div className="space-y-2 border-y border-[var(--m-border)] py-4 text-xs text-[var(--m-muted)]">
                   {event.location && (
                     <p className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 shrink-0 text-primary" /> {event.location}
+                      <MapPin className="h-4 w-4 shrink-0 text-[var(--m-aqua-ink)]" /> {event.location}
                     </p>
                   )}
                   <p className="flex items-center gap-2">
-                    <CalendarDays className="h-4 w-4 shrink-0 text-primary" />
+                    <CalendarDays className="h-4 w-4 shrink-0 text-[var(--m-aqua-ink)]" />
                     {event.start_date} s/d {event.end_date}
                   </p>
                   <p className="flex items-center gap-2">
-                    <Waves className="h-4 w-4 shrink-0 text-primary" />
+                    <Waves className="h-4 w-4 shrink-0 text-[var(--m-aqua-ink)]" />
                     {event.pool_type || 'Long Course'} ({event.pool_length_meters || 50}m)
                   </p>
                 </div>
 
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-[var(--m-muted)]">
                   {compCountByEvent.get(event.id) || 0} Nomor Lomba
                 </p>
-              </CardContent>
+              </div>
 
               <div className="grid grid-cols-2 gap-3 px-6 pb-6">
                 <Link
                   href={`/events/${event.id}`}
-                  className="w-full rounded-lg bg-primary px-3 py-2 text-center text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                  className="w-full rounded-xl bg-[var(--m-aqua)] px-3 py-2 text-center text-xs font-semibold text-white transition-colors hover:bg-[var(--m-aqua-ink)]"
                 >
                   Kelola Event
                 </Link>
                 <Link
                   href={`/heats?eventId=${event.id}`}
-                  className="w-full rounded-lg border px-3 py-2 text-center text-xs font-semibold transition-colors hover:bg-accent"
+                  className="w-full rounded-xl border border-[var(--m-border)] bg-white px-3 py-2 text-center text-xs font-semibold text-[var(--m-ink)] transition-colors hover:border-[var(--m-aqua)]"
                 >
                   Atur Acara
                 </Link>
               </div>
-            </Card>
+            </div>
           ))}
         </div>
       )}
