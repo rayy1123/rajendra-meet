@@ -12,6 +12,7 @@ import { AthleteFormModal, type AthleteFormValues } from '@/components/modules/a
 import { EmptyState } from '@/components/ui/empty-state';
 import { AthleteDetailModal, type AthleteDetail } from '@/components/modules/athlete-detail-modal';
 import { ConfirmDialog } from '@/components/modules/confirm-dialog';
+import { getKuCode } from '@/lib/age-category';
 
 interface SchoolOpt {
   id: string;
@@ -383,6 +384,7 @@ export function AthleteSayaManager({
                         />
                       </th>
                       <th className="px-3 py-2">Nama</th>
+                      <th className="px-3 py-2">KU</th>
                       <th className="px-3 py-2">Gender</th>
                       <th className="px-3 py-2">Tgl Lahir</th>
                       <th className="px-3 py-2">Usia</th>
@@ -393,6 +395,7 @@ export function AthleteSayaManager({
                   <tbody className="divide-y">
                     {g.rows.map((a) => {
                       const avatar = initials(a.full_name);
+                      const athleteKu = a.age_group || (a.birth_date ? getKuCode(a.birth_date) : '–');
                       return (
                         <tr key={a.id} className="transition-colors hover:bg-muted/40">
                           <td className="px-3 py-3">
@@ -412,6 +415,11 @@ export function AthleteSayaManager({
                                 <div className="text-xs text-muted-foreground">{a.class_name}</div>
                               </div>
                             </div>
+                          </td>
+                          <td className="px-3 py-3">
+                            <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-0.5 text-xs font-bold text-blue-700 border border-blue-200">
+                              {athleteKu}
+                            </span>
                           </td>
                           <td className="px-3 py-3">{a.gender === 'female' ? 'Putri' : 'Putra'}</td>
                           <td className="px-3 py-3">{a.birth_date}</td>

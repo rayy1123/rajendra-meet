@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { detectBrokenRecords, type RecordCandidate, type ExistingRecord } from '@/services/records';
 import { formatMsToTime } from '@/lib/utils';
-import { Card, CardContent } from '@/components/ui/card';
 import { GlassCard } from '@/components/ui/glass-card';
+import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { Crown } from 'lucide-react';
@@ -72,7 +72,7 @@ export default async function RajendraRecordPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Rajendra Record' }]} className="mb-2" />
+      <Breadcrumb items={[{ label: 'Dasbor', href: '/dashboard' }, { label: 'Rajendra Record' }]} className="mb-2" />
       <PageHeader
         title="Rajendra Record"
         description="Deteksi otomatis rekor baru per nomor lomba. Rekor memecahkan catatan tercepat sebelumnya."
@@ -80,30 +80,28 @@ export default async function RajendraRecordPage() {
       />
 
       {broken.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            Belum ada rekor baru terdeteksi. Input hasil lomba untuk memulai.
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={<Crown className="h-6 w-6" />}
+          title="Belum Ada Rekor Baru"
+          description="Belum ada rekor baru terdeteksi. Input hasil lomba untuk memulai."
+        />
       ) : (
         <div className="space-y-3">
           {broken.map((b) => (
-            <Card key={b.competition_event_id}>
-              <CardContent className="flex items-center gap-4 p-5">
-                <Crown className="h-8 w-8 text-amber-500" />
-                <div className="flex-1">
-                  <p className="font-semibold">{compName(b.competition_event_id)}</p>
-                  <p className="text-sm text-muted-foreground">{b.athlete_name}</p>
-                  <p className="text-xs text-muted-foreground/80">{b.school_name || 'Perorangan'}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-mono text-2xl tabular-nums tracking-tight text-primary">{formatMsToTime(b.time_ms)}</p>
-                  {b.improvement_ms != null && (
-                    <p className="text-xs text-emerald-600">-{(b.improvement_ms / 1000).toFixed(2)}s dari rekor lama</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <GlassCard key={b.competition_event_id} className="flex items-center gap-4 p-5">
+              <Crown className="h-8 w-8 text-amber-500" />
+              <div className="flex-1">
+                <p className="font-semibold">{compName(b.competition_event_id)}</p>
+                <p className="text-sm text-[var(--m-muted)]">{b.athlete_name}</p>
+                <p className="text-xs text-[var(--m-muted)]/80">{b.school_name || 'Perorangan'}</p>
+              </div>
+              <div className="text-right">
+                <p className="font-mono text-2xl tabular-nums tracking-tight text-primary">{formatMsToTime(b.time_ms)}</p>
+                {b.improvement_ms != null && (
+                  <p className="text-xs text-emerald-600">-{(b.improvement_ms / 1000).toFixed(2)}s dari rekor lama</p>
+                )}
+              </div>
+            </GlassCard>
           ))}
         </div>
       )}

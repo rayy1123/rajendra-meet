@@ -52,8 +52,16 @@ export async function requireViewer() {
     .eq('id', user.id)
     .maybeSingle();
   const role = (profile as { role?: string } | null)?.role;
-  if (role === 'super_admin' || role === 'event_admin' || role === 'operator') {
-    redirect('/events');
+  const ADMIN_ROLES = [
+    'super_admin',
+    'event_admin',
+    'operator',
+    'admin',
+    'admin_kejuaraan',
+    'admin_keuangan',
+  ];
+  if (role && ADMIN_ROLES.includes(role)) {
+    redirect('/dashboard');
   }
   return { supabase, user, profile };
 }

@@ -23,11 +23,12 @@ const PUBLIC_ROUTE_PREFIXES = [
   '/program',
   '/galeri',
   '/live',
-  '/dashboard-viewer',
-  '/atlet-saya',
-  '/daftar-lomba',
-  '/pendaftaran-saya',
-  '/profile',
+  '/invoice',
+  '/403',
+  '/api/register',
+  '/api/schools',
+  '/api/scoreboard',
+  '/api/showcases',
   '/',
 ];
 
@@ -77,6 +78,11 @@ export async function proxy(request: NextRequest) {
     );
 
   if (!user && !isPublicRoute) {
+    if (pathname.startsWith('/api/')) {
+      return applySecurityHeaders(
+        NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      );
+    }
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     const redirectResponse = NextResponse.redirect(url);
@@ -95,8 +101,15 @@ export async function proxy(request: NextRequest) {
       .eq('id', user.id)
       .single();
     const role = (profile as { role?: string } | null)?.role;
-    const ADMIN_ROLES = ['super_admin', 'event_admin', 'operator'];
-    const target = role && ADMIN_ROLES.includes(role) ? '/events' : '/dashboard-viewer';
+    const ADMIN_ROLES = [
+      'super_admin',
+      'event_admin',
+      'operator',
+      'admin',
+      'admin_kejuaraan',
+      'admin_keuangan',
+    ];
+    const target = role && ADMIN_ROLES.includes(role) ? '/dashboard' : '/dashboard-viewer';
     const url = request.nextUrl.clone();
     url.pathname = target;
     const redirectResponse = NextResponse.redirect(url);

@@ -5,6 +5,7 @@ import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { LayoutDashboard, CalendarDays, Users, ClipboardList, School, Trophy, Timer, Award } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import { AdminActionGuide } from '@/components/modules/admin-action-guide';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,32 +42,32 @@ export default async function DashboardPage() {
     <div className="mx-auto max-w-7xl space-y-6 p-6">
       <Breadcrumb items={[{ label: 'Dashboard' }]} className="mb-2" />
       <div className="flex flex-col gap-4 border-b border-[var(--m-border)] pb-5 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--m-aqua)] text-white">
+        <div className="flex items-center gap-3.5">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--m-aqua)] text-white shadow-xs">
             <LayoutDashboard className="h-6 w-6" />
           </span>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-[var(--m-ink)]">Dashboard Panitia</h1>
-            <p className="text-sm text-[var(--m-muted)]">
-              Kelola seluruh rangkaian kejuaraan renang dari satu panel.
+            <h1 className="font-heading text-2xl font-black tracking-tight text-[var(--m-ink)] sm:text-3xl">Dasbor Panitia</h1>
+            <p className="mt-0.5 text-sm text-[var(--m-muted)]">
+              Kelola seluruh rangkaian kejuaraan renang dari satu panel terpadu.
             </p>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((s) => {
+        {stats.map((s, idx) => {
           const Icon = s.icon;
           return (
-            <Link href={s.href} className="reveal" style={{ animationDelay: `${stats.indexOf(s) * 80}ms` }}>
-              <div className="glass-panel elevated transition-ui hover:-translate-y-0.5 hover:shadow-pop">
+            <Link key={s.label} href={s.href} className="reveal" style={{ animationDelay: `${idx * 80}ms` }}>
+              <div className="glass-panel elevated transition-all duration-200 hover:-translate-y-1 hover:shadow-pop border border-[var(--m-border)]">
                 <div className="flex items-center gap-4 p-5">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--m-aqua-soft)] text-[var(--m-aqua-ink)]">
-                    <Icon className="h-5 w-5" />
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--m-aqua-soft)] text-[var(--m-aqua-ink)] shadow-2xs">
+                    <Icon className="h-6 w-6" />
                   </div>
                   <div>
-                    <div className="text-2xl font-bold tabular-nums text-[var(--m-ink)]">{s.value}</div>
-                    <div className="text-xs font-medium text-[var(--m-muted)]">{s.label}</div>
+                    <div className="font-heading text-3xl font-black tabular-nums text-[var(--m-ink)]">{s.value}</div>
+                    <div className="text-xs font-bold uppercase tracking-wider text-[var(--m-muted)] mt-0.5">{s.label}</div>
                   </div>
                 </div>
               </div>
@@ -76,8 +77,8 @@ export default async function DashboardPage() {
       </div>
 
       <div className="reveal" style={{ animationDelay: `400ms` }}>
-        <div className="mb-2 flex items-center justify-between">
-          <h2 className="h-section">Modul Cepat</h2>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="font-heading text-lg font-black tracking-tight text-[var(--m-ink)]">Akses Cepat Operasional</h2>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {quickLinks.map((q, i) => {
@@ -86,18 +87,20 @@ export default async function DashboardPage() {
               <Link
                 key={q.href}
                 href={q.href}
-                className="pub-card elevated flex items-center gap-3 p-4 transition-ui hover:-translate-y-0.5 hover:border-primary/40 reveal"
+                className="pub-card elevated flex items-center gap-3 p-4 transition-all duration-200 hover:-translate-y-1 hover:border-[var(--m-aqua)] hover:shadow-md reveal"
                 style={{ animationDelay: `${(i + 4) * 80}ms` }}
               >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--m-aqua-soft)] text-[var(--m-aqua-ink)]">
-                  <Icon className="h-4 w-4" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--m-aqua-soft)] text-[var(--m-aqua-ink)]">
+                  <Icon className="h-5 w-5" />
                 </div>
-                <span className="text-sm font-semibold text-[var(--m-ink)]">{q.label}</span>
+                <span className="font-heading text-sm font-bold text-[var(--m-ink)]">{q.label}</span>
               </Link>
             );
           })}
         </div>
       </div>
+
+      <AdminActionGuide />
     </div>
   );
 }

@@ -30,16 +30,18 @@ export default async function AthletesPage() {
       grade_level,
       class_name,
       age_group,
+      event_id,
+      school_id,
       schools ( name )
     `)
     .order('full_name', { ascending: true });
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Atlet' }]} className="mb-2" />
+      <Breadcrumb items={[{ label: 'Dasbor', href: '/dashboard' }, { label: 'Atlet' }]} className="mb-2" />
       <PageHeader
         title="Master Data Atlet"
-        description="Kelompok Umur (KU) dihitung otomatis dari tanggal lahir saat disimpan."
+        description="Nomor atlet otomatis dibuat oleh sistem. Kelompok Umur (KU) dihitung otomatis dari tanggal lahir."
         icon={<Users className="h-6 w-6" />}
       />
 

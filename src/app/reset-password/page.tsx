@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { SplitAuthShell } from '@/components/layout/split-auth-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Eye, EyeOff } from 'lucide-react';
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState('');
@@ -72,11 +71,11 @@ export default function ResetPasswordPage() {
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-[#0b1220]">Kata Sandi Baru</label>
+          <label className="text-xs font-semibold text-[var(--m-ink)]">Kata Sandi Baru</label>
           <Input
             type="password"
             placeholder="Minimal 6 karakter"
-            className="bg-white text-[#0b1220] placeholder-[#64748b] border-[#cbd5e1] focus-visible:ring-cyan-300"
+            className="bg-white text-[var(--m-ink)] placeholder-[var(--m-muted)] border-[var(--m-border)] focus-visible:ring-primary/40"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -84,24 +83,24 @@ export default function ResetPasswordPage() {
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-[#0b1220]">Konfirmasi Kata Sandi</label>
+          <label className="text-xs font-semibold text-[var(--m-ink)]">Konfirmasi Kata Sandi</label>
           <Input
             type="password"
             placeholder="Ulangi kata sandi"
-            className="bg-white text-[#0b1220] placeholder-[#64748b] border-[#cbd5e1] focus-visible:ring-cyan-300"
+            className="bg-white text-[var(--m-ink)] placeholder-[var(--m-muted)] border-[var(--m-border)] focus-visible:ring-primary/40"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
           />
         </div>
 
-        <Button type="submit" className="w-full bg-cyan-600 text-white hover:bg-cyan-700" disabled={loading}>
+        <Button type="submit" className="w-full bg-primary text-white hover:bg-primary/90" disabled={loading}>
           Simpan Kata Sandi
         </Button>
       </form>
 
-      <div className="mt-6 text-center text-sm text-[#334155]">
-        <Link href="/login" className="font-medium text-cyan-700 hover:text-cyan-900">
+      <div className="mt-6 text-center text-sm text-[var(--m-muted)]">
+        <Link href="/login" className="font-medium text-primary hover:text-cyan-900">
           ← Kembali ke login
         </Link>
       </div>

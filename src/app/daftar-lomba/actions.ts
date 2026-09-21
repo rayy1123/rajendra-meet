@@ -64,6 +64,49 @@ export async function submitRegistrationAction(formData: FormData): Promise<Acti
   }
 
   try {
+    // Ambil konfigurasi biaya & kode unik event
+    let eventData: any = null;
+    const { data: fullEvtData } = await supabase
+      .from("events")
+      .select("id, fee_per_event, use_unique_code, unique_code_mode, unique_code_fixed, unique_code_min, unique_code_max")
+      .eq("id", eventId)
+      .maybeSingle();
+
+    if (fullEvtData && (fullEvtData as any).fee_per_event !== undefined) {
+      eventData = fullEvtData;
+    } else {
+      const { getEventSettings } = await import('@/lib/data/event-settings-server');
+      eventData = getEventSettings(eventId);
+    }
+
+    const { count: regCount } = await supabase
+      .from("registrations")
+      .select("*", { count: "exact", head: true })
+      .eq("event_id", eventId);
+
+    // Hitung kode unik per pendaftaran berdasarkan setting event
+    let uniqueCode = 0;
+    if (eventData?.use_unique_code !== false) {
+      const mode = eventData?.unique_code_mode || 'random_3_digit';
+      if (mode === 'fixed') {
+        uniqueCode = Number(eventData?.unique_code_fixed) || 0;
+      } else if (mode === 'sequential') {
+        const seq = ((regCount || 0) + 1) % 1000;
+        uniqueCode = seq === 0 ? 1 : seq;
+      } else if (mode === 'custom_range') {
+        const min = Number(eventData?.unique_code_min) || 100;
+        const max = Number(eventData?.unique_code_max) || 999;
+        uniqueCode = Math.floor(Math.random() * (max - min + 1)) + min;
+      } else {
+        // default 'random_3_digit': 100 s/d 999
+        uniqueCode = Math.floor(Math.random() * 900) + 100;
+      }
+    }
+
+    const feePerEvent = Number(eventData?.fee_per_event) || 50000;
+    const computedTotal = (feePerEvent * competitionEventIds.length) + uniqueCode;
+    const finalAmountDue = amountDue > 0 ? amountDue : computedTotal;
+
     for (const ceId of competitionEventIds) {
       // Cegah duplikat (unique athlete_id + competition_event_id)
       const { data: existing } = await supabase
@@ -90,12 +133,24 @@ export async function submitRegistrationAction(formData: FormData): Promise<Acti
         return { ok: false, error: regErr?.message || "Gagal menyimpan pendaftaran." };
       }
 
-      const { error: payErr } = await supabase.from("payment_verifications").insert({
+      let { error: payErr } = await supabase.from("payment_verifications").insert({
         registration_id: reg.id,
         status: "pending",
-        amount_due: amountDue,
+        amount_due: finalAmountDue,
+        base_amount: feePerEvent,
+        unique_code: uniqueCode,
         proof_url: proofUrl,
       });
+
+      if (payErr && (payErr.message?.includes('column') || payErr.message?.includes('schema cache'))) {
+        const { error: retryPayErr } = await supabase.from("payment_verifications").insert({
+          registration_id: reg.id,
+          status: "pending",
+          amount_due: finalAmountDue,
+          proof_url: proofUrl,
+        });
+        payErr = retryPayErr;
+      }
 
       if (payErr) {
         return { ok: false, error: payErr.message || "Gagal membuat verifikasi pembayaran." };
@@ -186,6 +241,47 @@ export async function createAthleteAndRegisterAction(formData: FormData): Promis
   }
 
   try {
+    // Ambil konfigurasi biaya & kode unik event
+    let eventData: any = null;
+    const { data: fullEvtData } = await supabase
+      .from('events')
+      .select('id, fee_per_event, use_unique_code, unique_code_mode, unique_code_fixed, unique_code_min, unique_code_max')
+      .eq('id', eventId)
+      .maybeSingle();
+
+    if (fullEvtData && (fullEvtData as any).fee_per_event !== undefined) {
+      eventData = fullEvtData;
+    } else {
+      const { getEventSettings } = await import('@/lib/data/event-settings-server');
+      eventData = getEventSettings(eventId);
+    }
+
+    const { count: regCount } = await supabase
+      .from('registrations')
+      .select('*', { count: 'exact', head: true })
+      .eq('event_id', eventId);
+
+    let uniqueCode = 0;
+    if (eventData?.use_unique_code !== false) {
+      const mode = eventData?.unique_code_mode || 'random_3_digit';
+      if (mode === 'fixed') {
+        uniqueCode = Number(eventData?.unique_code_fixed) || 0;
+      } else if (mode === 'sequential') {
+        const seq = ((regCount || 0) + 1) % 1000;
+        uniqueCode = seq === 0 ? 1 : seq;
+      } else if (mode === 'custom_range') {
+        const min = Number(eventData?.unique_code_min) || 100;
+        const max = Number(eventData?.unique_code_max) || 999;
+        uniqueCode = Math.floor(Math.random() * (max - min + 1)) + min;
+      } else {
+        uniqueCode = Math.floor(Math.random() * 900) + 100;
+      }
+    }
+
+    const feePerEvent = Number(eventData?.fee_per_event) || 50000;
+    const computedTotal = (feePerEvent * competitionEventIds.length) + uniqueCode;
+    const finalAmountDue = amountDue > 0 ? amountDue : computedTotal;
+
     for (const ceId of competitionEventIds) {
       // Cegah duplikat (unique athlete_id + competition_event_id)
       const { data: existing } = await supabase
@@ -212,12 +308,25 @@ export async function createAthleteAndRegisterAction(formData: FormData): Promis
         return { ok: false, error: regErr?.message || 'Gagal mendaftarkan nomor lomba.' };
       }
 
-      const { error: payErr } = await supabase.from('payment_verifications').insert({
+      let { error: payErr } = await supabase.from('payment_verifications').insert({
         registration_id: reg.id,
         status: 'pending',
-        amount_due: amountDue,
+        amount_due: finalAmountDue,
+        base_amount: feePerEvent,
+        unique_code: uniqueCode,
         proof_url: proofUrl,
       });
+
+      if (payErr && (payErr.message?.includes('column') || payErr.message?.includes('schema cache'))) {
+        const { error: retryPayErr } = await supabase.from('payment_verifications').insert({
+          registration_id: reg.id,
+          status: 'pending',
+          amount_due: finalAmountDue,
+          proof_url: proofUrl,
+        });
+        payErr = retryPayErr;
+      }
+
       if (payErr) return { ok: false, error: payErr.message || 'Gagal membuat verifikasi pembayaran.' };
     }
     return { ok: true };

@@ -1,7 +1,10 @@
 import { createClient } from '@/lib/supabase/server';
 import { PublicShell } from '@/components/layout/public-shell';
 import { LiveBoard, type LiveRow, type LiveOption } from '@/components/modules/live-board';
-import { Waves, Info } from 'lucide-react';
+import { LiveClosedCard } from '@/components/modules/live-closed-card';
+import { getEventLiveConfig } from '@/lib/data/live-scoreboard-server';
+import { checkEventLiveStatus } from '@/lib/data/live-scoreboard-settings';
+import { Waves, Info, Lock } from 'lucide-react';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
@@ -26,11 +29,21 @@ export default async function LivePage({
   const { event: eventId, ce: ceId, heat: heatId } = await searchParams;
   const supabase = await createClient();
 
+  const { data: { user } } = await supabase.auth.getUser();
+  let isAdmin = false;
+  if (user) {
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+    isAdmin = profile?.role === 'admin' || profile?.role === 'operator';
+  }
+
   const { data: events } = await supabase
     .from('events')
-    .select('id, name')
+    .select('id, name, start_date, end_date, location, pool_type, lane_count')
     .order('start_date', { ascending: false });
   const current = events?.find((e) => e.id === eventId) ?? events?.[0] ?? null;
+
+  const liveConfig = current ? getEventLiveConfig(current.id) : null;
+  const liveStatus = current ? checkEventLiveStatus(current, liveConfig) : null;
 
   const eventOpts: LiveOption[] = (events ?? []).map((e) => ({ id: e.id, label: e.name }));
 
@@ -101,6 +114,10 @@ export default async function LivePage({
     <PublicShell
       title="Live Board"
       subtitle="Papan hasil langsung. Pilih event, nomor lomba, dan heat untuk melihat perkembangan waktu per lintasan."
+      breadcrumbItems={[
+        { label: 'Beranda', href: '/' },
+        { label: 'Live Board' },
+      ]}
     >
       {!current ? (
         <div className="pub-card p-12 text-center">
@@ -108,6 +125,13 @@ export default async function LivePage({
           <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Belum ada kejuaraan</h3>
           <p className="mt-1 text-sm text-[var(--m-muted)]">Panitia belum mempublikasikan kejuaraan apa pun.</p>
         </div>
+      ) : !liveStatus?.isActive ? (
+        <LiveClosedCard
+          event={current}
+          reason={liveStatus?.reason || 'not_started'}
+          mode={liveConfig?.mode}
+          isAdmin={isAdmin}
+        />
       ) : (
         <div className="space-y-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">

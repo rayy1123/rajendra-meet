@@ -88,6 +88,11 @@ function sortBySeed(registrations: RegistrationSeed[]): RegistrationSeed[] {
   });
 }
 
+export interface SeedingOptions {
+  laneCount?: number;
+  method?: 'spearhead' | 'circular';
+}
+
 /**
  * Membagi peserta SATU nomor lomba ke dalam heat dan lane.
  * Pemanggil bertanggung jawab memastikan seluruh registrasi berasal dari
@@ -95,9 +100,18 @@ function sortBySeed(registrations: RegistrationSeed[]): RegistrationSeed[] {
  */
 export function generateHeats(
   registrations: RegistrationSeed[],
-  laneCount: number = 8
+  optionsOrLaneCount: SeedingOptions | number = 8
 ): GeneratedHeat[] {
   if (!registrations || registrations.length === 0) return [];
+  
+  const options: SeedingOptions =
+    typeof optionsOrLaneCount === 'number'
+      ? { laneCount: optionsOrLaneCount, method: 'spearhead' }
+      : { laneCount: optionsOrLaneCount.laneCount ?? 8, method: optionsOrLaneCount.method ?? 'spearhead' };
+
+  const laneCount = options.laneCount ?? 8;
+  const method = options.method ?? 'spearhead';
+
   if (laneCount <= 0) {
     throw new Error('laneCount harus lebih besar dari 0.');
   }
@@ -107,8 +121,47 @@ export function generateHeats(
   const totalHeats = Math.ceil(total / laneCount);
   const laneOrder = getLaneOrder(laneCount);
 
+  // Jika circular seeding untuk prelims (World Aquatics SW 3.1.1)
+  if (method === 'circular' && totalHeats >= 3) {
+    const heats: GeneratedHeat[] = Array.from({ length: totalHeats }, (_, i) => ({
+      heat_number: i + 1,
+      assignments: [],
+    }));
+
+    // 3 heat terakhir menggunakan circular seeding
+    const circularHeats = [heats[totalHeats - 1], heats[totalHeats - 2], heats[totalHeats - 3]];
+    let swimmerIdx = 0;
+
+    for (let round = 0; round < laneCount; round++) {
+      const laneNum = laneOrder[round];
+      for (let h = 0; h < 3; h++) {
+        if (swimmerIdx < total) {
+          circularHeats[h].assignments.push({
+            registration_id: sorted[swimmerIdx].registration_id,
+            lane_number: laneNum,
+          });
+          swimmerIdx++;
+        }
+      }
+    }
+
+    // Sisa peserta sebelum 3 heat terakhir
+    let remainingSwimmers = sorted.slice(swimmerIdx);
+    for (let hIdx = totalHeats - 4; hIdx >= 0; hIdx--) {
+      const slice = remainingSwimmers.slice(0, laneCount);
+      remainingSwimmers = remainingSwimmers.slice(laneCount);
+      const assignments: GeneratedLane[] = slice.map((reg, idx) => ({
+        registration_id: reg.registration_id,
+        lane_number: laneOrder[idx],
+      }));
+      heats[hIdx].assignments = assignments;
+    }
+
+    return heats;
+  }
+
+  // Standar Spearhead Seeding (Timed Finals)
   // Heat 1 berisi peserta paling lambat, heat terakhir peserta tercepat.
-  // Bila jumlah peserta tidak habis dibagi, heat pertama-lah yang tidak penuh.
   const slowestFirst = [...sorted].reverse();
   const firstHeatSize = total - (totalHeats - 1) * laneCount;
 

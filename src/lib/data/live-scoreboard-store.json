@@ -1,0 +1,17 @@
+{
+  "ev-unit-test": {
+    "eventId": "ev-unit-test",
+    "mode": "auto",
+    "updatedAt": "2026-09-20T17:20:04.641Z"
+  },
+  "51206709-e4a7-4e27-98f9-107875000444": {
+    "eventId": "51206709-e4a7-4e27-98f9-107875000444",
+    "mode": "closed",
+    "updatedAt": "2026-09-20T03:23:23.614Z"
+  },
+  "f4a3da09-836d-47b5-81b9-bfc9842844fe": {
+    "eventId": "f4a3da09-836d-47b5-81b9-bfc9842844fe",
+    "mode": "closed",
+    "updatedAt": "2026-09-20T03:23:36.404Z"
+  }
+}

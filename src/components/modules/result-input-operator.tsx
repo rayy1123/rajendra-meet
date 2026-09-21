@@ -15,7 +15,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Save, CheckCircle2 } from 'lucide-react';
+import { Save, CheckCircle2, BookOpen, Trophy, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
 interface HeatAssignmentRow {
   id: string;
@@ -57,6 +58,7 @@ export function ResultInputOperator({
   const [timeInputs, setTimeInputs] = useState<Record<string, string>>({});
   const [statusInputs, setStatusInputs] = useState<Record<string, string>>({});
   const [savingMap, setSavingMap] = useState<Record<string, boolean>>({});
+  const [isSavingAll, setIsSavingAll] = useState(false);
 
   // Navigasi Filter Event
   const handleEventChange = (val: string) => {
@@ -82,7 +84,7 @@ export function ResultInputOperator({
     { value: 'scr', label: 'SCR' },
   ] as const;
 
-  // Simpan/Update Hasil Waktu & Status Lomba
+  // Simpan/Update Hasil Waktu & Status Lomba per Lintasan
   const handleSaveResult = async (
     assignmentId: string,
     resultId?: string,
@@ -96,7 +98,6 @@ export function ResultInputOperator({
 
     // Waktu hanya diisi untuk status 'finished' (selesai)
     if (status === 'finished') {
-      // Prioritas: input baru -> waktu existing (saat edit tanpa ubah input)
       const sourceMs = rawTime ? formatTimeToMs(rawTime) : existingTimeMs;
 
       if (!sourceMs || isNaN(sourceMs) || sourceMs <= 0) {
@@ -129,7 +130,12 @@ export function ResultInputOperator({
         if (error) throw error;
       }
 
-      toast.success('Hasil berhasil disimpan!');
+      toast.success('Hasil lomba berhasil disimpan & terhubung ke Buku Acara!', {
+        action: {
+          label: 'Buka Buku Acara',
+          onClick: () => router.push(`/buku-acara?event=${selectedEventId}`),
+        },
+      });
       router.refresh();
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Gagal menyimpan hasil');
@@ -138,8 +144,89 @@ export function ResultInputOperator({
     }
   };
 
+  // Simpan Seluruh Lintasan di Seri / Heat Sekaligus (Batch Save)
+  const handleSaveAllInHeat = async (heat: HeatRow) => {
+    if (!heat.heat_assignments || heat.heat_assignments.length === 0) return;
+
+    setIsSavingAll(true);
+    let savedCount = 0;
+
+    try {
+      for (const assign of heat.heat_assignments) {
+        const rawTime = timeInputs[assign.id];
+        const existingResult = assign.results?.[0];
+        const status = statusInputs[assign.id] || existingResult?.status || 'finished';
+
+        let timeMs: number | null = null;
+        if (status === 'finished') {
+          const sourceMs = rawTime ? formatTimeToMs(rawTime) : existingResult?.time_ms;
+          if (sourceMs && !isNaN(sourceMs) && sourceMs > 0) {
+            timeMs = sourceMs;
+          }
+        }
+
+        if (timeMs !== null || status !== 'finished') {
+          const payload = {
+            heat_assignment_id: assign.id,
+            time_ms: timeMs,
+            status: status,
+          };
+
+          if (existingResult?.id) {
+            await supabase.from('results').update(payload).eq('id', existingResult.id);
+          } else {
+            await supabase.from('results').insert(payload);
+          }
+          savedCount++;
+        }
+      }
+
+      if (savedCount > 0) {
+        toast.success(
+          `${savedCount} hasil lintasan Acara ${heat.heat_number} berhasil disimpan & disinkronkan ke Buku Acara!`,
+          {
+            action: {
+              label: 'Buka Buku Acara',
+              onClick: () => router.push(`/buku-acara?event=${selectedEventId}`),
+            },
+          }
+        );
+        router.refresh();
+      } else {
+        toast.info('Belum ada waktu tempuh baru yang diisi pada Acara ini.');
+      }
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Gagal menyimpan hasil batch');
+    } finally {
+      setIsSavingAll(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
+      {/* Banner Koneksi Langsung ke Buku Acara */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-xl border border-blue-200 bg-blue-50/80 p-4 shadow-xs">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white shadow-xs">
+            <BookOpen className="h-5 w-5" />
+          </div>
+          <div>
+            <h4 className="text-sm font-bold text-blue-950">
+              Terhubung Langsung ke Buku Acara (Start List & Hasil)
+            </h4>
+            <p className="text-xs text-blue-800/80">
+              Setiap waktu tempuh yang Anda simpan di sini akan otomatis terisi pada kolom <b>Final Time</b> & <b>Peringkat Juara</b> di Buku Acara resmi.
+            </p>
+          </div>
+        </div>
+
+        <Link href={`/buku-acara?event=${selectedEventId}`}>
+          <Button size="sm" className="gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs shrink-0">
+            <BookOpen className="h-4 w-4" /> Buka Buku Acara <ArrowRight className="h-3.5 w-3.5" />
+          </Button>
+        </Link>
+      </div>
+
       {/* Filter Bar */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-muted/40 p-4 rounded-xl border">
         <div className="space-y-1">
@@ -183,11 +270,35 @@ export function ResultInputOperator({
       ) : (
         heatsData.map((heat) => (
           <Card key={heat.id} className="border-t-4 border-t-primary">
-            <CardHeader className="py-3 bg-muted/20 flex flex-row items-center justify-between">
-              <CardTitle className="text-base font-bold">Acara {heat.heat_number}</CardTitle>
-              <span className="text-xs font-medium text-muted-foreground">
-                {heat.heat_assignments?.length || 0} Lintasan
-              </span>
+            <CardHeader className="py-3 bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-base font-bold">Acara {heat.heat_number}</CardTitle>
+                <span className="text-xs font-medium text-muted-foreground">
+                  ({heat.heat_assignments?.length || 0} Lintasan)
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleSaveAllInHeat(heat)}
+                  disabled={isSavingAll}
+                  className="h-8 gap-1.5 text-xs font-bold border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
+                >
+                  <Save className="h-3.5 w-3.5" />
+                  Simpan Semua Lintasan
+                </Button>
+                <Link href={`/buku-acara?event=${selectedEventId}`}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 gap-1 text-xs font-bold text-blue-700 hover:bg-blue-50"
+                  >
+                    <BookOpen className="h-3.5 w-3.5" />
+                    Buku Acara »
+                  </Button>
+                </Link>
+              </div>
             </CardHeader>
             <CardContent className="p-0 divide-y">
               {heat.heat_assignments &&

@@ -125,6 +125,10 @@ export default async function MedalTallyPage({
     <PublicShell
       title="Klasemen Medali"
       subtitle="Podium dan klasemen medali per sekolah / klub untuk kejuaraan terpilih."
+      breadcrumbItems={[
+        { label: 'Beranda', href: '/' },
+        { label: 'Klasemen Medali' },
+      ]}
     >
       <div className="pub-container pb-16">
         {/* Pemilih kejuaraan */}
@@ -150,53 +154,53 @@ export default async function MedalTallyPage({
               {podium.map((p, i) => (
                 <div
                   key={p.name}
-                  className={`pub-card relative flex flex-col items-center border-t-4 p-5 ${podiumAccent[i]}`}
+                  className={`pub-card relative flex flex-col items-center border-t-4 p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md ${podiumAccent[i]}`}
                 >
-                  <div className={`flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold ${podiumColors[i]}`}>
-                    {i + 1}
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-2xl text-lg font-black shadow-xs ${podiumColors[i]}`}>
+                    {i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}
                   </div>
-                  <h3 className="mt-3 text-center font-bold text-[var(--m-ink)]">{p.name}</h3>
+                  <h3 className="font-heading mt-3.5 text-center font-bold text-base text-[var(--m-ink)]">{p.name}</h3>
                   <div className="mt-3 flex items-center gap-3">
-                    <span className="flex items-center gap-1 text-sm">
-                      <span className="h-3 w-3 rounded-full bg-[#FCD34D]" /> {p.gold}
+                    <span className="flex items-center gap-1.5 text-xs font-mono font-semibold">
+                      <span className="h-3 w-3 rounded-full bg-[#FCD34D] shadow-2xs" /> {p.gold}
                     </span>
-                    <span className="flex items-center gap-1 text-sm">
-                      <span className="h-3 w-3 rounded-full bg-[#E2E8F0]" /> {p.silver}
+                    <span className="flex items-center gap-1.5 text-xs font-mono font-semibold">
+                      <span className="h-3 w-3 rounded-full bg-[#E2E8F0] shadow-2xs" /> {p.silver}
                     </span>
-                    <span className="flex items-center gap-1 text-sm">
-                      <span className="h-3 w-3 rounded-full bg-[#FDBA74]" /> {p.bronze}
+                    <span className="flex items-center gap-1.5 text-xs font-mono font-semibold">
+                      <span className="h-3 w-3 rounded-full bg-[#FDBA74] shadow-2xs" /> {p.bronze}
                     </span>
                   </div>
-                  <p className="mt-2 text-2xl font-bold text-[var(--m-aqua-ink)]">{p.points}</p>
-                  <p className="text-xs text-[var(--m-muted)]">poin</p>
+                  <p className="font-heading mt-2.5 text-3xl font-black text-[var(--m-aqua-ink)]">{p.points}</p>
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--m-muted)]">poin</p>
                 </div>
               ))}
             </section>
 
             {/* Tabel klasemen */}
-            <div className="printable-area overflow-hidden rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] shadow-sm">
+            <div className="printable-area overflow-hidden rounded-2xl border border-[var(--m-border)] bg-[var(--m-surface)] shadow-sm">
               <table className="w-full text-left text-sm">
-                <thead className="bg-[var(--m-soft)] text-xs uppercase text-[var(--m-muted)]">
+                <thead className="bg-[var(--m-soft)] text-xs font-bold uppercase tracking-wider text-[var(--m-muted)]">
                   <tr>
-                    <th className="w-12 px-4 py-3 text-center">#</th>
-                    <th className="px-4 py-3">Sekolah / Klub</th>
-                    <th className="w-20 px-4 py-3 text-center">Emas</th>
-                    <th className="w-20 px-4 py-3 text-center">Perak</th>
-                    <th className="w-20 px-4 py-3 text-center">Perunggu</th>
-                    <th className="w-20 px-4 py-3 text-center">Total</th>
-                    <th className="w-20 px-4 py-3 text-right">Poin</th>
+                    <th className="w-12 px-4 py-3.5 text-center">#</th>
+                    <th className="px-4 py-3.5">Sekolah / Klub</th>
+                    <th className="w-20 px-4 py-3.5 text-center">Emas</th>
+                    <th className="w-20 px-4 py-3.5 text-center">Perak</th>
+                    <th className="w-20 px-4 py-3.5 text-center">Perunggu</th>
+                    <th className="w-20 px-4 py-3.5 text-center">Total</th>
+                    <th className="w-20 px-4 py-3.5 text-right">Poin</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--m-border)]">
                   {rows.map((r, i) => (
-                    <tr key={r.name} className="hover:bg-[var(--m-soft)]">
-                      <td className="px-4 py-3 text-center font-bold text-[var(--m-ink)]">{i + 1}</td>
-                      <td className="px-4 py-3 font-medium text-[var(--m-ink)]">{r.name}</td>
-                      <td className="px-4 py-3 text-center font-mono text-xs">{r.gold}</td>
-                      <td className="px-4 py-3 text-center font-mono text-xs">{r.silver}</td>
-                      <td className="px-4 py-3 text-center font-mono text-xs">{r.bronze}</td>
-                      <td className="px-4 py-3 text-center font-mono text-xs font-bold text-[var(--m-aqua-ink)]">{r.total}</td>
-                      <td className="px-4 py-3 text-right font-mono text-xs font-bold text-[var(--m-ink)]">{r.points}</td>
+                    <tr key={r.name} className="hover:bg-[var(--m-soft)] transition-colors">
+                      <td className="px-4 py-3 text-center font-bold text-[var(--m-ink)] font-mono">{i + 1}</td>
+                      <td className="px-4 py-3 font-semibold text-[var(--m-ink)]">{r.name}</td>
+                      <td className="px-4 py-3 text-center font-mono text-xs font-semibold">{r.gold}</td>
+                      <td className="px-4 py-3 text-center font-mono text-xs font-semibold">{r.silver}</td>
+                      <td className="px-4 py-3 text-center font-mono text-xs font-semibold">{r.bronze}</td>
+                      <td className="px-4 py-3 text-center font-mono text-xs font-black text-[var(--m-aqua-ink)]">{r.total}</td>
+                      <td className="px-4 py-3 text-right font-mono text-xs font-black text-[var(--m-ink)]">{r.points}</td>
                     </tr>
                   ))}
                 </tbody>

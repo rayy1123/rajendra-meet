@@ -2,6 +2,15 @@
 import { requireRole } from '@/lib/auth';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
+import { EmptyState } from '@/components/ui/empty-state';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@/components/ui/table';
 import { ShieldCheck } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -25,39 +34,37 @@ export default async function AuditPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Log Audit' }]} className="mb-2" />
+      <Breadcrumb items={[{ label: 'Dasbor', href: '/dashboard' }, { label: 'Log Audit' }]} className="mb-2" />
       <PageHeader
         title="Log Audit Sistem"
         description="Catatan modifikasi sistem dan event keamanan (override waktu, login, perubahan seeding)."
       />
       {rows.length === 0 ? (
-        <div className="pub-card p-12 text-center">
-          <ShieldCheck className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
-          <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Belum ada log</h3>
-          <p className="mt-1 text-sm text-[var(--m-muted)]">
-            Event akan tercatat di sini saat ada modifikasi sistem.
-          </p>
-        </div>
+        <EmptyState
+          icon={<ShieldCheck className="h-6 w-6" />}
+          title="Belum Ada Log Audit"
+          description="Aktivitas dan modifikasi sistem akan tercatat di sini."
+        />
       ) : (
         <div className="glass-panel overflow-hidden">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-[var(--m-soft)] text-xs uppercase text-[var(--m-muted)]">
-              <tr>
-                <th className="px-4 py-3">Waktu</th>
-                <th className="px-4 py-3">Aktor</th>
-                <th className="px-4 py-3">Aksi</th>
-                <th className="px-4 py-3">Entitas</th>
-                <th className="px-4 py-3">Detail</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--m-border)]">
+          <Table>
+            <TableHeader className="bg-[var(--m-soft)]">
+              <TableRow>
+                <TableHead>Waktu</TableHead>
+                <TableHead>Aktor</TableHead>
+                <TableHead>Aksi</TableHead>
+                <TableHead>Entitas</TableHead>
+                <TableHead>Detail</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {rows.map((r: any) => (
-                <tr key={r.id} className="hover:bg-[var(--m-soft)]">
-                  <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-[var(--m-muted)]">
+                <TableRow key={r.id}>
+                  <TableCell className="whitespace-nowrap font-mono text-xs text-[var(--m-muted)]">
                     {new Date(r.created_at).toLocaleString('id-ID')}
-                  </td>
-                  <td className="px-4 py-3 text-[var(--m-ink)]">{r.actor_email ?? '—'}</td>
-                  <td className="px-4 py-3">
+                  </TableCell>
+                  <TableCell className="text-[var(--m-ink)]">{r.actor_email ?? '—'}</TableCell>
+                  <TableCell>
                     <span
                       className={
                         'rounded px-2 py-0.5 text-xs font-semibold ' +
@@ -66,13 +73,13 @@ export default async function AuditPage() {
                     >
                       {r.action}
                     </span>
-                  </td>
-                  <td className="px-4 py-3 text-[var(--m-muted)]">{r.entity ?? '—'}</td>
-                  <td className="px-4 py-3 text-[var(--m-muted)]">{r.detail ?? '—'}</td>
-                </tr>
+                  </TableCell>
+                  <TableCell className="text-[var(--m-muted)]">{r.entity ?? '—'}</TableCell>
+                  <TableCell className="text-[var(--m-muted)]">{r.detail ?? '—'}</TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>

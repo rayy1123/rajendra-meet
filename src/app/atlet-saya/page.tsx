@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation';
 import { requireUser } from '@/lib/auth';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
@@ -25,6 +26,29 @@ interface AthleteRow {
 
 export default async function AtletSayaPage() {
   const { supabase, user } = await requireUser();
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  const userRole =
+    (profile?.role as string) ||
+    (user as any)?.user_metadata?.role ||
+    (user as any)?.app_metadata?.role ||
+    'viewer';
+  const ADMIN_ROLES = [
+    'super_admin',
+    'event_admin',
+    'operator',
+    'admin',
+    'admin_kejuaraan',
+    'admin_keuangan',
+  ];
+  if (ADMIN_ROLES.includes(userRole)) {
+    redirect('/athletes');
+  }
 
   const { data: athletes } = await supabase
     .from('athletes')

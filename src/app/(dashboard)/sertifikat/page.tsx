@@ -129,17 +129,17 @@ export default async function CertificatePage({
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Sertifikat' }]} className="mb-2" />
       <PageHeader
         title="Sertifikat Penghargaan"
         description="Cetak sertifikat juara 1–3 per nomor lomba. Gunakan tombol Cetak untuk menyimpan / kirim PDF."
       />
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Sertifikat' }]} className="mb-2" />
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <span className="rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-[var(--m-ink)]">
           {current?.name ?? '—'}
         </span>
         <span className="rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-[var(--m-ink)]">
-          {compEvents[0]?.label ?? '—'}
+          {compLabel || compEvents[0]?.label || '—'}
         </span>
         <PrintButton />
       </div>

@@ -13,7 +13,7 @@ export function ProfileMenu() {
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [profile, setProfile] = useState<{ full_name?: string; username?: string; avatar_url?: string } | null>(null);
+  const [profile, setProfile] = useState<{ full_name?: string; username?: string; avatar_url?: string; role?: string } | null>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -23,7 +23,7 @@ export function ProfileMenu() {
         if (user?.id) {
           const { data } = await supabase
             .from('profiles')
-            .select('full_name, username, avatar_url')
+            .select('full_name, username, avatar_url, role')
             .eq('id', user.id)
             .maybeSingle();
           setProfile(data as any);
@@ -74,6 +74,35 @@ export function ProfileMenu() {
               <p className="text-xs text-[var(--m-muted)]">{profile?.username || ''}</p>
             </div>
             <div className="my-1 h-px bg-[var(--m-border)]" />
+            {(() => {
+              const ADMIN_ROLES = [
+                'super_admin',
+                'event_admin',
+                'operator',
+                'admin',
+                'admin_kejuaraan',
+                'admin_keuangan',
+              ];
+              const isAdmin = profile?.role && ADMIN_ROLES.includes(profile.role);
+              const dashboardHref = isAdmin ? '/dashboard' : '/dashboard-viewer';
+              const dashboardLabel = isAdmin ? 'Dasbor Panitia' : 'Dasbor Peserta';
+
+              return (
+                <Link
+                  href={dashboardHref}
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-ui',
+                    pathname === dashboardHref
+                      ? 'bg-[var(--m-soft)] text-[var(--m-aqua-ink)] font-semibold'
+                      : 'text-[var(--m-ink)] hover:bg-[var(--m-soft)]'
+                  )}
+                >
+                  <LayoutDashboard className="h-4 w-4 text-[var(--m-aqua)]" />
+                  {dashboardLabel}
+                </Link>
+              );
+            })()}
             <Link
               href="/"
               onClick={() => setOpen(false)}
@@ -93,8 +122,8 @@ export function ProfileMenu() {
                 pathname === '/profile' ? 'bg-[var(--m-soft)] text-[var(--m-aqua-ink)]' : 'text-[var(--m-ink)] hover:bg-[var(--m-soft)]'
               )}
             >
-              <LayoutDashboard className="h-4 w-4" />
-              Profil
+              <UserCircle className="h-4 w-4" />
+              Profil Akun
             </Link>
             <button
               type="button"

@@ -1,0 +1,30 @@
+{
+  "8a79d0ba-9381-4cae-baca-b954f7fb17a6": {
+    "fee_per_event": 100000,
+    "use_unique_code": true,
+    "unique_code_mode": "random_3_digit",
+    "unique_code_fixed": 0,
+    "unique_code_min": 100,
+    "unique_code_max": 999,
+    "bank_name": "Bank Central Asia (BCA)",
+    "bank_account_no": "123347485",
+    "bank_account_name": "Panitia Pelaksana Renang",
+    "eventId": "8a79d0ba-9381-4cae-baca-b954f7fb17a6",
+    "updatedAt": "2026-09-19T09:35:53.325Z",
+    "logo_url": "/uploads/event-logos/poster-1789810552928-1jcr3.png"
+  },
+  "96bda7fb-8ee3-4525-a6a4-dd361cec3dd5": {
+    "fee_per_event": 100000,
+    "use_unique_code": true,
+    "unique_code_mode": "random_3_digit",
+    "unique_code_fixed": 0,
+    "unique_code_min": 100,
+    "unique_code_max": 999,
+    "bank_name": "Bank Central Asia (BCA)",
+    "bank_account_no": "123347485",
+    "bank_account_name": "Panitia Pelaksana Renang",
+    "eventId": "96bda7fb-8ee3-4525-a6a4-dd361cec3dd5",
+    "logo_url": "/brand/rajendra-organizer-logo.png",
+    "updatedAt": "2026-09-19T10:48:53.362Z"
+  }
+}

@@ -63,9 +63,11 @@ export interface ParticipantCardData {
 export function ParticipantCardManager({
   cards,
   initialAthleteId,
+  isAdmin = false,
 }: {
   cards: ParticipantCardData[];
   initialAthleteId?: string | null;
+  isAdmin?: boolean;
 }) {
   const [selectedEventId, setSelectedEventId] = useState<string>('all');
   const [selectedAthleteId, setSelectedAthleteId] = useState<string>(initialAthleteId || 'all');
@@ -293,13 +295,13 @@ export function ParticipantCardManager({
       </Card>
 
       {/* Info Petunjuk Cetak */}
-      <div className="no-print flex items-start gap-3 rounded-2xl border border-blue-200 bg-blue-50/70 p-4 text-xs text-blue-900 shadow-2xs dark:border-blue-900/40 dark:bg-blue-950/20 dark:text-blue-200">
+      <div className="no-print flex items-start gap-3 rounded-2xl border border-blue-200 bg-blue-50/70 p-4 text-xs text-blue-900 shadow-2xs">
         <Info className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
         <div className="space-y-1">
-          <p className="font-bold text-blue-950 dark:text-blue-100">
+          <p className="font-bold text-blue-950">
             Petunjuk Cetak Kartu Tanda Peserta (Official Pass)
           </p>
-          <p className="text-blue-800 dark:text-blue-300">
+          <p className="text-blue-800">
             Setiap kartu memuat rincian identitas atlet, QR Code verifikasi resmi, serta <b>daftar lengkap nomor lomba</b> yang diikuti pada event tersebut. Anda dapat mencetak langsung menggunakan printer atau memilih opsi <b>&quot;Save as PDF&quot;</b> di dialog browser untuk mengunduh berkas kartu.
           </p>
         </div>
@@ -314,9 +316,11 @@ export function ParticipantCardManager({
               Tidak ada kartu peserta yang sesuai filter
             </h4>
             <p className="text-xs text-muted-foreground mt-1 max-w-md mx-auto">
-              Belum ada atlet binaan Anda yang terdaftar pada nomor lomba, atau filter yang dipilih tidak menemukan hasil.
+              {isAdmin
+                ? 'Belum ada pendaftaran atlet pada event ini, atau filter yang dipilih tidak menemukan hasil.'
+                : 'Belum ada atlet binaan Anda yang terdaftar pada nomor lomba, atau filter yang dipilih tidak menemukan hasil.'}
             </p>
-            <div className="mt-4 flex items-center justify-center gap-3">
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
               <Button
                 variant="outline"
                 size="sm"
@@ -330,11 +334,26 @@ export function ParticipantCardManager({
               >
                 Reset Semua Filter
               </Button>
-              <Link href="/daftar-lomba">
-                <Button size="sm" className="text-xs font-bold">
-                  Daftarkan Atlet ke Event &rarr;
-                </Button>
-              </Link>
+              {isAdmin ? (
+                <>
+                  <Link href="/verifikasi-pembayaran">
+                    <Button size="sm" variant="outline" className="text-xs font-bold">
+                      Verifikasi Pembayaran
+                    </Button>
+                  </Link>
+                  <Link href="/events">
+                    <Button size="sm" className="text-xs font-bold">
+                      Kelola Kejuaraan / Event &rarr;
+                    </Button>
+                  </Link>
+                </>
+              ) : (
+                <Link href="/daftar-lomba">
+                  <Button size="sm" className="text-xs font-bold">
+                    Daftarkan Atlet ke Event &rarr;
+                  </Button>
+                </Link>
+              )}
             </div>
           </Card>
         ) : (

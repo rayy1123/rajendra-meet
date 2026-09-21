@@ -24,7 +24,7 @@ export function ViewerSubHeader({ title, description, badge }: ViewerSubHeaderPr
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg font-bold text-[var(--m-ink)] sm:text-xl">{title}</h1>
+                <h1 className="font-heading text-lg font-extrabold tracking-tight text-[var(--m-ink)] sm:text-2xl">{title}</h1>
                 {description && (
                   <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[var(--m-soft)] text-[var(--m-muted)]" title={description}>
                     <Info className="h-3.5 w-3.5" />

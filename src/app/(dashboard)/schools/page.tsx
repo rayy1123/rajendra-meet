@@ -1,9 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
-import { School, Plus, Search } from 'lucide-react';
+import { School, Search } from 'lucide-react';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import {
   Table,
@@ -66,11 +65,6 @@ export default async function SchoolsPage({
         title="Master Sekolah / Klub"
         description="Kelola daftar kontingen sekolah dan klub renang yang terdaftar dalam kejuaraan."
         icon={<School className="h-6 w-6" />}
-        actions={
-          <Button className="flex items-center gap-2">
-            <Plus className="w-4 h-4" /> Tambah Sekolah / Klub
-          </Button>
-        }
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

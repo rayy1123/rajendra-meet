@@ -1,7 +1,8 @@
 import { requireRole } from '@/lib/auth';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
-import { CreditCard, CheckCircle2, XCircle, Eye } from 'lucide-react';
+import { CreditCard, CheckCircle2, XCircle, Eye, FileText } from 'lucide-react';
+import Link from 'next/link';
 import { PaymentVerifyActions } from '@/components/modules/payment-verify-actions';
 
 export const dynamic = 'force-dynamic';
@@ -10,6 +11,8 @@ interface PaymentRow {
   id: string;
   status: string;
   amount_due: number | null;
+  base_amount?: number | null;
+  unique_code?: number | null;
   proof_url: string | null;
   created_at: string;
   registration: {
@@ -31,7 +34,7 @@ export default async function VerifikasiPembayaranPage({
   let query = supabase
     .from('payment_verifications')
     .select(
-      `id, status, amount_due, proof_url, created_at,
+      `id, status, amount_due, base_amount, unique_code, proof_url, created_at,
        registration:registrations(
          registrant_id,
          athletes(full_name),
@@ -71,7 +74,7 @@ export default async function VerifikasiPembayaranPage({
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Verifikasi Pembayaran' }]} className="mb-2" />
+      <Breadcrumb items={[{ label: 'Dasbor', href: '/dashboard' }, { label: 'Verifikasi Pembayaran' }]} className="mb-2" />
       <PageHeader
         title="Verifikasi Pembayaran"
         description="Tinjau bukti pembayaran pendaftaran dan setujui atau tolak."
@@ -112,23 +115,40 @@ export default async function VerifikasiPembayaranPage({
                     <div className="mt-0.5 text-xs text-[var(--m-muted)]">
                       Pendaftar: {registrant?.full_name ?? registrant?.email ?? '-'}
                     </div>
-                    <div className="mt-1 flex items-center gap-3 text-xs">
-                      <span className="font-semibold text-[var(--m-ink)]">
-                        Rp {(r.amount_due ?? 0).toLocaleString('id-ID')}
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
+                      <span className="font-bold text-[var(--m-ink)] bg-slate-100 px-2 py-0.5 rounded">
+                        Total: Rp {(r.amount_due ?? 0).toLocaleString('id-ID')}
                       </span>
+                      {r.unique_code && r.unique_code > 0 ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300">
+                          Kode Unik: +{r.unique_code}
+                        </span>
+                      ) : null}
+                      {r.base_amount && r.base_amount > 0 ? (
+                        <span className="text-[11px] text-muted-foreground">
+                          (Pokok: Rp {r.base_amount.toLocaleString('id-ID')})
+                        </span>
+                      ) : null}
                       {r.proof_url && (
                         <a
                           href={r.proof_url}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1 font-medium text-[var(--m-aqua-ink)] hover:underline"
+                          className="inline-flex items-center gap-1 font-medium text-[var(--m-aqua-ink)] hover:underline ml-1"
                         >
                           <Eye className="h-3.5 w-3.5" /> Lihat bukti
                         </a>
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <Link
+                      href={`/invoice/${r.id}`}
+                      target="_blank"
+                      className="inline-flex items-center gap-1 text-xs font-bold text-[var(--m-aqua-ink)] bg-[var(--m-aqua-soft)] hover:bg-[var(--m-aqua)] hover:text-white px-2.5 py-1 rounded-lg transition-colors"
+                    >
+                      <FileText className="h-3.5 w-3.5" /> Invoice
+                    </Link>
                     <StatusBadge status={r.status} />
                     {r.status === 'pending' && <PaymentVerifyActions id={r.id} />}
                   </div>

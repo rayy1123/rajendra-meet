@@ -26,15 +26,30 @@ export default async function KartuPesertaPage({
     redirect('/login?redirect=/kartu-peserta');
   }
 
-  // 1. Dapatkan daftar ID atlet yang dimiliki oleh user ini
-  const { data: userAthletes } = await supabase
-    .from('athletes')
-    .select('id')
-    .eq('owner_id', user.id);
+  // 1. Dapatkan peran user untuk menentukan apakah admin atau viewer
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle();
 
-  const ownedAthleteIds = (userAthletes || []).map((a) => a.id);
+  const userRole =
+    (profile?.role as string) ||
+    (user.user_metadata?.role as string) ||
+    (user.app_metadata?.role as string) ||
+    'viewer';
 
-  // 2. Query pendaftaran milik user atau milik atlet binaan user
+  const ADMIN_ROLES = [
+    'super_admin',
+    'event_admin',
+    'operator',
+    'admin',
+    'admin_kejuaraan',
+    'admin_keuangan',
+  ];
+  const isAdmin = ADMIN_ROLES.includes(userRole);
+
+  // 2. Query pendaftaran: jika admin tampilkan seluruh pendaftaran di event, jika viewer hanya atlet binaannya
   let query = supabase
     .from('registrations')
     .select(`
@@ -95,10 +110,19 @@ export default async function KartuPesertaPage({
     `)
     .order('created_at', { ascending: false });
 
-  if (ownedAthleteIds.length > 0) {
-    query = query.or(`registrant_id.eq.${user.id},athlete_id.in.(${ownedAthleteIds.join(',')})`);
-  } else {
-    query = query.eq('registrant_id', user.id);
+  if (!isAdmin) {
+    const { data: userAthletes } = await supabase
+      .from('athletes')
+      .select('id')
+      .eq('owner_id', user.id);
+
+    const ownedAthleteIds = (userAthletes || []).map((a) => a.id);
+
+    if (ownedAthleteIds.length > 0) {
+      query = query.or(`registrant_id.eq.${user.id},athlete_id.in.(${ownedAthleteIds.join(',')})`);
+    } else {
+      query = query.eq('registrant_id', user.id);
+    }
   }
 
   const { data: rawRegistrations } = await query;
@@ -181,8 +205,8 @@ export default async function KartuPesertaPage({
       <div className="no-print">
         <Breadcrumb
           items={[
-            { label: 'Pendaftaran', href: '/daftar-lomba' },
-            { label: 'Cetak Kartu Peserta' },
+            { label: 'Dasbor', href: '/dashboard' },
+            { label: 'Kartu Peserta' },
           ]}
           className="mb-2"
         />
@@ -193,7 +217,11 @@ export default async function KartuPesertaPage({
         />
       </div>
 
-      <ParticipantCardManager cards={cardsList} initialAthleteId={athleteId || null} />
+      <ParticipantCardManager
+        cards={cardsList}
+        initialAthleteId={athleteId || null}
+        isAdmin={isAdmin}
+      />
     </div>
   );
 }

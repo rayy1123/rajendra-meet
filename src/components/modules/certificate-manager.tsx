@@ -454,7 +454,7 @@ export function CertificateManager({
                 )}
               </button>
               {selectedIds.size > 0 && (
-                <span className="font-bold text-amber-700 dark:text-amber-300">
+                <span className="font-bold text-amber-700">
                   {selectedIds.size} atlet dipilih
                 </span>
               )}
@@ -508,7 +508,7 @@ export function CertificateManager({
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-slate-200/70 bg-slate-100/80 dark:bg-slate-800/80 backdrop-blur-md text-muted-foreground font-semibold">
+                <tr className="border-b border-slate-200/70 bg-slate-100/80 backdrop-blur-md text-muted-foreground font-semibold">
                   <th className="p-3 w-10 text-center">
                     <input
                       type="checkbox"
@@ -537,7 +537,7 @@ export function CertificateManager({
                     <tr
                       key={r.id}
                       className={`hover:bg-muted/40 transition-colors ${
-                        isSelected ? 'bg-amber-50/50 dark:bg-amber-950/20' : ''
+                        isSelected ? 'bg-amber-50/50' : ''
                       }`}
                     >
                       <td className="p-3 text-center">
@@ -551,15 +551,15 @@ export function CertificateManager({
 
                       <td className="p-3 text-center">
                         {isGold ? (
-                          <span className="inline-flex items-center gap-1 font-black text-amber-600 bg-amber-100 dark:bg-amber-950/50 px-2 py-0.5 rounded-full text-xs">
+                          <span className="inline-flex items-center gap-1 font-black text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full text-xs">
                             🥇 1
                           </span>
                         ) : isSilver ? (
-                          <span className="inline-flex items-center gap-1 font-black text-slate-600 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full text-xs">
+                          <span className="inline-flex items-center gap-1 font-black text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full text-xs">
                             🥈 2
                           </span>
                         ) : isBronze ? (
-                          <span className="inline-flex items-center gap-1 font-black text-amber-800 bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 rounded-full text-xs">
+                          <span className="inline-flex items-center gap-1 font-black text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full text-xs">
                             🥉 3
                           </span>
                         ) : (
@@ -572,7 +572,7 @@ export function CertificateManager({
                         <p className="font-mono text-[10px] text-muted-foreground">{r.athleteNumber}</p>
                       </td>
 
-                      <td className="p-3 font-medium text-slate-700 dark:text-slate-300">
+                      <td className="p-3 font-medium text-slate-700">
                         {r.schoolName || 'Mandiri'}
                       </td>
 

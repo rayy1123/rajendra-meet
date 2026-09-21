@@ -88,13 +88,33 @@ export default async function ResultsPage({
       .eq('competition_event_id', activeCompEventId)
       .order('heat_number', { ascending: true });
 
-    // Pastikan lane_number di setiap heat terurut rapi (Lane 1..8)
+    // Pastikan lane_number di setiap heat terurut rapi & hasil lomba tersinkron 100%
     if (heats) {
+      const allAssignIds = heats.flatMap((h) => (h.heat_assignments || []).map((ha) => ha.id));
+      const directResultsMap: Record<string, { id: string; time_ms: number | null; status: string }> = {};
+      if (allAssignIds.length > 0) {
+        const { data: dbRes } = await supabase
+          .from('results')
+          .select('id, heat_assignment_id, time_ms, status')
+          .in('heat_assignment_id', allAssignIds);
+        if (dbRes) {
+          dbRes.forEach((r) => {
+            directResultsMap[r.heat_assignment_id] = r;
+          });
+        }
+      }
+
       heatAssignments = heats.map((h) => ({
         ...h,
-        heat_assignments: (h.heat_assignments || []).sort(
-          (a, b) => a.lane_number - b.lane_number
-        ),
+        heat_assignments: (h.heat_assignments || [])
+          .sort((a, b) => a.lane_number - b.lane_number)
+          .map((ha) => {
+            const direct = directResultsMap[ha.id];
+            return {
+              ...ha,
+              results: direct ? [direct] : ha.results,
+            };
+          }),
       })) as unknown as HeatWithAssignments[];
     }
   }

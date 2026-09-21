@@ -3,7 +3,14 @@
  * Jika skema DB berubah, perbarui file ini.
  */
 
-export type UserRole = 'super_admin' | 'event_admin' | 'operator' | 'viewer';
+export type UserRole =
+  | 'super_admin'
+  | 'event_admin'
+  | 'operator'
+  | 'admin'
+  | 'admin_kejuaraan'
+  | 'admin_keuangan'
+  | 'viewer';
 export type GenderType = 'male' | 'female';
 export type ResultStatus = 'finished' | 'dns' | 'dnf' | 'dq' | 'scr';
 
@@ -36,7 +43,32 @@ export interface Event {
   lane_count: number;
   pool_count: number;
   is_published: boolean;
+  use_unique_code?: boolean;
+  unique_code_mode?: 'random_3_digit' | 'sequential' | 'fixed' | 'custom_range';
+  unique_code_fixed?: number;
+  unique_code_min?: number;
+  unique_code_max?: number;
+  fee_per_event?: number;
+  bank_name?: string;
+  bank_account_no?: string;
+  bank_account_name?: string;
   created_at?: string;
+}
+
+export interface PaymentVerification {
+  id: string;
+  registration_id: string;
+  status: 'pending' | 'verified' | 'rejected';
+  amount_due: number;
+  base_amount?: number;
+  unique_code?: number;
+  invoice_no?: string | null;
+  proof_url?: string | null;
+  notes?: string;
+  reviewed_by?: string | null;
+  reviewed_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface EventAdmin {
@@ -181,4 +213,25 @@ export interface AuditLog {
   entity_id?: string | null;
   payload: Record<string, unknown>;
   created_at?: string;
+}
+
+export type ExpenseCategory =
+  | 'operasional'
+  | 'medali_piala'
+  | 'juri_wasit'
+  | 'sewa_kolam'
+  | 'konsumsi'
+  | 'cetak_banner'
+  | 'lainnya';
+
+export interface Expense {
+  id: string;
+  event_id?: string | null;
+  type: ExpenseCategory | string;
+  amount: number;
+  expense_date: string;
+  description: string;
+  created_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
 }

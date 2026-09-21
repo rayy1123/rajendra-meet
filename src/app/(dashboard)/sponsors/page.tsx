@@ -42,7 +42,7 @@ export default async function SponsorsPage() {
     <div className="mx-auto max-w-7xl space-y-6 p-6">
       <Breadcrumb
         items={[
-          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'Dasbor', href: '/dashboard' },
           { label: 'Sponsorship Kejuaraan' },
         ]}
         className="mb-2"

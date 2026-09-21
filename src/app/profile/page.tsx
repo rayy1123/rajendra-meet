@@ -15,12 +15,29 @@ export default async function ProfilePage() {
     .eq('id', user.id)
     .single();
 
+  const userRole =
+    (profile?.role as string) ||
+    (user as any)?.user_metadata?.role ||
+    (user as any)?.app_metadata?.role ||
+    'viewer';
+  const ADMIN_ROLES = [
+    'super_admin',
+    'event_admin',
+    'operator',
+    'admin',
+    'admin_kejuaraan',
+    'admin_keuangan',
+  ];
+  const isAdmin = ADMIN_ROLES.includes(userRole);
+  const dashboardHref = isAdmin ? '/dashboard' : '/dashboard-viewer';
+  const dashboardLabel = isAdmin ? 'Dasbor Panitia' : 'Dasbor';
+
   return (
-    <DashboardLayout>
+    <DashboardLayout role={userRole}>
       <div className="space-y-6">
         <Breadcrumb
           items={[
-            { label: 'Dashboard', href: '/dashboard-viewer' },
+            { label: dashboardLabel, href: dashboardHref },
             { label: 'Profil' },
           ]}
           className="mb-2"

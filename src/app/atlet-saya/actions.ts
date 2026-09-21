@@ -2,6 +2,7 @@
 
 import { requireUser } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
+import { getKuCode } from '@/lib/age-category';
 
 export interface AthleteFormState {
   ok: boolean;
@@ -47,6 +48,7 @@ export async function saveAthlete(formData: FormData): Promise<AthleteFormState>
     grade_level: gradeLevel,
     class_name: className,
     school_id: schoolId ? schoolId : null,
+    age_group: getKuCode(birthDate),
     parent_phone: parentPhone,
     medical_notes: medicalNotes,
     height_cm: heightCm,

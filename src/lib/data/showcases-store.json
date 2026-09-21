@@ -1,0 +1,74 @@
+{
+  "poster": [
+    {
+      "id": "poster-1",
+      "type": "poster",
+      "title": "HT HSS S4",
+      "subtitle": "Home Tournament Series IV - Harahap Swimming School",
+      "imageUrl": "/brand/poster-hthss-hd.png",
+      "linkUrl": "/daftar-lomba",
+      "orderNo": 1,
+      "isActive": true
+    }
+  ],
+  "stat": [
+    {
+      "id": "stat-1",
+      "type": "stat",
+      "title": "Peserta",
+      "value": "250+",
+      "orderNo": 1,
+      "isActive": true
+    },
+    {
+      "id": "stat-2",
+      "type": "stat",
+      "title": "Team",
+      "value": "150+",
+      "orderNo": 2,
+      "isActive": true
+    },
+    {
+      "id": "stat-3",
+      "type": "stat",
+      "title": "Event",
+      "value": "100+",
+      "orderNo": 3,
+      "isActive": true
+    }
+  ],
+  "gallery": [
+    {
+      "id": "gal-1",
+      "type": "gallery",
+      "title": "Kolam renang outdoor",
+      "imageUrl": "/slider/hero-1.jpg",
+      "orderNo": 1,
+      "isActive": true
+    },
+    {
+      "id": "gal-2",
+      "type": "gallery",
+      "title": "Latihan atlet renang",
+      "imageUrl": "/slider/hero-2.jpg",
+      "orderNo": 2,
+      "isActive": true
+    },
+    {
+      "id": "gal-3",
+      "type": "gallery",
+      "title": "Finish sentuh dinding & timer",
+      "imageUrl": "/slider/hero-3.jpg",
+      "orderNo": 3,
+      "isActive": true
+    },
+    {
+      "id": "gal-4",
+      "type": "gallery",
+      "title": "Anak-anak berenang ceria",
+      "imageUrl": "/slider/hero-4.jpg",
+      "orderNo": 4,
+      "isActive": true
+    }
+  ]
+}

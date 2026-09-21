@@ -68,6 +68,7 @@ export default async function BukuAcaraPage({
           id,
           heat_number,
           heat_assignments (
+            id,
             lane_number,
             registrations (
               seed_time_ms,
@@ -78,6 +79,11 @@ export default async function BukuAcaraPage({
                   name
                 )
               )
+            ),
+            results (
+              id,
+              time_ms,
+              status
             )
           )
         )
@@ -86,6 +92,35 @@ export default async function BukuAcaraPage({
       .order('order_no', { ascending: true });
 
     if (compEvents) {
+      // Kumpulkan seluruh heat_assignment_id untuk memastikan query results 100% akurat & terhubung langsung
+      const allAssignIds: string[] = [];
+      compEvents.forEach((ce) => {
+        const rawHeats = Array.isArray(ce.heats) ? ce.heats : [];
+        rawHeats.forEach((h: any) => {
+          const rawAssigns = Array.isArray(h.heat_assignments) ? h.heat_assignments : [];
+          rawAssigns.forEach((ha: any) => {
+            if (ha.id) allAssignIds.push(ha.id);
+          });
+        });
+      });
+
+      const directResultsMap: Record<string, { time_ms: number | null; status: string }> = {};
+      if (allAssignIds.length > 0) {
+        const { data: dbResults } = await supabase
+          .from('results')
+          .select('heat_assignment_id, time_ms, status')
+          .in('heat_assignment_id', allAssignIds);
+
+        if (dbResults) {
+          dbResults.forEach((r) => {
+            directResultsMap[r.heat_assignment_id] = {
+              time_ms: r.time_ms,
+              status: r.status,
+            };
+          });
+        }
+      }
+
       bukuEvents = compEvents.map((ce) => {
         const rawHeats = Array.isArray(ce.heats) ? ce.heats : [];
         const sortedHeats = [...rawHeats].sort((a, b) => a.heat_number - b.heat_number);
@@ -108,13 +143,21 @@ export default async function BukuAcaraPage({
                 const rawReg = Array.isArray(ha.registrations) ? ha.registrations[0] : ha.registrations;
                 const rawAth = Array.isArray(rawReg?.athletes) ? rawReg?.athletes[0] : rawReg?.athletes;
                 const rawSchool = Array.isArray(rawAth?.schools) ? rawAth?.schools[0] : rawAth?.schools;
+                const rawRes = Array.isArray((ha as any).results) ? (ha as any).results[0] : (ha as any).results;
+                const directRes = directResultsMap[ha.id];
+
+                const finalTimeMs = directRes !== undefined ? directRes.time_ms : (rawRes?.time_ms ?? null);
+                const resultStatus = directRes !== undefined ? directRes.status : (rawRes?.status ?? null);
 
                 return {
+                  id: ha.id,
                   laneNumber: ha.lane_number,
                   athleteName: rawAth?.full_name || '—',
                   athleteNumber: rawAth?.athlete_number || '—',
                   schoolName: rawSchool?.name || '—',
                   seedTimeMs: rawReg?.seed_time_ms ?? null,
+                  finalTimeMs,
+                  resultStatus,
                 };
               }),
             };
@@ -143,7 +186,7 @@ export default async function BukuAcaraPage({
       <div className="no-print">
         <Breadcrumb
           items={[
-            { label: 'Dashboard', href: '/dashboard' },
+            { label: 'Dasbor', href: '/dashboard' },
             { label: 'Buku Acara (Start List)' },
           ]}
           className="mb-2"

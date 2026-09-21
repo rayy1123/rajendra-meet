@@ -271,7 +271,7 @@ export function UserRegistrationFlow({
               <div className="rounded-xl bg-muted/40 p-3 space-y-1.5 text-xs text-muted-foreground">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-foreground">{activeAthlete.full_name}</span>
-                  <Badge variant="outline" className="text-[10px] font-bold border-amber-400 text-amber-700 dark:text-amber-300">
+                  <Badge variant="outline" className="text-[10px] font-bold border-amber-400 text-amber-700">
                     {activeAthlete.age_group || 'Umum'}
                   </Badge>
                 </div>

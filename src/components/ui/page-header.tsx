@@ -42,7 +42,7 @@ export function PageHeader({
         <div>
           <h1
             className={cn(
-              "text-[1.7rem] font-bold leading-tight tracking-[-0.025em] text-foreground",
+              "font-heading text-[1.75rem] font-black leading-tight tracking-[-0.025em] text-foreground sm:text-3xl",
               gradient && "text-gradient-hero"
             )}
           >

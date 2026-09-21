@@ -1,9 +1,9 @@
 import { createClient } from '@/lib/supabase/server';
 import { MedalLeaderboardView } from '@/components/modules/medal-leaderboard-view';
-import { Award, Waves } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { Award, Medal } from 'lucide-react';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
+import { EmptyState } from '@/components/ui/empty-state';
 
 interface MedalStat {
   id: string;
@@ -115,19 +115,19 @@ export default async function MedalsPage({
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
+      <Breadcrumb items={[{ label: 'Dasbor', href: '/dashboard' }, { label: 'Klasemen Medali' }]} className="mb-2" />
       <PageHeader
         title="Perolehan Medali & Klasemen"
         description="Peringkat akumulasi medali Emas, Perak, dan Perunggu per kontingen/sekolah secara otomatis."
         icon={<Award className="h-6 w-6" />}
       />
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Klasemen Medali' }]} className="mb-2" />
 
       {!events || events.length === 0 ? (
-        <Card className="p-12 text-center border-dashed">
-          <Waves className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
-          <h3 className="font-semibold text-lg">Belum Ada Event</h3>
-          <p className="text-sm text-muted-foreground mt-1">Silakan buat event terlebih dahulu.</p>
-        </Card>
+        <EmptyState
+          icon={<Medal className="h-6 w-6" />}
+          title="Belum Ada Data Medali"
+          description="Data perolehan medali akan tampil setelah hasil lomba diinputkan."
+        />
       ) : (
         <MedalLeaderboardView
           events={events}

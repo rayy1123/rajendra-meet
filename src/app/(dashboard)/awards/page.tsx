@@ -3,8 +3,8 @@ import { rankResults } from '@/services/ranking';
 import { buildStandings, type PointRule, type ScoredEntry } from '@/services/points';
 import { selectBestSwimmers, type SwimmerEntry } from '@/services/records';
 import type { ResultStatus } from '@/types/database';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { GlassCard } from '@/components/ui/glass-card';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { School, User, Building2 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/page-header';
@@ -122,7 +122,7 @@ export default async function AwardsPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Penghargaan' }]} className="mb-2" />
+      <Breadcrumb items={[{ label: 'Dasbor', href: '/dashboard' }, { label: 'Penghargaan' }]} className="mb-2" />
       <PageHeader
         title="Awards & Klasemen"
         description={`Klasemen dihitung otomatis dari hasil lomba. Poin: ${rules.map((r) => `${r.rank}=${r.points}`).join(', ')}.`}
@@ -137,11 +137,11 @@ export default async function AwardsPage() {
         />
       ) : (
         <Tabs defaultValue="overall" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="overall"><Building2 className="h-4 w-4" /> Overall</TabsTrigger>
-            <TabsTrigger value="grade"><School className="h-4 w-4" /> Per Tingkat</TabsTrigger>
-            <TabsTrigger value="class"><User className="h-4 w-4" /> Per Kelas</TabsTrigger>
-            <TabsTrigger value="swimmer"><User className="h-4 w-4" /> Best Swimmer</TabsTrigger>
+          <TabsList className="bg-[var(--m-aqua-soft)] text-[var(--m-aqua-ink)] p-1 rounded-xl">
+            <TabsTrigger value="overall" className="rounded-lg data-[state=active]:bg-[var(--m-aqua)] data-[state=active]:text-white"><Building2 className="h-4 w-4 mr-2" /> Overall</TabsTrigger>
+            <TabsTrigger value="grade" className="rounded-lg data-[state=active]:bg-[var(--m-aqua)] data-[state=active]:text-white"><School className="h-4 w-4 mr-2" /> Per Tingkat</TabsTrigger>
+            <TabsTrigger value="class" className="rounded-lg data-[state=active]:bg-[var(--m-aqua)] data-[state=active]:text-white"><User className="h-4 w-4 mr-2" /> Per Kelas</TabsTrigger>
+            <TabsTrigger value="swimmer" className="rounded-lg data-[state=active]:bg-[var(--m-aqua)] data-[state=active]:text-white"><User className="h-4 w-4 mr-2" /> Best Swimmer</TabsTrigger>
           </TabsList>
 
           <div className="space-y-4">
@@ -156,11 +156,9 @@ export default async function AwardsPage() {
             </div>
             <div data-value="swimmer">
               {bestSwimmers.map((g) => (
-                <Card key={g.group_key}>
-                  <CardHeader>
-                    <CardTitle className="text-base">{g.group_key}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
+                <GlassCard key={g.group_key} className="p-5 mb-4">
+                  <h3 className="text-base font-semibold mb-3">{g.group_key}</h3>
+                  <div>
                     {g.tied ? (
                       <p className="text-sm text-amber-600">
                         Seri di puncak ({g.contenders.map((c) => c.athlete_name).join(', ')}). Panitia menentukan pemenang.
@@ -170,16 +168,16 @@ export default async function AwardsPage() {
                         <span className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-700">★</span>
                         <div>
                           <p className="font-semibold">{g.winner.athlete_name}</p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-sm text-[var(--m-muted)]">
                             {schoolName(g.winner.school_id)} · {g.winner.points} poin · {g.winner.gold}Emas {g.winner.silver}Perak {g.winner.bronze}Perunggu
                           </p>
                         </div>
                       </div>
                     ) : (
-                      <p className="text-sm text-muted-foreground">Belum ada pemenang.</p>
+                      <p className="text-sm text-[var(--m-muted)]">Belum ada pemenang.</p>
                     )}
-                  </CardContent>
-                </Card>
+                  </div>
+                </GlassCard>
               ))}
             </div>
           </div>
@@ -199,13 +197,11 @@ function StandingTable({
   title: string;
 }) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <GlassCard className="p-5">
+      <h3 className="text-base font-semibold mb-4">{title}</h3>
+      <div className="overflow-x-auto">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-[var(--m-soft)]">
             <TableRow>
               <TableHead>#</TableHead>
               <TableHead>Sekolah</TableHead>
@@ -217,9 +213,9 @@ function StandingTable({
           </TableHeader>
           <TableBody>
             {rows.map((r, i) => (
-              <TableRow key={r.key}>
+              <TableRow key={r.key} className="hover:bg-[var(--m-soft)]">
                 <TableCell className="font-bold">{i + 1}</TableCell>
-                <TableCell className="font-medium">{schoolName(r.school_id)}</TableCell>
+                <TableCell className="font-medium text-[var(--m-ink)]">{schoolName(r.school_id)}</TableCell>
                 <TableCell className="font-bold text-primary">{r.points}</TableCell>
                 <TableCell>{r.gold}</TableCell>
                 <TableCell>{r.silver}</TableCell>
@@ -228,8 +224,8 @@ function StandingTable({
             ))}
           </TableBody>
         </Table>
-      </CardContent>
-    </Card>
+      </div>
+    </GlassCard>
   );
 }
 

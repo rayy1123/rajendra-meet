@@ -5,9 +5,9 @@
 @theme inline {
   --color-background: var(--m-bg);
   --color-foreground: var(--m-ink);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-geist-sans);
+  --font-sans: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, monospace;
+  --font-heading: var(--font-heading), var(--font-sans), sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -101,6 +101,9 @@
   --m-aqua-2: oklch(0.66 0.13 205);
   --m-navy: oklch(0.27 0.06 235);
   --m-soft: oklch(0.95 0.009 90);
+  --m-aqua-deep: oklch(0.38 0.1 220);
+  --m-blue: oklch(0.55 0.12 240);
+  --m-blue-deep: oklch(0.35 0.1 250);
 }
 
 @layer base {
@@ -113,6 +116,7 @@
   }
   html {
     @apply font-sans;
+    scroll-behavior: smooth;
   }
   :focus-visible {
     @apply outline-none ring-2 ring-ring/60 ring-offset-1 ring-offset-background;
@@ -130,13 +134,13 @@
     @apply mx-auto w-full max-w-5xl px-4 sm:px-6;
   }
   .pub-card {
-    @apply rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] shadow-[var(--shadow-card)];
+    @apply rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] shadow-[var(--shadow-card)] transition-all duration-200 hover:border-[var(--m-aqua)]/40 hover:shadow-[var(--shadow-pop)];
   }
   .pub-chip {
     @apply relative inline-flex items-center gap-1.5 overflow-hidden rounded-full border border-[var(--m-border)] bg-[var(--m-surface)] px-3 py-1 text-xs font-medium text-[var(--m-muted)];
   }
   .pub-eyebrow {
-    @apply text-xs font-semibold uppercase tracking-[0.18em] text-[var(--m-aqua-ink)];
+    @apply font-heading text-xs font-bold uppercase tracking-[0.2em] text-[var(--m-aqua-ink)];
   }
   .pub-link {
     @apply text-sm font-medium text-[var(--m-muted)] transition-colors hover:text-[var(--m-ink)];
@@ -154,7 +158,7 @@
     @apply h-9 rounded-lg border border-[var(--m-border)] bg-[var(--m-surface)] px-3 text-sm shadow-sm transition-[border-color,box-shadow] placeholder:text-[var(--m-muted)] hover:border-[var(--m-aqua)]/50 focus:border-[var(--m-aqua)] focus:outline-none focus:ring-3 focus:ring-[var(--m-aqua)]/20;
   }
   .pub-time {
-    @apply font-mono font-semibold tabular-nums tracking-tight;
+    @apply font-mono font-bold tabular-nums tracking-tight;
   }
   .rank-1 { @apply flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-200 to-amber-400 font-bold text-amber-900 shadow-sm; }
   .rank-2 { @apply flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-slate-200 to-slate-400 font-bold text-slate-700 shadow-sm; }
@@ -203,13 +207,13 @@
 }
 
 .h-display {
-  @apply text-3xl font-bold tracking-tight text-[var(--m-ink)] sm:text-[2.75rem] sm:leading-[1.1];
+  @apply font-heading text-3xl font-black tracking-tight text-[var(--m-ink)] sm:text-[2.75rem] sm:leading-[1.1];
 }
 .h-section {
-  @apply text-xl font-semibold tracking-tight text-[var(--m-ink)];
+  @apply font-heading text-xl font-bold tracking-tight text-[var(--m-ink)];
 }
 .h-title {
-  @apply text-2xl font-bold tracking-tight text-[var(--m-ink)] sm:text-3xl;
+  @apply font-heading text-2xl font-black tracking-tight text-[var(--m-ink)] sm:text-3xl;
 }
 .text-balance { text-wrap: balance; }
 
@@ -265,16 +269,80 @@
 }
 
 @media print {
-  .no-print {
+  /* 1. Paksa browser mencetak warna & latar belakang asli secara akurat (Exact Color Adjust) */
+  *,
+  *::before,
+  *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* 2. Format kertas A4 standar */
+  @page {
+    size: A4 portrait;
+    margin: 10mm 12mm;
+  }
+
+  /* 3. Elemen non-dokumen yang selalu disembunyikan saat cetak */
+  .no-print,
+  .print\:hidden,
+  button,
+  nav,
+  aside,
+  header,
+  footer,
+  [data-slot="dialog-overlay"],
+  .modal-toolbar,
+  .sidebar {
     display: none !important;
   }
-  .printable-area,
-  .printable-area * {
-    color: #000 !important;
-    background: transparent !important;
-    box-shadow: none !important;
+
+  /* 4. Ketika modal dialog invoice dibuka dan dicetak (Cetak Invoice Klub / Individu) */
+  body:has([data-slot="dialog-content"]) > *:not([data-slot="dialog-portal"]) {
+    display: none !important;
   }
-  .print-break-inside-avoid {
+
+  [data-slot="dialog-portal"] {
+    position: static !important;
+    display: block !important;
+  }
+
+  [data-slot="dialog-content"] {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  /* 5. Lembar invoice resmi: 100% lebar, tanpa border modal atau scrollbar */
+  .invoice-paper {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 0 !important;
+    background: white !important;
+    page-break-inside: avoid;
     break-inside: avoid;
   }
+
+  .print-break-inside-avoid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
 }
+

@@ -74,14 +74,14 @@ const SECTIONS = [
 export default function PanduanAdminPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Panduan' }]} className="mb-2" />
+      <Breadcrumb items={[{ label: 'Dasbor', href: '/dashboard' }, { label: 'Panduan' }]} className="mb-2" />
       <PageHeader
         title="Panduan Operasional Panitia"
         description="Panduan teknis untuk pengelola kejuaraan: atlet, heat, input hasil, verifikasi pembayaran, hingga audit. Halaman ini hanya untuk akun yang masuk."
       />
       <div className="space-y-4">
         {SECTIONS.map((s) => (
-          <section key={s.title} className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <section key={s.title} className="glass-card p-6">
             <div className="flex items-start gap-3">
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--m-aqua-soft)] text-[var(--m-aqua-ink)]">
                 <s.icon className="h-5 w-5" />

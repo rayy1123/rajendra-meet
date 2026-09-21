@@ -1,12 +1,13 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { MapPin, CalendarDays, ExternalLink, Trophy, Waves } from 'lucide-react';
+import { MapPin, CalendarDays, ExternalLink, Trophy, Waves, Camera } from 'lucide-react';
 import Link from 'next/link';
 import { ProfileMenu } from '@/components/layout/logout-button';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { EmptyState } from '@/components/ui/empty-state';
+import { EventLogoDialog } from '@/components/modules/event-logo-dialog';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,7 +41,7 @@ export default async function EventsPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Kejuaraan / Events' }]} className="mb-2" />
+      <Breadcrumb items={[{ label: 'Dasbor', href: '/dashboard' }, { label: 'Kejuaraan / Events' }]} className="mb-2" />
       <PageHeader
         title="Kejuaraan / Events"
         description="Kelola kejuaraan renang, pengaturan kolam, dan jadwal perlombaan."
@@ -80,14 +81,44 @@ export default async function EventsPage() {
             >
               <div className="p-5 space-y-4">
                 <div className="flex items-start justify-between gap-3">
-                  <h3 className="font-bold leading-snug text-[var(--m-ink)]">{event.name}</h3>
+                  <div className="flex items-start gap-3">
+                    <EventLogoDialog
+                      eventId={event.id}
+                      eventName={event.name}
+                      currentLogoUrl={event.logo_url}
+                      trigger={
+                        <button
+                          type="button"
+                          className="group relative h-12 w-12 shrink-0 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center overflow-hidden shadow-sm hover:ring-2 hover:ring-primary/40 transition-all cursor-pointer"
+                          title="Klik untuk mengubah logo kejuaraan"
+                        >
+                          {event.logo_url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={event.logo_url}
+                              alt={event.name}
+                              className="h-full w-full object-contain p-1"
+                            />
+                          ) : (
+                            <Trophy className="h-6 w-6 text-blue-600" />
+                          )}
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                            <Camera className="h-3.5 w-3.5" />
+                          </div>
+                        </button>
+                      }
+                    />
+                    <div>
+                      <h3 className="font-bold leading-snug text-[var(--m-ink)]">{event.name}</h3>
+                      <p className="text-xs font-medium text-[var(--m-muted)] mt-0.5">
+                        {event.organizer || 'Panitia Pelaksana'}
+                      </p>
+                    </div>
+                  </div>
                   <span className="shrink-0 rounded-lg bg-[var(--m-aqua-soft)] px-2.5 py-1 text-[11px] font-semibold text-[var(--m-aqua-ink)]">
                     {event.lane_count || 8} Lintasan
                   </span>
                 </div>
-                <p className="text-xs font-medium text-[var(--m-muted)]">
-                  {event.organizer || 'Panitia Pelaksana'}
-                </p>
 
                 <div className="space-y-2 border-y border-[var(--m-border)] py-4 text-xs text-[var(--m-muted)]">
                   {event.location && (
@@ -110,19 +141,32 @@ export default async function EventsPage() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 px-6 pb-6">
+              <div className="grid grid-cols-3 gap-2 px-5 pb-5">
                 <Link
                   href={`/events/${event.id}`}
-                  className="w-full rounded-xl bg-[var(--m-aqua)] px-3 py-2 text-center text-xs font-semibold text-white transition-colors hover:bg-[var(--m-aqua-ink)]"
+                  className="w-full rounded-xl bg-[var(--m-aqua)] px-2 py-2 text-center text-xs font-semibold text-white transition-colors hover:bg-[var(--m-aqua-ink)]"
                 >
-                  Kelola Event
+                  Kelola
                 </Link>
                 <Link
-                  href={`/heats?eventId=${event.id}`}
-                  className="w-full rounded-xl border border-[var(--m-border)] bg-white px-3 py-2 text-center text-xs font-semibold text-[var(--m-ink)] transition-colors hover:border-[var(--m-aqua)]"
+                  href={`/events/${event.id}#atur-acara`}
+                  className="w-full rounded-xl border border-[var(--m-border)] bg-white px-2 py-2 text-center text-xs font-semibold text-[var(--m-ink)] transition-colors hover:border-[var(--m-aqua)]"
                 >
-                  Atur Acara
+                  Acara
                 </Link>
+                <EventLogoDialog
+                  eventId={event.id}
+                  eventName={event.name}
+                  currentLogoUrl={event.logo_url}
+                  trigger={
+                    <button
+                      type="button"
+                      className="w-full rounded-xl border border-[var(--m-border)] bg-white px-2 py-2 text-center text-xs font-semibold text-[var(--m-ink)] transition-colors hover:border-primary hover:text-primary flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <Camera className="h-3.5 w-3.5 text-primary" /> Logo
+                    </button>
+                  }
+                />
               </div>
             </div>
           ))}

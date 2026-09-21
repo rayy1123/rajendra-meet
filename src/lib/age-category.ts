@@ -9,18 +9,33 @@ export function ageInYears(birthDate: Date, referenceYear: number = new Date().g
 }
 
 export function calculateAgeCategory(
-  birthDate: Date,
+  birthDate: Date | string,
   referenceYear: number = new Date().getFullYear(),
 ): string {
-  const effectiveAge = ageInYears(birthDate, referenceYear);
+  const bDate = typeof birthDate === 'string' ? new Date(birthDate) : birthDate;
+  const effectiveAge = ageInYears(bDate, referenceYear);
 
-  if (effectiveAge <= 0) return "TB (Under 6)";
-  if (effectiveAge <= 8) return "KU 1 (6-8)";
-  if (effectiveAge <= 10) return "KU 2 (9-10)";
-  if (effectiveAge <= 12) return "KU 3 (11-12)";
-  if (effectiveAge <= 14) return "KU 4 (13-14)";
-  if (effectiveAge <= 16) return "KU 5 (15-16)";
-  return "Open (17+)";
+  if (effectiveAge >= 19) return "KU Senior (19+ Th / Mahasiswa & Umum)";
+  if (effectiveAge >= 16) return "KU I (16-18 Th / SMA 10-12)";
+  if (effectiveAge >= 14) return "KU II (14-15 Th / SMP 8-9)";
+  if (effectiveAge >= 12) return "KU III (12-13 Th / SD 6 - SMP 7)";
+  if (effectiveAge >= 10) return "KU IV (10-11 Th / SD 4-5)";
+  return "KU V (< 10 Th / SD 1-3 / PAUD)";
+}
+
+export function getKuCode(
+  birthDate: Date | string,
+  referenceYear: number = new Date().getFullYear(),
+): string {
+  const bDate = typeof birthDate === 'string' ? new Date(birthDate) : birthDate;
+  const effectiveAge = ageInYears(bDate, referenceYear);
+
+  if (effectiveAge >= 19) return "KU Senior";
+  if (effectiveAge >= 16) return "KU I";
+  if (effectiveAge >= 14) return "KU II";
+  if (effectiveAge >= 12) return "KU III";
+  if (effectiveAge >= 10) return "KU IV";
+  return "KU V";
 }
 
 export const STROKES = ["Freestyle", "Breaststroke", "Backstroke", "Butterfly", "Individual Medley"] as const;

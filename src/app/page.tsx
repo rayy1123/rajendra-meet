@@ -1,9 +1,15 @@
 import { LandingShell } from '@/components/layout/landing-shell';
 import { Testimonials, type Testimonial } from '@/components/modules/testimonials';
-import { PhotoSlider, ABOUT_PHOTOS } from '@/components/modules/photo-slider';
-import { Waves, Phone, Mail, Share2, ArrowRight, Trophy, MapPin, CalendarDays, Sparkles } from 'lucide-react';
+import { PhotoSlider } from '@/components/modules/photo-slider';
+import { Waves, Phone, Mail, Share2, ArrowRight, Trophy, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import { getServerShowcases } from '@/lib/data/landing-showcases-server';
+import {
+  UpcomingEventsShowcase,
+  type UpcomingEventItem,
+} from '@/components/modules/upcoming-events-showcase';
+import { AboutSection } from '@/components/modules/about-section';
 
 export const metadata = {
   title: 'Rajendra Meet — Sistem Manajemen Kejuaraan Renang',
@@ -11,36 +17,7 @@ export const metadata = {
     'Rajendra Meet membantu panitia menyelenggarakan kejuaraan renang dengan mudah: pendaftaran peserta, penyusunan heat, input hasil, dan live scoreboard real-time.',
 };
 
-interface UpcomingEvent {
-  id: string;
-  name: string;
-  location: string | null;
-  organizer: string | null;
-  start_date: string;
-  end_date: string;
-  logo_url: string | null;
-}
-
 export const dynamic = 'force-dynamic';
-
-const BULAN = [
-  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
-];
-
-function formatTanggal(iso: string): { hari: string; bulan: string; tahun: string } {
-  const d = new Date(iso + 'T00:00:00');
-  return {
-    hari: String(d.getDate()).padStart(2, '0'),
-    bulan: BULAN[d.getMonth()],
-    tahun: String(d.getFullYear()),
-  };
-}
-
-function formatRentang(iso: string): string {
-  const d = new Date(iso + 'T00:00:00');
-  return `${d.getDate()} ${BULAN[d.getMonth()]} ${d.getFullYear()}`;
-}
 
 const TESTIMONIALS: Testimonial[] = [
   {
@@ -68,17 +45,39 @@ const TESTIMONIALS: Testimonial[] = [
 export default async function HomePage() {
   const supabase = await createClient();
 
-  const { data: events } = await supabase
+  // Ambil data showcase yang telah diatur di Kelola Beranda SCMS (Poster, Stat, Galeri, Tentang, Pilar)
+  const posters = getServerShowcases('poster');
+  const stats = getServerShowcases('stat');
+  const gallery = getServerShowcases('gallery');
+  const aboutItems = getServerShowcases('about');
+  const aboutItem = aboutItems.length > 0 ? aboutItems[0] : undefined;
+  const pillars = getServerShowcases('pillar');
+
+  // Ambil data kejuaraan resmi dari database (prioritaskan mendatang, jika belum ada tampilkan event aktif)
+  let upcomingEvents: UpcomingEventItem[] = [];
+  const { data: futureEvents } = await supabase
     .from('events')
-    .select(
-      'id, name, location, organizer, start_date, end_date, logo_url',
-    )
+    .select('id, name, location, organizer, start_date, end_date, logo_url')
     .eq('is_published', true)
     .gte('start_date', new Date().toISOString().slice(0, 10))
     .order('start_date', { ascending: true })
     .limit(6);
 
-  const upcoming = (events ?? []) as UpcomingEvent[];
+  if (futureEvents && futureEvents.length > 0) {
+    upcomingEvents = futureEvents as UpcomingEventItem[];
+  } else {
+    const { data: allEvents } = await supabase
+      .from('events')
+      .select('id, name, location, organizer, start_date, end_date, logo_url')
+      .eq('is_published', true)
+      .order('start_date', { ascending: false })
+      .limit(6);
+    upcomingEvents = (allEvents ?? []) as UpcomingEventItem[];
+  }
+
+  const heroPhotos = gallery
+    .filter((g) => g.isActive && g.imageUrl)
+    .map((g) => ({ src: g.imageUrl as string, alt: g.title }));
 
   return (
     <LandingShell>
@@ -95,7 +94,7 @@ export default async function HomePage() {
             <span className="pub-chip mx-auto mb-5 w-fit lg:mx-0">
               <Waves className="h-3.5 w-3.5 text-[var(--m-aqua)]" /> Sistem Kejuaraan Renang · Sejak 2013
             </span>
-            <h1 className="mx-auto max-w-xl text-4xl font-black leading-[1.1] tracking-tight text-[var(--m-ink)] sm:text-5xl lg:text-6xl">
+            <h1 className="font-heading mx-auto max-w-xl text-4xl font-black leading-[1.08] tracking-tight text-[var(--m-ink)] sm:text-5xl lg:text-6xl">
               Selenggarakan lomba renang jadi{' '}
               <span className="bg-gradient-to-r from-[var(--m-aqua)] to-[var(--m-aqua-2)] bg-clip-text text-transparent">
                 lebih mudah & terukur.
@@ -116,23 +115,32 @@ export default async function HomePage() {
             </div>
 
             <dl className="mx-auto mt-10 grid max-w-md grid-cols-3 gap-3 lg:mx-0">
-              {[
-                { v: 'Real-time', l: 'Live scoreboard' },
-                { v: 'Otomatis', l: 'Penyusunan heat' },
-                { v: 'Mudah', l: 'Daftar online' },
-              ].map((s) => (
-                <div key={s.l} className="pub-card rounded-2xl p-4 text-center transition-transform hover:-translate-y-1">
-                  <dt className="text-lg font-bold text-[var(--m-aqua-ink)] sm:text-xl">{s.v}</dt>
-                  <dd className="mt-0.5 text-xs text-[var(--m-muted)] sm:text-sm">{s.l}</dd>
-                </div>
-              ))}
+              {stats
+                .filter((s) => s.isActive)
+                .slice(0, 3)
+                .map((s) => (
+                  <div
+                    key={s.id}
+                    className="pub-card rounded-2xl p-4 text-center transition-transform hover:-translate-y-1"
+                  >
+                    <dt className="text-lg font-bold text-[var(--m-aqua-ink)] sm:text-xl">
+                      {s.value || '100+'}
+                    </dt>
+                    <dd className="mt-0.5 text-xs text-[var(--m-muted)] sm:text-sm">
+                      {s.title}
+                    </dd>
+                  </div>
+                ))}
             </dl>
           </div>
 
           {/* Slider foto yang bergeser */}
           <div className="relative">
             <div className="absolute -inset-4 -z-10 rounded-[2rem] bg-gradient-to-tr from-[var(--m-aqua-soft)] to-[var(--m-aqua-2)]/30 blur-2xl" />
-            <PhotoSlider className="aspect-[4/5] sm:aspect-[4/3] lg:aspect-[4/5]" />
+            <PhotoSlider
+              photos={heroPhotos.length > 0 ? heroPhotos : undefined}
+              className="aspect-[4/5] sm:aspect-[4/3] lg:aspect-[4/5]"
+            />
             <div className="absolute -bottom-5 -left-5 hidden items-center gap-2 rounded-2xl bg-white px-4 py-2.5 soft-shadow sm:inline-flex">
               <Sparkles className="h-4 w-4 text-[var(--m-aqua)]" />
               <span className="text-sm font-semibold text-[var(--m-ink)]">Seru & terukur</span>
@@ -141,7 +149,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ===== LOMBA YANG AKAN DATANG ===== */}
+      {/* ===== LOMBA YANG AKAN DATANG (TERHUBUNG KE KELOLA BERANDA SCMS) ===== */}
       <section className="pub-container py-12 sm:py-16">
         <div className="mb-8 text-center">
           <span className="pub-eyebrow">Event</span>
@@ -150,102 +158,19 @@ export default async function HomePage() {
           </h2>
         </div>
 
-        {upcoming.length === 0 ? (
-          <div className="pub-card p-12 text-center">
-            <Trophy className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
-            <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Belum ada lomba mendatang</h3>
-            <p className="mt-1 text-sm text-[var(--m-muted)]">
-              Pantau terus — kejuaraan berikutnya akan segera dibuka pendaftarannya.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-5">
-            {upcoming.map((ev) => {
-              const tgl = formatTanggal(ev.start_date);
-              return (
-                <div key={ev.id} className="pub-card overflow-hidden">
-                  <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center">
-                    {/* Tanggal */}
-                    <div className="flex w-full shrink-0 items-center gap-3 sm:w-32 sm:flex-col sm:items-center sm:gap-0">
-                      <div className="flex h-20 w-20 shrink-0 flex-col items-center justify-center rounded-2xl bg-[var(--m-aqua)] text-white sm:h-24 sm:w-24">
-                        <span className="text-2xl font-black leading-none sm:text-3xl">{tgl.hari}</span>
-                        <span className="text-xs font-semibold uppercase tracking-wide">{tgl.bulan.slice(0, 3)}</span>
-                        <span className="text-[10px] font-medium opacity-90">{tgl.tahun}</span>
-                      </div>
-                    </div>
-
-                    {/* Detail */}
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold leading-snug text-[var(--m-ink)]">{ev.name}</h3>
-                      {ev.organizer && (
-                        <p className="mt-0.5 text-xs font-medium text-[var(--m-aqua-ink)]">{ev.organizer}</p>
-                      )}
-                      {ev.location && (
-                        <p className="mt-1.5 flex items-center gap-2 text-sm text-[var(--m-muted)]">
-                          <MapPin className="h-4 w-4 text-[var(--m-aqua)]" /> {ev.location}
-                        </p>
-                      )}
-                      <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm text-[var(--m-muted)]">
-                        <span className="flex items-center gap-2">
-                          <CalendarDays className="h-4 w-4 text-[var(--m-aqua)]" />
-                          {formatRentang(ev.start_date)}
-                          {ev.end_date !== ev.start_date && ` s/d ${formatRentang(ev.end_date)}`}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* CTA */}
-                    <div className="shrink-0 sm:w-44">
-                      <Link
-                        href={`/scoreboard`}
-                        className="pub-btn-primary w-full"
-                      >
-                        Detail & Hasil
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <UpcomingEventsShowcase
+          initialPosters={posters}
+          events={upcomingEvents}
+        />
       </section>
 
-      {/* ===== TENTANG ===== */}
-      <section className="pub-container py-12 sm:py-16">
-        <div className="pub-card overflow-hidden rounded-3xl-x">
-          <div className="grid grid-cols-1 lg:grid-cols-2">
-            <div className="flex flex-col justify-center gap-4 p-8 sm:p-10">
-              <span className="pub-eyebrow">Tentang Rajendra Meet</span>
-              <h2 className="text-2xl font-bold text-[var(--m-ink)] sm:text-3xl">
-                Satu sistem untuk seluruh rangkaian kejuaraan renang
-              </h2>
-              <p className="text-sm leading-relaxed text-[var(--m-muted)] sm:text-base">
-                <b>Rajendra Meet</b> adalah sistem manajemen kejuaraan renang yang
-                dirancang ramah panitia dan peserta. Dari pendaftaran online,
-                penyusunan heat otomatis, input hasil oleh juri, hingga live
-                scoreboard yang bisa dipantau orang tua secara langsung — semua
-                terintegrasi agar lomba berjalan lancar, transparan, dan menyenangkan.
-              </p>
-              <ul className="mt-2 grid grid-cols-1 gap-2 text-sm text-[var(--m-ink)] sm:grid-cols-2">
-                {[
-                  'Pendaftaran peserta online',
-                  'Penyusunan heat & lane',
-                  'Input hasil real-time',
-                  'Live scoreboard & ranking',
-                  'Rekap medali & rekor',
-                  'Ekspor hasil ke Excel/PDF',
-                ].map((f) => (
-                  <li key={f} className="flex items-center gap-2">
-                    <Trophy className="h-4 w-4 shrink-0 text-[var(--m-aqua)]" /> {f}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="min-h-56 sm:min-h-full">
-              <PhotoSlider photos={ABOUT_PHOTOS} className="h-full min-h-72" />
-            </div>
-          </div>
+      {/* ===== TENTANG KAMI & MENGAPA MEMILIH RAJENDRA SWIMMING ORGANIZER ===== */}
+      <section id="tentang" className="pub-container scroll-mt-20 py-12 sm:py-16">
+        <div id="layanan" className="scroll-mt-24">
+          <AboutSection
+            about={aboutItem}
+            pillars={pillars && pillars.length > 0 ? pillars : undefined}
+          />
         </div>
       </section>
 
@@ -261,7 +186,7 @@ export default async function HomePage() {
       </section>
 
       {/* ===== CTA KONTAK ===== */}
-      <section className="pub-container py-12 sm:py-16">
+      <section id="kontak" className="pub-container scroll-mt-20 py-12 sm:py-16">
         <div className="pub-card flex flex-col items-center gap-4 bg-[var(--m-aqua-soft)] p-8 text-center sm:flex-row sm:text-left">
           <Trophy className="h-10 w-10 shrink-0 text-[var(--m-aqua-ink)]" />
           <div className="flex-1">

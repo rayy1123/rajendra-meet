@@ -77,3 +77,79 @@ export function formatTimeToMs(timeStr: string): number | null {
     return null;
   }
 }
+
+/**
+ * 4. Format Label Nomor Acara Perlombaan (e.g. "50m Gaya Bebas Putra KU 2012-2013")
+ */
+export interface CompEventLabelInput {
+  name?: string | null;
+  order_no?: number | null;
+  gender?: string | null;
+  stroke?: string | null;
+  distance_meters?: number | null;
+  age_group?: string | null;
+}
+
+export function formatCompEventLabel(
+  ce: CompEventLabelInput,
+  includeOrderPrefix: boolean = true
+): string {
+  if (ce.name && ce.name.trim().length > 0) {
+    return includeOrderPrefix && ce.order_no ? `#${ce.order_no} ${ce.name}` : ce.name;
+  }
+
+  const parts: string[] = [];
+  if (ce.distance_meters) parts.push(`${ce.distance_meters}m`);
+  if (ce.stroke) parts.push(ce.stroke);
+  if (ce.gender) {
+    const g = ce.gender.toLowerCase();
+    parts.push(g === 'male' || g === 'putra' ? 'Putra' : g === 'female' || g === 'putri' ? 'Putri' : ce.gender);
+  }
+  if (ce.age_group) parts.push(ce.age_group);
+
+  const title = parts.join(' ') || 'Nomor Lomba';
+  return includeOrderPrefix && ce.order_no ? `#${ce.order_no} ${title}` : title;
+}
+
+/**
+ * 5. Format Angka ke Rupiah Indonesia (e.g. 150000 -> "Rp 150.000")
+ */
+export function formatRupiah(amount: number | null | undefined): string {
+  if (amount === null || amount === undefined || isNaN(amount)) {
+    return 'Rp 0';
+  }
+  return 'Rp ' + Math.round(amount).toLocaleString('id-ID');
+}
+
+/**
+ * 6. Generator Nomor Atlet Otomatis (e.g. "ATL-2026-001")
+ */
+export function generateAthleteNumber(existingAthletes: { athlete_number?: string | null }[] = []): string {
+  const currentYear = new Date().getFullYear();
+  const existingNumbers = new Set(
+    existingAthletes
+      .map((a) => (a.athlete_number || '').trim().toUpperCase())
+      .filter(Boolean)
+  );
+
+  let maxSeq = 0;
+  for (const num of existingNumbers) {
+    const match = num.match(/(\d+)$/);
+    if (match) {
+      const val = parseInt(match[1], 10);
+      if (val > maxSeq && val < 999999) {
+        maxSeq = val;
+      }
+    }
+  }
+
+  let nextSeq = Math.max(existingAthletes.length + 1, maxSeq + 1);
+  let candidate = `ATL-${currentYear}-${String(nextSeq).padStart(3, '0')}`;
+
+  while (existingNumbers.has(candidate)) {
+    nextSeq++;
+    candidate = `ATL-${currentYear}-${String(nextSeq).padStart(3, '0')}`;
+  }
+
+  return candidate;
+}

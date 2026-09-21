@@ -10,7 +10,7 @@ export default async function KelolaBerandaPage() {
     <div className="mx-auto max-w-7xl space-y-6 p-6">
       <Breadcrumb
         items={[
-          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'Dasbor', href: '/dashboard' },
           { label: 'Kelola Beranda' },
         ]}
         className="mb-2"

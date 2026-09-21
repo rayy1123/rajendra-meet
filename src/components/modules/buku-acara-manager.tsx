@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,7 +21,16 @@ import {
   Sliders,
   RotateCcw,
   Check,
+  Search,
+  X,
+  RefreshCw,
+  Trophy,
+  CheckCircle2,
+  Medal,
+  ArrowDownWideNarrow,
+  Layers,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { type SponsorItem, getCachedSponsors } from '@/lib/data/sponsors';
 import { SponsorLogosStrip } from './sponsor-logos-strip';
 import { formatMsToTime, cn } from '@/lib/utils';
@@ -37,11 +47,14 @@ export interface BukuEventItem {
     id: string;
     heatNumber: number;
     assignments: Array<{
+      id?: string;
       laneNumber: number;
       athleteName: string;
       athleteNumber: string;
       schoolName: string;
       seedTimeMs: number | null;
+      finalTimeMs?: number | null;
+      resultStatus?: string | null;
     }>;
   }>;
 }
@@ -69,6 +82,33 @@ export function BukuAcaraManager({
 }) {
   const [sponsorsList] = useState<SponsorItem[]>(() => getCachedSponsors(sponsors));
 
+  const router = useRouter();
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
+
+  // Hitung total hasil lomba yang sudah terekam di buku acara ini
+  const totalResultsCount = useMemo(() => {
+    return bukuEvents.reduce(
+      (acc, e) =>
+        acc +
+        e.heats.reduce(
+          (hAcc, h) =>
+            hAcc +
+            h.assignments.filter((a) => a.finalTimeMs && a.finalTimeMs > 0).length,
+          0
+        ),
+      0
+    );
+  }, [bukuEvents]);
+
+  const handleSyncResults = () => {
+    setIsSyncing(true);
+    router.refresh();
+    setTimeout(() => {
+      setIsSyncing(false);
+      toast.success('Buku Acara berhasil disinkronkan dengan data hasil lomba terkini!');
+    }, 600);
+  };
+
   // State Pengaturan Halaman & Cetak Acara / Seri
   const [eventFilterMode, setEventFilterMode] = useState<'all' | 'count' | 'range'>('all');
   const [eventLimitCount, setEventLimitCount] = useState<number>(bukuEvents.length || 10);
@@ -77,7 +117,10 @@ export function BukuAcaraManager({
   const [maxHeatsPerEvent, setMaxHeatsPerEvent] = useState<number>(0); // 0 = semua seri
   const [showCoverPage, setShowCoverPage] = useState<boolean>(true);
   const [pageBreakPerEvent, setPageBreakPerEvent] = useState<boolean>(false);
+  const [autoSortByResult, setAutoSortByResult] = useState<boolean>(true); // Otomatis urutkan tercepat di atas saat final time ada
+  const [viewLayoutMode, setViewLayoutMode] = useState<'heats' | 'combined'>('heats'); // 'heats' (per seri) atau 'combined' (rekap gabungan)
   const [openSettingsModal, setOpenSettingsModal] = useState<boolean>(false);
+  const [athleteSearch, setAthleteSearch] = useState<string>('');
 
   // Temporary State for Settings Dialog
   const [tempEventFilterMode, setTempEventFilterMode] = useState<'all' | 'count' | 'range'>('all');
@@ -87,6 +130,8 @@ export function BukuAcaraManager({
   const [tempMaxHeatsPerEvent, setTempMaxHeatsPerEvent] = useState<number>(0);
   const [tempShowCoverPage, setTempShowCoverPage] = useState<boolean>(true);
   const [tempPageBreakPerEvent, setTempPageBreakPerEvent] = useState<boolean>(false);
+  const [tempAutoSortByResult, setTempAutoSortByResult] = useState<boolean>(true);
+  const [tempViewLayoutMode, setTempViewLayoutMode] = useState<'heats' | 'combined'>('heats');
 
   const handleOpenSettings = () => {
     setTempEventFilterMode(eventFilterMode);
@@ -96,6 +141,8 @@ export function BukuAcaraManager({
     setTempMaxHeatsPerEvent(maxHeatsPerEvent);
     setTempShowCoverPage(showCoverPage);
     setTempPageBreakPerEvent(pageBreakPerEvent);
+    setTempAutoSortByResult(autoSortByResult);
+    setTempViewLayoutMode(viewLayoutMode);
     setOpenSettingsModal(true);
   };
 
@@ -107,6 +154,8 @@ export function BukuAcaraManager({
     setMaxHeatsPerEvent(tempMaxHeatsPerEvent);
     setShowCoverPage(tempShowCoverPage);
     setPageBreakPerEvent(tempPageBreakPerEvent);
+    setAutoSortByResult(tempAutoSortByResult);
+    setViewLayoutMode(tempViewLayoutMode);
     setOpenSettingsModal(false);
   };
 
@@ -118,6 +167,8 @@ export function BukuAcaraManager({
     setTempMaxHeatsPerEvent(0);
     setTempShowCoverPage(true);
     setTempPageBreakPerEvent(false);
+    setTempAutoSortByResult(true);
+    setTempViewLayoutMode('heats');
   };
 
   // Filtered Events and Heats
@@ -140,8 +191,34 @@ export function BukuAcaraManager({
       }));
     }
 
+    if (athleteSearch.trim()) {
+      const q = athleteSearch.trim().toLowerCase();
+      list = list
+        .map((e) => {
+          const matchingHeats = e.heats.filter((h) =>
+            h.assignments.some(
+              (a) =>
+                a.athleteName.toLowerCase().includes(q) ||
+                a.schoolName?.toLowerCase().includes(q) ||
+                a.athleteNumber?.toLowerCase().includes(q)
+            )
+          );
+          if (matchingHeats.length > 0) {
+            return {
+              ...e,
+              heats: matchingHeats,
+            };
+          }
+          if (e.name.toLowerCase().includes(q)) {
+            return e;
+          }
+          return null;
+        })
+        .filter(Boolean) as BukuEventItem[];
+    }
+
     return list;
-  }, [bukuEvents, eventFilterMode, eventLimitCount, eventStartNo, eventEndNo, maxHeatsPerEvent]);
+  }, [bukuEvents, eventFilterMode, eventLimitCount, eventStartNo, eventEndNo, maxHeatsPerEvent, athleteSearch]);
 
   const totalFilteredHeats = useMemo(() => {
     return filteredEvents.reduce((acc, e) => acc + e.heats.length, 0);
@@ -267,6 +344,31 @@ export function BukuAcaraManager({
               </SelectContent>
             </Select>
 
+            {/* Tombol Sinkronkan Hasil Lomba */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSyncResults}
+              disabled={isSyncing}
+              className="gap-1.5 text-xs font-semibold h-9 border-slate-300 bg-white hover:bg-slate-50 text-slate-800 shadow-2xs"
+              title="Perbarui data waktu & peringkat hasil lomba secara realtime"
+            >
+              <RefreshCw className={cn('h-3.5 w-3.5 text-blue-600', isSyncing && 'animate-spin')} />
+              {isSyncing ? 'Menyinkronkan...' : 'Sinkronkan Hasil'}
+            </Button>
+
+            {/* Tombol Menuju Input Hasil Lomba */}
+            <Link href={`/results?eventId=${event.id}`}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 text-xs font-bold h-9 border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100 shadow-2xs"
+              >
+                <Trophy className="h-3.5 w-3.5 text-amber-600" />
+                Input Hasil Lomba
+              </Button>
+            </Link>
+
             <Button
               variant="outline"
               size="sm"
@@ -274,7 +376,7 @@ export function BukuAcaraManager({
               className="gap-1.5 text-xs font-semibold h-9 border-blue-200 bg-blue-50/50 hover:bg-blue-100/60 text-blue-900"
             >
               <Sliders className="h-3.5 w-3.5 text-blue-600" />
-              Pengaturan Halaman & Seri
+              Pengaturan Halaman
             </Button>
 
             <Link href={`/juknis?event=${event.id}`}>
@@ -283,51 +385,143 @@ export function BukuAcaraManager({
               </Button>
             </Link>
 
-            <Button onClick={handlePrint} className="gap-2 text-xs font-bold h-9">
+            <Button onClick={handlePrint} className="gap-2 text-xs font-bold h-9 bg-primary text-primary-foreground">
               <Printer className="h-4 w-4" /> Cetak Start List / PDF
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Ringkasan Konfigurasi Halaman & Filter Cetak Aktif */}
-      <div className="no-print flex flex-wrap items-center justify-between gap-2.5 p-3 px-4 rounded-xl border border-blue-100 bg-blue-50/40 text-xs">
+      {/* Ringkasan Konfigurasi Halaman & Status Hasil Lomba */}
+      <div className="no-print flex flex-wrap items-center justify-between gap-3 p-3 px-4 rounded-xl border border-blue-100 bg-blue-50/40 text-xs">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-semibold text-slate-900 flex items-center gap-1.5">
-            <Sliders className="h-3.5 w-3.5 text-blue-600" /> Konfigurasi Cetak:
+          {totalResultsCount > 0 ? (
+            <Badge className="font-bold text-[11px] bg-emerald-600 text-white border-0 gap-1 shadow-2xs">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              {totalResultsCount} Hasil Lomba Terhubung
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="font-medium text-[11px] bg-white text-slate-500">
+              Belum Ada Hasil (Start List Kosong)
+            </Badge>
+          )}
+
+          {/* Tombol Toggle Urutan Tercepat Otomatis */}
+          <button
+            type="button"
+            onClick={() => {
+              const next = !autoSortByResult;
+              setAutoSortByResult(next);
+              toast.info(
+                next
+                  ? 'Urutan diatur otomatis: Perenang tercepat di posisi paling atas'
+                  : 'Urutan diatur sesuai nomor lintasan (Start List asli 1-8)'
+              );
+            }}
+            className={cn(
+              'flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all border shadow-2xs cursor-pointer',
+              autoSortByResult
+                ? 'bg-blue-600 text-white border-blue-700 hover:bg-blue-700'
+                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+            )}
+            title="Klik untuk mengubah mode urutan (Tercepat di atas vs Nomor lintasan)"
+          >
+            <ArrowDownWideNarrow className="h-3.5 w-3.5" />
+            <span>Urutan: {autoSortByResult ? 'Tercepat di Atas (Otomatis)' : 'Nomor Lintasan (1-8)'}</span>
+          </button>
+
+          {/* Toggle Tampilan Per Seri vs Peringkat Terpadu */}
+          <div className="flex items-center rounded-lg border border-slate-300 bg-white p-0.5 shadow-2xs">
+            <button
+              type="button"
+              onClick={() => setViewLayoutMode('heats')}
+              className={cn(
+                'flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold transition-all',
+                viewLayoutMode === 'heats'
+                  ? 'bg-slate-900 text-white'
+                  : 'text-slate-600 hover:text-slate-900'
+              )}
+            >
+              <Layers className="h-3 w-3" />
+              Per Seri
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewLayoutMode('combined')}
+              className={cn(
+                'flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold transition-all',
+                viewLayoutMode === 'combined'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-slate-600 hover:text-slate-900'
+              )}
+              title="Rekap terpadu seluruh seri diurutkan dari tercepat ke terlambat"
+            >
+              <Trophy className="h-3 w-3 text-amber-300" />
+              Peringkat Terpadu
+            </button>
+          </div>
+
+          <span className="font-semibold text-slate-900 flex items-center gap-1 ml-1 text-[11px]">
+            <Sliders className="h-3 w-3 text-blue-600" /> Filter:
           </span>
           <Badge variant="secondary" className="font-medium text-[11px] bg-white border border-slate-200">
             {eventFilterMode === 'all'
-              ? `Semua Acara (${filteredEvents.length} Acara)`
+              ? `Semua Acara (${filteredEvents.length})`
               : eventFilterMode === 'count'
-              ? `${filteredEvents.length} Acara Pertama`
-              : `Acara #${eventStartNo} s/d #${eventEndNo} (${filteredEvents.length} Acara)`}
+              ? `${filteredEvents.length} Acara`
+              : `#${eventStartNo} s/d #${eventEndNo}`}
           </Badge>
           <Badge variant="secondary" className="font-medium text-[11px] bg-white border border-slate-200">
             {maxHeatsPerEvent === 0
-              ? 'Semua Seri per Acara'
-              : `Maksimal ${maxHeatsPerEvent} Seri per Acara`}
+              ? 'Semua Seri'
+              : `Maks ${maxHeatsPerEvent} Seri`}
           </Badge>
-          <Badge variant="secondary" className="font-medium text-[11px] bg-white border border-slate-200">
-            Total {totalFilteredHeats} Seri
-          </Badge>
-          <Badge variant="outline" className="font-medium text-[11px] bg-white">
-            Cover: {showCoverPage ? 'Aktif' : 'Dilewati'}
-          </Badge>
-          {pageBreakPerEvent && (
-            <Badge variant="outline" className="font-medium text-[11px] bg-white text-indigo-700 border-indigo-200">
-              1 Acara / Halaman
-            </Badge>
-          )}
         </div>
 
         <button
           type="button"
           onClick={handleOpenSettings}
-          className="text-xs text-blue-600 hover:text-blue-800 font-semibold underline underline-offset-2"
+          className="text-xs text-blue-600 hover:text-blue-800 font-semibold underline underline-offset-2 shrink-0"
         >
           Ubah Pengaturan
         </button>
+      </div>
+
+      {/* Search Bar Nama Atlet (No-Print) */}
+      <div className="no-print flex flex-col sm:flex-row items-center justify-between gap-3 p-3 px-4 rounded-xl border border-slate-200 bg-white shadow-xs">
+        <div className="relative flex-1 w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            value={athleteSearch}
+            onChange={(e) => setAthleteSearch(e.target.value)}
+            placeholder="Cari nama atlet perenang atau sekolah / klub..."
+            className="pl-9 pr-9 h-9 text-xs border-slate-200"
+          />
+          {athleteSearch && (
+            <button
+              type="button"
+              onClick={() => setAthleteSearch('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+        {athleteSearch && (
+          <div className="flex items-center gap-2 text-xs">
+            <span className="font-semibold text-slate-700">
+              Menampilkan {filteredEvents.length} acara cocok
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setAthleteSearch('')}
+              className="h-7 px-2 text-xs text-blue-600 hover:text-blue-800"
+            >
+              Reset
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Dokumen Buku Acara (Printable) */}
@@ -335,18 +529,18 @@ export function BukuAcaraManager({
         {/* COVER HALAMAN UTAMA (Dengan Logo Rajendra & Logo Sponsor) */}
         {showCoverPage && (
           <div className="buku-page-break rounded-2xl border border-slate-200 print:border-none print:shadow-none bg-white p-8 sm:p-12 text-center shadow-xs space-y-6">
-            {/* Header Logos */}
-            <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+            {/* Header Logos: Rajendra Meet di Kiri & Rajendra Swimming Organizer di Kanan */}
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3 gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/brand/logo.png" alt="Rajendra SCMS" className="h-12 w-auto object-contain" />
-              <div className="text-center">
+              <img src="/brand/logo.png" alt="Rajendra Meet" className="h-8 sm:h-9 w-auto max-w-[120px] object-contain shrink-0" />
+              <div className="text-center px-3 flex-1 min-w-0">
                 <span className="font-mono text-xs font-black tracking-widest text-slate-800 uppercase block">
                   OFFICIAL MEET PROGRAM
                 </span>
                 <p className="text-[10px] text-slate-500 font-semibold">STANDAR FINA / AKUATIK INDONESIA</p>
               </div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/brand/logo.png" alt="Emblem" className="h-12 w-auto object-contain" />
+              <img src="/brand/rajendra-organizer-logo.png" alt="Rajendra Swimming Organizer" className="h-7 sm:h-8 w-auto max-w-[125px] object-contain shrink-0" />
             </div>
 
             {/* Judul Besar */}
@@ -415,9 +609,9 @@ export function BukuAcaraManager({
           <div className="border-b border-slate-200 pb-5 space-y-4">
             {/* Top Row: Logo Kiri - Title Tengah - Logo/Maskot Kanan */}
             <div className="flex items-center justify-between gap-4">
-              <div className="w-20 sm:w-24 flex items-center justify-start">
+              <div className="w-24 sm:w-32 flex items-center justify-start">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/brand/logo.png" alt="Event Logo" className="h-12 sm:h-14 w-auto object-contain" />
+                <img src="/brand/logo.png" alt="Rajendra Meet" className="h-10 sm:h-12 w-auto max-w-[120px] object-contain" />
               </div>
 
               <div className="text-center flex-1">
@@ -429,9 +623,9 @@ export function BukuAcaraManager({
                 </p>
               </div>
 
-              <div className="w-20 sm:w-24 flex items-center justify-end">
+              <div className="w-24 sm:w-32 flex items-center justify-end">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/brand/logo.png" alt="Mascot / Badge" className="h-12 sm:h-14 w-auto object-contain" />
+                <img src="/brand/rajendra-organizer-logo.png" alt="Rajendra Swimming Organizer" className="h-10 sm:h-12 w-auto max-w-[130px] object-contain" />
               </div>
             </div>
 
@@ -477,64 +671,399 @@ export function BukuAcaraManager({
                 Tidak ada acara yang cocok dengan kriteria pengaturan halaman yang dipilih.
               </div>
             ) : (
-              filteredEvents.map((eventItem) => (
-                <div
-                  key={eventItem.id}
-                  className={cn(
-                    'rounded-xl border border-slate-200 print:border-none print:shadow-none overflow-hidden',
-                    pageBreakPerEvent && 'buku-event-page-break'
-                  )}
-                >
-                  {/* Event Section Header (Sesuai Format: Event 103, Freestyle SD/MI 3-4 - Man 100meter - Final) */}
-                  <div className="border-b-2 border-slate-900 pb-1.5 pt-2 px-3 bg-slate-50/50">
-                    <h3 className="text-xs sm:text-sm font-black text-slate-950 uppercase tracking-tight">
-                      Event {eventItem.orderNo || '—'}, {eventItem.stroke} {eventItem.name} - {eventItem.gender === 'female' ? 'Women' : 'Men'} {eventItem.distanceMeters}meter - Time Final
-                    </h3>
-                  </div>
+              filteredEvents.map((eventItem) => {
+                // Perhitungan peringkat Time Final per nomor acara untuk semua perenang yang selesai (finished)
+                const finishedAthletes = eventItem.heats
+                  .flatMap((h) => h.assignments)
+                  .filter(
+                    (a) =>
+                      typeof a.finalTimeMs === 'number' &&
+                      a.finalTimeMs > 0 &&
+                      (!a.resultStatus || a.resultStatus === 'finished')
+                  )
+                  .sort((a, b) => (a.finalTimeMs || 0) - (b.finalTimeMs || 0));
 
-                  <div className="p-3 space-y-4">
-                    {eventItem.heats.map((heat) => (
-                      <div key={heat.id} className="space-y-1.5">
-                        <div className="flex items-center justify-between text-xs font-bold text-blue-950 bg-blue-50/90 px-3 py-1 rounded">
-                          <span className="uppercase">SERI {heat.heatNumber}</span>
-                          <span className="text-[11px] font-mono text-blue-800 font-semibold">{heat.assignments.length} Perenang</span>
+                const winnerTimeMs = finishedAthletes.length > 0 ? finishedAthletes[0].finalTimeMs || null : null;
+
+                const rankMap = new Map<string, number>();
+                let currentRank = 1;
+                finishedAthletes.forEach((a, idx) => {
+                  const key = a.id || `${a.athleteNumber}_${a.athleteName}_${a.laneNumber}`;
+                  if (idx > 0) {
+                    const prev = finishedAthletes[idx - 1];
+                    if (prev.finalTimeMs === a.finalTimeMs) {
+                      const prevKey = prev.id || `${prev.athleteNumber}_${prev.athleteName}_${prev.laneNumber}`;
+                      rankMap.set(key, rankMap.get(prevKey) || currentRank);
+                      return;
+                    }
+                  }
+                  currentRank = idx + 1;
+                  rankMap.set(key, currentRank);
+                });
+
+                // Gabungan semua perenang di acara ini jika dalam mode combined
+                const allEventAssignments = eventItem.heats.flatMap((h) =>
+                  h.assignments.map((a) => ({
+                    ...a,
+                    heatNumber: h.heatNumber,
+                  }))
+                );
+
+                const sortedCombined = !autoSortByResult
+                  ? [...allEventAssignments].sort(
+                      (a, b) => a.heatNumber - b.heatNumber || a.laneNumber - b.laneNumber
+                    )
+                  : [...allEventAssignments].sort((a, b) => {
+                      const hasTimeA =
+                        typeof a.finalTimeMs === 'number' &&
+                        a.finalTimeMs > 0 &&
+                        (!a.resultStatus || a.resultStatus === 'finished');
+                      const hasTimeB =
+                        typeof b.finalTimeMs === 'number' &&
+                        b.finalTimeMs > 0 &&
+                        (!b.resultStatus || b.resultStatus === 'finished');
+
+                      if (hasTimeA && hasTimeB) {
+                        if (a.finalTimeMs !== b.finalTimeMs) {
+                          return (a.finalTimeMs || 0) - (b.finalTimeMs || 0);
+                        }
+                        return a.laneNumber - b.laneNumber;
+                      }
+                      if (hasTimeA) return -1;
+                      if (hasTimeB) return 1;
+
+                      const hasStatusA = Boolean(a.resultStatus && a.resultStatus !== 'finished');
+                      const hasStatusB = Boolean(b.resultStatus && b.resultStatus !== 'finished');
+                      if (hasStatusA && !hasStatusB) return -1;
+                      if (!hasStatusA && hasStatusB) return 1;
+
+                      return a.heatNumber - b.heatNumber || a.laneNumber - b.laneNumber;
+                    });
+
+                return (
+                  <div
+                    key={eventItem.id}
+                    className={cn(
+                      'rounded-xl border border-slate-200 print:border-none print:shadow-none overflow-hidden',
+                      pageBreakPerEvent && 'buku-event-page-break'
+                    )}
+                  >
+                    {/* Event Section Header (Sesuai Format: Event 103, Freestyle SD/MI 3-4 - Man 100meter - Final) */}
+                    <div className="border-b-2 border-slate-900 pb-1.5 pt-2 px-3 bg-slate-50/50 flex items-center justify-between">
+                      <h3 className="text-xs sm:text-sm font-black text-slate-950 uppercase tracking-tight">
+                        Event {eventItem.orderNo || '—'}, {eventItem.stroke} {eventItem.name} - {eventItem.gender === 'female' ? 'Women' : 'Men'} {eventItem.distanceMeters}meter - Time Final
+                      </h3>
+                      {autoSortByResult && finishedAthletes.length > 0 && (
+                        <span className="text-[10px] font-bold text-blue-700 bg-blue-100/80 px-2 py-0.5 rounded print:hidden flex items-center gap-1">
+                          <ArrowDownWideNarrow className="h-3 w-3" /> Tercepat di Atas
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Mode Tampilan Peringkat Terpadu (Semua Seri Digabung) */}
+                    {viewLayoutMode === 'combined' ? (
+                      <div className="p-3 space-y-2">
+                        <div className="flex items-center justify-between text-xs font-bold text-blue-950 bg-blue-50/90 px-3 py-1.5 rounded">
+                          <span className="uppercase flex items-center gap-1.5">
+                            <Trophy className="h-3.5 w-3.5 text-amber-600" />
+                            HASIL PERINGKAT TERPADU (SELURUH SERI)
+                          </span>
+                          <span className="text-[11px] font-mono text-blue-800 font-semibold">
+                            {allEventAssignments.length} Perenang · {eventItem.heats.length} Seri
+                          </span>
                         </div>
 
                         <div className="overflow-x-auto">
                           <table className="w-full text-left text-xs border-collapse">
                             <thead>
                               <tr className="border-b border-slate-300 text-slate-600 text-[11px] font-bold">
-                                <th className="py-2 px-2 w-14 text-center">Lin.</th>
+                                <th className="py-2 px-2 text-center font-bold w-24">Peringkat</th>
+                                <th className="py-2 px-2 w-14 text-center">Seri</th>
+                                <th className="py-2 px-2 w-12 text-center">Lin.</th>
                                 <th className="py-2 px-2 font-bold">Nama Atlet</th>
                                 <th className="py-2 px-2 font-semibold">Klub / Sekolah (Team)</th>
-                                <th className="py-2 px-2 text-right font-bold w-28">Seed Time</th>
+                                <th className="py-2 px-2 text-right font-bold w-24">Seed Time</th>
+                                <th className="py-2 px-2 text-right font-bold w-24">Final Time</th>
+                                <th className="py-2 px-2 text-right font-bold w-20">Selisih</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-200">
-                              {heat.assignments.map((assign) => (
-                                <tr key={assign.laneNumber} className="hover:bg-slate-50/60">
-                                  <td className="py-2 px-2 text-center font-black font-mono text-slate-900">
-                                    {assign.laneNumber}
-                                  </td>
-                                  <td className="py-2 px-2 font-bold text-slate-950">
-                                    {assign.athleteName}
-                                  </td>
-                                  <td className="py-2 px-2 text-slate-700">
-                                    {assign.schoolName || '—'}
-                                  </td>
-                                  <td className="py-2 px-2 text-right font-mono font-bold text-slate-900">
-                                    {assign.seedTimeMs ? formatMsToTime(assign.seedTimeMs) : 'NT'}
-                                  </td>
-                                </tr>
-                              ))}
+                              {sortedCombined.map((assign) => {
+                                const q = athleteSearch.trim().toLowerCase();
+                                const isMatch =
+                                  Boolean(q) &&
+                                  (assign.athleteName.toLowerCase().includes(q) ||
+                                    assign.schoolName?.toLowerCase().includes(q) ||
+                                    assign.athleteNumber?.toLowerCase().includes(q));
+
+                                const athleteKey =
+                                  assign.id || `${assign.athleteNumber}_${assign.athleteName}_${assign.laneNumber}`;
+                                const athleteRank = rankMap.get(athleteKey);
+
+                                const diffMs =
+                                  winnerTimeMs && assign.finalTimeMs && assign.finalTimeMs > winnerTimeMs
+                                    ? assign.finalTimeMs - winnerTimeMs
+                                    : 0;
+
+                                return (
+                                  <tr
+                                    key={`${assign.heatNumber}_${assign.laneNumber}`}
+                                    className={
+                                      isMatch
+                                        ? 'bg-amber-100/70 font-semibold transition-colors'
+                                        : 'hover:bg-slate-50/60'
+                                    }
+                                  >
+                                    <td className="py-2 px-2 text-center font-mono">
+                                      {athleteRank !== undefined ? (
+                                        athleteRank === 1 ? (
+                                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-black text-amber-900 border border-amber-300">
+                                            🥇 1 (Emas)
+                                          </span>
+                                        ) : athleteRank === 2 ? (
+                                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-200 px-2 py-0.5 text-[11px] font-black text-slate-800 border border-slate-400">
+                                            🥈 2 (Perak)
+                                          </span>
+                                        ) : athleteRank === 3 ? (
+                                          <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-black text-orange-900 border border-orange-300">
+                                            🥉 3 (Perunggu)
+                                          </span>
+                                        ) : (
+                                          <span className="font-bold text-slate-700 text-xs">
+                                            #{athleteRank}
+                                          </span>
+                                        )
+                                      ) : assign.resultStatus && assign.resultStatus !== 'finished' ? (
+                                        <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-black text-rose-800 uppercase">
+                                          {assign.resultStatus}
+                                        </span>
+                                      ) : (
+                                        <span className="text-slate-400 font-normal print:inline-block print:w-12 print:border-b print:border-slate-400">
+                                          —
+                                        </span>
+                                      )}
+                                    </td>
+                                    <td className="py-2 px-2 text-center font-mono font-semibold text-slate-700">
+                                      Seri {assign.heatNumber}
+                                    </td>
+                                    <td className="py-2 px-2 text-center font-black font-mono text-slate-900">
+                                      <span
+                                        className={
+                                          isMatch
+                                            ? 'inline-flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 font-bold text-white text-[10px]'
+                                            : ''
+                                        }
+                                      >
+                                        {assign.laneNumber}
+                                      </span>
+                                    </td>
+                                    <td className="py-2 px-2 font-bold text-slate-950">
+                                      {isMatch ? (
+                                        <mark className="rounded bg-amber-200 px-1 py-0.5 font-bold text-amber-950">
+                                          {assign.athleteName}
+                                        </mark>
+                                      ) : (
+                                        assign.athleteName
+                                      )}
+                                    </td>
+                                    <td className="py-2 px-2 text-slate-700">
+                                      {assign.schoolName || '—'}
+                                    </td>
+                                    <td className="py-2 px-2 text-right font-mono font-semibold text-slate-700">
+                                      {assign.seedTimeMs ? formatMsToTime(assign.seedTimeMs) : 'NT'}
+                                    </td>
+                                    <td className="py-2 px-2 text-right font-mono font-bold">
+                                      {assign.finalTimeMs ? (
+                                        <span className="text-blue-900 font-extrabold">
+                                          {formatMsToTime(assign.finalTimeMs)}
+                                        </span>
+                                      ) : assign.resultStatus && assign.resultStatus !== 'finished' ? (
+                                        <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-black text-rose-800 uppercase">
+                                          {assign.resultStatus}
+                                        </span>
+                                      ) : (
+                                        <span className="text-slate-400 font-normal print:inline-block print:w-16 print:border-b print:border-slate-400">
+                                          —
+                                        </span>
+                                      )}
+                                    </td>
+                                    <td className="py-2 px-2 text-right font-mono text-[11px] text-slate-600">
+                                      {assign.finalTimeMs && winnerTimeMs ? (
+                                        diffMs === 0 ? (
+                                          <span className="font-bold text-amber-700">Tercepat</span>
+                                        ) : (
+                                          `+${(diffMs / 1000).toFixed(2)}s`
+                                        )
+                                      ) : (
+                                        '—'
+                                      )}
+                                    </td>
+                                  </tr>
+                                );
+                              })}
                             </tbody>
                           </table>
                         </div>
                       </div>
-                    ))}
+                    ) : (
+                      /* Mode Tampilan Standar Per Seri (Heats) */
+                      <div className="p-3 space-y-4">
+                        {eventItem.heats.map((heat) => {
+                          // Urutkan perenang di seri ini: tercepat paling atas jika finalTimeMs tersedia
+                          const sortedAssignments = !autoSortByResult
+                            ? [...heat.assignments].sort((a, b) => a.laneNumber - b.laneNumber)
+                            : [...heat.assignments].sort((a, b) => {
+                                const hasTimeA =
+                                  typeof a.finalTimeMs === 'number' &&
+                                  a.finalTimeMs > 0 &&
+                                  (!a.resultStatus || a.resultStatus === 'finished');
+                                const hasTimeB =
+                                  typeof b.finalTimeMs === 'number' &&
+                                  b.finalTimeMs > 0 &&
+                                  (!b.resultStatus || b.resultStatus === 'finished');
+
+                                if (hasTimeA && hasTimeB) {
+                                  if (a.finalTimeMs !== b.finalTimeMs) {
+                                    return (a.finalTimeMs || 0) - (b.finalTimeMs || 0);
+                                  }
+                                  return a.laneNumber - b.laneNumber;
+                                }
+                                if (hasTimeA) return -1;
+                                if (hasTimeB) return 1;
+
+                                const hasStatusA = Boolean(a.resultStatus && a.resultStatus !== 'finished');
+                                const hasStatusB = Boolean(b.resultStatus && b.resultStatus !== 'finished');
+                                if (hasStatusA && !hasStatusB) return -1;
+                                if (!hasStatusA && hasStatusB) return 1;
+
+                                return a.laneNumber - b.laneNumber;
+                              });
+
+                          return (
+                            <div key={heat.id} className="space-y-1.5">
+                              <div className="flex items-center justify-between text-xs font-bold text-blue-950 bg-blue-50/90 px-3 py-1 rounded">
+                                <span className="uppercase">SERI {heat.heatNumber}</span>
+                                <span className="text-[11px] font-mono text-blue-800 font-semibold">{heat.assignments.length} Perenang</span>
+                              </div>
+
+                              <div className="overflow-x-auto">
+                                <table className="w-full text-left text-xs border-collapse">
+                                  <thead>
+                                    <tr className="border-b border-slate-300 text-slate-600 text-[11px] font-bold">
+                                      <th className="py-2 px-2 w-12 text-center">Lin.</th>
+                                      <th className="py-2 px-2 font-bold">Nama Atlet</th>
+                                      <th className="py-2 px-2 font-semibold">Klub / Sekolah (Team)</th>
+                                      <th className="py-2 px-2 text-right font-bold w-24">Seed Time</th>
+                                      <th className="py-2 px-2 text-right font-bold w-24">Final Time</th>
+                                      <th className="py-2 px-2 text-center font-bold w-28">Peringkat</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-slate-200">
+                                    {sortedAssignments.map((assign) => {
+                                      const q = athleteSearch.trim().toLowerCase();
+                                      const isMatch =
+                                        Boolean(q) &&
+                                        (assign.athleteName.toLowerCase().includes(q) ||
+                                          assign.schoolName?.toLowerCase().includes(q) ||
+                                          assign.athleteNumber?.toLowerCase().includes(q));
+
+                                      const athleteKey =
+                                        assign.id || `${assign.athleteNumber}_${assign.athleteName}_${assign.laneNumber}`;
+                                      const athleteRank = rankMap.get(athleteKey);
+
+                                      return (
+                                        <tr
+                                          key={assign.laneNumber}
+                                          className={
+                                            isMatch
+                                              ? 'bg-amber-100/70 font-semibold transition-colors'
+                                              : 'hover:bg-slate-50/60'
+                                          }
+                                        >
+                                          <td className="py-2 px-2 text-center font-black font-mono text-slate-900">
+                                            <span
+                                              className={
+                                                isMatch
+                                                  ? 'inline-flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 font-bold text-white text-[10px]'
+                                                  : ''
+                                              }
+                                            >
+                                              {assign.laneNumber}
+                                            </span>
+                                          </td>
+                                          <td className="py-2 px-2 font-bold text-slate-950">
+                                            {isMatch ? (
+                                              <mark className="rounded bg-amber-200 px-1 py-0.5 font-bold text-amber-950">
+                                                {assign.athleteName}
+                                              </mark>
+                                            ) : (
+                                              assign.athleteName
+                                            )}
+                                          </td>
+                                          <td className="py-2 px-2 text-slate-700">
+                                            {assign.schoolName || '—'}
+                                          </td>
+                                          <td className="py-2 px-2 text-right font-mono font-semibold text-slate-700">
+                                            {assign.seedTimeMs ? formatMsToTime(assign.seedTimeMs) : 'NT'}
+                                          </td>
+                                          <td className="py-2 px-2 text-right font-mono font-bold">
+                                            {assign.finalTimeMs ? (
+                                              <span className="text-blue-900 font-extrabold">
+                                                {formatMsToTime(assign.finalTimeMs)}
+                                              </span>
+                                            ) : assign.resultStatus && assign.resultStatus !== 'finished' ? (
+                                              <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-black text-rose-800 uppercase">
+                                                {assign.resultStatus}
+                                              </span>
+                                            ) : (
+                                              <span className="text-slate-400 font-normal print:inline-block print:w-16 print:border-b print:border-slate-400">
+                                                —
+                                              </span>
+                                            )}
+                                          </td>
+                                          <td className="py-2 px-2 text-center font-mono">
+                                            {athleteRank !== undefined ? (
+                                              athleteRank === 1 ? (
+                                                <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-black text-amber-900 border border-amber-300">
+                                                  🥇 1 (Emas)
+                                                </span>
+                                              ) : athleteRank === 2 ? (
+                                                <span className="inline-flex items-center gap-1 rounded-full bg-slate-200 px-2 py-0.5 text-[11px] font-black text-slate-800 border border-slate-400">
+                                                  🥈 2 (Perak)
+                                                </span>
+                                              ) : athleteRank === 3 ? (
+                                                <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-black text-orange-900 border border-orange-300">
+                                                  🥉 3 (Perunggu)
+                                                </span>
+                                              ) : (
+                                                <span className="font-bold text-slate-700 text-xs">
+                                                  #{athleteRank}
+                                                </span>
+                                              )
+                                            ) : assign.resultStatus && assign.resultStatus !== 'finished' ? (
+                                              <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-black text-rose-800 uppercase">
+                                                {assign.resultStatus}
+                                              </span>
+                                            ) : (
+                                              <span className="text-slate-400 font-normal print:inline-block print:w-12 print:border-b print:border-slate-400">
+                                                —
+                                              </span>
+                                            )}
+                                          </td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
 
@@ -715,6 +1244,58 @@ export function BukuAcaraManager({
                   />
                   <span>Pisahkan Halaman Tiap Acara (1 Acara per Lembar A4)</span>
                 </label>
+              </div>
+            </div>
+
+            {/* Bagian 4: Pengurutan & Format Tampilan Hasil */}
+            <div className="space-y-2.5 pt-2 border-t border-slate-100">
+              <label className="font-bold text-slate-900 block text-xs">
+                4. Urutan Baris & Format Tampilan Hasil
+              </label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-slate-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={tempAutoSortByResult}
+                    onChange={(e) => setTempAutoSortByResult(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 text-blue-600"
+                  />
+                  <span className="font-semibold text-slate-900">
+                    Otomatis urutkan perenang tercepat di posisi paling atas setelah hasil masuk
+                  </span>
+                </label>
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setTempViewLayoutMode('heats')}
+                    className={cn(
+                      'p-2 rounded-lg border text-center transition-all text-xs',
+                      tempViewLayoutMode === 'heats'
+                        ? 'border-blue-600 bg-blue-50 text-blue-900 font-bold'
+                        : 'border-slate-200 hover:bg-slate-50 text-slate-700'
+                    )}
+                  >
+                    Tampilan Per Seri (Heats)
+                    <span className="block text-[10px] text-muted-foreground font-normal mt-0.5">
+                      Tabel terpisah untuk Seri 1, Seri 2, dst.
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTempViewLayoutMode('combined')}
+                    className={cn(
+                      'p-2 rounded-lg border text-center transition-all text-xs',
+                      tempViewLayoutMode === 'combined'
+                        ? 'border-blue-600 bg-blue-50 text-blue-900 font-bold'
+                        : 'border-slate-200 hover:bg-slate-50 text-slate-700'
+                    )}
+                  >
+                    Peringkat Terpadu (Event)
+                    <span className="block text-[10px] text-muted-foreground font-normal mt-0.5">
+                      Semua seri digabung satu peringkat 1-N
+                    </span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>

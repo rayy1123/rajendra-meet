@@ -3,7 +3,14 @@ import { createClient } from '@/lib/supabase/server';
 import DashboardLayout from '@/components/layout/layout';
 import type { UserRole } from '@/types/database';
 
-const ADMIN_ROLES: UserRole[] = ['super_admin', 'event_admin', 'operator'];
+const ADMIN_ROLES: UserRole[] = [
+  'super_admin',
+  'event_admin',
+  'operator',
+  'admin',
+  'admin_kejuaraan',
+  'admin_keuangan',
+];
 
 interface ProfileRole {
   role: UserRole;
@@ -15,19 +22,26 @@ export default async function Layout({ children }: { children: React.ReactNode }
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Proxy sudah mengarahkan yang belum login ke /login.
-  // Yang sudah login tapi bukan admin diarahkan ke halaman utama.
-  if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-    const role = (profile as ProfileRole | null)?.role;
-    if (!role || !ADMIN_ROLES.includes(role)) {
-      redirect('/');
-    }
+  if (!user) {
+    redirect('/login');
   }
 
-  return <DashboardLayout>{children}</DashboardLayout>;
+  let role: UserRole = 'viewer';
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle();
+  const fetchedRole =
+    (profile as ProfileRole | null)?.role ||
+    (user.user_metadata?.role as UserRole) ||
+    (user.app_metadata?.role as UserRole);
+  if (fetchedRole) {
+    role = fetchedRole;
+  }
+  if (!ADMIN_ROLES.includes(role)) {
+    redirect('/dashboard-viewer');
+  }
+
+  return <DashboardLayout role={role}>{children}</DashboardLayout>;
 }

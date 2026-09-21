@@ -18,6 +18,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UserPlus, Users, Trash2, Calendar, School, Sparkles, IdCard } from 'lucide-react';
 import Link from 'next/link';
+import { getKuCode } from '@/lib/age-category';
 
 function generateAthleteNumber(): string {
   return `AT-${Math.floor(100000 + Math.random() * 900000)}`;
@@ -87,6 +88,7 @@ export function UserAthleteManager({
           grade_level: form.grade_level || 'Umum',
           class_name: form.class_name || '-',
           school_id: form.school_id || null,
+          age_group: getKuCode(form.birth_date),
           owner_id: userId,
         })
         .select(`
@@ -330,11 +332,9 @@ export function UserAthleteManager({
                   <div className="flex items-center gap-2">
                     <Calendar className="w-3.5 h-3.5 text-primary shrink-0" />
                     <span>Lahir: <b>{a.birth_date}</b></span>
-                    {a.age_group && (
-                      <Badge variant="outline" className="text-[10px] font-bold border-amber-400 text-amber-700 dark:text-amber-300 ml-auto">
-                        {a.age_group}
-                      </Badge>
-                    )}
+                    <Badge variant="outline" className="text-[10px] font-bold border-blue-400 text-blue-700 bg-blue-50/50 ml-auto">
+                      {a.age_group || (a.birth_date ? getKuCode(a.birth_date) : '–')}
+                    </Badge>
                   </div>
                   <div className="flex items-center gap-2">
                     <School className="w-3.5 h-3.5 text-primary shrink-0" />
@@ -353,7 +353,7 @@ export function UserAthleteManager({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 text-xs font-bold gap-1 border border-slate-200 text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200"
+                        className="h-8 text-xs font-bold gap-1 border border-slate-200 text-slate-700 hover:bg-slate-100"
                         title="Cetak Kartu Tanda Peserta Atlet Ini"
                       >
                         <IdCard className="w-3.5 h-3.5 text-primary" /> Kartu
@@ -366,7 +366,7 @@ export function UserAthleteManager({
                     size="sm"
                     onClick={() => handleDelete(a.id, a.full_name)}
                     disabled={deletingId === a.id}
-                    className="h-8 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                    className="h-8 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </Button>

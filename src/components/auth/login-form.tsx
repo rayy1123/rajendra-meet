@@ -76,15 +76,17 @@ export function LoginForm({ initialMode = 'email' }: LoginFormProps) {
           return;
         }
 
-        const ADMIN_ROLES = ['super_admin', 'event_admin', 'operator'];
+        const ADMIN_ROLES = ['super_admin', 'event_admin', 'operator', 'admin', 'admin_kejuaraan', 'admin_keuangan'];
         const userId = data.user?.id;
         const { data: profile } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', userId ?? '')
-          .single();
-        const role = (profile as { role?: string } | null)?.role;
-        const target = role && ADMIN_ROLES.includes(role) ? '/events' : '/dashboard-viewer';
+          .maybeSingle();
+        const role = (profile as { role?: string } | null)?.role ||
+          (data.user?.user_metadata?.role as string) ||
+          (data.user?.app_metadata?.role as string);
+        const target = role && ADMIN_ROLES.includes(role) ? '/dashboard' : '/dashboard-viewer';
 
         window.location.assign(target);
       } else {
@@ -117,11 +119,13 @@ export function LoginForm({ initialMode = 'email' }: LoginFormProps) {
           .from('profiles')
           .select('full_name, role')
           .eq('id', userId)
-          .single();
+          .maybeSingle();
 
-        const ADMIN_ROLES = ['super_admin', 'event_admin', 'operator'];
-        const role = (profile as { role?: string } | null)?.role;
-        const target = role && ADMIN_ROLES.includes(role) ? '/events' : '/dashboard-viewer';
+        const ADMIN_ROLES = ['super_admin', 'event_admin', 'operator', 'admin', 'admin_kejuaraan', 'admin_keuangan'];
+        const role = (profile as { role?: string } | null)?.role ||
+          (data.user?.user_metadata?.role as string) ||
+          (data.user?.app_metadata?.role as string);
+        const target = role && ADMIN_ROLES.includes(role) ? '/dashboard' : '/dashboard-viewer';
 
         if (selectedSchoolId) {
           localStorage.setItem('selectedSchoolId', selectedSchoolId);

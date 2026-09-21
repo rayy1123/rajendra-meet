@@ -39,6 +39,10 @@ interface EventSheetRow {
 
 // Interface untuk baris Sheet 3 (Nomor Lomba)
 interface CompetitionEventSheetRow {
+  'No'?: number | string;
+  'Nomor'?: number | string;
+  'No. Urut'?: number | string;
+  'Order No'?: number | string;
   'Nama Nomor'?: string;
   'Event Name'?: string;
   'Gaya Renang'?: string;
@@ -88,6 +92,7 @@ interface EventInsertPayload {
 
 interface CompetitionEventInsertPayload {
   event_id: string;
+  order_no?: number;
   name: string;
   stroke: string;
   distance_meters: number;
@@ -275,6 +280,7 @@ export async function parseAndImportExcel(file: File): Promise<ExcelImportResult
 
       const compPayloads: CompetitionEventInsertPayload[] = compRows
         .map((row): CompetitionEventInsertPayload | null => {
+          const orderNo = Number(row['No'] || row['Nomor'] || row['No. Urut'] || row['Order No']) || undefined;
           const name = row['Nama Nomor'] || row['Event Name'];
           if (!name) return null;
 
@@ -285,6 +291,7 @@ export async function parseAndImportExcel(file: File): Promise<ExcelImportResult
 
           return {
             event_id: activeEventId,
+            ...(orderNo !== undefined ? { order_no: orderNo } : {}),
             name: name.trim(),
             stroke,
             distance_meters: distance,

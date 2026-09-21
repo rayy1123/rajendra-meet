@@ -1,9 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { ExportView, type ExportCompEvent } from '@/components/modules/export-view';
 import { FileSpreadsheet, Printer } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export default async function ExportPage({
   searchParams,
@@ -77,7 +76,7 @@ export default async function ExportPage({
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 print:p-0 print:m-0">
-      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Cetak & Ekspor' }]} className="mb-2" />
+      <Breadcrumb items={[{ label: 'Dasbor', href: '/dashboard' }, { label: 'Cetak & Ekspor' }]} className="mb-2" />
       <div className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
@@ -93,11 +92,12 @@ export default async function ExportPage({
       </div>
 
       {!events || events.length === 0 ? (
-        <Card className="p-12 text-center border-dashed print:hidden">
-          <Printer className="w-12 h-12 mx-auto text-[var(--m-muted)]/50 mb-3" />
-          <h3 className="font-semibold text-lg">Belum Ada Event</h3>
-          <p className="text-sm text-[var(--m-muted)] mt-1">Silakan buat event terlebih dahulu.</p>
-        </Card>
+        <EmptyState
+          icon={<Printer className="h-6 w-6" />}
+          title="Belum Ada Event"
+          description="Silakan buat event terlebih dahulu untuk dapat mencetak atau mengekspor laporan."
+          className="print:hidden"
+        />
       ) : (
         <ExportView
           events={events}

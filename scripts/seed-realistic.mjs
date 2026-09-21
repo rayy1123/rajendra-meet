@@ -95,13 +95,18 @@ async function main() {
   const { data: events } = await sb.from('events').select('id,start_date,lane_count');
   for (const ev of events) {
     const baseYear = new Date(ev.start_date).getFullYear();
-    // age_group_rules (6 KU)
-    for (let k = 1; k <= 6; k++) {
-      const code = 'KU ' + k;
-      const from = k === 1 ? null : `${baseYear - (18 - k)}-01-01`;
-      const to = k === 6 ? null : `${baseYear - (18 - k + 1)}-12-31`;
+    // age_group_rules (6 KU: KU 1 s/d KU 6)
+    const kuRanges = [
+      { code: 'KU 1', label: 'KU 1 (16-18 Tahun / SMA)', from: null, to: `${baseYear - 16}-12-31`, k: 1 },
+      { code: 'KU 2', label: 'KU 2 (14-15 Tahun / SMP)', from: `${baseYear - 15}-01-01`, to: `${baseYear - 14}-12-31`, k: 2 },
+      { code: 'KU 3', label: 'KU 3 (12-13 Tahun / SD 5-6)', from: `${baseYear - 13}-01-01`, to: `${baseYear - 12}-12-31`, k: 3 },
+      { code: 'KU 4', label: 'KU 4 (10-11 Tahun / SD 3-4)', from: `${baseYear - 11}-01-01`, to: `${baseYear - 10}-12-31`, k: 4 },
+      { code: 'KU 5', label: 'KU 5 (8-9 Tahun / SD 1-2)', from: `${baseYear - 9}-01-01`, to: `${baseYear - 8}-12-31`, k: 5 },
+      { code: 'KU 6', label: 'KU 6 (<= 7 Tahun / PAUD-TK)', from: `${baseYear - 7}-01-01`, to: null, k: 6 },
+    ];
+    for (const item of kuRanges) {
       await sb.from('age_group_rules').upsert(
-        { event_id: ev.id, code, label: 'Kelompok Umur ' + k, birth_date_from: from, birth_date_to: to, gender: null, sort_order: k },
+        { event_id: ev.id, code: item.code, label: item.label, birth_date_from: item.from, birth_date_to: item.to, gender: null, sort_order: item.k, is_active: true },
         { onConflict: 'event_id,code,gender' }
       );
     }

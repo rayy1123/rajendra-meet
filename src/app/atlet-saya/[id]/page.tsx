@@ -2,7 +2,7 @@ import { requireUser } from '@/lib/auth';
 import DashboardLayout from '@/components/layout/layout';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { AthleteProfileActions } from '@/components/modules/athlete-profile-actions';
 import type { AthleteFormValues } from '@/components/modules/athlete-form-modal';
 import { ArrowLeft, CalendarPlus } from 'lucide-react';
@@ -27,6 +27,29 @@ export default async function AthleteProfilePage({
 }) {
   const { id } = await params;
   const { supabase, user } = await requireUser();
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  const userRole =
+    (profile?.role as string) ||
+    (user as any)?.user_metadata?.role ||
+    (user as any)?.app_metadata?.role ||
+    'viewer';
+  const ADMIN_ROLES = [
+    'super_admin',
+    'event_admin',
+    'operator',
+    'admin',
+    'admin_kejuaraan',
+    'admin_keuangan',
+  ];
+  if (ADMIN_ROLES.includes(userRole)) {
+    redirect('/athletes');
+  }
 
   const { data: athlete } = await supabase
     .from('athletes')

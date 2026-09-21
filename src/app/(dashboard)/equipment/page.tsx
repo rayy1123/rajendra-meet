@@ -2,6 +2,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Wrench, AlertTriangle, CheckCircle2 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -24,19 +25,17 @@ export default async function EquipmentPage() {
   return (
     <>
       <div className="mx-auto max-w-7xl space-y-6 p-6">
+        <Breadcrumb items={[{ label: 'Dasbor', href: '/dashboard' }, { label: 'Peralatan' }]} className="mb-2" />
         <PageHeader
           title="Pemeliharaan Peralatan"
           description="Lacak kesiapan teknis peralatan: touchpad, starting block, konsol waktu, dan kalibrasinya."
         />
-        <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Peralatan' }]} className="mb-2" />
         {items.length === 0 ? (
-          <div className="pub-card p-12 text-center">
-            <Wrench className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
-            <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Belum ada catatan peralatan</h3>
-            <p className="mt-1 text-sm text-[var(--m-muted)]">
-              Tambahkan item peralatan lewat SQL/seed agar muncul di sini.
-            </p>
-          </div>
+          <EmptyState
+            icon={<Wrench className="h-6 w-6" />}
+            title="Belum Ada Data Peralatan"
+            description="Data peralatan arena belum tersedia."
+          />
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((it: any) => (

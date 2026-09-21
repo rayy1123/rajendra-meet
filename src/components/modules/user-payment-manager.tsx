@@ -167,7 +167,7 @@ export function UserPaymentManager({
                 Estimasi Biaya: Rp {totalAmountDue.toLocaleString('id-ID')}
               </p>
             </div>
-            <div className="h-10 w-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
               <ReceiptText className="w-5 h-5" />
             </div>
           </CardContent>
@@ -184,7 +184,7 @@ export function UserPaymentManager({
                 Upload bukti transfer untuk diproses
               </p>
             </div>
-            <div className="h-10 w-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
               <Clock className="w-5 h-5" />
             </div>
           </CardContent>
@@ -201,7 +201,7 @@ export function UserPaymentManager({
                 Siap bertanding di lintasan
               </p>
             </div>
-            <div className="h-10 w-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <CheckCircle2 className="w-5 h-5" />
             </div>
           </CardContent>
@@ -209,7 +209,7 @@ export function UserPaymentManager({
       </div>
 
       {/* Info Rekening Panitia */}
-      <div className="rounded-2xl border bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/20 p-5 shadow-xs">
+      <div className="rounded-2xl border bg-gradient-to-r from-blue-50 to-indigo-50 p-5 shadow-xs">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
@@ -218,13 +218,13 @@ export function UserPaymentManager({
             <p className="text-xs text-muted-foreground">
               Transfer biaya pendaftaran sebesar <b>Rp 50.000 / nomor lomba</b> ke rekening resmi panitia:
             </p>
-            <p className="text-xs font-mono font-bold text-blue-950 dark:text-blue-100 mt-1">
+            <p className="text-xs font-mono font-bold text-blue-950 mt-1">
               Bank BCA: <b>872-098-1234</b> a.n. <b>Panitia Rajendra Meet SCMS</b>
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 shrink-0">
             <Link href="/kartu-peserta">
-              <Button size="sm" variant="outline" className="text-xs font-bold gap-1.5 border-blue-300 text-blue-900 dark:text-blue-200 hover:bg-blue-100/50">
+              <Button size="sm" variant="outline" className="text-xs font-bold gap-1.5 border-blue-300 text-blue-900 hover:bg-blue-100/50">
                 <IdCard className="w-4 h-4 text-blue-600" />
                 Cetak Kartu Peserta
               </Button>
@@ -295,7 +295,7 @@ export function UserPaymentManager({
                       </div>
 
                       {item.payment_verifications?.notes && (
-                        <p className="text-[11px] text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/30 px-2.5 py-1 rounded-md w-fit">
+                        <p className="text-[11px] text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md w-fit">
                           Catatan: {item.payment_verifications.notes}
                         </p>
                       )}
@@ -313,11 +313,11 @@ export function UserPaymentManager({
                             <XCircle className="w-3.5 h-3.5" /> Ditolak (Upload Ulang)
                           </Badge>
                         ) : item.payment_verifications?.proof_url ? (
-                          <Badge variant="secondary" className="gap-1 text-xs py-1 text-amber-700 bg-amber-50 dark:bg-amber-950/40 border border-amber-300">
+                          <Badge variant="secondary" className="gap-1 text-xs py-1 text-amber-700 bg-amber-50 border border-amber-300">
                             <Clock className="w-3.5 h-3.5" /> Menunggu Review Panitia
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="gap-1 text-xs py-1 text-red-600 border-red-300 bg-red-50 dark:bg-red-950/30">
+                          <Badge variant="outline" className="gap-1 text-xs py-1 text-red-600 border-red-300 bg-red-50">
                             <AlertCircle className="w-3.5 h-3.5" /> Belum Upload Bukti
                           </Badge>
                         )}
@@ -328,7 +328,7 @@ export function UserPaymentManager({
                           <Button
                             size="sm"
                             variant="outline"
-                            className="gap-1 text-xs font-bold shrink-0 border-slate-300 text-slate-800 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200"
+                            className="gap-1 text-xs font-bold shrink-0 border-slate-300 text-slate-800 hover:bg-slate-100"
                             title="Lihat & Cetak Kartu Peserta Atlet"
                           >
                             <IdCard className="w-3.5 h-3.5 text-primary" />

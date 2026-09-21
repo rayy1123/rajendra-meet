@@ -50,6 +50,10 @@ export default async function GalleryPage() {
     <PublicShell
       title="Galeri Foto Kejuaraan"
       subtitle="Dokumentasi visual: aksi perlombaan, upacara medali, dan momen di balik layar kolam renang."
+      breadcrumbItems={[
+        { label: 'Beranda', href: '/' },
+        { label: 'Galeri' },
+      ]}
     >
       <div className="pub-container pb-16">
         <div className="mb-4 flex items-center justify-between">

@@ -61,6 +61,10 @@ export default function GuidePage() {
     <PublicShell
       title="Buku Panduan"
       subtitle="Cara menggunakan SCMS Rajendra Meet: dari mendaftar, menginput data, hingga melihat scoreboard."
+      breadcrumbItems={[
+        { label: 'Beranda', href: '/' },
+        { label: 'Panduan' },
+      ]}
     >
       <div className="pub-container space-y-5 pb-16">
         {SECTIONS.map((s) => (
