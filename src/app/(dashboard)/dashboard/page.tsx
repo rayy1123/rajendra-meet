@@ -2,7 +2,25 @@ import { Card, CardContent } from '@/components/ui/card';
 import { GlassCard } from '@/components/ui/glass-card';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
-import { LayoutDashboard, CalendarDays, Users, ClipboardList, School, Trophy, Timer, Award } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import {
+  LayoutDashboard,
+  CalendarDays,
+  Users,
+  ClipboardList,
+  School,
+  Trophy,
+  Timer,
+  Award,
+  Waves,
+  ArrowRight,
+  Sparkles,
+  MapPin,
+  Radio,
+  BookOpen,
+  Layers,
+  CheckCircle2,
+} from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { AdminActionGuide } from '@/components/modules/admin-action-guide';
@@ -17,12 +35,30 @@ export default async function DashboardPage() {
     { count: athleteCount },
     { count: regCount },
     { count: schoolCount },
+    { data: latestEvent },
   ] = await Promise.all([
     supabase.from('events').select('*', { count: 'exact', head: true }),
     supabase.from('athletes').select('*', { count: 'exact', head: true }),
     supabase.from('registrations').select('*', { count: 'exact', head: true }),
     supabase.from('schools').select('*', { count: 'exact', head: true }),
+    supabase
+      .from('events')
+      .select('id, name, organizer, location, start_date, end_date, pool_type, lane_count, logo_url')
+      .order('start_date', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
+
+  let eventCompCount = 0;
+  let eventRegCount = 0;
+  if (latestEvent) {
+    const [{ count: cCount }, { count: rCount }] = await Promise.all([
+      supabase.from('competition_events').select('id', { count: 'exact', head: true }).eq('event_id', latestEvent.id),
+      supabase.from('registrations').select('id', { count: 'exact', head: true }).eq('event_id', latestEvent.id),
+    ]);
+    eventCompCount = cCount || 0;
+    eventRegCount = rCount || 0;
+  }
 
   const stats = [
     { label: 'Kejuaraan', value: eventCount ?? 0, href: '/events', icon: CalendarDays },
@@ -75,6 +111,96 @@ export default async function DashboardPage() {
           );
         })}
       </div>
+
+      {/* Kejuaraan Aktif Utama (Spotlight & Quick Workflow) */}
+      {latestEvent && (
+        <div className="glass-panel relative overflow-hidden p-6 border border-[var(--m-border)] shadow-xs">
+          <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-[var(--m-aqua-soft)]/50 blur-3xl" />
+          <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+            <div className="flex items-start gap-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white border border-[var(--m-border)] p-2 shadow-2xs">
+                {latestEvent.logo_url ? (
+                  <img src={latestEvent.logo_url} alt={latestEvent.name} className="h-full w-full object-contain" />
+                ) : (
+                  <Trophy className="h-7 w-7 text-[var(--m-aqua-ink)]" />
+                )}
+              </div>
+              <div className="space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="outline" className="bg-[var(--m-aqua-soft)] text-[var(--m-aqua-ink)] border-[var(--m-aqua)]/30 font-bold text-[10px]">
+                    <Sparkles className="h-3 w-3 mr-1" /> Kejuaraan Terkini
+                  </Badge>
+                  <span className="text-xs text-[var(--m-muted)]">•</span>
+                  <span className="text-xs font-mono font-bold text-slate-700">
+                    {eventCompCount} Nomor Lomba · {eventRegCount} Peserta
+                  </span>
+                </div>
+                <h2 className="font-heading text-xl font-black text-[var(--m-ink)] sm:text-2xl">
+                  {latestEvent.name}
+                </h2>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[var(--m-muted)]">
+                  {latestEvent.location && (
+                    <span className="flex items-center gap-1.5">
+                      <MapPin className="h-3.5 w-3.5 text-[var(--m-aqua)]" /> {latestEvent.location}
+                    </span>
+                  )}
+                  {latestEvent.start_date && (
+                    <span className="flex items-center gap-1.5">
+                      <CalendarDays className="h-3.5 w-3.5 text-[var(--m-aqua)]" />
+                      {latestEvent.start_date} s/d {latestEvent.end_date}
+                    </span>
+                  )}
+                  <span className="flex items-center gap-1.5">
+                    <Waves className="h-3.5 w-3.5 text-[var(--m-aqua)]" />
+                    {latestEvent.lane_count || 8} Lintasan ({latestEvent.pool_type || 'Indoor'})
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Workflow Action Shortcuts */}
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                href={`/events/${latestEvent.id}`}
+                className="pub-btn-primary gap-1.5 text-xs font-bold"
+              >
+                Kelola Event <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+              <Link
+                href={`/events/${latestEvent.id}#atur-acara`}
+                className="pub-btn-ghost gap-1.5 text-xs font-semibold"
+              >
+                <Layers className="h-3.5 w-3.5 text-blue-600" /> Atur Acara
+              </Link>
+              <Link
+                href={`/heats?eventId=${latestEvent.id}`}
+                className="pub-btn-ghost gap-1.5 text-xs font-semibold"
+              >
+                <Timer className="h-3.5 w-3.5 text-indigo-600" /> Seri & Lintasan
+              </Link>
+              <Link
+                href={`/buku-acara?event=${latestEvent.id}`}
+                className="pub-btn-ghost gap-1.5 text-xs font-semibold"
+              >
+                <BookOpen className="h-3.5 w-3.5 text-amber-600" /> Buku Acara
+              </Link>
+              <Link
+                href={`/results?eventId=${latestEvent.id}`}
+                className="pub-btn-ghost gap-1.5 text-xs font-semibold"
+              >
+                <Trophy className="h-3.5 w-3.5 text-emerald-600" /> Input Hasil
+              </Link>
+              <Link
+                href={`/public-live/${latestEvent.id}`}
+                target="_blank"
+                className="pub-btn-ghost gap-1.5 text-xs font-semibold text-primary"
+              >
+                <Radio className="h-3.5 w-3.5 text-rose-600" /> Live Scoreboard
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="reveal" style={{ animationDelay: `400ms` }}>
         <div className="mb-3 flex items-center justify-between">
