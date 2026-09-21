@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { Layers, Clock, Radio, Waves, CreditCard, Tag, Trophy, Camera } from 'lucide-react';
+import { Layers, Clock, Radio, Waves, CreditCard, Tag, Trophy, Camera, School } from 'lucide-react';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { EventSettingsDialog } from '@/components/modules/event-settings-dialog';
@@ -116,6 +116,9 @@ export default async function EventDetailPage({ params }: PageProps) {
         <div className="mt-5 flex flex-wrap items-center gap-2">
           <Link href="#atur-acara" className="inline-flex items-center gap-2 rounded-lg bg-[var(--m-aqua)] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--m-aqua-ink)]">
             <Layers className="h-4 w-4" /> Atur Acara
+          </Link>
+          <Link href={`/events/${event.id}/rekap-klub`} className="inline-flex items-center gap-2 rounded-lg border border-[var(--m-border)] bg-white px-4 py-2 text-sm font-semibold text-[var(--m-ink)] transition-ui hover:border-indigo-400 hover:text-indigo-700">
+            <School className="h-4 w-4 text-indigo-600" /> Rekap per Klub (PDF)
           </Link>
           <Link href={`/results?eventId=${event.id}`} className="inline-flex items-center gap-2 rounded-lg border border-[var(--m-border)] px-4 py-2 text-sm font-semibold text-[var(--m-ink)] transition-ui hover:border-[var(--m-muted)]">
             <Clock className="h-4 w-4" /> Input Hasil

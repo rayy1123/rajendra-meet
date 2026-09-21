@@ -49,7 +49,6 @@ export function ExportBySchoolCard({
         .select(`
           id,
           seed_time_ms,
-          payment_status,
           created_at,
           athletes!inner (
             id,
@@ -80,15 +79,44 @@ export function ExportBySchoolCard({
         query = query.eq('athletes.school_id', selectedSchoolId);
       }
 
-      // Filter Status Pembayaran
-      if (selectedPaymentStatus !== 'all') {
-        query = query.eq('payment_status', selectedPaymentStatus);
-      }
-
       const { data, error } = await query;
       if (error) throw new Error(error.message);
 
-      if (!data || data.length === 0) {
+      let regRows = (data || []) as unknown as Array<{
+        id: string;
+        seed_time_ms?: number | null;
+        athletes?: {
+          full_name?: string;
+          athlete_number?: string;
+          gender?: string;
+          age_group?: string;
+          schools?: { name?: string };
+        } | null;
+        competition_events?: {
+          order_no?: number;
+          name?: string;
+          stroke?: string;
+          distance_meters?: number;
+        } | null;
+        payment_verifications?:
+          | { status?: string; amount_due?: number }
+          | Array<{ status?: string; amount_due?: number }>
+          | null;
+      }>;
+
+      // Filter Status Pembayaran
+      if (selectedPaymentStatus !== 'all') {
+        regRows = regRows.filter((r) => {
+          const rawPay = r.payment_verifications as unknown as
+            | { status?: string }
+            | Array<{ status?: string }>
+            | null;
+          const status = (Array.isArray(rawPay) ? rawPay[0]?.status : rawPay?.status) || 'pending';
+          return status === selectedPaymentStatus;
+        });
+      }
+
+      if (!regRows || regRows.length === 0) {
         toast.warning('Tidak ada data pendaftaran yang sesuai dengan filter yang dipilih.');
         return;
       }
@@ -157,29 +185,6 @@ export function ExportBySchoolCard({
         };
       });
 
-      const regRows = (data || []) as unknown as Array<{
-        id: string;
-        seed_time_ms?: number | null;
-        payment_status: string;
-        athletes?: {
-          full_name?: string;
-          athlete_number?: string;
-          gender?: string;
-          age_group?: string;
-          schools?: { name?: string };
-        } | null;
-        competition_events?: {
-          order_no?: number;
-          name?: string;
-          stroke?: string;
-          distance_meters?: number;
-        } | null;
-        payment_verifications?:
-          | { status?: string; amount_due?: number }
-          | Array<{ status?: string; amount_due?: number }>
-          | null;
-      }>;
-
       // Rows
       regRows.forEach((row, index: number) => {
         const athlete = row.athletes;
@@ -189,7 +194,7 @@ export function ExportBySchoolCard({
           | { status?: string }
           | Array<{ status?: string }>
           | null;
-        const payStatus = (Array.isArray(rawPay) ? rawPay[0]?.status : rawPay?.status) || row.payment_status || 'pending';
+        const payStatus = (Array.isArray(rawPay) ? rawPay[0]?.status : rawPay?.status) || 'pending';
 
         const rowData = [
           index + 1,

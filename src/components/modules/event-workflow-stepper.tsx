@@ -80,6 +80,9 @@ export function EventWorkflowStepper({
       href: `/perlombaan/partisipasi/${eventId}`,
       actionLabel: 'Kelola Peserta',
       color: 'emerald',
+      extraLinks: [
+        { label: 'Rekap Klub (PDF)', href: `/events/${eventId}/rekap-klub` },
+      ],
     },
     {
       no: 3,
@@ -103,6 +106,7 @@ export function EventWorkflowStepper({
       actionLabel: 'Buka Buku Acara',
       color: 'amber',
       extraLinks: [
+        { label: 'Rekap Klub (PDF)', href: `/events/${eventId}/rekap-klub` },
         { label: 'Juknis', href: `/juknis?event=${eventId}` },
         { label: 'Kartu Peserta', href: `/kartu-peserta?eventId=${eventId}` },
       ],
