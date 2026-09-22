@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { ExportView, type ExportCompEvent } from '@/components/modules/export-view';
+import { ExportBySchoolCard } from '@/components/modules/export-by-school-card';
 import { FileSpreadsheet, Printer } from 'lucide-react';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -12,11 +13,17 @@ export default async function ExportPage({
   const supabase = await createClient();
   const params = await searchParams;
 
-  // 1. Ambil daftar event
-  const { data: events } = await supabase
-    .from('events')
-    .select('id, name')
-    .order('created_at', { ascending: false });
+  // 1. Ambil daftar event & schools
+  const [{ data: events }, { data: schools }] = await Promise.all([
+    supabase
+      .from('events')
+      .select('id, name')
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('schools')
+      .select('id, name')
+      .order('name', { ascending: true }),
+  ]);
 
   const activeEventId = params.eventId || events?.[0]?.id || '';
 
@@ -99,11 +106,20 @@ export default async function ExportPage({
           className="print:hidden"
         />
       ) : (
-        <ExportView
-          events={events}
-          initialEventId={activeEventId}
-          exportData={exportData}
-        />
+        <div className="space-y-6">
+          <div className="print:hidden">
+            <ExportBySchoolCard
+              events={events}
+              schools={schools || []}
+              initialEventId={activeEventId}
+            />
+          </div>
+          <ExportView
+            events={events}
+            initialEventId={activeEventId}
+            exportData={exportData}
+          />
+        </div>
       )}
     </div>
   );

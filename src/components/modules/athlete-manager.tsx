@@ -66,16 +66,20 @@ export interface Opt {
 }
 
 const KU_LABELS: Record<string, string> = {
-  'KU Master': 'KU Master (22+ Th / Kelahiran ≤ 2004)',
-  'KU Senior': 'KU Senior (19-21 Th / Kelahiran 2005–2007)',
-  'KU 1': 'KU 1 (16-18 Th / SMA)',
-  'KU 2': 'KU 2 (14-15 Th / SMP)',
-  'KU 3': 'KU 3 (12-13 Th / SD 5-6)',
-  'KU 4': 'KU 4 (10-11 Th / SD 3-4)',
-  'KU 5': 'KU 5 (8-9 Th / SD 1-2)',
-  'KU 6': 'KU 6 (≤ 7 Th / PAUD-TK)',
-  'Senior': 'KU Senior (19-21 Th)',
-  'Master': 'KU Master (22+ Th)',
+  'KU Senior': 'KU Senior (19+ Th / Mahasiswa & Umum)',
+  'KU I': 'KU I (16-18 Th / SMA)',
+  'KU II': 'KU II (14-15 Th / SMP)',
+  'KU III': 'KU III (12-13 Th / SD 6 - SMP 7)',
+  'KU IV': 'KU IV (10-11 Th / SD 4-5)',
+  'KU V': 'KU V (< 10 Th / SD 1-3 / PAUD)',
+  'KU 1': 'KU I (16-18 Th / SMA)',
+  'KU 2': 'KU II (14-15 Th / SMP)',
+  'KU 3': 'KU III (12-13 Th / SD 5-6)',
+  'KU 4': 'KU IV (10-11 Th / SD 3-4)',
+  'KU 5': 'KU V (8-9 Th / SD 1-2)',
+  'KU 6': 'KU V (≤ 7 Th / PAUD-TK)',
+  'Senior': 'KU Senior (19+ Th)',
+  'Master': 'KU Senior (19+ Th)',
 };
 
 export function AthleteManager({
@@ -92,6 +96,7 @@ export function AthleteManager({
   const [query, setQuery] = useState('');
   const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
   const [kuFilter, setKuFilter] = useState<string>('all');
+  const [schoolFilter, setSchoolFilter] = useState<string>('all');
   const [sort, setSort] = useState<{ key: keyof AthleteRow; dir: 'asc' | 'desc' }>({
     key: 'full_name',
     dir: 'asc',
@@ -112,17 +117,17 @@ export function AthleteManager({
     grade_level: 'SD',
     class_name: '',
     school_id: schools[0]?.id || '',
-    age_group: 'KU 3',
+    age_group: 'KU III',
   });
 
   // Daftar KU standar + dinamis dari database
   const kuOptions = useMemo(() => {
-    const standard = ['KU Master', 'KU Senior', 'KU 1', 'KU 2', 'KU 3', 'KU 4', 'KU 5', 'KU 6'];
+    const standard = ['KU Senior', 'KU I', 'KU II', 'KU III', 'KU IV', 'KU V', 'KU 1', 'KU 2', 'KU 3', 'KU 4', 'KU 5', 'KU 6'];
     const fromList = list
       .map((a) => a.age_group || (a.birth_date ? getKuCode(a.birth_date) : ''))
       .filter(Boolean);
     const set = new Set([...standard, ...fromList]);
-    const order = ['KU Master', 'KU Senior', 'Senior', 'Master', 'KU 1', 'KU 2', 'KU 3', 'KU 4', 'KU 5', 'KU 6'];
+    const order = ['KU Senior', 'KU I', 'KU II', 'KU III', 'KU IV', 'KU V', 'KU 1', 'KU 2', 'KU 3', 'KU 4', 'KU 5', 'KU 6'];
     return Array.from(set).sort((a, b) => {
       const ia = order.indexOf(a);
       const ib = order.indexOf(b);
@@ -143,7 +148,8 @@ export function AthleteManager({
         athleteKu.toLowerCase().includes(q);
       const matchG = genderFilter === 'all' || a.gender === genderFilter;
       const matchKu = kuFilter === 'all' || athleteKu === kuFilter || a.age_group === kuFilter;
-      return matchQ && matchG && matchKu;
+      const matchSchool = schoolFilter === 'all' || a.school_id === schoolFilter;
+      return matchQ && matchG && matchKu && matchSchool;
     });
 
     const { key, dir } = sort;
@@ -350,10 +356,25 @@ export function AthleteManager({
               <SelectValue placeholder="Kelompok Umur" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Semua KU (1 - 6)</SelectItem>
+              <SelectItem value="all">Semua KU (Senior - V)</SelectItem>
               {kuOptions.map((ku) => (
                 <SelectItem key={ku} value={ku}>
                   {KU_LABELS[ku] || ku}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Filter Sekolah / Klub */}
+          <Select value={schoolFilter} onValueChange={setSchoolFilter}>
+            <SelectTrigger className="h-10 w-[170px] shrink-0">
+              <SelectValue placeholder="Semua Klub/Sekolah" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Klub / Sekolah</SelectItem>
+              {schools.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  {s.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -492,14 +513,18 @@ export function AthleteManager({
                   <SelectValue placeholder="Pilih Kelompok Umur" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="KU Master">KU Master (22+ Tahun / Kelahiran ≤ 2004)</SelectItem>
-                  <SelectItem value="KU Senior">KU Senior (19-21 Tahun / Kelahiran 2005–2007)</SelectItem>
-                  <SelectItem value="KU 1">KU 1 (16-18 Tahun / SMA)</SelectItem>
-                  <SelectItem value="KU 2">KU 2 (14-15 Tahun / SMP)</SelectItem>
-                  <SelectItem value="KU 3">KU 3 (12-13 Tahun / SD 5-6)</SelectItem>
-                  <SelectItem value="KU 4">KU 4 (10-11 Tahun / SD 3-4)</SelectItem>
-                  <SelectItem value="KU 5">KU 5 (8-9 Tahun / SD 1-2)</SelectItem>
-                  <SelectItem value="KU 6">KU 6 (≤ 7 Tahun / PAUD-TK)</SelectItem>
+                  <SelectItem value="KU Senior">KU Senior (19+ Tahun / Mahasiswa & Umum)</SelectItem>
+                  <SelectItem value="KU I">KU I (16-18 Tahun / SMA Kelas 10-12)</SelectItem>
+                  <SelectItem value="KU II">KU II (14-15 Tahun / SMP Kelas 8-9)</SelectItem>
+                  <SelectItem value="KU III">KU III (12-13 Tahun / SD Kelas 6 - SMP 7)</SelectItem>
+                  <SelectItem value="KU IV">KU IV (10-11 Tahun / SD Kelas 4-5)</SelectItem>
+                  <SelectItem value="KU V">KU V (&lt; 10 Tahun / SD Kelas 1-3 / PAUD)</SelectItem>
+                  <SelectItem value="KU 1">KU 1 (16-18 Tahun)</SelectItem>
+                  <SelectItem value="KU 2">KU 2 (14-15 Tahun)</SelectItem>
+                  <SelectItem value="KU 3">KU 3 (12-13 Tahun)</SelectItem>
+                  <SelectItem value="KU 4">KU 4 (10-11 Tahun)</SelectItem>
+                  <SelectItem value="KU 5">KU 5 (8-9 Tahun)</SelectItem>
+                  <SelectItem value="KU 6">KU 6 (≤ 7 Tahun)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import ExcelJS from 'exceljs';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Download, FileSpreadsheet, Filter, School, Loader2, Trophy } from 'lucide-react';
+import { Download, FileSpreadsheet, Filter, School, Loader2, Trophy, Printer } from 'lucide-react';
 import { formatMsToTime } from '@/lib/utils';
 
 interface EventItem {
@@ -366,7 +367,20 @@ export function ExportBySchoolCard({
           </div>
         </div>
 
-        <div className="pt-2 flex justify-end">
+        <div className="pt-2 flex flex-wrap items-center justify-end gap-2">
+          {selectedEventId && (
+            <Link href={`/events/${selectedEventId}/rekap-klub`} target="_blank">
+              <Button
+                type="button"
+                variant="outline"
+                className="gap-2 text-xs font-bold border-blue-200 text-blue-700 hover:bg-blue-50"
+              >
+                <Printer className="w-4 h-4 text-blue-600" />
+                Cetak PDF Lembar Rekap per Klub
+              </Button>
+            </Link>
+          )}
+
           <Button
             onClick={handleDownloadExcel}
             disabled={downloading || !selectedEventId}
