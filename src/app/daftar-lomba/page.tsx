@@ -6,6 +6,7 @@ import { Waves } from 'lucide-react';
 import Link from 'next/link';
 import { ViewerSubHeader } from '@/components/modules/viewer-subheader';
 import { ViewerEventCard } from '@/components/modules/viewer-event-card';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export const dynamic = 'force-dynamic';
 
@@ -57,13 +58,11 @@ export default async function DaftarLombaPage() {
         />
 
         {!events || events.length === 0 ? (
-          <div className="pub-card p-12 text-center">
-            <Waves className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
-            <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Belum ada kejuaraan dibuka</h3>
-            <p className="mt-1 text-sm text-[var(--m-muted)]">
-              Panitia belum mempublikasikan kejuaraan yang dibuka pendaftarannya.
-            </p>
-          </div>
+          <EmptyState
+            icon={<Waves className="h-6 w-6 text-primary" />}
+            title="Belum ada kejuaraan dibuka"
+            description="Panitia belum mempublikasikan kejuaraan yang dibuka pendaftarannya."
+          />
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {events.map((event) => (

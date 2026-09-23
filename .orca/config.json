@@ -1,0 +1,28 @@
+{
+  "name": "Rajendra SCMS Autonomous Orchestrator",
+  "version": "2.0.0",
+  "projectPath": "C:/Rajendra_Project/scms-app",
+  "workspaceRoot": "C:/Rajendra_Project",
+  "prdPath": "PRD.md",
+  "designSystemPath": "DESIGN.md",
+  "defaultAgent": "antigravity",
+  "fallbackAgents": ["claude", "codex", "gemini"],
+  "agentTeamsEnabled": true,
+  "nestedWorkerDepth": 3,
+  "qualityGates": {
+    "testCommand": "npm test",
+    "buildCommand": "npm run build",
+    "minPassingTests": 124,
+    "themeEnforcement": "light-only"
+  },
+  "agencyRoster": {
+    "uiDesigner": "../.claude/agents/design/design-ui-designer.md",
+    "uxArchitect": "../.claude/agents/design/design-ux-architect.md",
+    "brandGuardian": "../.claude/agents/design/design-brand-guardian.md",
+    "uiReviewer": "../.claude/agents/design/design-ui-finish-gate-reviewer.md",
+    "frontendDev": "../.claude/agents/engineering/engineering-frontend-developer.md",
+    "fullstackDev": "../.claude/agents/engineering/engineering-fullstack-engineer.md",
+    "qaAutomation": "../.claude/agents/testing/testing-qa-automation-engineer.md",
+    "productManager": "../.claude/agents/product/product-manager.md"
+  }
+}

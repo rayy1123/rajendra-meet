@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Event } from '@/types/database';
 import { EventLogoDialog } from '@/components/modules/event-logo-dialog';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export interface EventCardData extends Event {
   participant_count: number;
@@ -46,9 +47,18 @@ export function PerlombaanCardList({ events }: { events: EventCardData[] }) {
       )}
 
       {events.length === 0 ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center text-slate-500">
-          Belum ada kejuaraan yang dibuat.
-        </div>
+        <EmptyState
+          icon={<Trophy className="h-6 w-6 text-primary" />}
+          title="Belum ada kejuaraan"
+          description="Belum ada event kejuaraan yang dibuat oleh panitia."
+          action={
+            <Link href="/events/new">
+              <button type="button" className="pub-btn-primary text-xs font-bold">
+                Buat Kejuaraan Baru
+              </button>
+            </Link>
+          }
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {events.map((ev) => {

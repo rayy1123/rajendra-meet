@@ -8,8 +8,9 @@ import ExcelJS from 'exceljs';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Download, FileSpreadsheet, Filter, School, Loader2, Trophy, Printer } from 'lucide-react';
+import { Download, FileSpreadsheet, Filter, School, Trophy, Printer } from 'lucide-react';
 import { formatMsToTime } from '@/lib/utils';
+import { BrandedSpinner } from '@/components/ui/branded-loading';
 
 interface EventItem {
   id: string;
@@ -387,7 +388,7 @@ export function ExportBySchoolCard({
             className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs"
           >
             {downloading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <BrandedSpinner className="w-4 h-4 text-white" />
             ) : (
               <Download className="w-4 h-4" />
             )}

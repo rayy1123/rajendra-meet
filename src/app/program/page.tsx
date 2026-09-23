@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { PublicShell } from '@/components/layout/public-shell';
 import { Waves } from 'lucide-react';
 import { PublicProgramViewer, type ProgramCompEvent } from '@/components/modules/public-program-viewer';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,10 +61,12 @@ export default async function ProgramPage({
     >
       <div className="pub-container pb-16">
         {!current ? (
-          <div className="pub-card p-12 text-center no-print">
-            <Waves className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
-            <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Belum ada kejuaraan</h3>
-          </div>
+          <EmptyState
+            icon={<Waves className="h-6 w-6 text-primary" />}
+            title="Belum ada kejuaraan"
+            description="Panitia belum mempublikasikan susunan buku acara kejuaraan apa pun."
+            className="no-print my-6"
+          />
         ) : (
           <PublicProgramViewer
             currentEvent={current}

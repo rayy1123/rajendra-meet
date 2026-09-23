@@ -4,6 +4,7 @@ import { PublicShell } from '@/components/layout/public-shell';
 import { RouteEventSelect } from '@/components/modules/route-event-select';
 import { Medal } from 'lucide-react';
 import { PrintButton } from '@/components/modules/print-button';
+import { EmptyState } from '@/components/ui/empty-state';
 
 interface SchoolTally {
   name: string;
@@ -140,13 +141,12 @@ export default async function MedalTallyPage({
         </div>
 
         {rows.length === 0 ? (
-          <div className="pub-card p-12 text-center no-print">
-            <Medal className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
-            <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Belum ada hasil</h3>
-            <p className="mt-1 text-sm text-[var(--m-muted)]">
-              Kejuaraan ini belum memiliki hasil finished untuk dihitung medalinya.
-            </p>
-          </div>
+          <EmptyState
+            icon={<Medal className="h-6 w-6" />}
+            title="Belum ada hasil"
+            description="Kejuaraan ini belum memiliki hasil finished untuk dihitung medalinya."
+            className="no-print my-6"
+          />
         ) : (
           <>
             {/* Podium */}

@@ -4,6 +4,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { PrintButton } from '@/components/modules/print-button';
 import { Trophy } from 'lucide-react';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export const dynamic = 'force-dynamic';
 
@@ -145,13 +146,11 @@ export default async function CertificatePage({
       </div>
 
       {certs.length === 0 ? (
-        <div className="pub-card p-12 text-center">
-          <Trophy className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
-          <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Belum ada hasil</h3>
-          <p className="mt-1 text-sm text-[var(--m-muted)]">
-            Nomor lomba ini belum memiliki hasil finished untuk dibuat sertifikat.
-          </p>
-        </div>
+        <EmptyState
+          icon={<Trophy className="h-6 w-6" />}
+          title="Belum ada hasil"
+          description="Nomor lomba ini belum memiliki hasil finished untuk dibuat sertifikat."
+        />
       ) : (
         <div className="grid grid-cols-1 gap-6">
           {certs.map((c) => (

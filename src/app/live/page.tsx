@@ -6,6 +6,7 @@ import { getEventLiveConfig } from '@/lib/data/live-scoreboard-server';
 import { checkEventLiveStatus } from '@/lib/data/live-scoreboard-settings';
 import { Waves, Info, Lock } from 'lucide-react';
 import Link from 'next/link';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export const dynamic = 'force-dynamic';
 
@@ -120,11 +121,12 @@ export default async function LivePage({
       ]}
     >
       {!current ? (
-        <div className="pub-card p-12 text-center">
-          <Waves className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
-          <h3 className="mt-3 font-semibold text-[var(--m-ink)]">Belum ada kejuaraan</h3>
-          <p className="mt-1 text-sm text-[var(--m-muted)]">Panitia belum mempublikasikan kejuaraan apa pun.</p>
-        </div>
+        <EmptyState
+          icon={<Waves className="h-6 w-6 text-primary" />}
+          title="Belum ada kejuaraan"
+          description="Panitia belum mempublikasikan kejuaraan apa pun."
+          className="my-6"
+        />
       ) : !liveStatus?.isActive ? (
         <LiveClosedCard
           event={current}

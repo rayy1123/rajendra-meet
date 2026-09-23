@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Eye, EyeOff, HelpCircle, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { SplitAuthShell } from '@/components/layout/split-auth-shell';
 import { createClient } from '@/lib/supabase/client';
+import { BrandedSpinner } from '@/components/ui/branded-loading';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
@@ -150,7 +151,7 @@ export default function LoginPage() {
         >
           {loading ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <BrandedSpinner className="mr-2 h-4 w-4" />
               Memproses Masuk...
             </>
           ) : (

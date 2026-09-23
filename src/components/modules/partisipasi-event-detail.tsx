@@ -264,7 +264,13 @@ export function PartisipasiEventDetail({
             </select>
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+            <Link
+              href={`/events/${event.id}/rekap-klub`}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs px-3.5 py-2 shadow-xs transition-colors"
+            >
+              <Printer className="h-3.5 w-3.5" /> Rekap per Klub (PDF)
+            </Link>
             <button
               type="button"
               onClick={handleExportExcel}
@@ -275,9 +281,9 @@ export function PartisipasiEventDetail({
             <button
               type="button"
               onClick={handlePrintPDF}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 shadow-sm transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs px-4 py-2 shadow-sm transition-colors"
             >
-              <Printer className="h-3.5 w-3.5" /> Cetak PDF
+              <Printer className="h-3.5 w-3.5" /> Cetak Tabel
             </button>
           </div>
         </div>

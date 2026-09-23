@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Radio, Lock, Unlock, Clock, ChevronDown, Check, Loader2 } from 'lucide-react';
+import { Radio, Lock, Unlock, Clock, ChevronDown, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { BrandedSpinner } from '@/components/ui/branded-loading';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -68,7 +69,7 @@ export function EventLiveToggle({ eventId, initialMode = 'auto', event }: EventL
             }`}
           >
             {loading ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+              <BrandedSpinner className="h-3.5 w-3.5" />
             ) : status.isActive ? (
               <span className="flex h-2 w-2 relative">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>

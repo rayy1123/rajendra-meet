@@ -39,9 +39,9 @@ import {
   School as SchoolIcon,
   Trophy,
   Sparkles,
-  Loader2,
   CheckCircle2,
 } from 'lucide-react';
+import { BrandedSpinner } from '@/components/ui/branded-loading';
 import { EmptyState } from '@/components/ui/empty-state';
 import { getKuCode, calculateAgeCategory, ageInYears } from '@/lib/age-category';
 import { generateAthleteNumber } from '@/lib/utils';
@@ -616,7 +616,7 @@ export function AthleteManager({
               >
                 {saving ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <BrandedSpinner className="mr-2 h-4 w-4" />
                     Menyimpan...
                   </>
                 ) : (
