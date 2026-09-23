@@ -3,13 +3,10 @@ import { rankResults } from '@/services/ranking';
 import { buildStandings, type PointRule, type ScoredEntry } from '@/services/points';
 import { selectBestSwimmers, type SwimmerEntry } from '@/services/records';
 import type { ResultStatus } from '@/types/database';
-import { GlassCard } from '@/components/ui/glass-card';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { School, User, Building2 } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
-import { EmptyState } from '@/components/ui/empty-state';
+import { AwardsManager, type EventOption } from '@/components/modules/awards-manager';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,13 +21,14 @@ const DEFAULT_RULES: PointRule[] = [
   { rank: 8, points: 1 },
 ];
 
-interface Row {
+interface MappedRow {
   registration_id: string;
   competition_event_id: string;
+  event_id: string;
   athlete_id: string;
   athlete_name: string;
   school_id: string | null;
-  school_name: string | null;
+  school_name: string;
   grade_level: string;
   class_name: string;
   gender: string;
@@ -38,37 +36,137 @@ interface Row {
   status: string;
 }
 
-export default async function AwardsPage() {
+export default async function AwardsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ eventId?: string }>;
+}) {
   const supabase = await createClient();
+  const params = await searchParams;
+  const activeEventId = params?.eventId || '';
 
-  const { data: pointRules } = await supabase
+  // 1. Ambil daftar event aktif
+  const { data: eventsData } = await supabase
+    .from('events')
+    .select('id, name, location, start_date, end_date')
+    .order('start_date', { ascending: false });
+
+  const eventsList: EventOption[] = (eventsData || []).map((e) => ({
+    id: e.id,
+    name: e.name,
+    location: e.location,
+    startDate: e.start_date,
+    endDate: e.end_date,
+  }));
+
+  const currentEvent = activeEventId
+    ? eventsList.find((e) => e.id === activeEventId) || null
+    : eventsList[0] || null;
+
+  // 2. Ambil point rules (deduplikasi per rank 1..8)
+  let prQuery = supabase
     .from('point_rules')
-    .select('rank, points')
+    .select('event_id, rank, points')
     .order('rank', { ascending: true });
-  const rules = (pointRules && pointRules.length ? pointRules : DEFAULT_RULES) as PointRule[];
 
-  // Ambil hasil + join registrations -> athletes -> schools + competition_event
-  const { data: results } = await supabase
+  if (currentEvent) {
+    prQuery = prQuery.eq('event_id', currentEvent.id);
+  }
+
+  const { data: pointRulesData } = await prQuery;
+
+  const rulesMap = new Map<number, number>();
+  DEFAULT_RULES.forEach((r) => rulesMap.set(r.rank, r.points));
+  (pointRulesData || []).forEach((r) => {
+    if (r.rank && r.points != null) {
+      rulesMap.set(r.rank, r.points);
+    }
+  });
+
+  const rules: PointRule[] = Array.from(rulesMap.entries())
+    .map(([rank, points]) => ({ rank, points }))
+    .sort((a, b) => a.rank - b.rank);
+
+  // 3. Ambil data sekolah untuk pemetaan nama
+  const { data: schoolsData } = await supabase.from('schools').select('id, name');
+  const schoolNameMap: Record<string, string> = {};
+  (schoolsData || []).forEach((s) => {
+    schoolNameMap[s.id] = s.name;
+  });
+
+  // 4. Ambil hasil lomba (results) dengan relasi lengkap
+  let resultsQuery = supabase
     .from('results')
     .select(`
       id,
       time_ms,
       status,
       heat_assignments!inner (
+        id,
+        heat_id,
+        registration_id,
         registrations!inner (
           id,
           competition_event_id,
+          event_id,
           athletes!inner (
-            id, full_name, grade_level, class_name, gender, schools ( name )
+            id,
+            full_name,
+            grade_level,
+            class_name,
+            gender,
+            school_id,
+            schools (
+              id,
+              name
+            )
           )
         )
       )
     `);
 
-  const rows: Row[] = (results || []) as unknown as Row[];
+  if (currentEvent) {
+    resultsQuery = resultsQuery.eq(
+      'heat_assignments.registrations.event_id',
+      currentEvent.id
+    );
+  }
 
-  // Rank per competition_event
-  const byComp = new Map<string, Row[]>();
+  const { data: rawResults } = await resultsQuery;
+
+  // 5. Normalisasi data berstruktur nested ke bentuk MappedRow yang bersih
+  const rows: MappedRow[] = (rawResults || [])
+    .map((r: any) => {
+      const assign = r.heat_assignments;
+      const reg = assign?.registrations;
+      const ath = reg?.athletes;
+      if (!reg || !ath) return null;
+
+      const sId = ath.school_id || ath.schools?.id || null;
+      const sName = ath.schools?.name || (sId ? schoolNameMap[sId] : null) || 'Umum / Perorangan';
+      if (sId && !schoolNameMap[sId]) {
+        schoolNameMap[sId] = sName;
+      }
+
+      return {
+        registration_id: reg.id,
+        competition_event_id: reg.competition_event_id,
+        event_id: reg.event_id,
+        athlete_id: ath.id,
+        athlete_name: ath.full_name,
+        school_id: sId,
+        school_name: sName,
+        grade_level: ath.grade_level || '–',
+        class_name: ath.class_name || '–',
+        gender: ath.gender || 'male',
+        time_ms: r.time_ms,
+        status: r.status,
+      };
+    })
+    .filter(Boolean) as MappedRow[];
+
+  // 6. Hitung Ranking per Nomor Lomba (competition_event_id)
+  const byComp = new Map<string, MappedRow[]>();
   rows.forEach((r) => {
     const arr = byComp.get(r.competition_event_id) || [];
     arr.push(r);
@@ -77,6 +175,7 @@ export default async function AwardsPage() {
 
   const entries: ScoredEntry[] = [];
   const swimmerEntries: SwimmerEntry[] = [];
+
   for (const [compId, arr] of byComp) {
     const ranked = rankResults(
       arr.map((r) => ({
@@ -85,11 +184,13 @@ export default async function AwardsPage() {
         status: (r.status === 'ok' ? 'finished' : r.status) as ResultStatus,
       }))
     );
+
     ranked.forEach((rk) => {
       const r = arr.find((x) => x.registration_id === rk.registration_id);
       if (!r) return;
       const rank = rk.rank ?? null;
       if (rank == null) return;
+
       entries.push({
         athlete_id: r.athlete_id,
         school_id: r.school_id,
@@ -98,7 +199,9 @@ export default async function AwardsPage() {
         gender: r.gender,
         rank,
         competition_event_id: compId,
+        event_id: r.event_id,
       });
+
       swimmerEntries.push({
         athlete_id: r.athlete_id,
         athlete_name: r.athlete_name,
@@ -112,122 +215,41 @@ export default async function AwardsPage() {
     });
   }
 
+  // 7. Kalkulasi Standings
   const overall = buildStandings(entries, rules, { groupBy: 'overall' });
   const byGrade = buildStandings(entries, rules, { groupBy: 'grade' });
   const byClass = buildStandings(entries, rules, { groupBy: 'class' });
   const bestSwimmers = selectBestSwimmers(swimmerEntries, rules);
 
-  const schoolName = (id: string | null) =>
-    rows.find((r) => r.school_id === id)?.school_name || 'Umum';
-
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
-      <Breadcrumb items={[{ label: 'Dasbor', href: '/dashboard' }, { label: 'Penghargaan' }]} className="mb-2" />
-      <PageHeader
-        title="Awards & Klasemen"
-        description={`Klasemen dihitung otomatis dari hasil lomba. Poin: ${rules.map((r) => `${r.rank}=${r.points}`).join(', ')}.`}
-        icon={<Building2 className="h-6 w-6" />}
-      />
-
-      {entries.length === 0 ? (
-        <EmptyState
-          icon={<Building2 className="h-6 w-6" />}
-          title="Belum ada hasil lomba"
-          description="Input hasil di menu Results untuk melihat klasemen penghargaan."
+      <div className="no-print">
+        <Breadcrumb
+          items={[
+            { label: 'Dasbor', href: '/dashboard' },
+            { label: 'Penghargaan & Klasemen' },
+          ]}
+          className="mb-2"
         />
-      ) : (
-        <Tabs defaultValue="overall" className="space-y-4">
-          <TabsList className="bg-[var(--m-aqua-soft)] text-[var(--m-aqua-ink)] p-1 rounded-xl">
-            <TabsTrigger value="overall" className="rounded-lg data-[state=active]:bg-[var(--m-aqua)] data-[state=active]:text-white"><Building2 className="h-4 w-4 mr-2" /> Overall</TabsTrigger>
-            <TabsTrigger value="grade" className="rounded-lg data-[state=active]:bg-[var(--m-aqua)] data-[state=active]:text-white"><School className="h-4 w-4 mr-2" /> Per Tingkat</TabsTrigger>
-            <TabsTrigger value="class" className="rounded-lg data-[state=active]:bg-[var(--m-aqua)] data-[state=active]:text-white"><User className="h-4 w-4 mr-2" /> Per Kelas</TabsTrigger>
-            <TabsTrigger value="swimmer" className="rounded-lg data-[state=active]:bg-[var(--m-aqua)] data-[state=active]:text-white"><User className="h-4 w-4 mr-2" /> Best Swimmer</TabsTrigger>
-          </TabsList>
+        <PageHeader
+          title="Awards & Indikator Klasemen"
+          description="Sistem indikator penilaian otomatis: Klasemen Juara Umum, Pemenang per Tingkat & Kelas, serta Gelar Best Swimmer."
+          icon={<Trophy className="h-6 w-6" />}
+        />
+      </div>
 
-          <div className="space-y-4">
-            <div data-value="overall">
-              <StandingTable rows={overall} schoolName={schoolName} title="Klasemen Overall" />
-            </div>
-            <div data-value="grade">
-              <StandingTable rows={byGrade} schoolName={schoolName} title="Klasemen per Tingkat" />
-            </div>
-            <div data-value="class">
-              <StandingTable rows={byClass} schoolName={schoolName} title="Klasemen per Kelas" />
-            </div>
-            <div data-value="swimmer">
-              {bestSwimmers.map((g) => (
-                <GlassCard key={g.group_key} className="p-5 mb-4">
-                  <h3 className="text-base font-semibold mb-3">{g.group_key}</h3>
-                  <div>
-                    {g.tied ? (
-                      <p className="text-sm text-amber-600">
-                        Seri di puncak ({g.contenders.map((c) => c.athlete_name).join(', ')}). Panitia menentukan pemenang.
-                      </p>
-                    ) : g.winner ? (
-                      <div className="flex items-center gap-3">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-700">★</span>
-                        <div>
-                          <p className="font-semibold">{g.winner.athlete_name}</p>
-                          <p className="text-sm text-[var(--m-muted)]">
-                            {schoolName(g.winner.school_id)} · {g.winner.points} poin · {g.winner.gold}Emas {g.winner.silver}Perak {g.winner.bronze}Perunggu
-                          </p>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-sm text-[var(--m-muted)]">Belum ada pemenang.</p>
-                    )}
-                  </div>
-                </GlassCard>
-              ))}
-            </div>
-          </div>
-        </Tabs>
-      )}
+      <AwardsManager
+        event={currentEvent}
+        eventsList={eventsList}
+        rules={rules}
+        overall={overall}
+        byGrade={byGrade}
+        byClass={byClass}
+        bestSwimmers={bestSwimmers}
+        schoolNameMap={schoolNameMap}
+        totalEntriesScored={entries.length}
+        totalCompEventsScored={byComp.size}
+      />
     </div>
   );
 }
-
-function StandingTable({
-  rows,
-  schoolName,
-  title,
-}: {
-  rows: { key: string; school_id: string | null; points: number; gold: number; silver: number; bronze: number }[];
-  schoolName: (id: string | null) => string;
-  title: string;
-}) {
-  return (
-    <GlassCard className="p-5">
-      <h3 className="text-base font-semibold mb-4">{title}</h3>
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader className="bg-[var(--m-soft)]">
-            <TableRow>
-              <TableHead>#</TableHead>
-              <TableHead>Sekolah</TableHead>
-              <TableHead>Poin</TableHead>
-              <TableHead>Emas</TableHead>
-              <TableHead>Perak</TableHead>
-              <TableHead>Perunggu</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rows.map((r, i) => (
-              <TableRow key={r.key} className="hover:bg-[var(--m-soft)]">
-                <TableCell className="font-bold">{i + 1}</TableCell>
-                <TableCell className="font-medium text-[var(--m-ink)]">{schoolName(r.school_id)}</TableCell>
-                <TableCell className="font-bold text-primary">{r.points}</TableCell>
-                <TableCell>{r.gold}</TableCell>
-                <TableCell>{r.silver}</TableCell>
-                <TableCell>{r.bronze}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    </GlassCard>
-  );
-}
-
-// Table primitives
-
