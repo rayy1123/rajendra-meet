@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Printer, Download } from 'lucide-react';
+import { Printer, Download, BookOpen, Layers } from 'lucide-react';
 import { exportToExcel, printPage } from '@/lib/utils/export';
 import { formatMsToTime } from '@/lib/utils';
 
@@ -31,11 +31,23 @@ interface ExportViewProps {
   events: { id: string; name: string }[];
   initialEventId: string;
   exportData: ExportCompEvent[];
+  showEventSelector?: boolean;
 }
 
-export function ExportView({ events, initialEventId, exportData }: ExportViewProps) {
+export function ExportView({
+  events,
+  initialEventId,
+  exportData,
+  showEventSelector = false,
+}: ExportViewProps) {
   const router = useRouter();
   const [selectedEventId, setSelectedEventId] = useState(initialEventId);
+
+  useEffect(() => {
+    if (initialEventId) {
+      setSelectedEventId(initialEventId);
+    }
+  }, [initialEventId]);
 
   const handleEventChange = (val: string) => {
     setSelectedEventId(val);
@@ -68,32 +80,48 @@ export function ExportView({ events, initialEventId, exportData }: ExportViewPro
   return (
     <div className="space-y-6">
       {/* Control Bar (Disembunyikan saat cetak PDF / Print) */}
-      <div className="flex flex-col sm:flex-row justify-between gap-4 bg-muted/40 p-4 rounded-xl border print:hidden">
-        <div className="w-full sm:w-72">
-          <label className="text-xs font-semibold block mb-1">Pilih Kejuaraan / Event</label>
-          <Select value={selectedEventId} onValueChange={handleEventChange}>
-            <SelectTrigger className="bg-background">
-              <SelectValue placeholder="Pilih Event" />
-            </SelectTrigger>
-            <SelectContent>
-              {events.map((e) => (
-                <SelectItem key={e.id} value={e.id}>
-                  {e.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-muted/40 p-4 rounded-xl border print:hidden">
+        {showEventSelector ? (
+          <div className="w-full sm:w-72">
+            <label className="text-xs font-semibold block mb-1">Pilih Kejuaraan / Event</label>
+            <Select value={selectedEventId} onValueChange={handleEventChange}>
+              <SelectTrigger className="bg-background">
+                <SelectValue placeholder="Pilih Event" />
+              </SelectTrigger>
+              <SelectContent>
+                {events.map((e) => (
+                  <SelectItem key={e.id} value={e.id}>
+                    {e.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--m-aqua-soft)] text-[var(--m-aqua-ink)] font-black">
+              <BookOpen className="h-4 w-4" />
+            </span>
+            <div>
+              <h3 className="font-heading font-bold text-sm text-[var(--m-ink)]">
+                Susunan Seri & Lintasan Lomba (Buku Acara)
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Lembar start list siap cetak untuk pengambil waktu (timer) dan wasit kolam.
+              </p>
+            </div>
+          </div>
+        )}
 
-        <div className="flex items-end gap-2">
+        <div className="flex items-center gap-2 justify-end">
           <Button
             variant="outline"
             onClick={handleExportExcel}
-            className="gap-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50"
+            className="gap-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 text-xs font-bold"
           >
             <Download className="w-4 h-4" /> Export Excel (.xlsx)
           </Button>
-          <Button onClick={printPage} className="gap-2 bg-primary hover:bg-primary/90">
+          <Button onClick={printPage} className="gap-2 bg-primary hover:bg-primary/90 text-xs font-bold">
             <Printer className="w-4 h-4" /> Cetak / Save PDF
           </Button>
         </div>

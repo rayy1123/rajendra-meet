@@ -1,74 +1,133 @@
 import { createClient } from '@/lib/supabase/server';
 import { detectBrokenRecords, type RecordCandidate, type ExistingRecord } from '@/services/records';
-import { formatMsToTime } from '@/lib/utils';
-import { GlassCard } from '@/components/ui/glass-card';
-import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { Crown } from 'lucide-react';
+import { RecordsManager, type RecordItemView } from '@/components/modules/records-manager';
 
 export const dynamic = 'force-dynamic';
 
-export default async function RajendraRecordPage() {
+export default async function RajendraRecordPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ eventId?: string }>;
+}) {
   const supabase = await createClient();
+  const params = await searchParams;
+  const activeEventId = params?.eventId || 'all';
 
-  // Rekor yang sudah tercatat
+  // 1. Ambil daftar event untuk switcher
+  const { data: eventsData } = await supabase
+    .from('events')
+    .select('id, name')
+    .order('start_date', { ascending: false });
+
+  const events = (eventsData || []).map((e) => ({ id: e.id, name: e.name }));
+
+  // 2. Rekor yang sudah tercatat di database
   const { data: existing } = await supabase
     .from('rajendra_records')
     .select('competition_event_id, time_ms')
     .eq('is_active', true);
 
-  // Kandidat: hasil finished yang valid
-  const { data: results } = await supabase
+  // 3. Ambil data nomor lomba untuk detail nama, gaya, jarak, dll
+  const { data: compEvents } = await supabase
+    .from('competition_events')
+    .select('id, name, distance_meters, stroke, gender, grade_level, event_id, events(id, name)');
+
+  const compMap = new Map<string, any>();
+  (compEvents || []).forEach((c) => {
+    compMap.set(c.id, c);
+  });
+
+  // 4. Kandidat: hasil finished yang valid dengan struktur relasi yang benar
+  let resultsQuery = supabase
     .from('results')
     .select(`
+      id,
       time_ms,
       status,
       heat_assignments!inner (
+        id,
+        heat_id,
+        registration_id,
         registrations!inner (
-          athletes!inner ( id, full_name, schools ( name ) ),
-          competition_event_id
+          id,
+          competition_event_id,
+          event_id,
+          athletes!inner (
+            id,
+            full_name,
+            schools ( name )
+          )
         )
       )
-    `);
+    `)
+    .eq('status', 'finished')
+    .not('time_ms', 'is', null)
+    .gt('time_ms', 0);
 
-  const candidates: RecordCandidate[] = (results || []).map((r: {
-    time_ms: number | null;
-    status: string | null;
-    heat_assignments: {
-      registrations: {
-        athletes: { id: string; full_name: string | null; schools: { name: string | null }[] | null }[] | null;
-        competition_event_id: string;
-      }[];
-    }[];
-  }) => {
-    const ha = r.heat_assignments?.[0];
-    const reg = ha?.registrations?.[0];
-    const ath = reg?.athletes?.[0];
-    return {
-      time_ms: r.time_ms ?? 0,
-      status: r.status ?? '',
-      competition_event_id: reg?.competition_event_id ?? '',
-      athlete_id: ath?.id ?? '',
-      athlete_name: ath?.full_name ?? '',
-      school_name: ath?.schools?.[0]?.name ?? '',
-    };
-  }) as unknown as RecordCandidate[];
+  if (activeEventId && activeEventId !== 'all') {
+    resultsQuery = resultsQuery.eq(
+      'heat_assignments.registrations.event_id',
+      activeEventId
+    );
+  }
+
+  const { data: results } = await resultsQuery;
+
+  // 5. Normalisasi candidates
+  const candidates: RecordCandidate[] = (results || [])
+    .map((r: any) => {
+      const ha = r.heat_assignments;
+      const reg = ha?.registrations;
+      const ath = reg?.athletes;
+      if (!reg || !ath || !reg.competition_event_id) return null;
+
+      return {
+        time_ms: r.time_ms ?? 0,
+        status: r.status ?? 'finished',
+        competition_event_id: reg.competition_event_id,
+        event_id: reg.event_id,
+        athlete_id: ath.id ?? '',
+        athlete_name: ath.full_name ?? 'Atlet',
+        school_name: ath.schools?.name ?? 'Umum / Perorangan',
+      };
+    })
+    .filter(Boolean) as RecordCandidate[];
 
   const existingRecs: ExistingRecord[] = (existing || []) as unknown as ExistingRecord[];
-
   const broken = detectBrokenRecords(candidates, existingRecs);
 
-  // Map nama nomor lomba
-  const { data: compEvents } = await supabase
-    .from('competition_events')
-    .select('id, distance_meters, stroke, gender, grade_level');
+  // 6. Bentuk record items view yang lengkap
+  const formattedRecords: RecordItemView[] = broken.map((b) => {
+    const comp = compMap.get(b.competition_event_id);
+    const strokeName = comp?.stroke || 'Gaya Bebas';
+    const dist = comp?.distance_meters || 50;
+    const gender = comp?.gender === 'female' ? 'female' : 'male';
+    const grade = comp?.grade_level || 'Umum';
+    const eventName = comp?.events?.name || 'Kejuaraan Renang';
 
-  const compName = (id: string) => {
-    const c = (compEvents || []).find((x: { id: string; distance_meters?: number | null; stroke?: string | null; grade_level?: string | null; gender?: string | null }) => x.id === id);
-    if (!c) return id;
-    return `${c.distance_meters}m ${c.stroke} ${c.grade_level} (${c.gender === 'female' ? 'Putri' : 'Putra'})`;
-  };
+    const displayName =
+      comp?.name || `${dist}m ${strokeName} ${grade} (${gender === 'female' ? 'Putri' : 'Putra'})`;
+
+    return {
+      competition_event_id: b.competition_event_id,
+      event_id: comp?.event_id,
+      event_name: eventName,
+      athlete_id: b.athlete_id,
+      athlete_name: b.athlete_name || 'Atlet',
+      school_name: b.school_name || 'Umum / Perorangan',
+      time_ms: b.time_ms,
+      previous_time_ms: b.previous_time_ms,
+      improvement_ms: b.improvement_ms,
+      comp_name: displayName,
+      stroke: strokeName,
+      distance_meters: dist,
+      gender,
+      grade_level: grade,
+    };
+  });
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
@@ -79,32 +138,11 @@ export default async function RajendraRecordPage() {
         icon={<Crown className="h-6 w-6" />}
       />
 
-      {broken.length === 0 ? (
-        <EmptyState
-          icon={<Crown className="h-6 w-6" />}
-          title="Belum Ada Rekor Baru"
-          description="Belum ada rekor baru terdeteksi. Input hasil lomba untuk memulai."
-        />
-      ) : (
-        <div className="space-y-3">
-          {broken.map((b) => (
-            <GlassCard key={b.competition_event_id} className="flex items-center gap-4 p-5">
-              <Crown className="h-8 w-8 text-amber-500" />
-              <div className="flex-1">
-                <p className="font-semibold">{compName(b.competition_event_id)}</p>
-                <p className="text-sm text-[var(--m-muted)]">{b.athlete_name}</p>
-                <p className="text-xs text-[var(--m-muted)]/80">{b.school_name || 'Perorangan'}</p>
-              </div>
-              <div className="text-right">
-                <p className="font-mono text-2xl tabular-nums tracking-tight text-primary">{formatMsToTime(b.time_ms)}</p>
-                {b.improvement_ms != null && (
-                  <p className="text-xs text-emerald-600">-{(b.improvement_ms / 1000).toFixed(2)}s dari rekor lama</p>
-                )}
-              </div>
-            </GlassCard>
-          ))}
-        </div>
-      )}
+      <RecordsManager
+        events={events}
+        activeEventId={activeEventId}
+        records={formattedRecords}
+      />
     </div>
   );
 }

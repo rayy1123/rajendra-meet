@@ -5,6 +5,7 @@ import { PrintButton } from '@/components/modules/print-button';
 import { Trophy } from 'lucide-react';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { EmptyState } from '@/components/ui/empty-state';
+import { CertificatePageControls } from '@/components/modules/certificate-page-controls';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,6 +42,7 @@ export default async function CertificatePage({
   let certs: CertRow[] = [];
   let eventLabel = '';
   let compLabel = '';
+  let selectedCeId = '';
 
   if (current) {
     const { data: ce } = await supabase
@@ -54,6 +56,7 @@ export default async function CertificatePage({
     }));
     const ceCur = ce?.find((c) => c.id === ceId) ?? ce?.[0];
     if (ceCur) {
+      selectedCeId = ceCur.id;
       eventLabel = current.name;
       compLabel = `${ceCur.distance_meters}m ${ceCur.stroke} ${ceCur.gender === 'male' ? 'Putra' : 'Putri'}`;
       const { data: assigns } = await supabase
@@ -135,15 +138,13 @@ export default async function CertificatePage({
         title="Sertifikat Penghargaan"
         description="Cetak sertifikat juara 1–3 per nomor lomba. Gunakan tombol Cetak untuk menyimpan / kirim PDF."
       />
-      <div className="mb-6 flex flex-wrap items-center gap-3">
-        <span className="rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-[var(--m-ink)]">
-          {current?.name ?? '—'}
-        </span>
-        <span className="rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-[var(--m-ink)]">
-          {compLabel || compEvents[0]?.label || '—'}
-        </span>
-        <PrintButton />
-      </div>
+
+      <CertificatePageControls
+        events={(events || []).map((e) => ({ id: e.id, name: e.name }))}
+        compEvents={compEvents}
+        currentEventId={current?.id || ''}
+        currentCeId={selectedCeId}
+      />
 
       {certs.length === 0 ? (
         <EmptyState

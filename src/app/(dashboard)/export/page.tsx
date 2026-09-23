@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { ExportView, type ExportCompEvent } from '@/components/modules/export-view';
 import { ExportBySchoolCard } from '@/components/modules/export-by-school-card';
+import { ExportEventToolbar } from '@/components/modules/export-event-toolbar';
 import { FileSpreadsheet, Printer } from 'lucide-react';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -17,8 +18,8 @@ export default async function ExportPage({
   const [{ data: events }, { data: schools }] = await Promise.all([
     supabase
       .from('events')
-      .select('id, name')
-      .order('created_at', { ascending: false }),
+      .select('id, name, location, start_date, end_date')
+      .order('start_date', { ascending: false }),
     supabase
       .from('schools')
       .select('id, name')
@@ -107,17 +108,26 @@ export default async function ExportPage({
         />
       ) : (
         <div className="space-y-6">
+          <ExportEventToolbar
+            events={events}
+            currentEventId={activeEventId}
+            totalEvents={exportData.length}
+          />
+
           <div className="print:hidden">
             <ExportBySchoolCard
               events={events}
               schools={schools || []}
               initialEventId={activeEventId}
+              showEventSelector={false}
             />
           </div>
+
           <ExportView
             events={events}
             initialEventId={activeEventId}
             exportData={exportData}
+            showEventSelector={false}
           />
         </div>
       )}

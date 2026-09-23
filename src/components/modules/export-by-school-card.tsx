@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
@@ -8,8 +8,9 @@ import ExcelJS from 'exceljs';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Download, FileSpreadsheet, Filter, School, Trophy, Printer } from 'lucide-react';
-import { formatMsToTime } from '@/lib/utils';
+import { Download, FileSpreadsheet, Filter, School, Trophy, Printer, BadgeCheck } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { formatMsToTime, cn } from '@/lib/utils';
 import { BrandedSpinner } from '@/components/ui/branded-loading';
 
 interface EventItem {
@@ -26,16 +27,26 @@ export function ExportBySchoolCard({
   events,
   schools,
   initialEventId,
+  showEventSelector = false,
 }: {
   events: EventItem[];
   schools: SchoolItem[];
   initialEventId: string;
+  showEventSelector?: boolean;
 }) {
   const supabase = createClient();
   const [selectedEventId, setSelectedEventId] = useState(initialEventId || events[0]?.id || '');
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>('all');
   const [selectedPaymentStatus, setSelectedPaymentStatus] = useState<string>('all');
   const [downloading, setDownloading] = useState(false);
+
+  const activeEventName = events.find((e) => e.id === selectedEventId)?.name || 'Kejuaraan';
+
+  useEffect(() => {
+    if (initialEventId) {
+      setSelectedEventId(initialEventId);
+    }
+  }, [initialEventId]);
 
   const handleDownloadExcel = async () => {
     if (!selectedEventId) {
@@ -288,12 +299,17 @@ export function ExportBySchoolCard({
   return (
     <Card className="shadow-xs border-primary/20 bg-card overflow-hidden">
       <CardHeader className="pb-3 border-b bg-muted/20">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-bold flex items-center gap-2">
-            <FileSpreadsheet className="w-5 h-5 text-emerald-600" /> Ekspor Pendaftar per Cabang / Klub
-          </CardTitle>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-base font-bold flex items-center gap-2">
+              <FileSpreadsheet className="w-5 h-5 text-emerald-600" /> Ekspor Pendaftar per Cabang / Klub
+            </CardTitle>
+            <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200 text-xs font-bold">
+              {activeEventName}
+            </Badge>
+          </div>
           <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-            Format Excel (.xlsx)
+            Format Excel (.xlsx) & PDF Lembar Klub
           </span>
         </div>
         <CardDescription className="text-xs">
@@ -302,27 +318,29 @@ export function ExportBySchoolCard({
       </CardHeader>
 
       <CardContent className="p-5 space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {/* Filter 1: Event */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
-              <Trophy className="w-3.5 h-3.5 text-primary" /> Pilih Kejuaraan
-            </label>
-            <Select value={selectedEventId} onValueChange={setSelectedEventId}>
-              <SelectTrigger className="h-9 text-xs">
-                <SelectValue placeholder="Pilih Event" />
-              </SelectTrigger>
-              <SelectContent>
-                {events.map((e) => (
-                  <SelectItem key={e.id} value={e.id} className="text-xs">
-                    {e.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        <div className={cn('grid gap-3', showEventSelector ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2')}>
+          {/* Filter Event (Hanya jika showEventSelector = true) */}
+          {showEventSelector && (
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                <Trophy className="w-3.5 h-3.5 text-primary" /> Pilih Kejuaraan
+              </label>
+              <Select value={selectedEventId} onValueChange={setSelectedEventId}>
+                <SelectTrigger className="h-9 text-xs">
+                  <SelectValue placeholder="Pilih Event" />
+                </SelectTrigger>
+                <SelectContent>
+                  {events.map((e) => (
+                    <SelectItem key={e.id} value={e.id} className="text-xs">
+                      {e.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
-          {/* Filter 2: Cabang (Sekolah / Klub) */}
+          {/* Filter Cabang (Sekolah / Klub) */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
               <School className="w-3.5 h-3.5 text-primary" /> Cabang / Klub
@@ -344,7 +362,7 @@ export function ExportBySchoolCard({
             </Select>
           </div>
 
-          {/* Filter 3: Status Pembayaran */}
+          {/* Filter Status Pembayaran */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
               <Filter className="w-3.5 h-3.5 text-primary" /> Status Pembayaran
