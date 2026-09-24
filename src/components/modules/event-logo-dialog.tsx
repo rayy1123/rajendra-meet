@@ -20,6 +20,7 @@ import {
   Trash2,
   Camera
 } from 'lucide-react';
+import { EventLogoImage } from '@/components/ui/event-logo-image';
 
 interface EventLogoDialogProps {
   eventId: string;
@@ -205,16 +206,12 @@ export function EventLogoDialog({
           {/* Logo Preview Box */}
           <div className="flex flex-col items-center justify-center p-4 bg-slate-50 border border-slate-200 rounded-2xl gap-2.5 text-center">
             <div className="h-24 w-24 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-center overflow-hidden p-2 relative group">
-              {previewUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={previewUrl}
-                  alt="Logo Preview"
-                  className="h-full w-full object-contain"
-                />
-              ) : (
-                <Trophy className="h-10 w-10 text-blue-500 opacity-80" />
-              )}
+              <EventLogoImage
+                src={previewUrl}
+                alt="Logo Preview"
+                className="h-full w-full object-contain"
+                fallbackIconClassName="h-10 w-10 text-blue-500 opacity-80"
+              />
             </div>
             <div className="text-[11px] text-slate-500">
               {previewUrl ? (

@@ -9,6 +9,7 @@ import { EventLogoDialog } from '@/components/modules/event-logo-dialog';
 import { CompetitionEventsManager } from '@/components/modules/competition-events-manager';
 import { EventLiveToggle } from '@/components/modules/event-live-toggle';
 import { EventWorkflowStepper } from '@/components/modules/event-workflow-stepper';
+import { EventLogoImage } from '@/components/ui/event-logo-image';
 import { getEventLiveConfig } from '@/lib/data/live-scoreboard-server';
 import { getEventSettings } from '@/lib/data/event-settings-server';
 
@@ -72,16 +73,12 @@ export default async function EventDetailPage({ params }: PageProps) {
                   className="group relative h-16 w-16 shrink-0 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center overflow-hidden shadow-sm hover:ring-2 hover:ring-primary/40 transition-all cursor-pointer"
                   title="Klik untuk mengubah logo kejuaraan"
                 >
-                  {event.logo_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={event.logo_url}
-                      alt={event.name}
-                      className="h-full w-full object-contain p-1.5"
-                    />
-                  ) : (
-                    <Trophy className="h-8 w-8 text-blue-600" />
-                  )}
+                  <EventLogoImage
+                    src={event.logo_url}
+                    alt={event.name}
+                    className="h-full w-full object-contain p-1.5"
+                    fallbackIconClassName="h-8 w-8 text-blue-600"
+                  />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
                     <Camera className="h-5 w-5" />
                   </div>

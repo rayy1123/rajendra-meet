@@ -20,6 +20,7 @@ import {
 import { Event } from '@/types/database';
 import { EventLogoDialog } from '@/components/modules/event-logo-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
+import { EventLogoImage } from '@/components/ui/event-logo-image';
 
 export interface EventCardData extends Event {
   participant_count: number;
@@ -87,16 +88,12 @@ export function PerlombaanCardList({ events }: { events: EventCardData[] }) {
                             className="group relative h-14 w-14 shrink-0 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center overflow-hidden shadow-sm hover:ring-2 hover:ring-primary/40 transition-all cursor-pointer"
                             title="Klik untuk mengubah logo kejuaraan"
                           >
-                            {ev.logo_url ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
-                                src={ev.logo_url}
-                                alt={ev.name}
-                                className="h-full w-full object-contain p-1"
-                              />
-                            ) : (
-                              <Trophy className="h-7 w-7 text-blue-600" />
-                            )}
+                            <EventLogoImage
+                              src={ev.logo_url}
+                              alt={ev.name}
+                              className="h-full w-full object-contain p-1"
+                              fallbackIconClassName="h-7 w-7 text-blue-600"
+                            />
                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
                               <Camera className="h-4 w-4" />
                             </div>

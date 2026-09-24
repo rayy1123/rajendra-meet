@@ -141,6 +141,7 @@ export function LandingSidebarDrawer({
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent
         side="left"
+        showCloseButton={false}
         className="flex w-80 max-w-[85vw] flex-col p-0 border-r border-[var(--m-border)] bg-[var(--m-surface)] z-50"
       >
         {/* Header Drawer */}

@@ -24,6 +24,7 @@ import {
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { AdminActionGuide } from '@/components/modules/admin-action-guide';
+import { EventLogoImage } from '@/components/ui/event-logo-image';
 
 export const dynamic = 'force-dynamic';
 
@@ -119,11 +120,11 @@ export default async function DashboardPage() {
           <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-5">
             <div className="flex items-start gap-4">
               <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white border border-[var(--m-border)] p-2 shadow-2xs">
-                {latestEvent.logo_url ? (
-                  <img src={latestEvent.logo_url} alt={latestEvent.name} className="h-full w-full object-contain" />
-                ) : (
-                  <Trophy className="h-7 w-7 text-[var(--m-aqua-ink)]" />
-                )}
+                <EventLogoImage
+                  src={latestEvent.logo_url}
+                  alt={latestEvent.name}
+                  fallbackIconClassName="h-7 w-7 text-[var(--m-aqua-ink)]"
+                />
               </div>
               <div className="space-y-1">
                 <div className="flex flex-wrap items-center gap-2">

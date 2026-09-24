@@ -8,6 +8,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { EmptyState } from '@/components/ui/empty-state';
 import { EventLogoDialog } from '@/components/modules/event-logo-dialog';
+import { EventLogoImage } from '@/components/ui/event-logo-image';
 
 export const dynamic = 'force-dynamic';
 
@@ -92,16 +93,12 @@ export default async function EventsPage() {
                           className="group relative h-12 w-12 shrink-0 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center overflow-hidden shadow-sm hover:ring-2 hover:ring-primary/40 transition-all cursor-pointer"
                           title="Klik untuk mengubah logo kejuaraan"
                         >
-                          {event.logo_url ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={event.logo_url}
-                              alt={event.name}
-                              className="h-full w-full object-contain p-1"
-                            />
-                          ) : (
-                            <Trophy className="h-6 w-6 text-blue-600" />
-                          )}
+                          <EventLogoImage
+                            src={event.logo_url}
+                            alt={event.name}
+                            className="h-full w-full object-contain p-1"
+                            fallbackIconClassName="h-6 w-6 text-blue-600"
+                          />
                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
                             <Camera className="h-3.5 w-3.5" />
                           </div>
