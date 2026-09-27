@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { EventLiveConfig, LiveScoreboardMode } from './live-scoreboard-settings';
+import { EventLiveConfig, LiveScoreboardMode, ResultsVisibilityMode } from './live-scoreboard-settings';
 
 const STORE_PATH = path.join(process.cwd(), 'src', 'lib', 'data', 'live-scoreboard-store.json');
 
@@ -10,7 +10,14 @@ export function getEventLiveConfig(eventId: string): EventLiveConfig {
       const raw = fs.readFileSync(STORE_PATH, 'utf-8');
       const data: Record<string, EventLiveConfig> = JSON.parse(raw);
       if (data && data[eventId]) {
-        return data[eventId];
+        const item = data[eventId];
+        return {
+          eventId,
+          mode: item.mode || 'auto',
+          resultsMode: item.resultsMode || 'auto',
+          updatedAt: item.updatedAt,
+          updatedBy: item.updatedBy,
+        };
       }
     }
   } catch (e) {
@@ -21,6 +28,7 @@ export function getEventLiveConfig(eventId: string): EventLiveConfig {
   return {
     eventId,
     mode: 'auto',
+    resultsMode: 'auto',
   };
 }
 
@@ -44,7 +52,14 @@ export function saveEventLiveConfig(eventId: string, mode: LiveScoreboardMode): 
       allData = JSON.parse(raw) || {};
     }
 
+    const current = allData[eventId] || {
+      eventId,
+      mode: 'auto',
+      resultsMode: 'auto',
+    };
+
     allData[eventId] = {
+      ...current,
       eventId,
       mode,
       updatedAt: new Date().toISOString(),
@@ -57,3 +72,33 @@ export function saveEventLiveConfig(eventId: string, mode: LiveScoreboardMode): 
     return false;
   }
 }
+
+export function saveEventResultsConfig(eventId: string, resultsMode: ResultsVisibilityMode): boolean {
+  try {
+    let allData: Record<string, EventLiveConfig> = {};
+    if (fs.existsSync(STORE_PATH)) {
+      const raw = fs.readFileSync(STORE_PATH, 'utf-8');
+      allData = JSON.parse(raw) || {};
+    }
+
+    const current = allData[eventId] || {
+      eventId,
+      mode: 'auto',
+      resultsMode: 'auto',
+    };
+
+    allData[eventId] = {
+      ...current,
+      eventId,
+      resultsMode,
+      updatedAt: new Date().toISOString(),
+    };
+
+    fs.writeFileSync(STORE_PATH, JSON.stringify(allData, null, 2), 'utf-8');
+    return true;
+  } catch (e) {
+    console.error('Error saving results visibility config:', e);
+    return false;
+  }
+}
+

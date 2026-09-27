@@ -8,6 +8,7 @@ import { EventSettingsDialog } from '@/components/modules/event-settings-dialog'
 import { EventLogoDialog } from '@/components/modules/event-logo-dialog';
 import { CompetitionEventsManager } from '@/components/modules/competition-events-manager';
 import { EventLiveToggle } from '@/components/modules/event-live-toggle';
+import { EventResultsToggle } from '@/components/modules/event-results-toggle';
 import { EventWorkflowStepper } from '@/components/modules/event-workflow-stepper';
 import { EventLogoImage } from '@/components/ui/event-logo-image';
 import { getEventLiveConfig } from '@/lib/data/live-scoreboard-server';
@@ -124,6 +125,7 @@ export default async function EventDetailPage({ params }: PageProps) {
             <Radio className="h-4 w-4" /> Buka Live Board
           </Link>
           <EventLiveToggle eventId={event.id} initialMode={liveConfig.mode} event={event} />
+          <EventResultsToggle eventId={event.id} initialMode={liveConfig.resultsMode} event={event} />
           <EventSettingsDialog event={event} />
         </div>
       </div>

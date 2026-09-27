@@ -266,7 +266,7 @@ export function PartisipasiEventDetail({
 
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
             <Link
-              href={`/events/${event.id}/rekap-klub`}
+              href={`/events/${event.id}/rekap-klub${selectedClubId !== 'all' ? `?clubId=${selectedClubId}` : ''}`}
               className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs px-3.5 py-2 shadow-xs transition-colors"
             >
               <Printer className="h-3.5 w-3.5" /> Rekap per Klub (PDF)

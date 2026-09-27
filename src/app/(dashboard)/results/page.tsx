@@ -4,6 +4,8 @@ import { Trophy } from 'lucide-react';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { EmptyState } from '@/components/ui/empty-state';
+import { EventResultsToggle } from '@/components/modules/event-results-toggle';
+import { getEventLiveConfig } from '@/lib/data/live-scoreboard-server';
 
 // Types untuk menyempurnakan Type Safety
 export interface HeatAssignmentWithResult {
@@ -42,10 +44,12 @@ export default async function ResultsPage({
   // 1. Ambil daftar event aktif
   const { data: events } = await supabase
     .from('events')
-    .select('id, name')
+    .select('id, name, start_date, end_date')
     .order('created_at', { ascending: false });
 
   const activeEventId = params.eventId || events?.[0]?.id || '';
+  const selectedEventObj = events?.find((e) => e.id === activeEventId) || events?.[0] || null;
+  const liveConfig = selectedEventObj ? getEventLiveConfig(selectedEventObj.id) : null;
 
   // 2. Ambil daftar nomor lomba berdasarkan event yang dipilih
   const { data: compEvents } = await supabase
@@ -126,6 +130,15 @@ export default async function ResultsPage({
         title="Input Hasil Lomba"
         description="Input waktu tempuh per lintasan (lane). Hasil otomatis tersimpan dan terupdate secara realtime."
         icon={<Trophy className="h-6 w-6" />}
+        actions={
+          selectedEventObj && liveConfig ? (
+            <EventResultsToggle
+              eventId={selectedEventObj.id}
+              initialMode={liveConfig.resultsMode}
+              event={selectedEventObj}
+            />
+          ) : undefined
+        }
       />
 
       {!events || events.length === 0 ? (

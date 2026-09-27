@@ -24,17 +24,26 @@ const PUBLIC_ROUTE_PREFIXES = [
   '/galeri',
   '/live',
   '/invoice',
+  '/videos',
+  '/gallery',
+  '/slider',
+  '/brand',
+  '/uploads',
   '/403',
   '/api/register',
   '/api/schools',
   '/api/scoreboard',
   '/api/showcases',
+  '/api/health',
   '/',
 ];
 
 export async function proxy(request: NextRequest) {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-pathname', request.nextUrl.pathname);
+
   let response = NextResponse.next({
-    request: { headers: request.headers },
+    request: { headers: requestHeaders },
   });
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -177,6 +186,6 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mp4|webm|ogg|mp3|wav|ico|txt)$).*)',
   ],
 };

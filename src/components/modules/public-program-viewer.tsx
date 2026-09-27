@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Search, X, Waves, FileText, Check, Sparkles } from 'lucide-react';
-import { PrintButton } from '@/components/modules/print-button';
+import { Search, X, Waves, FileText, Check, Sparkles, Printer } from 'lucide-react';
+import { printElement } from '@/lib/utils/print-helper';
 
 export interface ProgramCompEvent {
   id: string;
@@ -191,6 +191,14 @@ export function PublicProgramViewer({
     .map(Number)
     .sort((a, b) => a - b);
 
+  const handlePrintProgram = () => {
+    printElement('printable-program-area', {
+      title: `Buku-Acara-${currentEvent.name.replace(/\s+/g, '-')}`,
+      isLandscape: false,
+      pageMargin: '10mm 12mm',
+    });
+  };
+
   return (
     <div className="space-y-6">
       {/* ===== ACTION & EVENT BAR (NO-PRINT) ===== */}
@@ -212,7 +220,13 @@ export function PublicProgramViewer({
               </a>
             ))}
           </div>
-          <PrintButton />
+          <button
+            type="button"
+            onClick={handlePrintProgram}
+            className="inline-flex items-center gap-2 rounded-xl bg-[#0f1f3d] hover:bg-[#1e3a8a] text-white px-4 py-2 text-xs font-bold shadow-sm transition-colors cursor-pointer"
+          >
+            <Printer className="h-4 w-4" /> Cetak Buku Acara (A4)
+          </button>
         </div>
 
         {/* ===== SEARCH BAR NAMA ATLET (FITUR UTAMA) ===== */}
@@ -325,29 +339,77 @@ export function PublicProgramViewer({
         </div>
       </div>
 
+      {/* Print Stylesheet khusus agar buku acara publik rapi tanpa gap kosong */}
+      <style jsx global>{`
+        @media print {
+          body, html {
+            background: #ffffff !important;
+            color: #0f172a !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            height: auto !important;
+            min-height: 0 !important;
+          }
+          .pub-shell, main, .pub-container {
+            min-height: 0 !important;
+            height: auto !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            max-width: 100% !important;
+            display: block !important;
+          }
+          .printable-area {
+            border: none !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            background: #ffffff !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            display: block !important;
+          }
+          .buku-header-print {
+            display: flex !important;
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+            margin: 0 0 12px 0 !important;
+          }
+          .session-print-block {
+            page-break-inside: auto !important;
+            break-inside: auto !important;
+          }
+          .print-break-inside-avoid {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+        }
+      `}</style>
+
       {/* ===== PRINTABLE DOCUMENT AREA ===== */}
-      <div className="printable-area rounded-2xl border border-border bg-card shadow-sm">
-        {/* Header Dokumen Buku Acara */}
-        <header className="flex flex-col gap-3 border-b-2 border-primary bg-[#0f1f3d] p-6 text-white sm:flex-row sm:items-end sm:justify-between">
+      <div
+        id="printable-program-area"
+        className="printable-area rounded-2xl border border-border bg-card shadow-sm print:border-none print:shadow-none print:rounded-none print:m-0 print:p-0"
+      >
+        {/* Header Dokumen Buku Acara (Gunakan div agar tidak kena display:none pada tag header) */}
+        <div className="buku-header-print flex flex-col gap-3 border-b-2 border-primary bg-[#0f1f3d] p-6 text-white sm:flex-row sm:items-end sm:justify-between print:bg-[#0f1f3d] print:p-4 print:mb-3">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">
+            <h1 className="text-2xl font-bold tracking-tight text-white font-heading">
               BUKU ACARA (EVENT PROGRAM)
             </h1>
-            <p className="mt-1 text-sm text-white/70">{currentEvent.name}</p>
+            <p className="mt-1 text-sm text-white/90 font-medium">{currentEvent.name}</p>
             {currentEvent.location && (
-              <p className="mt-1 text-xs text-white/50">
+              <p className="mt-1 text-xs text-white/70">
                 {currentEvent.location} · {currentEvent.start_date} s/d {currentEvent.end_date}
               </p>
             )}
           </div>
-          <div className="flex items-center gap-2 text-primary-foreground">
-            <FileText className="h-5 w-5" />
+          <div className="flex items-center gap-2 text-white">
+            <FileText className="h-5 w-5 text-cyan-300" />
             <span className="text-sm font-semibold">Rajendra Meet</span>
           </div>
-        </header>
+        </div>
 
         {/* Konten Sesi & Nomor Acara */}
-        <div className="space-y-10 p-6">
+        <div className="space-y-8 p-6 print:p-0 print:space-y-5">
           {sessionKeys.length === 0 ? (
             <div className="py-12 text-center text-muted-foreground">
               <Waves className="mx-auto h-10 w-10 text-[var(--m-aqua)]" />
@@ -368,7 +430,7 @@ export function PublicProgramViewer({
             </div>
           ) : (
             sessionKeys.map((sessionNo) => (
-              <section key={sessionNo} className="print-break-inside-avoid">
+              <section key={sessionNo} className="session-print-block">
                 {/* Judul Sesi */}
                 <div className="mb-4 flex items-center justify-between bg-primary/10 px-4 py-2 text-sm font-semibold uppercase tracking-wider text-primary">
                   <span>Sesi {sessionNo}</span>
@@ -378,15 +440,15 @@ export function PublicProgramViewer({
                 </div>
 
                 {/* Daftar Nomor Lomba */}
-                <div className="space-y-8">
+                <div className="space-y-6 print:space-y-3">
                   {processedSessions[sessionNo].map((ce) => {
                     return (
                       <div
                         key={ce.id}
-                        className="print-break-inside-avoid border-l-2 border-primary/30 pl-4"
+                        className="event-print-row border-l-2 border-primary/30 pl-3 sm:pl-4 print:border-l-2 print:pl-3 print:mb-3"
                       >
                         {/* Header Nomor Lomba */}
-                        <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
+                        <div className="event-print-header mb-2 flex flex-wrap items-baseline justify-between gap-2 print:mb-1">
                           <h3 className="font-semibold text-[var(--m-ink)]">
                             <HighlightText text={ce.name} query={searchQuery} />
                           </h3>
@@ -401,7 +463,7 @@ export function PublicProgramViewer({
                             Belum ada heat (pembagian lintasan menyusul).
                           </p>
                         ) : (
-                          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 print:grid-cols-2 print:gap-3">
                             {[...ce.heats]
                               .sort((a, b) => a.heat_number - b.heat_number)
                               .map((heat) => {
@@ -438,7 +500,7 @@ export function PublicProgramViewer({
                                 return (
                                   <div
                                     key={heat.heat_number}
-                                    className={`overflow-hidden rounded-lg border transition-all ${
+                                    className={`heat-print-box print-break-inside-avoid overflow-hidden rounded-lg border transition-all ${
                                       heatHasMatch
                                         ? 'border-amber-400 bg-amber-50/20 shadow-xs ring-1 ring-amber-300'
                                         : 'border-border'
@@ -586,7 +648,7 @@ export function PublicProgramViewer({
 
         {/* Footer Buku Acara */}
         <footer className="printable-area flex items-center justify-between border-t border-border px-6 py-3 text-xs text-[var(--m-muted)]">
-          <span>Powered by Rajendra Meet SCMS</span>
+          <span>Powered by Rajendra Meet</span>
           <span className="font-mono">Program resmi · Cetak mandiri</span>
         </footer>
       </div>

@@ -955,7 +955,7 @@ export function JuknisManager({
             <section className="space-y-1">
               <h3 className="text-xs sm:text-sm font-black uppercase text-slate-950">9. METODE PENDAFTARAN</h3>
               <p className="text-slate-800">
-                Pendaftaran dilakukan melalui Sistem SCMS Resmi Rajendra Meet pada tautan portal resmi pendaftaran kejuaraan atau Formulir Digital resmi yang disediakan oleh panitia.
+                Pendaftaran dilakukan melalui Sistem Resmi Rajendra Meet pada tautan portal resmi pendaftaran kejuaraan atau Formulir Digital resmi yang disediakan oleh panitia.
               </p>
             </section>
 
@@ -1146,7 +1146,7 @@ export function JuknisManager({
               <ul className="space-y-0.5 text-slate-800">
                 <li className="flex items-baseline gap-2">
                   <span>•</span>
-                  <span>Hasil perlombaan akan dirilis secara real-time pada Live Scoreboard SCMS dan dibagikan ke WhatsApp Grup Resmi.</span>
+                  <span>Hasil perlombaan akan dirilis secara real-time pada Live Scoreboard Rajendra Meet dan dibagikan ke WhatsApp Grup Resmi.</span>
                 </li>
                 <li className="flex items-baseline gap-2">
                   <span>•</span>
@@ -1249,7 +1249,7 @@ export function JuknisManager({
                 </li>
                 <li className="flex items-baseline gap-2">
                   <span>•</span>
-                  <span>Panitia menyediakan Buku Acara digital yang dapat diunduh melalui platform SCMS.</span>
+                  <span>Panitia menyediakan Buku Acara digital yang dapat diunduh melalui platform Rajendra Meet.</span>
                 </li>
                 <li className="flex items-baseline gap-2">
                   <span>•</span>

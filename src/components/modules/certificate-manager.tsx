@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { type SponsorItem, getCachedSponsors } from '@/lib/data/sponsors';
+import { printElement } from '@/lib/utils/print-helper';
 
 export interface CertificateRecipient {
   id: string;
@@ -109,7 +110,7 @@ export function CertificateManager({
   // Modal Pengaturan Sertifikat
   const [openSettings, setOpenSettings] = useState(false);
   const [settings, setSettings] = useState<CertificateSettings>({
-    skNumber: '028/SK-SCMS/X/2026',
+    skNumber: '028/SK-RM/X/2026',
     issuedCity: 'Bandung',
     issuedDate: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
     organizerChairman: 'Dr. H. Hendra Wijaya, M.Pd',
@@ -176,44 +177,47 @@ export function CertificateManager({
 
   // Cetak Semua / Pilihan
   const handlePrintAll = () => {
-    // Tutup dialog pratinjau jika ada yang terbuka
     setPreviewRecipient(null);
     const target = selectedList.length > 0 ? selectedList : filteredRecipients;
     setPrintList(target);
     setTimeout(() => {
-      window.print();
+      printElement('certificate-print-area', {
+        title: `Sertifikat-Juara-Semua-${activeEventId}`,
+        isLandscape: true,
+        pageMargin: '0mm',
+      });
     }, 150);
   };
 
   // Cetak Tunggal (Farrel Manik dsb.)
   const handlePrintSingle = (rec: CertificateRecipient) => {
-    // Tutup dialog modal pratinjau agar TIDAK MUNCUL di atas kertas cetak!
     setPreviewRecipient(null);
-    // Masukkan HANYA 1 penerima ke printList agar cetak tepat 1 halaman!
     setPrintList([rec]);
     setTimeout(() => {
-      window.print();
+      printElement('certificate-print-area', {
+        title: `Sertifikat-Juara-${rec.swimmerName.replace(/\s+/g, '-')}`,
+        isLandscape: true,
+        pageMargin: '0mm',
+      });
     }, 150);
   };
 
   return (
     <div className="space-y-6">
-      {/* Print Stylesheet Khusus untuk Sertifikat Landscape A4 Tanpa Modal Dialog */}
+      {/* Print Stylesheet Khusus untuk Sertifikat Landscape A4 (Tepat 1 Atlet per 1 Lembar Tanpa Spill Halaman) */}
       <style jsx global>{`
         @media print {
-          /* Sembunyikan seluruh UI dashboard, sidebar, modal radix, backdrop overlay */
           aside,
           header,
           nav,
           .no-print,
           footer,
           .breadcrumb-container,
-          [role="dialog"],
-          [data-radix-portal],
-          [data-state="open"],
-          .fixed,
-          .backdrop-blur-sm,
-          div[data-aria-hidden="true"] {
+          .modal-toolbar,
+          [data-slot="dialog-overlay"],
+          button,
+          input,
+          select {
             display: none !important;
             visibility: hidden !important;
             opacity: 0 !important;
@@ -221,37 +225,51 @@ export function CertificateManager({
 
           @page {
             size: A4 landscape;
-            margin: 0;
+            margin: 0mm;
           }
 
           body,
           html {
             background: #ffffff !important;
-            color: #000000 !important;
+            color: #0f172a !important;
             margin: 0 !important;
             padding: 0 !important;
+            width: 297mm !important;
+            height: 209mm !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
 
           #certificate-print-area {
             display: block !important;
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
+            position: static !important;
+            width: 297mm !important;
             margin: 0 !important;
             padding: 0 !important;
+            background: #ffffff !important;
           }
 
           .certificate-sheet {
             page-break-after: always !important;
             break-after: page !important;
-            box-shadow: none !important;
-            max-width: 100% !important;
-            width: 100% !important;
-            min-height: 98vh !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            box-sizing: border-box !important;
+            width: 297mm !important;
+            height: 209mm !important;
+            max-width: 297mm !important;
+            max-height: 209mm !important;
+            min-height: 209mm !important;
+            margin: 0 auto !important;
+            padding: 8mm 12mm !important;
             border-radius: 0 !important;
+            box-shadow: none !important;
+            border: none !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+            overflow: hidden !important;
+            background: #ffffff !important;
           }
         }
       `}</style>
@@ -647,7 +665,7 @@ export function CertificateManager({
       )}
 
       {/* AREA KHUSUS CETAK (@media print) - HANYA BERISI ATLET YANG BENAR-BENAR INGIN DICETAK! */}
-      <div id="certificate-print-area" className="hidden print:block">
+      <div id="certificate-print-area" className="only-print">
         {printList.map((r) => (
           <CertificateCard key={r.id} recipient={r} settings={settings} sponsors={sponsorsList} isPrintOnly />
         ))}
@@ -664,7 +682,7 @@ export function CertificateManager({
 
           {previewRecipient && (
             <div className="space-y-4 pt-2">
-              <div className="max-h-[75vh] overflow-y-auto p-1 rounded-xl border bg-slate-100/50">
+              <div id="modal-admin-cert-preview-card" className="max-h-[75vh] overflow-y-auto p-1 rounded-xl border bg-slate-100/50">
                 <CertificateCard recipient={previewRecipient} settings={settings} sponsors={sponsorsList} />
               </div>
 
@@ -677,14 +695,20 @@ export function CertificateManager({
                     variant="ghost"
                     size="sm"
                     onClick={() => setPreviewRecipient(null)}
-                    className="text-xs"
+                    className="text-xs cursor-pointer"
                   >
                     Tutup
                   </Button>
                   <Button
-                    onClick={() => handlePrintSingle(previewRecipient)}
+                    onClick={() => {
+                      printElement('modal-admin-cert-preview-card', {
+                        title: `Sertifikat-Juara-${previewRecipient.swimmerName.replace(/\s+/g, '-')}`,
+                        isLandscape: true,
+                        pageMargin: '0mm',
+                      });
+                    }}
                     size="sm"
-                    className="gap-1.5 text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white"
+                    className="gap-1.5 text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white cursor-pointer"
                   >
                     <Printer className="h-4 w-4" /> Cetak Sekarang
                   </Button>
@@ -716,7 +740,7 @@ export function CertificateManager({
               <Input
                 value={settings.skNumber}
                 onChange={(e) => setSettings((s) => ({ ...s, skNumber: e.target.value }))}
-                placeholder="Contoh: 028/SK-SCMS/X/2026"
+                placeholder="Contoh: 028/SK-RM/X/2026"
                 className="h-8 text-xs bg-background"
                 required
               />

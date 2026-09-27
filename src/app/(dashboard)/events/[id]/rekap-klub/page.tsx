@@ -11,24 +11,47 @@ import { getEventSettings } from '@/lib/data/event-settings-server';
 
 interface PageProps {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{
+    clubId?: string;
+    schoolId?: string;
+    payment?: string;
+    print?: string;
+  }>;
 }
 
 export const dynamic = 'force-dynamic';
 
-export default async function EventClubRosterPage({ params }: PageProps) {
+export default async function EventClubRosterPage({ params, searchParams }: PageProps) {
   const { id } = await params;
+  const sParams = searchParams ? await searchParams : {};
+  const initialClubId = sParams.clubId || sParams.schoolId || 'all';
+  const initialPayment = sParams.payment || 'all';
+  const autoPrint = sParams.print === 'true';
   const supabase = await createClient();
 
-  // 1. Ambil data event
-  const { data: rawEvent } = await supabase
+  // 1. Ambil data event menggunakan select('*')
+  let { data: rawEvent } = await supabase
     .from('events')
-    .select('id, name, organizer, location, start_date, end_date, pool_type, pool_length_meters, lane_count, fee_per_event, bank_name, bank_account_no, bank_account_name')
+    .select('*')
     .eq('id', id)
-    .single();
+    .maybeSingle();
 
-  if (!rawEvent) notFound();
+  // Fallback: Jika event dengan ID spesifik tidak ditemukan di DB, gunakan event aktif terbaru
+  if (!rawEvent) {
+    const { data: fallbackEvent } = await supabase
+      .from('events')
+      .select('*')
+      .order('start_date', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    rawEvent = fallbackEvent;
+  }
 
-  const savedSettings = getEventSettings(id);
+  if (!rawEvent) {
+    notFound();
+  }
+
+  const savedSettings = getEventSettings(rawEvent.id);
   const event = {
     ...rawEvent,
     ...savedSettings,
@@ -46,55 +69,67 @@ export default async function EventClubRosterPage({ params }: PageProps) {
     .select('id, name, city')
     .order('name', { ascending: true });
 
-  // 4. Ambil seluruh pendaftaran di event ini beserta atlet, klub, nomor lomba, & verifikasi bayar
-  const { data: rawRegistrations } = await supabase
-    .from('registrations')
-    .select(`
-      id,
-      seed_time_ms,
-      athletes!inner (
+  // 4. Ambil seluruh pendaftaran di event ini beserta atlet & nomor lomba
+  const [{ data: rawRegistrations }, { data: payments }] = await Promise.all([
+    supabase
+      .from('registrations')
+      .select(`
         id,
-        athlete_number,
-        full_name,
-        gender,
-        birth_date,
-        age_group,
-        grade_level,
-        school_id,
-        schools (
+        seed_time_ms,
+        athletes (
           id,
+          athlete_number,
+          full_name,
+          gender,
+          birth_date,
+          age_group,
+          grade_level,
+          school_id,
+          schools (
+            id,
+            name,
+            city
+          )
+        ),
+        competition_events (
+          id,
+          order_no,
           name,
-          city
+          stroke,
+          distance_meters,
+          gender
         )
-      ),
-      competition_events!inner (
-        id,
-        order_no,
-        name,
-        stroke,
-        distance_meters,
-        gender
-      ),
-      payment_verifications (
-        id,
-        status,
-        amount_due
-      )
-    `)
-    .eq('event_id', id);
+      `)
+      .eq('event_id', rawEvent.id),
+    supabase
+      .from('payment_verifications')
+      .select('id, registration_id, status, amount_due'),
+  ]);
 
-  const registrations = (rawRegistrations || []).map((r: any) => ({
-    id: r.id,
-    seed_time_ms: r.seed_time_ms,
-    athletes: r.athletes,
-    competition_events: r.competition_events,
-    payment_verifications: Array.isArray(r.payment_verifications)
-      ? r.payment_verifications[0] || null
-      : r.payment_verifications || null,
-  })) as RegistrationClubRecord[];
+  const payMap = new Map<string, { id?: string; status: 'pending' | 'verified' | 'rejected'; amount_due: number }>();
+  (payments || []).forEach((p: any) => {
+    if (p.registration_id) {
+      payMap.set(p.registration_id, {
+        id: p.id,
+        status: (p.status as any) || 'verified',
+        amount_due: Number(p.amount_due) || 0,
+      });
+    }
+  });
+
+  const registrations: RegistrationClubRecord[] = (rawRegistrations || []).map((r: any) => {
+    const pay = payMap.get(r.id) || null;
+    return {
+      id: r.id,
+      seed_time_ms: r.seed_time_ms,
+      athletes: r.athletes || null,
+      competition_events: r.competition_events || null,
+      payment_verifications: pay,
+    };
+  });
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6">
+    <div className="mx-auto max-w-7xl space-y-6 p-6 print:p-0 print:m-0 print:max-w-none">
       <div className="no-print">
         <Breadcrumb
           items={[
@@ -117,6 +152,9 @@ export default async function EventClubRosterPage({ params }: PageProps) {
         eventsList={(allEvents || []).map((e) => ({ id: e.id, name: e.name }))}
         schools={schools || []}
         registrations={registrations}
+        initialClubId={initialClubId}
+        initialPayment={initialPayment}
+        autoPrint={autoPrint}
         lockEvent={false}
         backHref={`/events/${event.id}`}
       />

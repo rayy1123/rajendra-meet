@@ -7,10 +7,13 @@ export const dynamic = 'force-dynamic';
 
 interface InvoicePageProps {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ print?: string }>;
 }
 
-export default async function InvoicePage({ params }: InvoicePageProps) {
+export default async function InvoicePage({ params, searchParams }: InvoicePageProps) {
   const { id } = await params;
+  const sParams = searchParams ? await searchParams : {};
+  const autoPrint = sParams.print === 'true';
   const supabase = await createClient();
 
   // 1. Cari pendaftaran berdasarkan id (bisa registration_id atau payment_verification_id)
@@ -322,7 +325,7 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100/70 py-8 px-4 sm:px-6">
+    <div className="min-h-screen bg-slate-100/70 py-8 px-4 sm:px-6 print:min-h-0 print:p-0 print:m-0 print:bg-white print:block">
       <div className="mx-auto max-w-4xl mb-4 no-print">
         <Breadcrumb
           items={[
@@ -332,7 +335,7 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
           ]}
         />
       </div>
-      <InvoiceCard invoice={invoiceData} backUrl="/pendaftaran-saya" />
+      <InvoiceCard invoice={invoiceData} backUrl="/pendaftaran-saya" autoPrint={autoPrint} />
     </div>
   );
 }

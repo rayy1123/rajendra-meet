@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Plus, Pencil, Trash2, Copy, Search, X, Download, ClipboardList } from 'lucide-react';
+import Link from 'next/link';
+import { Plus, Pencil, Trash2, Copy, Search, X, Download, ClipboardList, IdCard, CalendarDays, Users } from 'lucide-react';
 import {
   deleteAthlete,
   bulkDeleteAthletes,
@@ -344,21 +345,22 @@ export function AthleteSayaManager({
       {/* Empty state */}
       {athletes.length === 0 ? (
         <EmptyState
-          title="Belum ada atlet"
-          description="Tambahkan atlet untuk mulai mengelola data."
+          icon={<Users className="h-8 w-8 text-primary" />}
+          title="Belum Ada Atlet Binaan Terdaftar"
+          description="Sebagai Pelatih atau Pengurus Kontingen, Anda dapat mendaftarkan atlet binaan Anda di sini. Data atlet yang tersimpan akan otomatis muncul saat Anda memilih nomor perlombaan dan siap dicetak sebagai ID Pass resmi."
           action={
             <button
               type="button"
               onClick={openNew}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-colors cursor-pointer"
             >
-              <Plus className="h-4 w-4" /> Tambah Atlet
+              <Plus className="h-4 w-4" /> + Tambah Atlet Pertama
             </button>
           }
         />
       ) : filtered.length === 0 ? (
-        <div className="rounded-2xl border bg-card p-8 text-center text-sm text-muted-foreground">
-          Tidak ada atlet yang cocok dengan filter.
+        <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-xs text-slate-500 shadow-2xs">
+          Tidak ada atlet yang cocok dengan filter atau kata kunci pencarian.
         </div>
       ) : (
         <div className="space-y-6">
@@ -426,7 +428,21 @@ export function AthleteSayaManager({
                           <td className="px-3 py-3">{age(a.birth_date)}</td>
                           <td className="px-3 py-3">{a.schools?.name ?? '-'}</td>
                           <td className="px-3 py-3 text-right">
-                            <div className="flex justify-end gap-2">
+                            <div className="flex justify-end gap-1.5">
+                              <Link
+                                href={`/kartu-peserta?athleteId=${a.id}`}
+                                className="rounded-lg border border-blue-200 px-2 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-50"
+                                title="Cetak ID Pass Peserta"
+                              >
+                                <IdCard className="h-3.5 w-3.5" />
+                              </Link>
+                              <Link
+                                href="/daftar-lomba"
+                                className="rounded-lg border border-indigo-200 px-2 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-50"
+                                title="Daftarkan ke Nomor Lomba"
+                              >
+                                <CalendarDays className="h-3.5 w-3.5" />
+                              </Link>
                               <button
                                 type="button"
                                 onClick={() => openEdit(a)}

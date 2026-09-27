@@ -8,7 +8,7 @@ export async function exportToExcel(
   fileName: string
 ): Promise<void> {
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = 'SCMS';
+  workbook.creator = 'Rajendra Meet';
   workbook.created = new Date();
 
   const worksheet = workbook.addWorksheet('Data');

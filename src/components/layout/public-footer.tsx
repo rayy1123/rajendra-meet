@@ -135,13 +135,13 @@ export function PublicFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/kontak" className="hover:text-cyan-200 transition-colors">
+                <Link href="/#tentang" className="hover:text-cyan-200 transition-colors">
                   Tentang Kami
                 </Link>
               </li>
               <li>
-                <Link href="/kontak" className="hover:text-cyan-200 transition-colors">
-                  Layanan Kami
+                <Link href="/#layanan" className="hover:text-cyan-200 transition-colors">
+                  Layanan Kami (RAB)
                 </Link>
               </li>
               <li>
@@ -182,26 +182,27 @@ export function PublicFooter() {
         </div>
       </footer>
 
-      {/* Floating WhatsApp Action Button */}
-      <a
-        href="https://wa.me/628877151189"
-        target="_blank"
-        rel="noreferrer"
-        className="fixed bottom-16 right-5 z-40 flex h-11 w-11 items-center justify-center rounded-full bg-[#25D366] text-white shadow-xl transition-all duration-300 hover:scale-110 hover:bg-[#20bd5a]"
-        title="Hubungi Kami via WhatsApp"
-      >
-        <Phone className="h-5 w-5" />
-      </a>
+      {/* Floating Action Buttons Container (Completely hidden on print) */}
+      <div className="no-print print:hidden print:!hidden" aria-hidden="true">
+        <a
+          href="https://wa.me/628877151189"
+          target="_blank"
+          rel="noreferrer"
+          className="no-print print:hidden fixed bottom-16 right-5 z-40 flex h-11 w-11 items-center justify-center rounded-full bg-[#25D366] text-white shadow-xl transition-all duration-300 hover:scale-110 hover:bg-[#20bd5a]"
+          title="Hubungi Kami via WhatsApp"
+        >
+          <Phone className="h-5 w-5" />
+        </a>
 
-      {/* Floating Scroll-to-Top Button */}
-      <button
-        type="button"
-        onClick={scrollToTop}
-        className="fixed bottom-4 right-5 z-40 flex h-10 w-10 items-center justify-center rounded-full bg-slate-900/80 text-white shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-slate-900 border border-white/10"
-        title="Kembali ke Atas"
-      >
-        <ArrowUp className="h-4 w-4" />
-      </button>
+        <button
+          type="button"
+          onClick={scrollToTop}
+          className="no-print print:hidden fixed bottom-4 right-5 z-40 flex h-10 w-10 items-center justify-center rounded-full bg-slate-900/80 text-white shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-slate-900 border border-white/10 cursor-pointer"
+          title="Kembali ke Atas"
+        >
+          <ArrowUp className="h-4 w-4" />
+        </button>
+      </div>
     </>
   );
 }

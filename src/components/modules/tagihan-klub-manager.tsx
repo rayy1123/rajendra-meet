@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useRef } from 'react';
+import Link from 'next/link';
 import {
   Printer,
   Search,
@@ -13,9 +14,11 @@ import {
   CreditCard,
   Building2,
   Calendar,
-  X
+  X,
+  School,
 } from 'lucide-react';
 import { formatRupiah } from '@/lib/utils';
+import { printElement } from '@/lib/utils/print-helper';
 import { InvoiceCard, type InvoiceData, type InvoiceAthleteGroup } from '@/components/modules/invoice-card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
@@ -109,7 +112,22 @@ export function TagihanKlubManager({
   }, [filtered]);
 
   const handlePrint = () => {
-    window.print();
+    if (printAreaRef.current) {
+      printElement(printAreaRef.current, {
+        title: `Rekap-Tagihan-${selectedEventName.replace(/\s+/g, '-')}`,
+        isLandscape: false,
+      });
+    } else {
+      window.print();
+    }
+  };
+
+  const handlePrintModalInvoice = () => {
+    if (!selectedInvoice) return;
+    printElement('modal-invoice-paper', {
+      title: `Invoice-${selectedInvoice.invoice_no.replace(/[\\/]/g, '-')}`,
+      isLandscape: false,
+    });
   };
 
   // Bangun data invoice klub sesuai template resmi gambar media_1789731350401.png
@@ -239,13 +257,25 @@ export function TagihanKlubManager({
             >
               Reset
             </button>
-            <button
-              type="button"
-              onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 shadow-sm transition-colors ml-auto"
-            >
-              <Printer className="h-3.5 w-3.5" /> Cetak Rekap Tagihan
-            </button>
+            <div className="flex items-center gap-2 ml-auto">
+              {selectedEventId !== 'all' && (
+                <Link
+                  href={`/events/${selectedEventId}/rekap-klub${selectedClubId !== 'all' ? `?clubId=${selectedClubId}` : ''}`}
+                  target="_blank"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-800 text-xs font-bold px-4 py-2.5 shadow-2xs transition-colors"
+                  title="Cetak Dokumen Rekapitulasi Atlet Kontingen (PDF)"
+                >
+                  <School className="h-3.5 w-3.5 text-blue-600" /> Cetak Rekap Atlet
+                </Link>
+              )}
+              <button
+                type="button"
+                onClick={handlePrint}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 shadow-sm transition-colors"
+              >
+                <Printer className="h-3.5 w-3.5" /> Cetak Rekap Tagihan
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -307,7 +337,7 @@ export function TagihanKlubManager({
         </div>
 
         {/* ── Printable Header Banner Navy (Template Rajendra Meet) ── */}
-        <div className="hidden print:block p-6 sm:p-8 space-y-4">
+        <div className="only-print p-6 sm:p-8 space-y-4">
           <div className="bg-[#1b2e4b] text-white p-6 rounded-lg flex items-center justify-between gap-6">
             <div className="space-y-1 text-xs">
               <h1 className="text-lg sm:text-xl font-bold tracking-tight uppercase text-white">
@@ -444,14 +474,27 @@ export function TagihanKlubManager({
                         </span>
                       </td>
                       <td className="py-3.5 px-3 text-center print:hidden">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedInvoice(item)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#1b2e4b] text-white hover:bg-[#1b2e4b]/90 text-[11px] font-bold shadow-xs transition-colors"
-                        >
-                          <FileText className="h-3 w-3" />
-                          Invoice
-                        </button>
+                        <div className="flex items-center justify-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedInvoice(item)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#1b2e4b] text-white hover:bg-[#1b2e4b]/90 text-[11px] font-bold shadow-xs transition-colors"
+                          >
+                            <FileText className="h-3 w-3" />
+                            Invoice
+                          </button>
+                          {item.event_id && item.club_id && (
+                            <Link
+                              href={`/events/${item.event_id}/rekap-klub?clubId=${item.club_id}`}
+                              target="_blank"
+                              className="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-blue-200 bg-blue-50 text-blue-800 hover:bg-blue-100 text-[11px] font-bold shadow-2xs transition-colors"
+                              title="Lihat / Cetak PDF Rekap Peserta & Status Kontingen Ini"
+                            >
+                              <Printer className="h-3 w-3 text-blue-600" />
+                              Rekap
+                            </Link>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -462,7 +505,7 @@ export function TagihanKlubManager({
         </div>
 
         {/* ── Printable Summary Footer & Bank Info ── */}
-        <div className="hidden print:block p-6 sm:p-8 space-y-4">
+        <div className="only-print p-6 sm:p-8 space-y-4">
           <div className="bg-[#1b2e4b] text-white p-4 rounded-lg flex items-center justify-between font-bold text-sm">
             <span className="uppercase tracking-wider">TOTAL TAGIHAN KESELURUHAN</span>
             <span className="text-base sm:text-lg">{formatRupiah(totalTagihan)}</span>
@@ -522,7 +565,7 @@ export function TagihanKlubManager({
           {/* Dedicated Modal Toolbar Header (Hidden on print) */}
           <div className="flex items-center justify-between px-5 py-3.5 bg-white border-b border-slate-200 shrink-0 no-print print:hidden modal-toolbar">
             <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-lg bg-[#1b2e4b]/10 flex items-center justify-center text-[#1b2e4b]">
+              <div className="h-8 w-8 rounded-lg bg-[#0f2b5c]/10 flex items-center justify-center text-[#0f2b5c]">
                 <FileText className="h-4 w-4" />
               </div>
               <div>
@@ -538,15 +581,15 @@ export function TagihanKlubManager({
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => window.print()}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-[#1b2e4b] px-3.5 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-[#142338] transition-colors"
+                onClick={handlePrintModalInvoice}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[#0f2b5c] hover:bg-[#1e3a8a] px-3.5 py-1.5 text-xs font-bold text-white shadow-sm transition-colors cursor-pointer"
               >
                 <Printer className="h-3.5 w-3.5" /> Cetak / Unduh PDF
               </button>
               <button
                 type="button"
                 onClick={() => setSelectedInvoice(null)}
-                className="rounded-lg p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                className="rounded-lg p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
                 title="Tutup"
               >
                 <X className="h-4 w-4" />
@@ -557,10 +600,11 @@ export function TagihanKlubManager({
           {/* Scrollable Paper Container with Generous Desktop Proportions */}
           {selectedInvoice && (
             <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-slate-100/90 flex justify-center print:p-0 print:m-0 print:bg-white print:overflow-visible print:block">
-              <div className="w-full max-w-[760px] print:max-w-none print:w-full">
+              <div className="w-full max-w-[780px] print:max-w-none print:w-full">
                 <InvoiceCard
                   invoice={buildInvoiceData(selectedInvoice)}
                   hideActionBar={true}
+                  elementId="modal-invoice-paper"
                 />
               </div>
             </div>
