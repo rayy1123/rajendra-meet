@@ -16,7 +16,7 @@ export default async function KartuPesertaPage({
 }: {
   searchParams: Promise<{ athleteId?: string; eventId?: string }>;
 }) {
-  const { athleteId } = await searchParams;
+  const { athleteId, eventId } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -49,13 +49,15 @@ export default async function KartuPesertaPage({
   ];
   const isAdmin = ADMIN_ROLES.includes(userRole);
 
-  // 2. Query pendaftaran: jika admin tampilkan seluruh pendaftaran di event, jika viewer hanya atlet binaannya
+  // 2. Query pendaftaran registrasi beserta atlet, nomor lomba, event, & heat assignment
   let query = supabase
     .from('registrations')
     .select(`
       id,
+      event_id,
+      athlete_id,
+      competition_event_id,
       seed_time_ms,
-      payment_status,
       created_at,
       events:event_id (
         id,
@@ -101,16 +103,22 @@ export default async function KartuPesertaPage({
           id,
           heat_number
         )
-      ),
-      payment_verifications (
-        id,
-        status,
-        amount_due
       )
     `)
     .order('created_at', { ascending: false });
 
-  if (!isAdmin) {
+  // Filter event jika diberikan via parameter URL
+  if (eventId) {
+    query = query.eq('event_id', eventId);
+  }
+
+  // Filter athlete jika diberikan via parameter URL
+  if (athleteId) {
+    query = query.eq('athlete_id', athleteId);
+  }
+
+  // Jika bukan admin dan tidak ada filter spesifik, batasi ke atlet binaan user
+  if (!isAdmin && !athleteId) {
     const { data: userAthletes } = await supabase
       .from('athletes')
       .select('id')
@@ -125,28 +133,44 @@ export default async function KartuPesertaPage({
     }
   }
 
-  const { data: rawRegistrations } = await query;
+  // Ambil data registrasi dan data verifikasi pembayaran secara paralel
+  const [{ data: rawRegistrations }, { data: paymentsData }] = await Promise.all([
+    query,
+    supabase.from('payment_verifications').select('id, registration_id, status, amount_due'),
+  ]);
+
+  // Map status pembayaran berdasarkan registration_id
+  const payMap = new Map<string, { id: string; status: string; amount_due: number }>();
+  (paymentsData || []).forEach((p: any) => {
+    if (p.registration_id) {
+      payMap.set(p.registration_id, {
+        id: p.id,
+        status: p.status || 'pending',
+        amount_due: Number(p.amount_due) || 0,
+      });
+    }
+  });
 
   // 3. Kelompokkan pendaftaran per [atlet + event] sehingga 1 kartu memuat semua nomor lomba yang diikuti
   const cardMap = new Map<string, ParticipantCardData>();
 
-  (rawRegistrations || []).forEach((row) => {
+  (rawRegistrations || []).forEach((row: any) => {
     const rawAth = Array.isArray(row.athletes) ? row.athletes[0] : row.athletes;
     const rawComp = Array.isArray(row.competition_events) ? row.competition_events[0] : row.competition_events;
     const rawEvent = Array.isArray(row.events) ? row.events[0] : (row.events || rawComp?.events);
     const rawHeatAssign = Array.isArray(row.heat_assignments) ? row.heat_assignments[0] : row.heat_assignments;
     const rawHeat = Array.isArray(rawHeatAssign?.heats) ? rawHeatAssign?.heats[0] : rawHeatAssign?.heats;
-    const rawPay = Array.isArray(row.payment_verifications) ? row.payment_verifications[0] : row.payment_verifications;
+    const payInfo = payMap.get(row.id);
 
     if (!rawAth) return;
 
     const athleteIdStr = rawAth.id;
-    const eventIdStr = rawEvent?.id || 'general-event';
+    const eventIdStr = rawEvent?.id || row.event_id || 'general-event';
     const groupKey = `${athleteIdStr}_${eventIdStr}`;
 
     const rawSchool = Array.isArray(rawAth.schools) ? rawAth.schools[0] : rawAth.schools;
 
-    const isVerified = rawPay?.status === 'verified' || row.payment_status === 'verified';
+    const isVerified = payInfo?.status === 'verified';
 
     const raceItem: ParticipantCardRaceItem = {
       registrationId: row.id,
@@ -157,7 +181,7 @@ export default async function KartuPesertaPage({
       gender: rawComp?.gender || rawAth.gender || 'male',
       ageGroup: rawAth.age_group || 'Umum',
       seedTimeMs: row.seed_time_ms,
-      paymentStatus: row.payment_status || 'pending',
+      paymentStatus: payInfo?.status || 'pending',
       isVerified,
       heatNumber: rawHeat?.heat_number || null,
       laneNumber: rawHeatAssign?.lane_number || null,
@@ -177,8 +201,8 @@ export default async function KartuPesertaPage({
         },
         event: {
           id: eventIdStr,
-          name: rawEvent?.name || 'Kejuaraan Renang SCMS',
-          organizer: rawEvent?.organizer || 'Panitia Pelaksana SCMS',
+          name: rawEvent?.name || 'Kejuaraan Renang Rajendra Meet',
+          organizer: rawEvent?.organizer || 'Panitia Pelaksana Rajendra Meet',
           location: rawEvent?.location || 'Kolam Renang Resmi',
           startDate: rawEvent?.start_date || '',
           endDate: rawEvent?.end_date || '',
@@ -201,7 +225,7 @@ export default async function KartuPesertaPage({
   const cardsList = Array.from(cardMap.values());
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6">
+    <div className="mx-auto max-w-7xl space-y-6 p-6 print:p-0 print:m-0 print:max-w-none">
       <div className="no-print">
         <Breadcrumb
           items={[
@@ -220,6 +244,7 @@ export default async function KartuPesertaPage({
       <ParticipantCardManager
         cards={cardsList}
         initialAthleteId={athleteId || null}
+        initialEventId={eventId || null}
         isAdmin={isAdmin}
       />
     </div>

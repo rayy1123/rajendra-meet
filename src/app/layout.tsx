@@ -22,8 +22,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'SCMS',
-  description: 'Swimming Competition Management System',
+  title: 'Rajendra Meet',
+  description: 'Rajendra Meet — Platform Manajemen Kejuaraan Renang',
 };
 
 export default function RootLayout({

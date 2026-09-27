@@ -268,6 +268,46 @@
   animation: loading-fade 420ms ease-in-out forwards;
 }
 
+/* ── Seamless Infinite Marquee Auto-Slide Animations ── */
+@keyframes marquee-scroll {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes marquee-scroll-reverse {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 40s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+.animate-marquee-reverse {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll-reverse 40s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-reverse:hover {
+  animation-play-state: paused;
+}
+
+/* Screen vs Print Visibility Helpers (Bebas dari bug cascade Tailwind v4) */
+@media screen {
+  .only-print {
+    display: none !important;
+  }
+}
+
 @media print {
   /* 1. Paksa browser mencetak warna & latar belakang asli secara akurat (Exact Color Adjust) */
   *,
@@ -281,7 +321,17 @@
   /* 2. Format kertas A4 standar */
   @page {
     size: A4 portrait;
-    margin: 10mm 12mm;
+    margin: 8mm 10mm;
+  }
+
+  body,
+  html {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
   }
 
   /* 3. Elemen non-dokumen yang selalu disembunyikan saat cetak */
@@ -290,24 +340,92 @@
   button,
   nav,
   aside,
-  header,
+  header.pub-header,
+  header.sticky,
   footer,
   [data-slot="dialog-overlay"],
   .modal-toolbar,
-  .sidebar {
+  .sidebar,
+  .breadcrumb-container,
+  a[href*="wa.me"],
+  a[href*="whatsapp"],
+  a[title*="WhatsApp"],
+  button[title*="Kembali ke Atas"],
+  .fixed:not([data-slot="dialog-content"]):not([data-slot="dialog-content"] *),
+  [class*="fixed"]:not([data-slot="dialog-content"]):not([data-slot="dialog-content"] *) {
     display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    left: -9999px !important;
+    top: -9999px !important;
+    width: 0 !important;
+    height: 0 !important;
   }
 
-  /* 4. Ketika modal dialog invoice dibuka dan dicetak (Cetak Invoice Klub / Individu) */
-  body:has([data-slot="dialog-content"]) > *:not([data-slot="dialog-portal"]) {
-    display: none !important;
+  /* Reset Shells & Wrappers in Print to prevent blank first page and overflow gaps */
+  .pub-shell,
+  .pub-container,
+  main,
+  div:has(> .printable-area),
+  div:has(> #printable-program-area) {
+    min-height: 0 !important;
+    height: auto !important;
+    display: block !important;
+    background: transparent !important;
+    background-color: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-shadow: none !important;
   }
 
-  [data-slot="dialog-portal"] {
-    position: static !important;
+  .only-print {
     display: block !important;
   }
 
+  /* Buku Acara Program Print Styling - rapi tanpa gap kosong */
+  .printable-area {
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+
+  .buku-header-print {
+    display: flex !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+    margin: 0 0 10px 0 !important;
+  }
+
+  .session-print-block {
+    page-break-inside: auto !important;
+    break-inside: auto !important;
+  }
+
+  .event-print-row {
+    page-break-inside: auto !important;
+    break-inside: auto !important;
+    margin-bottom: 12px !important;
+  }
+
+  .event-print-header {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+
+  .heat-print-box {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* 4. Dukungan Cetak Dialog / Modal (Misal Invoice / Pratinjau Dokumen) */
   [data-slot="dialog-content"] {
     position: static !important;
     top: auto !important;
@@ -322,8 +440,9 @@
     border: none !important;
     background: transparent !important;
     padding: 0 !important;
-    margin: 0 !important;
+    margin: 0 auto !important;
     border-radius: 0 !important;
+    display: block !important;
   }
 
   /* 5. Lembar invoice resmi: 100% lebar, tanpa border modal atau scrollbar */
@@ -331,18 +450,18 @@
     border: none !important;
     box-shadow: none !important;
     padding: 0 !important;
-    margin: 0 !important;
+    margin: 0 auto !important;
     width: 100% !important;
     max-width: 100% !important;
     border-radius: 0 !important;
-    background: white !important;
-    page-break-inside: avoid;
-    break-inside: avoid;
+    background: #ffffff !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   .print-break-inside-avoid {
-    break-inside: avoid;
-    page-break-inside: avoid;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 }
 

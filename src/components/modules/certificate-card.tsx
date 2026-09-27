@@ -31,21 +31,24 @@ export function CertificateCard({
     ? 'JUARA III (MEDALI PERUNGGU)'
     : `PERINGKAT KE-${recipient.rank}`;
 
-  const certNumber = `${settings.skNumber || 'SCMS/CERT'}/${recipient.orderNo || '01'}/${String(recipient.rank).padStart(2, '0')}`;
-  const verificationPayload = `SCMS:CERT:${recipient.athleteNumber}:${recipient.competitionEventId}:${recipient.rank}:${recipient.finishTimeMs || 0}`;
+  const certNumber = `${settings.skNumber || 'RM/CERT'}/${recipient.orderNo ? String(recipient.orderNo).padStart(2, '0') : '01'}/${String(recipient.rank).padStart(2, '0')}`;
+  const verificationPayload = `RAJENDRA-MEET:CERT:${recipient.athleteNumber}:${recipient.competitionEventId}:${recipient.rank}:${recipient.finishTimeMs || 0}`;
 
-  const formattedEventTitle = formatCompEventLabel({
-    name: recipient.competitionEventName,
-    order_no: recipient.orderNo,
-    gender: recipient.gender,
-    stroke: recipient.stroke,
-    distance_meters: recipient.distanceMeters,
-    age_group: recipient.ageGroup,
-  }, false);
+  const formattedEventTitle = formatCompEventLabel(
+    {
+      name: recipient.competitionEventName,
+      order_no: recipient.orderNo,
+      gender: recipient.gender,
+      stroke: recipient.stroke,
+      distance_meters: recipient.distanceMeters,
+      age_group: recipient.ageGroup,
+    },
+    false
+  );
 
   return (
     <div
-      className={`certificate-sheet relative mx-auto overflow-hidden bg-gradient-to-br from-[#ffffff] via-[#fcfbf9] to-[#f7f9fc] text-slate-900 shadow-[0_20px_60px_-15px_rgba(15,43,92,0.14),0_0_0_1px_rgba(180,138,60,0.25)] rounded-2xl print:rounded-none print:shadow-none print:m-0 print:border-0 ${
+      className={`certificate-sheet relative mx-auto overflow-hidden bg-gradient-to-br from-[#ffffff] via-[#fcfbf9] to-[#f7f9fc] text-slate-900 rounded-2xl print:rounded-none print:shadow-none print:m-0 print:border-0 ${
         isPrintOnly ? 'print:block' : 'print:break-after-page print:break-inside-avoid'
       }`}
       style={{
@@ -55,24 +58,112 @@ export function CertificateCard({
         minHeight: '600px',
         pageBreakAfter: 'always',
         breakAfter: 'page',
+        pageBreakInside: 'avoid',
+        breakInside: 'avoid',
       }}
     >
-      {/* Bingkai Ganda Emas Klasik (Guilloche Metallic Border) */}
-      <div className="absolute inset-3 rounded-2xl border-[3px] border-[#b48a3c] p-1.5 pointer-events-none print:inset-2 print:border-[2.5px]">
+      {/* ── 1. BACKGROUND WATERMARK SANCTION DARI RAJENDRA-MEET SWIMSYS (DIAGONAL REPEATING PATTERN) ── */}
+      <svg
+        className="absolute inset-0 h-full w-full opacity-[0.032] print:opacity-[0.045] pointer-events-none select-none z-0"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <pattern
+            id={`sanction-watermark-${recipient.id}`}
+            width="320"
+            height="130"
+            patternUnits="userSpaceOnUse"
+            patternTransform="rotate(-24)"
+          >
+            <text
+              x="10"
+              y="32"
+              fontSize="10"
+              fontFamily="sans-serif"
+              fontWeight="900"
+              fill="#0f2b5c"
+              letterSpacing="0.22em"
+            >
+              RAJENDRA-MEET SWIMSYS
+            </text>
+            <text
+              x="10"
+              y="58"
+              fontSize="8"
+              fontFamily="sans-serif"
+              fontWeight="800"
+              fill="#b48a3c"
+              letterSpacing="0.16em"
+            >
+              OFFICIAL SANCTIONED • AQUATIC INDONESIA
+            </text>
+            <text
+              x="10"
+              y="82"
+              fontSize="7"
+              fontFamily="monospace"
+              fontWeight="700"
+              fill="#0284c7"
+              letterSpacing="0.12em"
+            >
+              WORLD AQUATICS RULE SW 3.1 • TIMING CERTIFIED
+            </text>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill={`url(#sanction-watermark-${recipient.id})`} />
+      </svg>
+
+      {/* ── 2. GRAND CENTRAL WATERMARK CREST SANCTION (SEGEL BESAR DI TENGAH SERTIFIKAT) ── */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.055] print:opacity-[0.075] z-0">
+        <svg viewBox="0 0 400 400" className="h-[360px] w-[360px] text-[#0f2b5c]">
+          {/* Concentric Decorative Rings */}
+          <circle cx="200" cy="200" r="190" fill="none" stroke="currentColor" strokeWidth="2.5" strokeDasharray="6 3" />
+          <circle cx="200" cy="200" r="182" fill="none" stroke="#b48a3c" strokeWidth="1.8" />
+          <circle cx="200" cy="200" r="140" fill="none" stroke="currentColor" strokeWidth="2" />
+          <circle cx="200" cy="200" r="134" fill="none" stroke="#b48a3c" strokeWidth="1" strokeDasharray="4 2" />
+
+          {/* Circular Text: RAJENDRA-MEET SWIMSYS OFFICIAL SANCTIONED COMPETITION */}
+          <path id={`circleTextPath-${recipient.id}`} d="M 200, 200 m -158, 0 a 158,158 0 1,1 316,0 a 158,158 0 1,1 -316,0" fill="none" />
+          <text fontSize="10.5" fontWeight="900" letterSpacing="0.22em" fill="#0f2b5c">
+            <textPath href={`#circleTextPath-${recipient.id}`} startOffset="50%" textAnchor="middle">
+              ★ RAJENDRA-MEET SWIMSYS • OFFICIAL SANCTIONED COMPETITION • AQUATIC INDONESIA ★
+            </textPath>
+          </text>
+
+          {/* 4 Aquatic Waves of Rajendra Meet Emblem */}
+          <g transform="translate(105, 142) scale(3.6)" stroke="currentColor" strokeWidth="2.2" fill="none" strokeLinecap="round">
+            <path d="M4 6 Q 16 1, 26 6 T 48 6" />
+            <path d="M4 14 Q 16 9, 26 14 T 48 14" />
+            <path d="M4 22 Q 16 17, 26 22 T 48 22" />
+            <path d="M4 30 Q 16 25, 26 30 T 48 30" />
+          </g>
+
+          {/* Big SANCTIONED Ribbon & Watermark Text */}
+          <text x="200" y="274" textAnchor="middle" fontSize="20" fontWeight="900" letterSpacing="0.28em" fill="#b48a3c">
+            SANCTIONED
+          </text>
+          <text x="200" y="293" textAnchor="middle" fontSize="8.5" fontWeight="800" letterSpacing="0.18em" fill="#0f2b5c">
+            WORLD AQUATICS RULE SW 3.1 COMPLIANT
+          </text>
+        </svg>
+      </div>
+
+      {/* ── 3. BINGKAI GANDA EMAS KLASIK & CORNER BRACKETS ── */}
+      <div className="absolute inset-3 rounded-2xl border-[3px] border-[#b48a3c] p-1.5 pointer-events-none print:inset-2 print:border-[2.5px] z-10">
         <div className="h-full w-full rounded-xl border-[1.5px] border-[#0f2b5c] p-1">
           <div className="h-full w-full rounded-lg border border-[#b48a3c]/40" />
         </div>
       </div>
 
-      {/* Ornamen Sudut Emas Mewah */}
-      <div className="absolute top-5 left-5 w-8 h-8 border-t-[3px] border-l-[3px] border-[#b48a3c] pointer-events-none" />
-      <div className="absolute top-5 right-5 w-8 h-8 border-t-[3px] border-r-[3px] border-[#b48a3c] pointer-events-none" />
-      <div className="absolute bottom-5 left-5 w-8 h-8 border-b-[3px] border-l-[3px] border-[#b48a3c] pointer-events-none" />
-      <div className="absolute bottom-5 right-5 w-8 h-8 border-b-[3px] border-r-[3px] border-[#b48a3c] pointer-events-none" />
+      {/* Ornamen Sudut Emas Mewah (Guilloche Corner Brackets) */}
+      <div className="absolute top-5 left-5 w-8 h-8 border-t-[3px] border-l-[3px] border-[#b48a3c] pointer-events-none z-10" />
+      <div className="absolute top-5 right-5 w-8 h-8 border-t-[3px] border-r-[3px] border-[#b48a3c] pointer-events-none z-10" />
+      <div className="absolute bottom-5 left-5 w-8 h-8 border-b-[3px] border-l-[3px] border-[#b48a3c] pointer-events-none z-10" />
+      <div className="absolute bottom-5 right-5 w-8 h-8 border-b-[3px] border-r-[3px] border-[#b48a3c] pointer-events-none z-10" />
 
-      {/* Konten Utama Sertifikat */}
-      <div className="relative z-10 flex flex-col justify-between h-full p-7 sm:p-9 text-center">
-        {/* Header: Logo Rajendra, Glassmorphic Medallion Seal & Federasi */}
+      {/* ── 4. KONTEN UTAMA SERTIFIKAT ── */}
+      <div className="relative z-20 flex flex-col justify-between h-full p-7 sm:p-9 text-center">
+        {/* Header: Logo Rajendra, Segel Medallion & Sanction Badge */}
         <div>
           <div className="flex items-center justify-between px-3 pb-2 border-b border-amber-200/60">
             {/* Logo Rajendra SCMS Kiri */}
@@ -86,6 +177,9 @@ export function CertificateCard({
               <div className="hidden sm:block">
                 <p className="font-serif font-black text-[12px] text-slate-900 tracking-wide leading-tight">
                   RAJENDRA SPORTS
+                </p>
+                <p className="font-mono text-[8px] font-bold text-slate-500 uppercase tracking-wider">
+                  AQUATIC CHAMPIONSHIP SYSTEM
                 </p>
               </div>
             </div>
@@ -101,7 +195,7 @@ export function CertificateCard({
                   <Star className="h-5 w-5 text-blue-600 drop-shadow-xs" />
                 )}
                 <span className="absolute -bottom-1 px-1.5 py-0.2 bg-amber-500 text-white font-mono text-[7px] font-black rounded-full uppercase tracking-tighter shadow-2xs">
-                  SCMS
+                  MEET
                 </span>
               </div>
               <p className="text-[8px] font-mono font-bold tracking-widest text-slate-600 uppercase mt-1">
@@ -109,17 +203,17 @@ export function CertificateCard({
               </p>
             </div>
 
-            {/* Lambang Federasi Kanan */}
+            {/* Lambang Sanction Resmi & World Aquatics Kanan */}
             <div className="flex items-center gap-2 text-right">
               <div className="text-right hidden sm:block">
-                <p className="font-bold text-[10px] text-blue-950 uppercase tracking-tight leading-none">
-                  AKUATIK INDONESIA
-                </p>
-                <p className="text-[8px] font-mono text-slate-500 font-semibold">OFFICIAL SANCTIONED</p>
+                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 border border-amber-300 text-[8px] font-black tracking-wider text-amber-900 uppercase">
+                  <ShieldCheck className="h-2.5 w-2.5 text-amber-600" /> RAJENDRA SANCTIONED
+                </div>
+                <p className="text-[8px] font-mono text-slate-500 font-bold mt-0.5">RMS-AQUATICS / SW 3.1</p>
               </div>
-              <div className="h-10 w-10 rounded-full border border-blue-300 bg-blue-50/90 flex flex-col items-center justify-center text-blue-900 font-black text-[10px] shadow-2xs">
+              <div className="h-10 w-10 rounded-full border-2 border-amber-500 bg-gradient-to-br from-amber-50 to-amber-100 flex flex-col items-center justify-center text-amber-950 font-black text-[9px] shadow-2xs">
                 <span>FINA</span>
-                <span className="text-[6px] font-mono text-blue-600 font-bold -mt-0.5">RULES</span>
+                <span className="text-[6px] font-mono text-amber-700 font-black -mt-0.5">RULES</span>
               </div>
             </div>
           </div>
@@ -140,7 +234,7 @@ export function CertificateCard({
           </div>
         </div>
 
-        {/* Identitas Penerima (Langsung Nama Klub di Bawah Nama Atlet) */}
+        {/* Identitas Penerima (Nama Atlet & Klub) */}
         <div className="my-1.5 space-y-1">
           <p className="text-xs italic text-slate-500 font-serif">
             Diberikan dengan bangga kepada / Proudly presented to:
@@ -157,7 +251,7 @@ export function CertificateCard({
           )}
         </div>
 
-        {/* KOTAK PRESTASI GLASSMORPHISM UI */}
+        {/* KOTAK PRESTASI GLASSMORPHISM AQUATIC */}
         <div
           className={`mx-auto w-full max-w-xl rounded-2xl p-4 shadow-[0_8px_32px_0_rgba(15,43,92,0.06),inset_0_1px_1px_rgba(255,255,255,0.95)] ${
             isGold
@@ -196,7 +290,7 @@ export function CertificateCard({
 
           <div className="mt-2 flex flex-wrap items-center justify-center gap-2.5 text-xs text-slate-800">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 backdrop-blur-sm border border-amber-300/80 shadow-2xs font-semibold">
-              <span className="text-slate-600 text-[10px] uppercase font-bold">Waktu Tempuh:</span>
+              <span className="text-slate-600 text-[10px] uppercase font-bold">Waktu Tempuh Resmi:</span>
               <b className="font-mono font-black text-slate-950 text-xs">
                 {recipient.formattedTime} detik
               </b>
@@ -210,7 +304,7 @@ export function CertificateCard({
           </div>
         </div>
 
-        {/* Tanda Tangan, QR Code Glassmorphism, dan Stempel */}
+        {/* Tanda Tangan, QR Code Sanction, dan Stempel Resmi */}
         <div className="mt-3 pt-2 border-t border-slate-200">
           <div className="grid grid-cols-3 items-end gap-2 text-center">
             {/* Kiri: Technical Delegate */}
@@ -227,15 +321,20 @@ export function CertificateCard({
               </p>
             </div>
 
-            {/* Tengah: QR Code & Stempel Glassmorphism */}
+            {/* Tengah: QR Code & Stempel Sanction SwimSystem */}
             <div className="flex flex-col items-center justify-center space-y-1">
-              <div className="rounded-xl border border-white/90 bg-white/90 backdrop-blur-sm p-1 shadow-[0_4px_12px_rgba(0,0,0,0.06)] ring-1 ring-amber-200/50">
-                <QrCodeSvg value={verificationPayload} size={46} />
+              <div className="relative">
+                <div className="rounded-xl border border-white/90 bg-white/95 backdrop-blur-sm p-1 shadow-[0_4px_12px_rgba(0,0,0,0.06)] ring-1 ring-amber-200/50">
+                  <QrCodeSvg value={verificationPayload} size={44} />
+                </div>
+                <div className="absolute -top-2 -right-3 px-1.5 py-0.2 rounded bg-emerald-600 text-white font-mono text-[7px] font-black uppercase tracking-tighter shadow-2xs border border-emerald-400">
+                  VERIFIED
+                </div>
               </div>
-              <p className="text-[8px] font-mono font-bold text-slate-600 uppercase tracking-tight flex items-center gap-1">
-                <ShieldCheck className="h-3 w-3 text-emerald-600 inline" /> OFFICIAL SCMS VERIFIED
+              <p className="text-[8px] font-mono font-black text-slate-700 uppercase tracking-tight flex items-center gap-1">
+                <ShieldCheck className="h-3 w-3 text-emerald-600 inline" /> SWIMSYS SANCTIONED
               </p>
-              <p className="text-[9px] text-slate-600 font-medium">
+              <p className="text-[9px] text-slate-600 font-bold">
                 {settings.issuedCity || 'Kota Kejuaraan'}, {settings.issuedDate || '2026'}
               </p>
             </div>
@@ -272,4 +371,3 @@ export function CertificateCard({
     </div>
   );
 }
-

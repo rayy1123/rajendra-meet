@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getEventLiveConfig, saveEventLiveConfig, getAllLiveConfigs } from '@/lib/data/live-scoreboard-server';
-import { checkEventLiveStatus, LiveScoreboardMode } from '@/lib/data/live-scoreboard-settings';
+import {
+  getEventLiveConfig,
+  saveEventLiveConfig,
+  saveEventResultsConfig,
+  getAllLiveConfigs,
+} from '@/lib/data/live-scoreboard-server';
+import {
+  LiveScoreboardMode,
+  ResultsVisibilityMode,
+} from '@/lib/data/live-scoreboard-settings';
 import { createClient } from '@/lib/supabase/server';
 
 export async function GET(req: NextRequest) {
@@ -19,35 +27,57 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { eventId, mode } = body as { eventId?: string; mode?: LiveScoreboardMode };
+    const { eventId, mode, resultsMode } = body as {
+      eventId?: string;
+      mode?: LiveScoreboardMode;
+      resultsMode?: ResultsVisibilityMode;
+    };
 
-    if (!eventId || !mode || !['auto', 'open', 'closed'].includes(mode)) {
-      return NextResponse.json({ error: 'Parameter eventId dan mode ("auto" | "open" | "closed") harus diisi' }, { status: 400 });
+    if (!eventId) {
+      return NextResponse.json({ error: 'Parameter eventId harus diisi' }, { status: 400 });
     }
 
-    const saved = saveEventLiveConfig(eventId, mode);
-    if (!saved) {
-      return NextResponse.json({ error: 'Gagal menyimpan status live scoreboard' }, { status: 500 });
+    if (!mode && !resultsMode) {
+      return NextResponse.json({ error: 'Parameter mode atau resultsMode harus diisi' }, { status: 400 });
+    }
+
+    // 1. Update live scoreboard mode jika dikirim
+    if (mode && ['auto', 'open', 'closed'].includes(mode)) {
+      saveEventLiveConfig(eventId, mode);
+    }
+
+    // 2. Update results visibility mode jika dikirim
+    if (resultsMode && ['auto', 'open', 'closed'].includes(resultsMode)) {
+      saveEventResultsConfig(eventId, resultsMode);
     }
 
     // Upayakan sync ke database Supabase jika kolom terkait tersedia
     try {
       const supabase = await createClient();
-      await supabase
-        .from('events')
-        .update({
-          is_live_enabled: mode === 'open' ? true : mode === 'closed' ? false : null,
-        })
-        .eq('id', eventId);
+      const updateData: Record<string, any> = {};
+      if (mode) {
+        updateData.is_live_enabled = mode === 'open' ? true : mode === 'closed' ? false : null;
+      }
+      if (resultsMode) {
+        updateData.is_results_published = resultsMode === 'open' ? true : resultsMode === 'closed' ? false : null;
+      }
+      if (Object.keys(updateData).length > 0) {
+        await supabase
+          .from('events')
+          .update(updateData)
+          .eq('id', eventId);
+      }
     } catch {
-      // Abaikan jika kolom is_live_enabled belum ada di schema
+      // Abaikan jika kolom belum ada di schema
     }
+
+    const updatedConfig = getEventLiveConfig(eventId);
 
     return NextResponse.json({
       success: true,
       eventId,
-      mode,
-      message: `Status live scoreboard berhasil diubah menjadi: ${mode.toUpperCase()}`,
+      config: updatedConfig,
+      message: 'Pengaturan status berhasil disimpan.',
     });
   } catch (error) {
     console.error('Error in /api/scoreboard/live-status:', error);

@@ -38,13 +38,21 @@ export function SchoolPrintDialog({
   const [selectedEventId, setSelectedEventId] = useState(events[0]?.id || '');
   const [selectedSchoolId, setSelectedSchoolId] = useState(initialSchoolId || 'all');
 
-  const handleOpenReport = () => {
+  const handleOpenReport = (directPrint = false) => {
     if (!selectedEventId) {
       toast.error('Silakan pilih kejuaraan terlebih dahulu.');
       return;
     }
     setOpen(false);
-    router.push(`/events/${selectedEventId}/rekap-klub`);
+    const params = new URLSearchParams();
+    if (selectedSchoolId && selectedSchoolId !== 'all') {
+      params.set('clubId', selectedSchoolId);
+    }
+    if (directPrint) {
+      params.set('print', 'true');
+    }
+    const query = params.toString() ? `?${params.toString()}` : '';
+    router.push(`/events/${selectedEventId}/rekap-klub${query}`);
   };
 
   return (
@@ -111,17 +119,26 @@ export function SchoolPrintDialog({
             </Select>
           </div>
 
-          <div className="pt-2 flex justify-end gap-2">
+          <div className="pt-3 flex flex-wrap items-center justify-end gap-2 border-t border-slate-100">
             <Button variant="outline" size="sm" onClick={() => setOpen(false)} className="text-xs">
               Batal
             </Button>
             <Button
+              variant="outline"
               size="sm"
-              onClick={handleOpenReport}
+              onClick={() => handleOpenReport(false)}
               disabled={!selectedEventId}
-              className="gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs"
+              className="gap-1.5 text-xs font-bold border-slate-300 text-slate-800 hover:bg-slate-50"
             >
-              Buka Lembar Rekap <ArrowRight className="h-3.5 w-3.5" />
+              Lihat Lembar Rekap <ArrowRight className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => handleOpenReport(true)}
+              disabled={!selectedEventId}
+              className="gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs"
+            >
+              <Printer className="h-3.5 w-3.5" /> Cetak Sekarang (PDF)
             </Button>
           </div>
         </div>

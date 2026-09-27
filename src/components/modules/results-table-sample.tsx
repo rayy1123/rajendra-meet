@@ -69,7 +69,7 @@ export function ResultsTableSample() {
         </table>
       </div>
       <div className="flex items-center justify-between border-t border-border px-5 py-3 text-xs text-[var(--m-muted)]">
-        <span>Powered by Rajendra Meet SCMS</span>
+        <span>Powered by Rajendra Meet</span>
         <span className="flex items-center gap-1.5">
           <Trophy className="h-3.5 w-3.5 text-[var(--m-aqua)]" /> Live Result
         </span>

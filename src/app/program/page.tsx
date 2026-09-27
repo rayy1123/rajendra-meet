@@ -59,7 +59,7 @@ export default async function ProgramPage({
         { label: 'Buku Acara' },
       ]}
     >
-      <div className="pub-container pb-16">
+      <div className="pub-container pb-16 print:p-0 print:m-0 print:pb-0 print:max-w-none">
         {!current ? (
           <EmptyState
             icon={<Waves className="h-6 w-6 text-primary" />}

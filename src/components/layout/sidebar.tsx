@@ -28,11 +28,14 @@ import {
   Building2,
   BookmarkCheck,
   Menu,
+  X,
   Receipt,
   TrendingDown,
   BarChart3,
   ListOrdered,
   CalendarCheck,
+  IdCard,
+  User,
   type LucideIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -116,16 +119,31 @@ const adminNavGroups: NavGroup[] = [
   },
 ];
 
-// Menu khusus Peserta / Wali / Atlet
+// Menu terpadu Peserta / Wali / Klub Atlet
 const viewerNavGroups: NavGroup[] = [
   {
-    label: 'Akun Peserta',
+    label: 'Alur Pendaftaran',
     items: [
-      { title: 'Dasbor Peserta', href: '/dashboard-viewer', icon: LayoutDashboard, description: 'Ringkasan akun dan akses cepat' },
-      { title: 'Daftar Lomba', href: '/daftar-lomba', icon: CalendarDays, description: 'Pilih kejuaraan untuk mendaftar' },
-      { title: 'Atlet Saya', href: '/atlet-saya', icon: Users, description: 'Kelola data atlet Anda' },
-      { title: 'Pendaftaran Saya', href: '/pendaftaran-saya', icon: ClipboardList, description: 'Pantau status pembayaran & invoice' },
-      { title: 'Profil Akun', href: '/profile', icon: UserCircle, description: 'Kelola data akun Anda' },
+      { title: 'Dasbor Peserta', href: '/dashboard-viewer', icon: LayoutDashboard, description: 'Ringkasan persiapan lomba & status' },
+      { title: 'Data Saya', href: '/data-saya', icon: User, description: 'Profil data diri perenang pribadi (Mandiri)' },
+      { title: 'Data Atlet Tim', href: '/atlet-saya', icon: Users, description: 'Kelola atlet binaan kontingen (Pelatih)' },
+      { title: 'Daftar Nomor Lomba', href: '/daftar-lomba', icon: CalendarDays, description: 'Pilih kejuaraan & nomor lomba' },
+      { title: 'Pendaftaran & Tagihan', href: '/pendaftaran-saya', icon: ClipboardList, description: 'Cek bukti transfer & invoice resmi' },
+      { title: 'Kartu Peserta (ID Pass)', href: '/kartu-peserta', icon: IdCard, description: 'Cetak ID Pass Call Room atlet' },
+    ],
+  },
+  {
+    label: 'Arena & Prestasi',
+    items: [
+      { title: 'Live Scoreboard', href: '/scoreboard', icon: Timer, description: 'Pantauan live timing arena kolam' },
+      { title: 'Hasil Lomba', href: '/rankings', icon: Trophy, description: 'Catatan waktu resmi per nomor lomba' },
+      { title: 'Sertifikat Juara', href: '/sertifikat', icon: Award, description: 'Unduh piagam & sertifikat penghargaan' },
+    ],
+  },
+  {
+    label: 'Akun & Profil',
+    items: [
+      { title: 'Profil Pengguna', href: '/profile', icon: UserCircle, description: 'Ubah profil, kontak, & kata sandi' },
     ],
   },
 ];
@@ -224,6 +242,7 @@ export function SidebarNav({
 
 export function MobileSidebar({ role }: { role?: string }) {
   const [open, setOpen] = useState(false);
+  const isAdmin = ADMIN_ROLE_LIST.includes(role || '');
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -233,16 +252,45 @@ export function MobileSidebar({ role }: { role?: string }) {
           <span className="sr-only">Buka navigasi</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-72 p-0 flex flex-col">
-        <SheetHeader className="flex flex-row items-center gap-2 border-b px-6 py-4 text-left space-y-0">
-          <img
-            src="/brand/logo.png"
-            alt="Rajendra Meet"
-            className="h-7 w-auto"
-          />
-          <SheetTitle className="font-bold text-lg tracking-tight">
-            Rajendra Meet
-          </SheetTitle>
+      <SheetContent side="left" showCloseButton={false} className="w-72 p-0 flex flex-col">
+        <SheetHeader className="border-b px-5 py-3.5 text-left space-y-2">
+          <div className="flex items-center justify-between">
+            <img
+              src="/brand/logo.png"
+              alt="Rajendra Meet"
+              className="h-7 w-auto object-contain"
+            />
+            <SheetTitle className="sr-only">Navigasi Rajendra Meet</SheetTitle>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="rounded-lg p-1.5 text-slate-400 hover:text-slate-900 transition-colors"
+              aria-label="Tutup navigasi"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="flex items-center gap-1.5 pt-0.5">
+            <span className="text-[9px] font-black uppercase tracking-wider text-slate-400">
+              DESIGN BY
+            </span>
+            <img
+              src="/brand/rajendra-organizer-logo.png"
+              alt="Rajendra Project"
+              className="h-4.5 w-auto object-contain"
+            />
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold text-slate-600 bg-slate-100 border border-slate-200">
+              {isAdmin ? 'Rajendra Meet Admin v4.8' : 'Portal Peserta v4.8'}
+            </span>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Live Sync
+            </span>
+          </div>
         </SheetHeader>
         <div className="flex-1 overflow-y-auto">
           <SidebarNav onItemClick={() => setOpen(false)} role={role} />

@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 import DashboardLayout from '@/components/layout/layout';
 import type { UserRole } from '@/types/database';
@@ -10,6 +11,13 @@ const ADMIN_ROLES: UserRole[] = [
   'admin',
   'admin_kejuaraan',
   'admin_keuangan',
+];
+
+const ALLOWED_VIEWER_ROUTES = [
+  '/kartu-peserta',
+  '/sertifikat',
+  '/rajendra-record',
+  '/rankings',
 ];
 
 interface ProfileRole {
@@ -39,7 +47,23 @@ export default async function Layout({ children }: { children: React.ReactNode }
   if (fetchedRole) {
     role = fetchedRole;
   }
-  if (!ADMIN_ROLES.includes(role)) {
+
+  const isViewer = !ADMIN_ROLES.includes(role);
+
+  // Cek apakah halaman yang diakses diizinkan untuk role non-admin (viewer)
+  const headerList = await headers();
+  const pathname = headerList.get('x-pathname') || '';
+
+  // Jika viewer mencoba membuka /results (halaman input juri), alihkan ke /rankings (hasil peringkat resmi)
+  if (isViewer && pathname.startsWith('/results')) {
+    redirect('/rankings');
+  }
+
+  const isAllowedForViewer = ALLOWED_VIEWER_ROUTES.some((route) =>
+    pathname.startsWith(route)
+  );
+
+  if (isViewer && !isAllowedForViewer) {
     redirect('/dashboard-viewer');
   }
 

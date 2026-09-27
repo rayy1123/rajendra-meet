@@ -92,9 +92,9 @@ export function PublicShell({
   );
 
   return (
-    <div className="pub-shell">
+    <div className="pub-shell print:bg-white print:min-h-0 print:block print:p-0 print:m-0 print:h-auto">
       {/* HEADER UTAMA DENGAN BREADCRUMB MENU */}
-      <header className="pub-header">
+      <header className="pub-header no-print print:hidden">
         <div className="pub-container flex h-16 items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 sm:gap-3.5">
             <Link href="/" className="flex items-center gap-2.5 transition-opacity hover:opacity-90">
@@ -121,14 +121,14 @@ export function PublicShell({
         role={role}
       />
 
-      <main className="flex-1">
+      <main className="flex-1 print:p-0 print:m-0 print:block print:flex-none">
         {breadcrumbItems && breadcrumbItems.length > 0 && (
-          <div className="pub-container pt-4">
+          <div className="pub-container pt-4 no-print print:hidden">
             <Breadcrumb items={breadcrumbItems} />
           </div>
         )}
         {title && (
-          <div className="pub-container pt-4 pb-6">
+          <div className="pub-container pt-4 pb-6 no-print print:hidden">
             <p className="pub-eyebrow">Rajendra Meet · Kejuaraan Renang</p>
             <h1 className="font-heading mt-2 text-3xl font-extrabold tracking-tight text-[var(--m-ink)] sm:text-4xl">
               {title}

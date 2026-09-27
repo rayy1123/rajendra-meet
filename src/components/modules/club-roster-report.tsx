@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
+import ExcelJS from 'exceljs';
+import { toast } from 'sonner';
 import {
   Printer,
   School,
@@ -17,11 +19,13 @@ import {
   MapPin,
   Waves,
   FileSpreadsheet,
-  Download
+  Download,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { BrandedSpinner } from '@/components/ui/branded-loading';
+import { EmptyState } from '@/components/ui/empty-state';
 import { formatMsToTime } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 
@@ -77,6 +81,9 @@ export interface ClubRosterReportProps {
   eventsList?: { id: string; name: string }[];
   schools: { id: string; name: string; city?: string | null }[];
   registrations: RegistrationClubRecord[];
+  initialClubId?: string;
+  initialPayment?: string;
+  autoPrint?: boolean;
   lockEvent?: boolean;
   backHref?: string;
 }
@@ -116,11 +123,30 @@ export function ClubRosterReport({
   eventsList = [],
   schools,
   registrations,
+  initialClubId = 'all',
+  initialPayment = 'all',
+  autoPrint = false,
   lockEvent = false,
   backHref = `/events/${event.id}`,
 }: ClubRosterReportProps) {
-  const [selectedClubId, setSelectedClubId] = useState<string>('all');
-  const [filterPayment, setFilterPayment] = useState<string>('all');
+  const [selectedClubId, setSelectedClubId] = useState<string>(initialClubId || 'all');
+  const [filterPayment, setFilterPayment] = useState<string>(initialPayment || 'all');
+  const [isExportingExcel, setIsExportingExcel] = useState(false);
+
+  useEffect(() => {
+    if (initialClubId) {
+      setSelectedClubId(initialClubId);
+    }
+  }, [initialClubId]);
+
+  useEffect(() => {
+    if (autoPrint) {
+      const timer = setTimeout(() => {
+        window.print();
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [autoPrint]);
 
   const feePerEvent = event.fee_per_event || 50000;
 
@@ -249,6 +275,179 @@ export function ClubRosterReport({
     window.print();
   };
 
+  const handlePrintSingleClub = (clubId: string) => {
+    setSelectedClubId(clubId);
+    setTimeout(() => {
+      window.print();
+    }, 200);
+  };
+
+  const handleExportExcel = async (targetClubId?: string) => {
+    const clubsToExport = targetClubId
+      ? clubsData.filter((c) => c.clubId === targetClubId)
+      : filteredClubs;
+
+    if (clubsToExport.length === 0) {
+      toast.warning('Tidak ada data kontingen untuk diekspor ke Excel.');
+      return;
+    }
+
+    setIsExportingExcel(true);
+    try {
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'Rajendra Meet';
+      workbook.created = new Date();
+
+      clubsToExport.forEach((club) => {
+        const safeSheetName =
+          club.clubName.replace(/[\\/*?:[\]]/g, '').slice(0, 28) || 'Kontingen';
+        let sheetName = safeSheetName;
+        let counter = 1;
+        while (workbook.getWorksheet(sheetName)) {
+          sheetName = `${safeSheetName.slice(0, 25)}_${counter++}`;
+        }
+
+        const ws = workbook.addWorksheet(sheetName, {
+          views: [{ showGridLines: true }],
+        });
+
+        // Title & Info
+        ws.mergeCells('A1:G1');
+        const titleCell = ws.getCell('A1');
+        titleCell.value = 'REKAPITULASI ATLET & STATUS PEMBAYARAN KONTINGEN';
+        titleCell.font = { bold: true, size: 14, color: { argb: '0F172A' } };
+        titleCell.alignment = { vertical: 'middle', horizontal: 'left' };
+        ws.getRow(1).height = 24;
+
+        ws.mergeCells('A2:G2');
+        const subCell = ws.getCell('A2');
+        subCell.value = `Kejuaraan: ${event.name} | Lokasi: ${event.location || 'Kolam Renang Resmi'} | Tanggal: ${event.start_date || '–'} s/d ${event.end_date || '–'}`;
+        subCell.font = { italic: true, size: 10, color: { argb: '475569' } };
+        ws.getRow(2).height = 18;
+
+        ws.mergeCells('A3:G3');
+        const clubInfoCell = ws.getCell('A3');
+        clubInfoCell.value = `Sekolah / Klub: ${club.clubName} (${club.city}) | Total Atlet: ${club.totalAthletes} | Total Entri: ${club.totalEventEntries} | Total Biaya: Rp ${club.totalFee.toLocaleString('id-ID')} | Status: ${club.clubPaymentStatus.toUpperCase()}`;
+        clubInfoCell.font = { bold: true, size: 10, color: { argb: '0369A1' } };
+        ws.getRow(3).height = 20;
+
+        ws.addRow([]); // Spacer
+
+        // Table Headers
+        const headers = [
+          'No',
+          'Nama Lengkap Atlet',
+          'ID / NISN',
+          'Gender',
+          'Kelompok Usia (KU)',
+          'Nomor Lomba & Seed Time',
+          'Status Pembayaran',
+        ];
+
+        const headerRow = ws.addRow(headers);
+        headerRow.height = 24;
+        headerRow.eachCell((cell) => {
+          cell.font = { bold: true, color: { argb: 'FFFFFF' }, size: 10 };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '1E3A8A' } };
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+          cell.border = {
+            top: { style: 'thin', color: { argb: '0F172A' } },
+            left: { style: 'thin', color: { argb: '0F172A' } },
+            bottom: { style: 'medium', color: { argb: '0F172A' } },
+            right: { style: 'thin', color: { argb: '0F172A' } },
+          };
+        });
+
+        // Rows
+        club.athletes.forEach((ath, idx) => {
+          const eventsText = ath.events
+            .map(
+              (e, eIdx) =>
+                `${eIdx + 1}. ${e.eventName} (${e.seedTime ? formatMsToTime(e.seedTime) : 'NT'})`
+            )
+            .join('\n');
+
+          const rowData = [
+            idx + 1,
+            ath.fullName,
+            ath.athleteNumber || '–',
+            ath.gender === 'female' ? 'Putri' : 'Putra',
+            ath.ageGroup,
+            eventsText,
+            ath.overallStatus === 'verified'
+              ? 'LUNAS'
+              : ath.overallStatus === 'pending'
+              ? 'PENDING'
+              : 'BELUM BAYAR',
+          ];
+
+          const insertedRow = ws.addRow(rowData);
+          insertedRow.height = Math.max(22, ath.events.length * 16);
+
+          if (idx % 2 === 1) {
+            insertedRow.eachCell((c) => {
+              c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'F8FAFC' } };
+            });
+          }
+
+          insertedRow.getCell(1).alignment = { vertical: 'middle', horizontal: 'center' };
+          insertedRow.getCell(2).alignment = { vertical: 'middle', horizontal: 'left' };
+          insertedRow.getCell(3).alignment = { vertical: 'middle', horizontal: 'center' };
+          insertedRow.getCell(4).alignment = { vertical: 'middle', horizontal: 'center' };
+          insertedRow.getCell(5).alignment = { vertical: 'middle', horizontal: 'center' };
+          insertedRow.getCell(6).alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
+          insertedRow.getCell(7).alignment = { vertical: 'middle', horizontal: 'center' };
+
+          if (ath.overallStatus === 'verified') {
+            insertedRow.getCell(7).font = { bold: true, color: { argb: '166534' } };
+          } else if (ath.overallStatus === 'pending') {
+            insertedRow.getCell(7).font = { bold: true, color: { argb: 'B45309' } };
+          } else {
+            insertedRow.getCell(7).font = { bold: true, color: { argb: 'BE123C' } };
+          }
+
+          insertedRow.eachCell((c) => {
+            c.border = {
+              top: { style: 'thin', color: { argb: 'E2E8F0' } },
+              left: { style: 'thin', color: { argb: 'E2E8F0' } },
+              bottom: { style: 'thin', color: { argb: 'E2E8F0' } },
+              right: { style: 'thin', color: { argb: 'E2E8F0' } },
+            };
+          });
+        });
+
+        // Column Widths
+        ws.getColumn(1).width = 6;
+        ws.getColumn(2).width = 28;
+        ws.getColumn(3).width = 14;
+        ws.getColumn(4).width = 12;
+        ws.getColumn(5).width = 16;
+        ws.getColumn(6).width = 40;
+        ws.getColumn(7).width = 18;
+      });
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const fileName = targetClubId
+        ? `Rekap_${clubsToExport[0]?.clubName.replace(/\s+/g, '_')}_${event.name.replace(/\s+/g, '_')}.xlsx`
+        : `Rekap_Seluruh_Klub_${event.name.replace(/\s+/g, '_')}.xlsx`;
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      toast.success('Berkas Excel rekapitulasi kontingen berhasil diunduh!');
+    } catch (err: any) {
+      toast.error(`Gagal ekspor Excel: ${err?.message || 'Kesalahan sistem'}`);
+    } finally {
+      setIsExportingExcel(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Print Specific CSS */}
@@ -313,6 +512,19 @@ export function ClubRosterReport({
           </div>
 
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => handleExportExcel()}
+              disabled={isExportingExcel}
+              className="gap-2 border-emerald-300 bg-emerald-50/50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs shadow-2xs"
+            >
+              {isExportingExcel ? (
+                <BrandedSpinner className="h-4 w-4" />
+              ) : (
+                <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
+              )}
+              Download Excel Rekap
+            </Button>
             <Button
               onClick={handlePrint}
               className="gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs"
@@ -430,19 +642,19 @@ export function ClubRosterReport({
       {/* LEMBAR DOKUMEN REKAP (PRINTABLE AREA) */}
       <div id="club-roster-print-area" className="space-y-8">
         {filteredClubs.length === 0 ? (
-          <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center space-y-3">
-            <School className="h-10 w-10 text-muted-foreground/30 mx-auto" />
-            <h4 className="font-heading font-bold text-base text-slate-800">
-              Belum ada atlet atau klub yang terdaftar pada kejuaraan ini
-            </h4>
-            <p className="text-xs text-muted-foreground max-w-md mx-auto">
-              Silakan lakukan pendaftaran atlet terlebih dahulu melalui menu <b>Daftar Perlombaan</b> atau unggah berkas Excel pendaftaran klub.
-            </p>
-            <Link href={`/perlombaan/partisipasi/${event.id}`}>
-              <Button className="gap-2 text-xs font-bold bg-blue-600 text-white mt-2">
-                <Users className="h-4 w-4" /> Masukkan Atlet / Import Excel
-              </Button>
-            </Link>
+          <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-xs">
+            <EmptyState
+              icon={<School className="h-8 w-8 text-primary" />}
+              title="Belum Ada Atlet atau Klub Terdaftar"
+              description="Belum ada pendaftaran atlet kontingen pada kejuaraan ini. Silakan daftarkan atlet atau unggah berkas Excel pendaftaran klub."
+              action={
+                <Link href={`/perlombaan/partisipasi/${event.id}`}>
+                  <Button className="gap-2 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white">
+                    <Users className="h-4 w-4" /> Masukkan Atlet / Import Excel
+                  </Button>
+                </Link>
+              }
+            />
           </div>
         ) : (
           filteredClubs.map((club, cIdx) => {
@@ -454,6 +666,33 @@ export function ClubRosterReport({
                 key={club.clubId}
                 className="club-print-sheet rounded-2xl border border-slate-300 bg-white p-6 sm:p-8 shadow-sm print:border-none print:shadow-none print:p-0"
               >
+                {/* Bar Aksi Cepat per Lembar Klub (Hanya Tampil di Layar / no-print) */}
+                <div className="no-print flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-slate-200">
+                  <div className="flex items-center gap-1.5 text-xs text-slate-700 font-bold">
+                    <School className="h-4 w-4 text-blue-600" />
+                    <span>Lembar Dokumen: <strong className="text-slate-950 font-heading">{club.clubName}</strong></span>
+                    <span className="text-slate-400 font-normal">({club.totalAthletes} Atlet • {club.totalEventEntries} Entri)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleExportExcel(club.clubId)}
+                      disabled={isExportingExcel}
+                      className="h-8 gap-1.5 text-xs font-bold border-emerald-300 text-emerald-800 hover:bg-emerald-50 shadow-2xs"
+                    >
+                      <Download className="h-3.5 w-3.5 text-emerald-600" /> Unduh Excel (.xlsx)
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => handlePrintSingleClub(club.clubId)}
+                      className="h-8 gap-1.5 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-2xs"
+                    >
+                      <Printer className="h-3.5 w-3.5" /> Cetak Lembar Klub Ini (PDF)
+                    </Button>
+                  </div>
+                </div>
+
                 {/* 1. KOP DOKUMEN RESMI KEJUARAAN */}
                 <div className="border-b-2 border-slate-900 pb-3 flex items-center justify-between gap-4">
                   <div className="flex shrink-0 items-center">
@@ -685,7 +924,7 @@ export function ClubRosterReport({
 
                 {/* Footer Bar Kecil */}
                 <div className="mt-2 pt-1 border-t border-slate-200 flex items-center justify-between text-[9px] text-slate-400 font-mono">
-                  <span>SCMS Rajendra Meet · Dokumen Rekapitulasi Kontingen</span>
+                  <span>Rajendra Meet · Dokumen Rekapitulasi Kontingen</span>
                   <span>Dicetak: {new Date().toLocaleString('id-ID')}</span>
                 </div>
               </div>

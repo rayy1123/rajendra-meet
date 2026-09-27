@@ -142,7 +142,7 @@ export function ExportBySchoolCard({
 
       // 2. Bangun Workbook ExcelJS
       const workbook = new ExcelJS.Workbook();
-      workbook.creator = 'Rajendra SCMS';
+      workbook.creator = 'Rajendra Meet';
       workbook.created = new Date();
 
       const ws = workbook.addWorksheet('Pendaftar_Cabang', {
@@ -388,7 +388,13 @@ export function ExportBySchoolCard({
 
         <div className="pt-2 flex flex-wrap items-center justify-end gap-2">
           {selectedEventId && (
-            <Link href={`/events/${selectedEventId}/rekap-klub`} target="_blank">
+            <Link
+              href={`/events/${selectedEventId}/rekap-klub?${new URLSearchParams({
+                ...(selectedSchoolId !== 'all' ? { clubId: selectedSchoolId } : {}),
+                ...(selectedPaymentStatus !== 'all' ? { payment: selectedPaymentStatus } : {}),
+              }).toString()}`}
+              target="_blank"
+            >
               <Button
                 type="button"
                 variant="outline"

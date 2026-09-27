@@ -1,6 +1,8 @@
 import { LandingShell } from '@/components/layout/landing-shell';
 import { Testimonials, type Testimonial } from '@/components/modules/testimonials';
 import { PhotoSlider } from '@/components/modules/photo-slider';
+import { HeroBannerSlider } from '@/components/modules/hero-banner-slider';
+import { AutoslidePhotoGallery } from '@/components/modules/autoslide-photo-gallery';
 import { Waves, Phone, Mail, Share2, ArrowRight, Trophy, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
@@ -10,6 +12,8 @@ import {
   type UpcomingEventItem,
 } from '@/components/modules/upcoming-events-showcase';
 import { AboutSection } from '@/components/modules/about-section';
+import { ServicesSection } from '@/components/modules/services-section';
+import { ClientsSection } from '@/components/modules/clients-section';
 
 export const metadata = {
   title: 'Rajendra Meet — Sistem Manajemen Kejuaraan Renang',
@@ -21,37 +25,59 @@ export const dynamic = 'force-dynamic';
 
 const TESTIMONIALS: Testimonial[] = [
   {
-    text: 'Ini pertama kalinya anak saya ikut kompetisi yang dibantu Rajendra Meet, dan saya benar-benar menikmati setiap momennya! Suasananya mendukung, panitianya ramah, dan acaranya fun banget. Nggak sabar ikut event selanjutnya!',
-    name: 'Nadine Kusuma',
+    name: 'Naya Kurnia',
     role: 'Orang Tua Peserta',
+    category: 'parent',
+    event: 'Home Tournament Series IV',
+    highlight: 'Suasana Ramah & Fun untuk Anak',
+    rating: 5,
+    club: 'Harahap Swimming School',
+    text: 'Ini pertama kalinya anak saya ikut kompetisi yang diselenggarakan bersama Rajendra Meet, dan saya benar-benar menikmati setiap momennya! Suasananya sangat mendukung, panitianya ramah dan informatif, serta acaranya fun banget. Anak jadi tidak trauma berlomba, malah nggak sabar mau ikut event selanjutnya!',
   },
   {
-    text: 'Kejuaraan renang yang diselenggarakan lewat sistem ini sangat terorganisir dengan baik. Anak saya jadi semakin percaya diri dan semangat berlatih renang. Suasana kompetisinya seru tapi tetap menyenangkan untuk anak-anak!',
-    name: 'Rina Setyawati',
+    name: 'Koko Nugroho',
     role: 'Orang Tua Peserta',
+    category: 'parent',
+    event: 'Kejurda Pelajar Banten 2026',
+    highlight: 'Disiplin Waktu & Terorganisir Rapih',
+    rating: 5,
+    club: 'Klub Akuatik Tirta',
+    text: 'Event lomba renang dari Rajendra Meet sangat terorganisir dengan baik. Panggilan Call Room tertib, jadwal seri tepat waktu, dan anak saya jadi semakin percaya diri serta bersemangat berlatih renang. Suasana kompetisinya seru tapi tetap menyenangkan untuk anak-anak!',
   },
   {
-    text: 'Sebagai pelatih, saya sangat mengapresiasi penyelenggaraan lomba ini. Hasil muncul real-time, juri lebih cepat, dan orang tua bisa memantau langsung. Pengalaman positif untuk para atlet muda.',
-    name: 'Andi Pratama',
-    role: 'Pelatih Renang',
+    name: 'Willy Surya',
+    role: 'Pelatih Kepala (Head Coach)',
+    category: 'coach',
+    event: 'Kejurnas Akuatik Seri I',
+    highlight: 'Live Scoreboard Real-Time & Transparan',
+    rating: 5,
+    club: 'Jangkar Swimming Club',
+    text: 'Sebagai pelatih, saya sangat mengapresiasi sistem Rajendra Meet. Fasilitas memadai, panitia ramah, hasil waktu muncul real-time di scoreboard, dan seluruh rangkaian acara berjalan lancar tepat waktu. Pengalaman yang sangat positif untuk pembinaan atlet muda.',
   },
   {
-    text: 'Anak saya ikut lomba renang dari sini dan senang banget! Seru, banyak teman baru, dan langsung dapat peringkat di scoreboard. Pengen ikut lagi event selanjutnya!',
-    name: 'Nayla',
-    role: 'Peserta',
+    name: 'Elly Anggraini',
+    role: 'Wali Atlet Pemula',
+    category: 'parent',
+    event: 'Festival Renang Pelajar',
+    highlight: 'Sertifikat & Medali Resmi Instan',
+    rating: 5,
+    club: 'Mandiri / Sekolah',
+    text: 'Terima kasih Rajendra Meet sudah membuat event yang penuh semangat, sportivitas, dan keceriaan. Transparansi nomor lomba sangat jelas, dan sertifikat resmi berstempel langsung siap diunduh setelah acara selesai. Ditunggu event selanjutnya!',
   },
 ];
 
 export default async function HomePage() {
   const supabase = await createClient();
 
-  // Ambil data showcase yang telah diatur di Kelola Beranda SCMS (Poster, Stat, Galeri, Tentang, Pilar)
+  // Ambil data showcase yang telah diatur di Kelola Beranda SCMS (Poster, Stat, Galeri, Tentang, Pilar, Layanan/RAB, Client)
   const posters = getServerShowcases('poster');
   const stats = getServerShowcases('stat');
   const gallery = getServerShowcases('gallery');
   const aboutItems = getServerShowcases('about');
   const aboutItem = aboutItems.length > 0 ? aboutItems[0] : undefined;
   const pillars = getServerShowcases('pillar');
+  const services = getServerShowcases('service');
+  const clients = getServerShowcases('client');
 
   // Ambil data kejuaraan resmi dari database (prioritaskan mendatang, jika belum ada tampilkan event aktif)
   let upcomingEvents: UpcomingEventItem[] = [];
@@ -81,7 +107,13 @@ export default async function HomePage() {
 
   return (
     <LandingShell>
-      {/* ===== HERO ===== */}
+      {/* ===== 1. WIDESCREEN HERO BANNER SLIDER (Sesuai Image #11: "Saatnya Jadi Juara") ===== */}
+      <HeroBannerSlider />
+
+      {/* ===== 2. CONTINUOUS AUTOSLIDE PHOTO GALLERY (Sesuai Image #11, #12, #13, #14) ===== */}
+      <AutoslidePhotoGallery />
+
+      {/* ===== 3. CORE OVERVIEW & VALUE PROPOSITION HERO ===== */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-[var(--m-aqua-soft)] via-[var(--m-bg)] to-[var(--m-bg)]" />
         {/* floating soft blobs — biar nggak kaku */}
@@ -166,22 +198,34 @@ export default async function HomePage() {
 
       {/* ===== TENTANG KAMI & MENGAPA MEMILIH RAJENDRA SWIMMING ORGANIZER ===== */}
       <section id="tentang" className="pub-container scroll-mt-20 py-12 sm:py-16">
-        <div id="layanan" className="scroll-mt-24">
-          <AboutSection
-            about={aboutItem}
-            pillars={pillars && pillars.length > 0 ? pillars : undefined}
-          />
-        </div>
+        <AboutSection
+          about={aboutItem}
+          pillars={pillars && pillars.length > 0 ? pillars : undefined}
+        />
       </section>
 
-      {/* ===== TESTIMONI ===== */}
-      <section className="pub-container py-12 sm:py-16">
-        <div className="mb-8 text-center">
-          <span className="pub-eyebrow">Testimoni</span>
-          <h2 className="mt-2 text-2xl font-bold text-[var(--m-ink)] sm:text-3xl">
-            Apa Kata Mereka
+      {/* ===== LAYANAN KAMI / PAKET RAB KEJUARAAN ===== */}
+      <section id="layanan" className="pub-container scroll-mt-20 py-12 sm:py-16">
+        <div className="mb-10 text-center space-y-2">
+          <span className="pub-eyebrow">Layanan &amp; Paket RAB</span>
+          <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-[var(--m-ink)]">
+            Layanan Kami &amp; Estimasi RAB Event
           </h2>
+          <p className="text-xs sm:text-sm text-slate-500 max-w-2xl mx-auto leading-relaxed">
+            Paket manajemen teknologi informasi, tim IT berlisensi, sistem penyusunan heat otomatis, serta live timing scoreboard untuk kejuaraan renang Anda.
+          </p>
         </div>
+
+        <ServicesSection services={services && services.length > 0 ? services : undefined} />
+      </section>
+
+      {/* ===== KLIEN KAMI & DOKUMENTASI KOMUNITAS ===== */}
+      <section className="pub-container py-12 sm:py-16">
+        <ClientsSection clients={clients && clients.length > 0 ? clients : undefined} />
+      </section>
+
+      {/* ===== TESTIMONI & ULASAN PESERTA ===== */}
+      <section id="testimoni" className="pub-container py-12 sm:py-16">
         <Testimonials items={TESTIMONIALS} />
       </section>
 

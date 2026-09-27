@@ -240,7 +240,7 @@ export async function parseAndImportExcel(file: File): Promise<ExcelImportResult
       if (eventRows.length > 0) {
         const row = eventRows[0];
         const eventPayload: EventInsertPayload = {
-          name: row['Nama Event'] || row['Name'] || 'Kejuaraan Renang SCMS',
+          name: row['Nama Event'] || row['Name'] || 'Kejuaraan Renang Rajendra Meet',
           organizer: row['Penyelenggara'] || row['Organizer'] || 'Panitia Pelaksana',
           location: row['Lokasi'] || row['Location'] || 'Kolam Renang Utama',
           start_date: parseExcelDate(row['Tanggal Mulai'] || row['Start Date']),

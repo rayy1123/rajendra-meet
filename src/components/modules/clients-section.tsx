@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
 import { type ShowcaseItem, DEFAULT_CLIENTS } from '@/lib/data/landing-showcases';
+import { CommunityVideoPlayer } from '@/components/modules/community-video-player';
 
 export function ClientsSection({ clients = DEFAULT_CLIENTS }: { clients?: ShowcaseItem[] }) {
   return (
@@ -35,7 +36,7 @@ export function ClientsSection({ clients = DEFAULT_CLIENTS }: { clients?: Showca
 
       {/* 2. Ukir Prestasimu dan Jadilah Pemenang Bersama Rajendra Project */}
       <div className="mx-auto max-w-3xl text-center space-y-5">
-        <h3 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight tracking-tight text-[var(--m-ink)]">
+        <h3 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-black leading-tight tracking-tight text-[var(--m-ink)]">
           Ukir Prestasimu dan Jadilah Pemenang Bersama Rajendra Project.
         </h3>
         <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto">
@@ -52,13 +53,13 @@ export function ClientsSection({ clients = DEFAULT_CLIENTS }: { clients?: Showca
         </div>
       </div>
 
-      {/* 3. Community Photo Collage */}
-      <div className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-lg">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/brand/community-team.png"
-          alt="Komunitas Kejuaraan Renang Rajendra Project"
-          className="h-auto w-full object-cover max-h-96"
+      {/* 3. Community Video Player & Teaser Showcase (Sesuai Image #15) */}
+      <div className="w-full">
+        <CommunityVideoPlayer
+          videoSrc="/videos/community-video.mp4"
+          posterSrc="/videos/community-poster.jpg"
+          fallbackImageSrc="/brand/community-team.png"
+          title="Dokumentasi Arena & Komunitas Rajendra Project"
         />
       </div>
     </div>

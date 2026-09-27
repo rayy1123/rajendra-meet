@@ -47,8 +47,8 @@ export const MAIN_MENU_ITEMS: LandingMenuItem[] = [
   },
   {
     href: '/#layanan',
-    label: 'Layanan Kami',
-    description: 'Event organizer & sistem SCMS',
+    label: 'Layanan Kami (RAB)',
+    description: 'Paket & estimasi biaya RAB kejuaraan',
     icon: Sparkles,
   },
   {
@@ -269,7 +269,7 @@ export function LandingSidebarDrawer({
                     {user.user_metadata?.full_name || user.email}
                   </p>
                   <p className="text-[10px] font-medium text-[var(--m-muted)] capitalize">
-                    {isAdmin ? 'Panitia SCMS' : 'Akun Peserta'}
+                    {isAdmin ? 'Panitia Rajendra Meet' : 'Akun Peserta'}
                   </p>
                 </div>
               </div>

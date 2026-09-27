@@ -12,6 +12,8 @@ export interface EventSettings {
   bank_name: string;
   bank_account_no: string;
   bank_account_name: string;
+  logo_url?: string | null;
+  status_override?: 'auto' | 'open' | 'live' | 'finished';
   updatedAt?: string;
 }
 

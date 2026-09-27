@@ -3,7 +3,7 @@ import { requireUser } from '@/lib/auth';
 import DashboardLayout from '@/components/layout/layout';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { EmptyState } from '@/components/ui/empty-state';
-import { Waves, CheckCircle2, XCircle, Clock, FileText } from 'lucide-react';
+import { Waves, CheckCircle2, XCircle, Clock, FileText, IdCard } from 'lucide-react';
 import Link from 'next/link';
 import { ViewerSubHeader } from '@/components/modules/viewer-subheader';
 
@@ -167,6 +167,15 @@ export default async function PendaftaranSayaPage() {
                       >
                         <FileText className="h-3.5 w-3.5" /> Invoice
                       </Link>
+                      {pay?.status === 'verified' && (
+                        <Link
+                          href="/kartu-peserta"
+                          className="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 bg-emerald-100 hover:bg-emerald-200 px-2.5 py-1 rounded-full transition-colors shadow-2xs"
+                          title="Cetak ID Pass Call Room Resmi"
+                        >
+                          <IdCard className="h-3.5 w-3.5 text-emerald-600" /> ID Pass
+                        </Link>
+                      )}
                     </div>
 
                     {pay?.status === 'pending' && evt?.bank_account_no && (
