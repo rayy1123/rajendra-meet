@@ -568,13 +568,18 @@ export function BukuAcaraManager({
           <div className="buku-page-break rounded-2xl border border-slate-200 print:border-none print:shadow-none bg-white p-8 sm:p-12 text-center shadow-xs space-y-6">
             {/* Header Logos: Rajendra Swim System di Kiri & Rajendra Swimming Organizer di Kanan */}
             <div className="flex items-center justify-between border-b border-slate-200 pb-3 gap-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/brand/logo.png" alt="Rajendra Swim System" className="h-8 sm:h-9 w-auto max-w-[120px] object-contain shrink-0" />
-              <div className="text-center px-3 flex-1 min-w-0">
-                <span className="font-mono text-xs font-black tracking-widest text-slate-800 uppercase block">
-                  OFFICIAL MEET PROGRAM
+              <div className="flex items-center gap-2 shrink-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/brand/logo.png" alt="Rajendra Swim System" className="h-8 sm:h-9 w-auto max-w-[120px] object-contain shrink-0" />
+                <span className="font-heading font-black text-sm text-slate-900 tracking-tight">
+                  Rajendra <span className="text-[#0284c7]">Swim System</span>
                 </span>
-                <p className="text-[10px] text-slate-500 font-semibold">STANDAR FINA / AKUATIK INDONESIA</p>
+              </div>
+              <div className="text-center px-3 flex-1 min-w-0">
+                <span className="font-mono text-xs font-black tracking-widest text-slate-900 uppercase block">
+                  RAJENDRA SWIM SYSTEM
+                </span>
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">OFFICIAL MEET PROGRAM</p>
               </div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/brand/rajendra-organizer-logo.png" alt="Rajendra Swimming Organizer" className="h-7 sm:h-8 w-auto max-w-[125px] object-contain shrink-0" />
@@ -619,18 +624,8 @@ export function BukuAcaraManager({
               </div>
             </div>
 
-            {/* FOOTER BANNER CHAMPION SPORTS & MASCOT RAJEN & DARA DI COVER */}
+            {/* PITA SPONSOR RESMI */}
             <div className="pt-8 border-t border-slate-200 space-y-4">
-              <div className="w-full overflow-hidden rounded-xl border border-slate-200 shadow-sm print:rounded-none print:shadow-none">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/brand/banner-rajendra.jpg"
-                  alt="Rajendra Swim System Swimming System - Champion Sports (Mascot Rajen & Dara)"
-                  className="w-full h-auto object-cover max-h-28"
-                />
-              </div>
-
-              {/* PITA SPONSOR RESMI */}
               <SponsorLogosStrip
                 sponsors={sponsorsList}
                 title="TERIMA KASIH KEPADA SELURUH MITRA & SPONSOR KEJUARAAN"
@@ -646,9 +641,12 @@ export function BukuAcaraManager({
           <div className="border-b border-slate-200 pb-5 space-y-4">
             {/* Top Row: Logo Kiri - Title Tengah - Logo/Maskot Kanan */}
             <div className="flex items-center justify-between gap-4">
-              <div className="w-24 sm:w-32 flex items-center justify-start">
+              <div className="flex items-center gap-2 justify-start shrink-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/brand/logo.png" alt="Rajendra Swim System" className="h-10 sm:h-12 w-auto max-w-[120px] object-contain" />
+                <img src="/brand/logo.png" alt="Rajendra Swim System" className="h-9 sm:h-11 w-auto max-w-[120px] object-contain" />
+                <span className="font-heading font-black text-xs sm:text-sm text-slate-950 tracking-tight hidden sm:inline">
+                  Rajendra <span className="text-[#0284c7]">Swim System</span>
+                </span>
               </div>
 
               <div className="text-center flex-1">

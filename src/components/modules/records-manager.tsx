@@ -101,20 +101,13 @@ export function RecordsManager({
                 <Crown className="h-4 w-4" />
               </span>
               <h2 className="font-heading font-black text-lg text-[var(--m-ink)]">
-                Daftar Rekor Kejuaraan Renang
+                Daftar Rekor Kejuaraan Renang (Rajendra Record)
               </h2>
             </div>
             <p className="text-xs text-[var(--m-muted)] mt-1">
-              Catatan waktu terbaik yang terpecahkan sepanjang kejuaraan renang resmi Rajendra Swim System.
+              Catatan waktu terbaik, nama atlet, klub, dan event tempat rekor terpecahkan sepanjang sejarah kejuaraan renang Rajendra Swim System.
             </p>
           </div>
-
-          <Button
-            onClick={handlePrint}
-            className="gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs"
-          >
-            <Printer className="h-4 w-4" /> Cetak Lembar Rekor (PDF)
-          </Button>
         </div>
 
         {/* Filter Controls Grid */}

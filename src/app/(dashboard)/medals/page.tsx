@@ -4,6 +4,8 @@ import { Award, Medal } from 'lucide-react';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { EmptyState } from '@/components/ui/empty-state';
+import { EventResultsToggle } from '@/components/modules/event-results-toggle';
+import { getEventLiveConfig } from '@/lib/data/live-scoreboard-server';
 
 interface MedalStat {
   id: string;
@@ -34,10 +36,12 @@ export default async function MedalsPage({
   // 1. Ambil daftar event
   const { data: events } = await supabase
     .from('events')
-    .select('id, name')
+    .select('id, name, start_date, end_date')
     .order('created_at', { ascending: false });
 
   const activeEventId = params.eventId || events?.[0]?.id || '';
+  const currentEvent = events?.find((e) => e.id === activeEventId) || null;
+  const liveConfig = currentEvent ? getEventLiveConfig(currentEvent.id) : null;
 
   // 2. Query Hasil Lomba Tercepat per Kategori untuk Menghitung Medali
   let medalStats: MedalStat[] = [];
@@ -116,11 +120,22 @@ export default async function MedalsPage({
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
       <Breadcrumb items={[{ label: 'Dasbor', href: '/dashboard' }, { label: 'Klasemen Medali' }]} className="mb-2" />
-      <PageHeader
-        title="Perolehan Medali & Klasemen"
-        description="Peringkat akumulasi medali Emas, Perak, dan Perunggu per kontingen/sekolah secara otomatis."
-        icon={<Award className="h-6 w-6" />}
-      />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <PageHeader
+          title="Perolehan Medali & Klasemen"
+          description="Peringkat akumulasi medali Emas, Perak, dan Perunggu per kontingen/sekolah secara otomatis."
+          icon={<Award className="h-6 w-6" />}
+        />
+        {currentEvent && (
+          <div className="shrink-0 pt-2 sm:pt-0">
+            <EventResultsToggle
+              eventId={currentEvent.id}
+              initialMode={liveConfig?.resultsMode || 'auto'}
+              event={currentEvent}
+            />
+          </div>
+        )}
+      </div>
 
       {!events || events.length === 0 ? (
         <EmptyState

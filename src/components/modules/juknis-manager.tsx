@@ -121,13 +121,16 @@ function HaornasSheetHeader({
   return (
     <div className="relative z-10 flex items-center justify-between border-b-2 border-slate-900 pb-3 gap-3">
       {/* SISI KIRI: Logo Rajendra Swim System */}
-      <div contentEditable={false} className="relative z-20 flex shrink-0 items-center">
+      <div contentEditable={false} className="relative z-20 flex shrink-0 items-center gap-2">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/brand/logo.png"
           alt="Rajendra Swim System"
           className="h-7 w-auto sm:h-8 max-w-[105px] object-contain"
         />
+        <span className="font-heading font-black text-xs sm:text-sm text-slate-900 tracking-tight hidden sm:inline">
+          Rajendra <span className="text-[#0284c7]">Swim System</span>
+        </span>
       </div>
 
       {/* TENGAH: Event Title, Tempat, Tanggal */}
@@ -635,13 +638,16 @@ export function JuknisManager({
 
             {/* Header Bar Cover: Rajendra Swim System (Kiri) & Rajendra Organizer (Kanan) */}
             <div className="relative z-10 flex items-center justify-between border-b-2 border-slate-900 pb-2.5 gap-3">
-              <div contentEditable={false} className="relative z-20 flex shrink-0 items-center">
+              <div contentEditable={false} className="relative z-20 flex shrink-0 items-center gap-2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/brand/logo.png"
                   alt="Rajendra Swim System"
                   className="h-7.5 w-auto sm:h-8.5 max-w-[115px] object-contain"
                 />
+                <span className="font-heading font-black text-xs sm:text-sm text-slate-900 tracking-tight hidden sm:inline">
+                  Rajendra <span className="text-[#0284c7]">Swim System</span>
+                </span>
               </div>
 
               <div className="flex-1 px-3 text-center min-w-0">
