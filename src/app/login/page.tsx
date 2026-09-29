@@ -92,10 +92,16 @@ export default function LoginPage() {
       }
 
       if (!sessionData || !sessionData.session) {
-        const detailMsg = lastAuthError?.message
-          ? ` (${lastAuthError.message})`
-          : '';
-        setErrorMsg(`Login gagal. Periksa kembali email/username dan kata sandi Anda.${detailMsg}`);
+        const rawErr = lastAuthError?.message || '';
+        let userFriendlyError = 'Login gagal. Periksa kembali email/username dan kata sandi Anda.';
+        if (rawErr.toLowerCase().includes('invalid login credentials')) {
+          userFriendlyError = 'Login gagal. Email/username atau kata sandi yang Anda masukkan salah.';
+        } else if (rawErr.toLowerCase().includes('email not confirmed')) {
+          userFriendlyError = 'Login gagal. Alamat email belum terkonfirmasi.';
+        } else if (rawErr && !rawErr.includes('fetch')) {
+          userFriendlyError = `Login gagal: ${rawErr}`;
+        }
+        setErrorMsg(userFriendlyError);
         setLoading(false);
         return;
       }
