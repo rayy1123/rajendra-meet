@@ -257,15 +257,24 @@ export async function createAthleteAndRegisterAction(formData: FormData): Promis
     }
     finalAthleteId = athlete.id;
   } else {
-    // Mode existing: pastikan atlet ini milik user (owner_id) atau sudah
-    // pernah dia daftarkan. Cegah mendaftarkan atlet orang lain.
+    // Mode existing: jika bukan panitia, pastikan atlet ini milik user (owner_id) atau sudah
+    // pernah dia daftarkan. Panitia berwenang mendaftarkan atlet mana pun secara manual.
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .maybeSingle();
+    const role = profile?.role;
+    const isPanitia = role === 'super_admin' || role === 'event_admin' || role === 'operator';
+
     const { data: owned } = await supabase
       .from('athletes')
       .select('id, school_id')
       .eq('id', finalAthleteId)
       .eq('owner_id', user.id)
       .maybeSingle();
-    if (!owned) {
+
+    if (!isPanitia && !owned) {
       const { data: regOwned } = await supabase
         .from('registrations')
         .select('id')

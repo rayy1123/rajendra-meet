@@ -40,7 +40,7 @@ export function ExcelImportButton() {
 
   const handleDownloadTemplate = async () => {
     try {
-      toast.info('Menyiapkan & mengunduh Template Excel Resmi Rajendra Meet...');
+      toast.info('Menyiapkan & mengunduh Template Excel Resmi Rajendra Swim System...');
       await downloadExcelTemplate();
       toast.success('Template Excel berhasil diunduh!');
     } catch {

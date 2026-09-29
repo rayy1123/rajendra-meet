@@ -206,20 +206,20 @@ export function InvoiceCard({
             </div>
           </div>
 
-          {/* Logo Rajendra Meet Emblem */}
+          {/* Logo Rajendra Swim System Emblem */}
           <div className="flex flex-col items-start sm:items-center justify-center text-center shrink-0 pr-1 relative z-10">
             <div className="flex flex-col items-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/brand/logo.png"
-                alt="Rajendra Meet"
+                alt="Rajendra Swim System"
                 className="h-10 w-auto object-contain bg-white/20 rounded-lg p-1.5 backdrop-blur-xs mb-1"
               />
-              <p className="text-sm sm:text-base font-black tracking-[0.22em] text-white leading-tight font-heading">
+              <p className="text-sm sm:text-base font-black tracking-[0.18em] text-white leading-tight font-heading">
                 RAJENDRA
               </p>
-              <p className="text-[10px] sm:text-xs font-black tracking-[0.38em] text-cyan-200 uppercase leading-tight mt-0.5">
-                MEET
+              <p className="text-[10px] sm:text-xs font-black tracking-[0.22em] text-cyan-200 uppercase leading-tight mt-0.5">
+                SWIM SYSTEM
               </p>
             </div>
           </div>
@@ -252,7 +252,7 @@ export function InvoiceCard({
               Diterbitkan Oleh (Penyelenggara)
             </p>
             <p className="font-bold text-slate-950 text-sm">
-              Panitia Pelaksana Kejuaraan Renang Rajendra Meet
+              Panitia Pelaksana Kejuaraan Renang Rajendra Swim System
             </p>
             <p className="text-[11px] text-slate-600 leading-snug">
               Sekretariat Pertandingan &amp; Tim Keuangan Akuatik Indonesia
@@ -437,7 +437,7 @@ export function InvoiceCard({
             </div>
             <div className="text-[10px] text-slate-500 space-y-0.5">
               <p className="font-mono font-black text-slate-900 uppercase">INVOICE VERIFIED</p>
-              <p className="text-slate-600">Sistem Keuangan Rajendra Meet</p>
+              <p className="text-slate-600">Sistem Keuangan Rajendra Swim System</p>
               <p className="text-[9px] text-slate-400 font-mono">Status: {invoice.status}</p>
             </div>
           </div>
@@ -459,7 +459,7 @@ export function InvoiceCard({
 
         {/* Footer Microtext */}
         <div className="mt-4 pt-2 border-t border-slate-200 flex items-center justify-between text-[9px] text-slate-400 font-mono">
-          <span>Rajendra Meet · Dokumen Invoice Kejuaraan Resmi</span>
+          <span>Rajendra Swim System · Dokumen Invoice Kejuaraan Resmi</span>
           <span>Dicetak: {new Date().toLocaleString('id-ID')}</span>
         </div>
       </div>

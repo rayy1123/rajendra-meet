@@ -75,7 +75,7 @@ export function LiveBoard({
             </span>
             <div>
               <h1 className="text-lg font-bold tracking-tight">Live Board</h1>
-              <p className="text-xs text-[var(--m-muted)]">Hasil langsung · Rajendra Meet</p>
+              <p className="text-xs text-[var(--m-muted)]">Hasil langsung · Rajendra Swim System</p>
             </div>
           </div>
           <div className="flex items-center gap-3 text-xs">

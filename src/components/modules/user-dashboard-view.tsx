@@ -164,7 +164,7 @@ export function UserDashboardView({
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src="/brand/logo.png"
-                  alt="Rajendra Meet"
+                  alt="Rajendra Swim System"
                   className="h-10 w-auto object-contain p-1"
                 />
               )}
@@ -441,7 +441,7 @@ export function UserDashboardView({
                   {activeEvent.name}
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Diselenggarakan oleh {activeEvent.organizer || 'Panitia Pelaksana Resmi Rajendra Meet'}
+                  Diselenggarakan oleh {activeEvent.organizer || 'Panitia Pelaksana Resmi Rajendra Swim System'}
                 </p>
               </div>
 

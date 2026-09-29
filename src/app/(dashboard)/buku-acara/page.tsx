@@ -171,7 +171,7 @@ export default async function BukuAcaraPage({
     ? {
         id: currentEvent.id,
         name: currentEvent.name,
-        organizer: currentEvent.organizer || 'Panitia Pelaksana Rajendra Meet',
+        organizer: currentEvent.organizer || 'Panitia Pelaksana Rajendra Swim System',
         location: currentEvent.location || 'Kolam Renang Resmi',
         startDate: currentEvent.start_date,
         endDate: currentEvent.end_date,

@@ -22,8 +22,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Rajendra Meet',
-  description: 'Rajendra Meet — Platform Manajemen Kejuaraan Renang',
+  title: 'Rajendra Swim System',
+  description: 'Rajendra Swim System — Platform Manajemen Kejuaraan Renang',
   icons: {
     icon: [
       { url: '/favicon.ico' },
@@ -43,7 +43,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id" suppressHydrationWarning>
-      <body className={`${plusJakarta.variable} ${outfit.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
+      <body
+        suppressHydrationWarning
+        className={`${plusJakarta.variable} ${outfit.variable} ${jetbrainsMono.variable} font-sans antialiased`}
+      >
         {children}
       </body>
     </html>

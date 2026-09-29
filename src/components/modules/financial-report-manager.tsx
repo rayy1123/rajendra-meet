@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { formatRupiah } from '@/lib/utils';
 import { Expense } from '@/types/database';
+import { printElement } from '@/lib/utils/print-helper';
 
 export interface FinancialTransaction {
   id: string;
@@ -68,6 +69,12 @@ export function FinancialReportManager({
   // Filtered transactions
   const filtered = useMemo(() => {
     return allTransactions.filter((tx) => {
+      if (selectedEventId !== 'all' && tx.eventName) {
+        const evObj = events.find((e) => e.id === selectedEventId);
+        if (evObj && tx.eventName !== evObj.name) {
+          return false;
+        }
+      }
       if (filterType !== 'all' && tx.type !== filterType) {
         return false;
       }
@@ -90,7 +97,7 @@ export function FinancialReportManager({
       }
       return true;
     });
-  }, [allTransactions, filterType, period, selectedDate, search]);
+  }, [allTransactions, selectedEventId, events, filterType, period, selectedDate, search]);
 
   // Totals
   const totalIncome = useMemo(() => {
@@ -206,6 +213,25 @@ export function FinancialReportManager({
       {/* 1. Filter Bar (Matching screenshot media_1789719635908.png) */}
       <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm space-y-4 print:hidden">
         <div className="flex flex-wrap items-center gap-4">
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-slate-500">Pilih Event Kejuaraan :</label>
+            <select
+              value={selectedEventId}
+              onChange={(e) => {
+                setSelectedEventId(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="block w-48 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/30"
+            >
+              <option value="all">Semua Kejuaraan</option>
+              {events.map((ev) => (
+                <option key={ev.id} value={ev.id}>
+                  {ev.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="space-y-1">
             <label className="text-xs font-semibold text-slate-500">Periode :</label>
             <select
@@ -332,9 +358,22 @@ export function FinancialReportManager({
           <button
             type="button"
             onClick={handlePrint}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-4 py-2.5 shadow-sm transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-4 py-2.5 shadow-sm transition-colors cursor-pointer"
           >
-            <Printer className="h-4 w-4" /> Print
+            <Printer className="h-4 w-4" /> Print Laporan Rekap
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              printElement('printable-event-expenses-area', {
+                title: `Laporan-Pengeluaran-Event-${selectedEventId}`,
+                isLandscape: false,
+              });
+            }}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[#0f2b5c] hover:bg-[#0369a1] text-white text-xs font-bold px-4 py-2.5 shadow-sm transition-colors cursor-pointer"
+          >
+            <Printer className="h-4 w-4 text-cyan-300" /> Cetak Pengeluaran Event (Template Resmi)
           </button>
         </div>
 
@@ -381,7 +420,7 @@ export function FinancialReportManager({
               </p>
             </div>
 
-            {/* Logo Rajendra Meet */}
+            {/* Logo Rajendra Swim System */}
             <div className="flex flex-col items-center justify-center text-center shrink-0 pr-1">
               <svg
                 className="h-10 w-14 text-white fill-none stroke-current stroke-[2.4] mb-1.5 opacity-95"
@@ -531,7 +570,7 @@ export function FinancialReportManager({
               <p className="border-t border-slate-400 pt-1 font-bold">( ............................................ )</p>
             </div>
             <div className="space-y-16">
-              <p className="font-semibold">Mengetahui,<br />Ketua Penyelenggara Rajendra Meet</p>
+              <p className="font-semibold">Mengetahui,<br />Ketua Penyelenggara Rajendra Swim System</p>
               <p className="border-t border-slate-400 pt-1 font-bold">( ............................................ )</p>
             </div>
           </div>
@@ -563,6 +602,119 @@ export function FinancialReportManager({
             >
               &rarr;
             </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── AREA TEMPLATE RESMI CETAK PENGELUARAN EVENT (ISOLATED PRINT) ── */}
+      <div id="printable-event-expenses-area" className="hidden p-8 bg-white text-slate-900 font-sans space-y-6">
+        {/* Kop Header Navy Resmi */}
+        <div className="bg-[#0f2b5c] text-white p-6 rounded-xl flex items-center justify-between gap-6">
+          <div className="space-y-1 text-xs">
+            <span className="text-[10px] font-mono font-black tracking-widest text-cyan-300 uppercase">
+              OFFICIAL FINANCIAL EXPENSE REPORT
+            </span>
+            <h1 className="text-xl font-black uppercase tracking-tight text-white font-heading">
+              LAPORAN PENGELUARAN & OPERASIONAL EVENT
+            </h1>
+            <p className="text-slate-200 text-xs">
+              <span className="font-semibold text-slate-300">Nama Event:</span>{' '}
+              <b>{events.find((e) => e.id === selectedEventId)?.name || 'Seluruh Event Kejuaraan'}</b>
+            </p>
+            <p className="text-slate-300 text-xs">
+              <span className="text-slate-400">Tanggal Cetak:</span>{' '}
+              {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </p>
+          </div>
+
+          <div className="flex flex-col items-center justify-center text-center shrink-0 pr-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/brand/logo.png" alt="Rajendra Swim System" className="h-10 w-auto object-contain bg-white/20 rounded-lg p-1.5 backdrop-blur-xs mb-1" />
+            <p className="text-xs font-black tracking-[0.22em] text-white uppercase font-heading">
+              RAJENDRA
+            </p>
+            <p className="text-[9px] font-black tracking-[0.32em] text-cyan-200 uppercase">
+              SWIM SYSTEM
+            </p>
+          </div>
+        </div>
+
+        {/* Total Pengeluaran Summary Box */}
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-between">
+          <div>
+            <span className="text-xs font-bold text-rose-900 uppercase tracking-wider block">
+              TOTAL PENGELUARAN OPERASIONAL EVENT
+            </span>
+            <p className="text-xs text-rose-700 mt-0.5">
+              Rincian beban biaya logistik, honorarium juri, konsumsi, trophy, dan peralatan.
+            </p>
+          </div>
+          <span className="text-2xl font-black text-rose-700 font-mono">
+            {formatRupiah(totalExpense)}
+          </span>
+        </div>
+
+        {/* Tabel Pengeluaran Rinci */}
+        <div className="overflow-hidden rounded-xl border border-slate-300">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="bg-[#0f2b5c] text-white font-bold uppercase text-[11px] tracking-wider">
+                <th className="py-3 px-3 text-center w-12 border-b">No</th>
+                <th className="py-3 px-3 w-28 border-b">Tanggal</th>
+                <th className="py-3 px-3 w-36 border-b">Kategori Pengeluaran</th>
+                <th className="py-3 px-4 border-b">Keterangan / Rincian Pengadaan</th>
+                <th className="py-3 px-4 text-right w-40 border-b">Jumlah (IDR)</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 font-medium">
+              {filtered.filter((t) => t.type === 'expense').length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-8 text-center text-slate-400 text-xs">
+                    Belum ada pengeluaran terdata untuk event ini.
+                  </td>
+                </tr>
+              ) : (
+                filtered
+                  .filter((t) => t.type === 'expense')
+                  .map((exp, idx) => (
+                    <tr key={exp.id} className="hover:bg-slate-50">
+                      <td className="py-2.5 px-3 text-center text-slate-500 font-semibold">{idx + 1}</td>
+                      <td className="py-2.5 px-3 text-slate-700 font-mono">{exp.date}</td>
+                      <td className="py-2.5 px-3 text-slate-900 font-bold uppercase text-[11px]">{exp.category}</td>
+                      <td className="py-2.5 px-4 text-slate-800">{exp.description}</td>
+                      <td className="py-2.5 px-4 text-right font-mono font-bold text-rose-600">
+                        {formatRupiah(exp.amount)}
+                      </td>
+                    </tr>
+                  ))
+              )}
+            </tbody>
+            <tfoot>
+              <tr className="bg-slate-100 font-bold text-slate-900 border-t-2 border-slate-400 text-xs">
+                <td colSpan={4} className="py-3 px-4 text-right uppercase tracking-wider">
+                  Total Pengeluaran:
+                </td>
+                <td className="py-3 px-4 text-right font-mono font-black text-rose-700 text-sm">
+                  {formatRupiah(totalExpense)}
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        {/* Tanda Tangan Pengesahan */}
+        <div className="pt-8 flex justify-between items-center text-center text-xs text-slate-800">
+          <div className="space-y-16">
+            <p className="font-semibold">Dibuat Oleh,<br />Bendahara Panitia</p>
+            <p className="border-t border-slate-400 pt-1 font-bold">( ............................................ )</p>
+          </div>
+          <div className="space-y-16">
+            <p className="font-semibold">Disetujui Oleh,<br />Technical Delegate / Referee</p>
+            <p className="border-t border-slate-400 pt-1 font-bold">( ............................................ )</p>
+          </div>
+          <div className="space-y-16">
+            <p className="font-semibold">Mengetahui,<br />Ketua Panitia Pelaksana</p>
+            <p className="border-t border-slate-400 pt-1 font-bold">( ............................................ )</p>
           </div>
         </div>
       </div>

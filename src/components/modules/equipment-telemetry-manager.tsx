@@ -334,7 +334,7 @@ export function EquipmentTelemetryManager({
               </span>
             </div>
             <p className="text-xs text-amber-900/90 leading-relaxed max-w-4xl">
-              Anda <b>tidak wajib</b> memiliki konsol Swiss Timing Omega fisik untuk menjalankan kejuaraan. Sistem Rajendra Meet dapat beroperasi mandiri menggunakan <b>Input Waktu Juri / Stopwatch Digital</b>, dan live scoreboard akan tetap aktif real-time. Jika Anda ingin menghubungkan perangkat Omega/Touchpad fisik di masa mendatang, ikuti panduan kabel pada tab <b>Tata Cara Pemasangan</b>.
+              Anda <b>tidak wajib</b> memiliki konsol Swiss Timing Omega fisik untuk menjalankan kejuaraan. Sistem Rajendra Swim System dapat beroperasi mandiri menggunakan <b>Input Waktu Juri / Stopwatch Digital</b>, dan live scoreboard akan tetap aktif real-time. Jika Anda ingin menghubungkan perangkat Omega/Touchpad fisik di masa mendatang, ikuti panduan kabel pada tab <b>Tata Cara Pemasangan</b>.
             </p>
           </div>
         </div>
@@ -626,7 +626,7 @@ export function EquipmentTelemetryManager({
               </div>
               <div className="space-y-1.5 flex-1">
                 <h3 className="font-heading font-black text-sm sm:text-base text-slate-900">
-                  Konfigurasi Port Serial / Ethernet ke Laptop Operator SCMS
+                  Konfigurasi Port Serial / Ethernet ke Laptop Operator Rajendra Swim System
                 </h3>
                 <p className="text-xs text-slate-600 leading-relaxed">
                   Gunakan konverter <b>RS232-to-USB FTDI berlisensi</b> atau kabel LAN Ethernet langsung dari port data konsol Swiss Timing ke laptop operator. Konfigurasikan port komunikasi pada software pengatur:

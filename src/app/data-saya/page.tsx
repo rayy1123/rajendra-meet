@@ -137,7 +137,7 @@ export default async function DataSayaPage() {
 
         <ViewerSubHeader
           title="Data Diri Atlet"
-          description="Profil data perenang pribadi Anda untuk pendaftaran mandiri pada kejuaraan renang Rajendra Meet."
+          description="Profil data perenang pribadi Anda untuk pendaftaran mandiri pada kejuaraan renang Rajendra Swim System."
         />
 
         <DataSayaManager

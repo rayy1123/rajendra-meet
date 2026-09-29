@@ -57,7 +57,7 @@ export default async function GalleryPage() {
     >
       <div className="pub-container pb-16">
         <div className="mb-4 flex items-center justify-between">
-          <div className="text-xs text-[var(--m-muted)]">{events?.[0]?.name ?? 'Rajendra Meet'}</div>
+          <div className="text-xs text-[var(--m-muted)]">{events?.[0]?.name ?? 'Rajendra Swim System'}</div>
         </div>
         <GalleryGrid photos={photos} />
       </div>

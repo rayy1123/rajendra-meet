@@ -336,7 +336,7 @@ export function TagihanKlubManager({
           </div>
         </div>
 
-        {/* ── Printable Header Banner Navy (Template Rajendra Meet) ── */}
+        {/* ── Printable Header Banner Navy (Template Rajendra Swim System) ── */}
         <div className="only-print p-6 sm:p-8 space-y-4">
           <div className="bg-[#1b2e4b] text-white p-6 rounded-lg flex items-center justify-between gap-6">
             <div className="space-y-1 text-xs">
@@ -359,7 +359,7 @@ export function TagihanKlubManager({
               </p>
             </div>
 
-            {/* Logo Rajendra Meet (4-wave emblem) */}
+            {/* Logo Rajendra Swim System (4-wave emblem) */}
             <div className="flex flex-col items-center justify-center text-center shrink-0 pr-1">
               <svg
                 className="h-10 w-14 text-white fill-none stroke-current stroke-[2.4] mb-1.5 opacity-95"

@@ -115,7 +115,7 @@ export default async function AtletSayaPage() {
         />
         <ViewerSubHeader
           title="Data Atlet Saya"
-          description="Kelola dan lengkapi data perenang binaan Anda sebelum memilih nomor lomba pada kejuaraan renang Rajendra Meet."
+          description="Kelola dan lengkapi data perenang binaan Anda sebelum memilih nomor lomba pada kejuaraan renang Rajendra Swim System."
         />
 
         {/* ── BANNER INFORMASI KHUSUS PELATIH & PENGURUS TIM ── */}
@@ -169,7 +169,7 @@ export default async function AtletSayaPage() {
                 <CheckCircle2 className="h-3.5 w-3.5 text-blue-600" /> 2. Satu Data untuk Semua Event
               </p>
               <p className="text-[11px] text-slate-500 leading-snug">
-                Data atlet yang tersimpan dapat didaftarkan berulang kali ke berbagai seri kejuaraan Rajendra Meet.
+                Data atlet yang tersimpan dapat didaftarkan berulang kali ke berbagai seri kejuaraan Rajendra Swim System.
               </p>
             </div>
 

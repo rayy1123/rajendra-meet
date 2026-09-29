@@ -220,7 +220,7 @@ export function UserPaymentManager({
               Transfer biaya pendaftaran sebesar <b>Rp 50.000 / nomor lomba</b> ke rekening resmi panitia:
             </p>
             <p className="text-xs font-mono font-bold text-blue-950 mt-1">
-              Bank BCA: <b>872-098-1234</b> a.n. <b>Panitia Rajendra Meet</b>
+              Bank BCA: <b>872-098-1234</b> a.n. <b>Panitia Rajendra Swim System</b>
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 shrink-0">

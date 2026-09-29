@@ -46,6 +46,7 @@ export interface CertificateRecipient {
   finishTimeMs: number | null;
   formattedTime: string;
   isNewRecord: boolean;
+  recordType?: 'pribadi' | 'games' | 'daerah' | 'nasional' | string;
   status: string;
   competitionEventId: string;
   competitionEventName: string;
@@ -68,6 +69,11 @@ export interface CertificateSettings {
   technicalDelegateTitle: string;
   certificateType: 'achievement' | 'participation' | 'auto';
   showSponsors?: boolean;
+  customBackgroundImage?: string | null;
+  headerTitle?: string;
+  headerSubtitle?: string;
+  presentedText?: string;
+  defaultRecordType?: 'pribadi' | 'games' | 'daerah' | 'nasional';
 }
 
 export interface CompetitionEventOption {
@@ -92,6 +98,7 @@ export function CertificateManager({
   competitionEvents: CompetitionEventOption[];
   sponsors?: SponsorItem[];
 }) {
+  const [recipientsState, setRecipientsState] = useState<CertificateRecipient[]>(recipients);
   const [selectedCompEventId, setSelectedCompEventId] = useState<string>('all');
   const [rankFilter, setRankFilter] = useState<'all' | 'podium' | 'records'>('podium');
   const [searchQuery, setSearchQuery] = useState('');
@@ -124,7 +131,7 @@ export function CertificateManager({
 
   // Filter penerima sertifikat
   const filteredRecipients = useMemo(() => {
-    return recipients.filter((r) => {
+    return recipientsState.filter((r) => {
       // Filter nomor lomba
       if (selectedCompEventId !== 'all' && r.competitionEventId !== selectedCompEventId) {
         return false;
@@ -606,9 +613,24 @@ export function CertificateManager({
 
                       <td className="p-3 text-center">
                         {r.isNewRecord ? (
-                          <Badge className="bg-rose-600 text-white text-[10px] font-bold">
-                            Rekor Baru
-                          </Badge>
+                          <div className="inline-flex items-center gap-1">
+                            <select
+                              value={r.recordType || settings.defaultRecordType || 'games'}
+                              onChange={(e) => {
+                                const val = e.target.value as any;
+                                r.recordType = val;
+                                setRecipientsState((prev) =>
+                                  prev.map((item) => (item.id === r.id ? { ...item, recordType: val } : item))
+                                );
+                              }}
+                              className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-[10px] font-bold text-slate-900 shadow-2xs"
+                            >
+                              <option value="pribadi">⚡ Rekor Pribadi (PB)</option>
+                              <option value="games">🏆 Rekor Games (Kejuaraan)</option>
+                              <option value="daerah">🏅 Rekor Daerah (Regional)</option>
+                              <option value="nasional">🥇 Rekor Nasional (National)</option>
+                            </select>
+                          </div>
                         ) : (
                           <span className="text-muted-foreground text-[11px]">—</span>
                         )}
@@ -745,6 +767,57 @@ export function CertificateManager({
                 className="h-8 text-xs bg-background"
                 required
               />
+            </div>
+
+            {/* Custom Background Image URL */}
+            <div className="space-y-1 pt-1 border-t">
+              <label className="font-bold text-foreground">Gambar Background Custom (Opsional)</label>
+              <Input
+                value={settings.customBackgroundImage || ''}
+                onChange={(e) => setSettings((s) => ({ ...s, customBackgroundImage: e.target.value || null }))}
+                placeholder="https://... atau /uploads/background.jpg"
+                className="h-8 text-xs bg-background"
+              />
+              <p className="text-[10px] text-muted-foreground">
+                Gunakan URL gambar template piagam buatan Anda untuk dijadikan latar belakang sertifikat.
+              </p>
+            </div>
+
+            {/* Kategori Rekor Default (4 Rekor) */}
+            <div className="space-y-1">
+              <label className="font-bold text-foreground">Kategori Rekor Default</label>
+              <select
+                value={settings.defaultRecordType || 'games'}
+                onChange={(e) => setSettings((s) => ({ ...s, defaultRecordType: e.target.value as any }))}
+                className="w-full rounded-lg border border-slate-300 bg-background px-2.5 py-1.5 text-xs font-semibold"
+              >
+                <option value="pribadi">⚡ Rekor Pribadi (PB)</option>
+                <option value="games">🏆 Rekor Games (Kejuaraan)</option>
+                <option value="daerah">🏅 Rekor Daerah (Regional)</option>
+                <option value="nasional">🥇 Rekor Nasional (National)</option>
+              </select>
+            </div>
+
+            {/* Header Title & Subtitle Override */}
+            <div className="grid grid-cols-2 gap-2 pt-1 border-t">
+              <div className="space-y-1">
+                <label className="font-bold text-foreground">Judul Utama Piagam</label>
+                <Input
+                  value={settings.headerTitle || ''}
+                  onChange={(e) => setSettings((s) => ({ ...s, headerTitle: e.target.value }))}
+                  placeholder="PIAGAM PENGHARGAAN"
+                  className="h-8 text-xs bg-background"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="font-bold text-foreground">Sub-Judul Bahasa Inggris</label>
+                <Input
+                  value={settings.headerSubtitle || ''}
+                  onChange={(e) => setSettings((s) => ({ ...s, headerSubtitle: e.target.value }))}
+                  placeholder="CERTIFICATE OF ACHIEVEMENT"
+                  className="h-8 text-xs bg-background"
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2">

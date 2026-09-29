@@ -46,6 +46,20 @@ export async function POST(request: Request) {
           role: 'viewer',
         })
         .eq('id', data.user.id);
+
+      // Kirim email sambutan pendaftaran akun baru via Brevo SMTP provider jika email valid
+      if (authEmail && authEmail.includes('@') && !authEmail.endsWith('@scms.local')) {
+        try {
+          const { sendAccountRegistrationEmail } = await import('@/lib/email/brevo');
+          await sendAccountRegistrationEmail({
+            toEmail: authEmail,
+            toName: full_name.trim(),
+            username: cleanUsername,
+          });
+        } catch (emailErr) {
+          console.warn('[Register Email Notice]:', emailErr);
+        }
+      }
     }
 
     return NextResponse.json({

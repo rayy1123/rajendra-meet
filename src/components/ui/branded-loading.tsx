@@ -9,11 +9,11 @@ export interface BrandedLoadingProps extends React.HTMLAttributes<HTMLDivElement
 }
 
 /**
- * Route / Page Loading resmi SCMS sesuai DESIGN.md:
+ * Route / Page Loading resmi Rajendra Swim System sesuai DESIGN.md:
  * Menampilkan logo tajam `/brand/logo.png` tanpa backdrop-blur yang mengaburkan logo.
  */
 export function BrandedLoading({
-  text = 'Memuat...',
+  text = 'RAJENDRA SWIM SYSTEM',
   fullScreen = true,
   className,
   ...props
@@ -21,7 +21,7 @@ export function BrandedLoading({
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center gap-4 bg-white/95 text-foreground transition-all duration-300',
+        'flex flex-col items-center justify-center gap-3.5 bg-white/95 text-foreground transition-all duration-300',
         fullScreen ? 'fixed inset-0 z-[9999]' : 'py-16 w-full',
         className
       )}
@@ -34,22 +34,27 @@ export function BrandedLoading({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/brand/logo.png"
-            alt="Rajendra Meet"
+            alt="Rajendra Swim System"
             className="h-full w-full object-contain"
           />
         </div>
       </div>
-      {text && (
-        <p className="font-heading text-xs font-bold uppercase tracking-wider text-[var(--m-muted)] animate-pulse">
-          {text}
-        </p>
-      )}
+      <div className="flex flex-col items-center justify-center text-center space-y-0.5">
+        <span className="font-heading font-black text-sm tracking-wider uppercase text-slate-900">
+          RAJENDRA <span className="text-[#0284c7]">SWIM SYSTEM</span>
+        </span>
+        {text && text !== 'RAJENDRA SWIM SYSTEM' && (
+          <p className="font-heading text-[11px] font-semibold text-[var(--m-muted)] animate-pulse">
+            {text}
+          </p>
+        )}
+      </div>
     </div>
   );
 }
 
 /**
- * Button / Inline Loading resmi SCMS sesuai DESIGN.md:
+ * Button / Inline Loading resmi Rajendra Swim System sesuai DESIGN.md:
  * Spinner mikro elegan berlogo akuatik tajam, tanpa teks "Memuat..." berulang di dalam tombol.
  */
 export function BrandedSpinner({ className }: { className?: string }) {

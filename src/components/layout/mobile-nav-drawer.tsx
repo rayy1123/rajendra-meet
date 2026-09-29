@@ -17,7 +17,7 @@ export function MobileNavDrawer({ open, onClose, title = 'Menu', children, foote
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent side="left" showCloseButton={false} className="w-72 max-w-[85vw] p-0">
         <SheetHeader className="flex flex-row items-center gap-2 border-b px-5 py-4 text-left space-y-0">
-          <Image src="/brand/logo.png" alt="Rajendra Meet" width={28} height={28} className="h-7 w-auto" />
+          <Image src="/brand/logo.png" alt="Rajendra Swim System" width={28} height={28} className="h-7 w-auto" />
           <SheetTitle className="text-sm font-bold tracking-tight">{title}</SheetTitle>
           <button
             type="button"

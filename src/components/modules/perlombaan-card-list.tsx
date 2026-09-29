@@ -217,10 +217,10 @@ export function PerlombaanCardList({ events }: { events: EventCardData[] }) {
                 <div className="space-y-2 pt-4 border-t border-slate-100">
                   <div className="grid grid-cols-2 gap-2.5">
                     <Link
-                      href={`/perlombaan/partisipasi/${ev.id}`}
-                      className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs py-2.5 shadow-sm transition-colors"
+                      href={`/daftar-lomba/${ev.id}`}
+                      className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs py-2.5 shadow-sm transition-colors cursor-pointer"
                     >
-                      <UserPlus className="h-3.5 w-3.5 text-slate-500" /> Daftar Manual
+                      <UserPlus className="h-3.5 w-3.5 text-blue-600" /> Daftar Manual
                     </Link>
 
                     <button

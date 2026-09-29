@@ -206,8 +206,8 @@ export default async function KartuPesertaPage({
         },
         event: {
           id: eventIdStr,
-          name: rawEvent?.name || 'Kejuaraan Renang Rajendra Meet',
-          organizer: rawEvent?.organizer || 'Panitia Pelaksana Rajendra Meet',
+          name: rawEvent?.name || 'Kejuaraan Renang Rajendra Swim System',
+          organizer: rawEvent?.organizer || 'Panitia Pelaksana Rajendra Swim System',
           location: rawEvent?.location || 'Kolam Renang Resmi',
           startDate: rawEvent?.start_date || '',
           endDate: rawEvent?.end_date || '',

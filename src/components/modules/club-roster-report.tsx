@@ -295,7 +295,7 @@ export function ClubRosterReport({
     setIsExportingExcel(true);
     try {
       const workbook = new ExcelJS.Workbook();
-      workbook.creator = 'Rajendra Meet';
+      workbook.creator = 'Rajendra Swim System';
       workbook.created = new Date();
 
       clubsToExport.forEach((club) => {
@@ -699,7 +699,7 @@ export function ClubRosterReport({
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src="/brand/logo.png"
-                      alt="Rajendra Meet"
+                      alt="Rajendra Swim System"
                       className="h-8 w-auto sm:h-9 max-w-[110px] object-contain"
                     />
                   </div>
@@ -924,7 +924,7 @@ export function ClubRosterReport({
 
                 {/* Footer Bar Kecil */}
                 <div className="mt-2 pt-1 border-t border-slate-200 flex items-center justify-between text-[9px] text-slate-400 font-mono">
-                  <span>Rajendra Meet · Dokumen Rekapitulasi Kontingen</span>
+                  <span>Rajendra Swim System · Dokumen Rekapitulasi Kontingen</span>
                   <span>Dicetak: {new Date().toLocaleString('id-ID')}</span>
                 </div>
               </div>

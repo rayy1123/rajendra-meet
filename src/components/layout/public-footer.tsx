@@ -33,17 +33,20 @@ export function PublicFooter() {
       <footer className="relative border-t border-[#134b6b] bg-gradient-to-br from-[#0c344b] via-[#0f435c] to-[#0a2c40] text-white">
         {/* Konten Utama Footer 4 Kolom */}
         <div className="pub-container grid grid-cols-1 gap-8 py-12 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Kolom 1: Logo Rajendra Meet + Logo Rajendra Organizer & Copyright */}
+          {/* Kolom 1: Logo Rajendra Swim System + Logo Rajendra Organizer & Copyright */}
           <div className="space-y-4">
             <div className="flex flex-col gap-3">
-              {/* Logo Rajendra Meet */}
-              <div className="inline-flex w-fit items-center bg-white/95 px-3 py-1.5 rounded-xl shadow-xs">
+              {/* Logo Rajendra Swim System */}
+              <div className="inline-flex w-fit items-center gap-2 bg-white/95 px-3 py-1.5 rounded-xl shadow-xs">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/brand/logo.png"
-                  alt="Rajendra Meet"
+                  alt="Rajendra Swim System"
                   className="h-7 w-auto object-contain"
                 />
+                <span className="font-heading font-black text-sm tracking-tight text-slate-950">
+                  Rajendra <span className="text-[#0284c7]">Swim System</span>
+                </span>
               </div>
 
               {/* Logo Rajendra Swimming Organizer */}

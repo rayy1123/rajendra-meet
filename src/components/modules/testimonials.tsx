@@ -37,7 +37,7 @@ export const DEFAULT_TESTIMONIALS: Testimonial[] = [
     highlight: 'Suasana Ramah & Fun untuk Anak',
     rating: 5,
     club: 'Harahap Swimming School',
-    text: 'Ini pertama kalinya anak saya ikut kompetisi yang diselenggarakan bersama Rajendra Meet, dan saya benar-benar menikmati setiap momennya! Suasananya sangat mendukung, panitianya ramah dan informatif, serta acaranya fun banget. Anak jadi tidak trauma berlomba, malah nggak sabar mau ikut event selanjutnya!',
+    text: 'Ini pertama kalinya anak saya ikut kompetisi yang diselenggarakan bersama Rajendra Swim System, dan saya benar-benar menikmati setiap momennya! Suasananya sangat mendukung, panitianya ramah dan informatif, serta acaranya fun banget. Anak jadi tidak trauma berlomba, malah nggak sabar mau ikut event selanjutnya!',
   },
   {
     name: 'Koko Nugroho',
@@ -47,7 +47,7 @@ export const DEFAULT_TESTIMONIALS: Testimonial[] = [
     highlight: 'Disiplin Waktu & Terorganisir Rapih',
     rating: 5,
     club: 'Klub Akuatik Tirta',
-    text: 'Event lomba renang dari Rajendra Meet sangat terorganisir dengan baik. Panggilan Call Room tertib, jadwal seri tepat waktu, dan anak saya jadi semakin percaya diri serta bersemangat berlatih renang. Suasana kompetisinya kompetitif namun tetap menyenangkan untuk anak-anak!',
+    text: 'Event lomba renang dari Rajendra Swim System sangat terorganisir dengan baik. Panggilan Call Room tertib, jadwal seri tepat waktu, dan anak saya jadi semakin percaya diri serta bersemangat berlatih renang. Suasana kompetisinya kompetitif namun tetap menyenangkan untuk anak-anak!',
   },
   {
     name: 'Willy Surya',
@@ -57,7 +57,7 @@ export const DEFAULT_TESTIMONIALS: Testimonial[] = [
     highlight: 'Live Scoreboard Real-Time & Transparan',
     rating: 5,
     club: 'Jangkar Swimming Club',
-    text: 'Sebagai pelatih, saya sangat mengapresiasi sistem Rajendra Meet. Fasilitas pencatatan waktu memadai, integrasi touchpad presisi, dan hasil lomba langsung muncul real-time di layar arena maupun smartphone wali atlet. Ini pengalaman positif yang sangat berharga untuk pembinaan atlet muda.',
+    text: 'Sebagai pelatih, saya sangat mengapresiasi sistem Rajendra Swim System. Fasilitas pencatatan waktu memadai, integrasi touchpad presisi, dan hasil lomba langsung muncul real-time di layar arena maupun smartphone wali atlet. Ini pengalaman positif yang sangat berharga untuk pembinaan atlet muda.',
   },
   {
     name: 'Elly Anggraini',
@@ -67,7 +67,7 @@ export const DEFAULT_TESTIMONIALS: Testimonial[] = [
     highlight: 'Sertifikat & Medali Resmi Instan',
     rating: 5,
     club: 'Mandiri / Sekolah',
-    text: 'Terima kasih Rajendra Meet sudah membuat event yang penuh semangat, sportivitas, dan keceriaan. Transparansi nomor lomba sangat jelas, dan sertifikat resmi berstempel langsung siap diunduh setelah acara selesai. Sangat direkomendasikan untuk seluruh sekolah dan klub!',
+    text: 'Terima kasih Rajendra Swim System sudah membuat event yang penuh semangat, sportivitas, dan keceriaan. Transparansi nomor lomba sangat jelas, dan sertifikat resmi berstempel langsung siap diunduh setelah acara selesai. Sangat direkomendasikan untuk seluruh sekolah dan klub!',
   },
 ];
 
@@ -101,7 +101,7 @@ export function Testimonials({
         </h2>
 
         <p className="text-xs sm:text-sm md:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto">
-          Jangan hanya dengar dari kami. Lihat apa kata orang tua, pelatih klub, dan perenang tentang pengalaman nyata berlomba di ekosistem kejuaraan renang Rajendra Meet.
+          Jangan hanya dengar dari kami. Lihat apa kata orang tua, pelatih klub, dan perenang tentang pengalaman nyata berlomba di ekosistem kejuaraan renang Rajendra Swim System.
         </p>
       </div>
 

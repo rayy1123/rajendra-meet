@@ -32,7 +32,7 @@ interface EventLogoDialogProps {
 
 const PRESET_LOGOS = [
   {
-    name: 'Rajendra Meet',
+    name: 'Rajendra Swim System',
     url: '/brand/logo.png',
   },
   {

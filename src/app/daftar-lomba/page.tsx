@@ -81,7 +81,7 @@ export default async function DaftarLombaPage() {
     return {
       id: ev.id,
       name: ev.name,
-      organizer: ev.organizer || 'Panitia Pelaksana Rajendra Meet',
+      organizer: ev.organizer || 'Panitia Pelaksana Rajendra Swim System',
       location: ev.location || 'Gelanggang Renang Resmi',
       start_date: ev.start_date,
       end_date: ev.end_date,

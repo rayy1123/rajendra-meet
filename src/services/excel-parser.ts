@@ -209,7 +209,7 @@ function sheetToJson<T>(worksheet: ExcelJS.Worksheet | undefined): T[] {
 // ==========================================
 
 /**
- * Membaca file Excel Buku Acara SCMS dan mengimpor seluruh datanya ke Supabase.
+ * Membaca file Excel Buku Acara Rajendra Swim System dan mengimpor seluruh datanya ke Supabase.
  * Jika targetEventId disertakan, data atlet dan registrasi akan langsung dikaitkan ke event tersebut.
  */
 export async function parseAndImportExcel(file: File, targetEventId?: string): Promise<ExcelImportResult> {
@@ -241,7 +241,7 @@ export async function parseAndImportExcel(file: File, targetEventId?: string): P
       if (eventRows.length > 0) {
         const row = eventRows[0];
         const eventPayload: EventInsertPayload = {
-          name: row['Nama Event'] || row['Name'] || 'Kejuaraan Renang Rajendra Meet',
+          name: row['Nama Event'] || row['Name'] || 'Kejuaraan Renang Rajendra Swim System',
           organizer: row['Penyelenggara'] || row['Organizer'] || 'Panitia Pelaksana',
           location: row['Lokasi'] || row['Location'] || 'Kolam Renang Utama',
           start_date: parseExcelDate(row['Tanggal Mulai'] || row['Start Date']),
@@ -477,12 +477,12 @@ export async function parseAndImportExcel(file: File, targetEventId?: string): P
 }
 
 /**
- * Membuat dan mengunduh Template Excel Resmi Buku Acara Rajendra Meet (.xlsx)
+ * Membuat dan mengunduh Template Excel Resmi Buku Acara Rajendra Swim System (.xlsx)
  */
 export async function downloadExcelTemplate(): Promise<void> {
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = 'Rajendra Meet';
-  workbook.lastModifiedBy = 'Rajendra Meet';
+  workbook.creator = 'Rajendra Swim System';
+  workbook.lastModifiedBy = 'Rajendra Swim System';
   workbook.created = new Date();
 
   const headerFill: ExcelJS.Fill = {

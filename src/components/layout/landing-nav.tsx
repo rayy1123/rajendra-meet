@@ -36,7 +36,7 @@ export const MAIN_MENU_ITEMS: LandingMenuItem[] = [
   {
     href: '/',
     label: 'Beranda',
-    description: 'Halaman utama Rajendra Meet',
+    description: 'Halaman utama Rajendra Swim System',
     icon: Home,
   },
   {
@@ -96,6 +96,7 @@ export function BreadcrumbMenuButton({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
+      suppressHydrationWarning
       className="group inline-flex items-center gap-2 rounded-full border border-[var(--m-border)] bg-white/90 px-3.5 py-1.5 text-xs font-semibold text-[var(--m-ink)] shadow-xs backdrop-blur-md transition-all hover:border-[var(--m-aqua)] hover:bg-[var(--m-soft)] hover:text-[var(--m-aqua-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--m-aqua)] cursor-pointer"
       aria-label="Buka Menu Navigasi"
     >
@@ -149,7 +150,7 @@ export function LandingSidebarDrawer({
           <div className="flex items-center gap-3">
             <img
               src="/brand/logo.png"
-              alt="Rajendra Meet"
+              alt="Rajendra Swim System"
               className="h-8 w-auto object-contain"
             />
             <div className="border-l border-[var(--m-border)] pl-2.5">
@@ -269,7 +270,7 @@ export function LandingSidebarDrawer({
                     {user.user_metadata?.full_name || user.email}
                   </p>
                   <p className="text-[10px] font-medium text-[var(--m-muted)] capitalize">
-                    {isAdmin ? 'Panitia Rajendra Meet' : 'Akun Peserta'}
+                    {isAdmin ? 'Panitia Rajendra Swim System' : 'Akun Peserta'}
                   </p>
                 </div>
               </div>

@@ -29,7 +29,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { EmptyState } from '@/components/ui/empty-state';
-import { type PointRule, type StandingRow } from '@/services/points';
+import { type PointRule, type StandingRow, sortStandings } from '@/services/points';
 import { type BestSwimmerGroup } from '@/services/records';
 import { cn } from '@/lib/utils';
 
@@ -68,6 +68,7 @@ export function AwardsManager({
 }: AwardsManagerProps) {
   const [activeTab, setActiveTab] = useState<'overall' | 'grade' | 'class' | 'swimmer'>('overall');
   const [showGuide, setShowGuide] = useState(true);
+  const [standingsSortBy, setStandingsSortBy] = useState<'points' | 'medals'>('points');
 
   // Filters
   const [gradeFilter, setGradeFilter] = useState<string>('all');
@@ -165,8 +166,21 @@ export function AwardsManager({
     });
   }, [bestSwimmers, swimmerGenderFilter, swimmerGradeFilter]);
 
+  // Sorted Standings based on Standings Option (Poin Terbanyak vs Medali Terbanyak)
+  const sortedOverall = useMemo(() => {
+    return sortStandings(overall, standingsSortBy);
+  }, [overall, standingsSortBy]);
+
+  const sortedGradeRows = useMemo(() => {
+    return sortStandings(filteredGradeRows, standingsSortBy);
+  }, [filteredGradeRows, standingsSortBy]);
+
+  const sortedClassRows = useMemo(() => {
+    return sortStandings(filteredClassRows, standingsSortBy);
+  }, [filteredClassRows, standingsSortBy]);
+
   // Top 1 Overall Champion
-  const topOverall = overall[0];
+  const topOverall = sortedOverall[0];
 
   return (
     <div className="space-y-6">
@@ -208,34 +222,71 @@ export function AwardsManager({
           </div>
         </div>
 
-        {/* Filter Kejuaraan */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <span className="font-bold text-slate-700 shrink-0 flex items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5 text-primary" /> Kejuaraan:
-            </span>
-            <Select
-              value={event?.id || 'all'}
-              onValueChange={(val) => {
-                if (val === 'all') {
-                  window.location.assign('/awards');
-                } else {
-                  window.location.assign(`/awards?eventId=${val}`);
-                }
-              }}
-            >
-              <SelectTrigger className="h-9 w-full sm:w-[280px] text-xs font-bold text-slate-900 bg-slate-50">
-                <SelectValue placeholder="Pilih Kejuaraan" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">⭐ Seluruh Kejuaraan (Akumulasi)</SelectItem>
-                {eventsList.map((e) => (
-                  <SelectItem key={e.id} value={e.id} className="text-xs">
-                    {e.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        {/* Filter Kejuaraan & Opsi Pengambilan Perolehan (Medali Terbanyak / Poin Terbanyak) */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 text-xs pt-1">
+          <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-slate-700 shrink-0 flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5 text-primary" /> Kejuaraan:
+              </span>
+              <Select
+                value={event?.id || 'all'}
+                onValueChange={(val) => {
+                  if (val === 'all') {
+                    window.location.assign('/awards');
+                  } else {
+                    window.location.assign(`/awards?eventId=${val}`);
+                  }
+                }}
+              >
+                <SelectTrigger className="h-9 w-[260px] text-xs font-bold text-slate-900 bg-slate-50">
+                  <SelectValue placeholder="Pilih Kejuaraan" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">⭐ Seluruh Kejuaraan (Akumulasi)</SelectItem>
+                  {eventsList.map((e) => (
+                    <SelectItem key={e.id} value={e.id} className="text-xs">
+                      {e.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* 2 Opsi Pengambilan Perolehan (Medali Terbanyak vs Poin Terbanyak) */}
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-slate-700 shrink-0 flex items-center gap-1">
+                <Filter className="h-3.5 w-3.5 text-primary" /> Skema Perolehan:
+              </span>
+              <div className="inline-flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setStandingsSortBy('points')}
+                  className={cn(
+                    'px-3 py-1 rounded-lg font-bold transition-all cursor-pointer flex items-center gap-1.5',
+                    standingsSortBy === 'points'
+                      ? 'bg-blue-600 text-white shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  )}
+                  title="Klasemen diurutkan dari total akumulasi poin terbanyak"
+                >
+                  <TrendingUp className="h-3.5 w-3.5" /> Poin Terbanyak
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStandingsSortBy('medals')}
+                  className={cn(
+                    'px-3 py-1 rounded-lg font-bold transition-all cursor-pointer flex items-center gap-1.5',
+                    standingsSortBy === 'medals'
+                      ? 'bg-amber-600 text-white shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  )}
+                  title="Klasemen diurutkan dari perolehan medali Emas terbanyak"
+                >
+                  <Trophy className="h-3.5 w-3.5" /> Medali Terbanyak (Emas)
+                </button>
+              </div>
+            </div>
           </div>
 
           <div className="flex items-center gap-2 text-[11px] text-muted-foreground font-mono">
@@ -537,7 +588,7 @@ export function AwardsManager({
                     </TableRow>
                   </TableHeader>
                   <TableBody className="divide-y divide-slate-100 text-xs">
-                    {overall.map((row, idx) => {
+                    {sortedOverall.map((row, idx) => {
                       const isTop1 = idx === 0;
                       const isTop2 = idx === 1;
                       const isTop3 = idx === 2;
@@ -655,7 +706,7 @@ export function AwardsManager({
                     </TableRow>
                   </TableHeader>
                   <TableBody className="divide-y divide-slate-100 text-xs">
-                    {filteredGradeRows.map((row, idx) => {
+                    {sortedGradeRows.map((row, idx) => {
                       const { scope } = parseRowKey(row.key, row.school_id);
                       return (
                         <TableRow key={row.key} className="hover:bg-slate-50/80 transition-colors">
@@ -746,7 +797,7 @@ export function AwardsManager({
                     </TableRow>
                   </TableHeader>
                   <TableBody className="divide-y divide-slate-100 text-xs">
-                    {filteredClassRows.map((row, idx) => {
+                    {sortedClassRows.map((row, idx) => {
                       const { scope } = parseRowKey(row.key, row.school_id);
                       return (
                         <TableRow key={row.key} className="hover:bg-slate-50/80 transition-colors">

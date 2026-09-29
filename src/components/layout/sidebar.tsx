@@ -257,12 +257,17 @@ export function MobileSidebar({ role }: { role?: string }) {
       <SheetContent side="left" showCloseButton={false} className="w-72 p-0 flex flex-col">
         <SheetHeader className="border-b px-5 py-3.5 text-left space-y-2">
           <div className="flex items-center justify-between">
-            <img
-              src="/brand/logo.png"
-              alt="Rajendra Meet"
-              className="h-7 w-auto object-contain"
-            />
-            <SheetTitle className="sr-only">Navigasi Rajendra Meet</SheetTitle>
+            <div className="flex items-center gap-2">
+              <img
+                src="/brand/logo.png"
+                alt="Rajendra Swim System"
+                className="h-7 w-auto object-contain"
+              />
+              <span className="font-heading font-black text-sm text-[var(--m-ink)]">
+                Rajendra <span className="text-[var(--m-aqua)]">Swim System</span>
+              </span>
+            </div>
+            <SheetTitle className="sr-only">Navigasi Rajendra Swim System</SheetTitle>
             <button
               type="button"
               onClick={() => setOpen(false)}
@@ -286,7 +291,7 @@ export function MobileSidebar({ role }: { role?: string }) {
 
           <div className="flex items-center gap-1.5">
             <span className="px-2 py-0.5 rounded-md text-[10px] font-bold text-slate-600 bg-slate-100 border border-slate-200">
-              {isAdmin ? 'Rajendra Meet Admin v4.8' : 'Portal Peserta v4.8'}
+              {isAdmin ? 'Rajendra Swim System Admin v4.8' : 'Portal Peserta v4.8'}
             </span>
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
