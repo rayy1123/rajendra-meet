@@ -68,7 +68,7 @@ export function AthleteParticipantCard({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/brand/logo.png"
-              alt="Rajendra Meet"
+              alt="Rajendra Swim System"
               className="h-8 w-auto object-contain bg-white/20 rounded-md p-1 backdrop-blur-xs shrink-0"
             />
             <div className="min-w-0">
@@ -221,7 +221,7 @@ export function AthleteParticipantCard({
             <div className="text-[9px] text-slate-500 space-y-0.5">
               <p className="font-mono font-black text-slate-900 uppercase tracking-tight">SCAN CALL ROOM</p>
               <p className="text-slate-600 font-medium">Validasi Petugas & Juri</p>
-              <p className="text-[8px] text-slate-400 font-mono">Rajendra Meet Official Pass</p>
+              <p className="text-[8px] text-slate-400 font-mono">Rajendra Swim System Official Pass</p>
             </div>
           </div>
 
@@ -239,7 +239,7 @@ export function AthleteParticipantCard({
 
       {/* Security Microtext Strip di Bawah */}
       <div className="bg-slate-900 py-1 px-3 text-center text-[7.5px] font-mono font-bold tracking-widest text-slate-400 uppercase border-t border-slate-800">
-        ★ RAJENDRA MEET SWIMSYS • OFFICIAL COMPETITION ID PASS • CALL ROOM READY ★
+        ★ RAJENDRA SWIM SYSTEM SWIMSYS • OFFICIAL COMPETITION ID PASS • CALL ROOM READY ★
       </div>
     </div>
   );

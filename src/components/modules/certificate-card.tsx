@@ -7,6 +7,13 @@ import type { SponsorItem } from '@/lib/data/sponsors';
 import { SponsorLogosStrip } from './sponsor-logos-strip';
 import { formatCompEventLabel } from '@/lib/utils';
 
+export const RECORD_BADGES: Record<string, { label: string; cls: string }> = {
+  pribadi: { label: 'REKOR PRIBADI (PB)', cls: 'bg-cyan-600 text-white border-cyan-300/80 shadow-2xs' },
+  games: { label: 'REKOR GAMES (KEJUARAAN)', cls: 'bg-rose-600 text-white border-rose-300/80 shadow-2xs' },
+  daerah: { label: 'REKOR DAERAH (REGIONAL)', cls: 'bg-purple-600 text-white border-purple-300/80 shadow-2xs' },
+  nasional: { label: 'REKOR NASIONAL (NATIONAL)', cls: 'bg-amber-600 text-white border-amber-300/80 shadow-2xs' },
+};
+
 export function CertificateCard({
   recipient,
   settings,
@@ -62,6 +69,17 @@ export function CertificateCard({
         breakInside: 'avoid',
       }}
     >
+      {/* ── 0. CUSTOM BACKGROUND IMAGE (DAPAT DIATUR ADMIN) ── */}
+      {settings.customBackgroundImage && (
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={settings.customBackgroundImage}
+            alt="Custom Certificate Background"
+            className="h-full w-full object-cover"
+          />
+        </div>
+      )}
       {/* ── 1. BACKGROUND WATERMARK SANCTION DARI RAJENDRA-MEET SWIMSYS (DIAGONAL REPEATING PATTERN) ── */}
       <svg
         className="absolute inset-0 h-full w-full opacity-[0.032] print:opacity-[0.045] pointer-events-none select-none z-0"
@@ -130,7 +148,7 @@ export function CertificateCard({
             </textPath>
           </text>
 
-          {/* 4 Aquatic Waves of Rajendra Meet Emblem */}
+          {/* 4 Aquatic Waves of Rajendra Swim System Emblem */}
           <g transform="translate(105, 142) scale(3.6)" stroke="currentColor" strokeWidth="2.2" fill="none" strokeLinecap="round">
             <path d="M4 6 Q 16 1, 26 6 T 48 6" />
             <path d="M4 14 Q 16 9, 26 14 T 48 14" />
@@ -171,15 +189,15 @@ export function CertificateCard({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/brand/logo.png"
-                alt="Rajendra Sports System"
+                alt="Rajendra Swim System"
                 className="h-11 sm:h-12 w-auto object-contain drop-shadow-xs"
               />
               <div className="hidden sm:block">
                 <p className="font-serif font-black text-[12px] text-slate-900 tracking-wide leading-tight">
-                  RAJENDRA SPORTS
+                  RAJENDRA SWIM SYSTEM
                 </p>
                 <p className="font-mono text-[8px] font-bold text-slate-500 uppercase tracking-wider">
-                  AQUATIC CHAMPIONSHIP SYSTEM
+                  OFFICIAL SANCTIONED SYSTEM
                 </p>
               </div>
             </div>
@@ -203,13 +221,13 @@ export function CertificateCard({
               </p>
             </div>
 
-            {/* Lambang Sanction Resmi & World Aquatics Kanan */}
+            {/* Lambang Sanction Resmi & World Aquatics Kanan (Sesuai Image #26: Rajendra Swim System) */}
             <div className="flex items-center gap-2 text-right">
               <div className="text-right hidden sm:block">
-                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 border border-amber-300 text-[8px] font-black tracking-wider text-amber-900 uppercase">
-                  <ShieldCheck className="h-2.5 w-2.5 text-amber-600" /> RAJENDRA SANCTIONED
+                <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-blue-50 border border-blue-300 text-[9px] font-black tracking-wider text-blue-950 uppercase shadow-2xs">
+                  <ShieldCheck className="h-3 w-3 text-blue-600" /> RAJENDRA SWIM SYSTEM
                 </div>
-                <p className="text-[8px] font-mono text-slate-500 font-bold mt-0.5">RMS-AQUATICS / SW 3.1</p>
+                <p className="text-[8px] font-mono text-slate-500 font-bold mt-0.5">OFFICIAL SANCTIONED • SW 3.1</p>
               </div>
               <div className="h-10 w-10 rounded-full border-2 border-amber-500 bg-gradient-to-br from-amber-50 to-amber-100 flex flex-col items-center justify-center text-amber-950 font-black text-[9px] shadow-2xs">
                 <span>FINA</span>
@@ -218,14 +236,14 @@ export function CertificateCard({
             </div>
           </div>
 
-          {/* Judul Besar Piagam */}
+          {/* Judul Besar Piagam (Dapat Disesuaikan Admin) */}
           <div className="pt-3 space-y-0.5">
             <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-[#0f2b5c] font-serif">
-              {isMedalist ? 'PIAGAM PENGHARGAAN' : 'SERTIFIKAT PARTISIPASI'}
+              {settings.headerTitle || (isMedalist ? 'PIAGAM PENGHARGAAN' : 'SERTIFIKAT PARTISIPASI')}
             </h1>
             <p className="text-xs font-bold tracking-widest text-[#b48a3c] uppercase font-sans flex items-center justify-center gap-1.5">
               <Sparkles className="h-3 w-3 text-amber-500" />
-              {isMedalist ? 'CERTIFICATE OF ACHIEVEMENT' : 'CERTIFICATE OF PARTICIPATION'}
+              {settings.headerSubtitle || (isMedalist ? 'CERTIFICATE OF ACHIEVEMENT' : 'CERTIFICATE OF PARTICIPATION')}
               <Sparkles className="h-3 w-3 text-amber-500" />
             </p>
             <p className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide pt-0.5">
@@ -237,7 +255,7 @@ export function CertificateCard({
         {/* Identitas Penerima (Nama Atlet & Klub) */}
         <div className="my-1.5 space-y-1">
           <p className="text-xs italic text-slate-500 font-serif">
-            Diberikan dengan bangga kepada / Proudly presented to:
+            {settings.presentedText || 'Diberikan dengan bangga kepada / Proudly presented to:'}
           </p>
 
           <h2 className="text-2xl sm:text-3xl font-black tracking-wide text-slate-950 uppercase font-serif py-0.5">
@@ -296,11 +314,16 @@ export function CertificateCard({
               </b>
             </span>
 
-            {recipient.isNewRecord && (
-              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-rose-600 text-white font-black text-[10px] tracking-wide uppercase shadow-2xs border border-rose-300/60">
-                <Sparkles className="h-3 w-3" /> Rekor Kejuaraan Baru
-              </span>
-            )}
+            {/* 4 Kategori Rekor (Dapat Diatur Admin: Pribadi, Games, Daerah, Nasional) */}
+            {recipient.isNewRecord && (() => {
+              const rType = recipient.recordType || settings.defaultRecordType || 'games';
+              const rConfig = RECORD_BADGES[rType] || RECORD_BADGES.games;
+              return (
+                <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black tracking-wide uppercase border ${rConfig.cls}`}>
+                  <Sparkles className="h-3 w-3" /> {rConfig.label}
+                </span>
+              );
+            })()}
           </div>
         </div>
 

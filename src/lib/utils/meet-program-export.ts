@@ -138,10 +138,10 @@ export function generateMeetProgramHtml(data: MeetProgramData): string {
 
       <div style="border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 20px;">
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px;">
-          <img src="/brand/logo.png" alt="Logo" style="height: 48px; width: auto; object-fit: contain;" />
+          <img src="/brand/logo.png" alt="Rajendra Swim System" style="height: 48px; width: auto; object-fit: contain;" />
           <div style="text-align: center; flex: 1;">
             <div style="font-size: 16px; font-weight: 900; text-transform: uppercase; color: #0f172a; letter-spacing: 0.5px;">${data.meetName}</div>
-            <div style="font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px;">SPORT SCHOOL SERIES · OFFICIAL START LIST</div>
+            <div style="font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px;">RAJENDRA SWIM SYSTEM · OFFICIAL START LIST</div>
           </div>
           <img src="/brand/rajendra-organizer-logo.png" alt="Rajendra Swimming Organizer" style="height: 42px; width: auto; object-fit: contain;" />
         </div>

@@ -30,14 +30,14 @@ const contacts = [
 
 export const metadata = {
   title: 'Hubungi Kami',
-  description: 'Kontak Rajendra Meet — alamat, WhatsApp, Instagram, dan YouTube.',
+  description: 'Kontak Rajendra Swim System — alamat, WhatsApp, Instagram, dan YouTube.',
 };
 
 export default function KontakPage() {
   return (
     <PublicShell
       title="Hubungi Kami"
-      subtitle="Kontak resmi Rajendra Meet — konsultasi kejuaraan, bantuan teknis, dan lokasi kantor."
+      subtitle="Kontak resmi Rajendra Swim System — konsultasi kejuaraan, bantuan teknis, dan lokasi kantor."
       breadcrumbItems={[
         { label: 'Beranda', href: '/' },
         { label: 'Kontak' },
@@ -87,7 +87,7 @@ export default function KontakPage() {
 
         <p className="mt-6 flex items-center justify-center gap-2 text-sm text-[var(--m-muted)]">
           <Waves className="h-4 w-4 text-[var(--m-aqua)]" />
-          Rajendra Meet — We Organize, You Achieve.
+          Rajendra Swim System — We Organize, You Achieve.
         </p>
       </section>
     </PublicShell>

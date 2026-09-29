@@ -105,7 +105,7 @@ export function RecordsManager({
               </h2>
             </div>
             <p className="text-xs text-[var(--m-muted)] mt-1">
-              Catatan waktu terbaik yang terpecahkan sepanjang kejuaraan renang resmi Rajendra Meet.
+              Catatan waktu terbaik yang terpecahkan sepanjang kejuaraan renang resmi Rajendra Swim System.
             </p>
           </div>
 

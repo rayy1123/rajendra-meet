@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Search, X, Waves, FileText, Check, Sparkles, Printer } from 'lucide-react';
+import { Search, X, Waves, FileText, Check, Sparkles, Printer, RefreshCw } from 'lucide-react';
 import { printElement } from '@/lib/utils/print-helper';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 export interface ProgramCompEvent {
   id: string;
@@ -88,11 +90,26 @@ export function PublicProgramViewer({
   events,
   compEvents,
 }: PublicProgramViewerProps) {
+  const router = useRouter();
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSession, setSelectedSession] = useState<number | 'all'>('all');
   const [filterMode, setFilterMode] = useState<'only_matches' | 'highlight_all'>('only_matches');
 
   const cleanQuery = searchQuery.trim().toLowerCase();
+
+  const handleUpdateProgram = async () => {
+    setIsRefreshing(true);
+    try {
+      await fetch('/api/scoreboard/revalidate', { method: 'POST' });
+      router.refresh();
+      toast.success('Buku Acara & Start List Berhasil Diperbarui secara Realtime!');
+    } catch {
+      toast.error('Gagal memperbarui buku acara.');
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 500);
+    }
+  };
 
   // Daftar semua sesi unik
   const availableSessions = useMemo(() => {
@@ -115,9 +132,13 @@ export function PublicProgramViewer({
 
       ce.heats?.forEach((h) => {
         h.heat_assignments?.forEach((ha) => {
-          const athleteName = ha.registrations?.athletes?.full_name?.toLowerCase() || '';
-          const schoolName = ha.registrations?.athletes?.schools?.name?.toLowerCase() || '';
-          const athleteNo = ha.registrations?.athletes?.athlete_number?.toLowerCase() || '';
+          const rawReg = Array.isArray(ha.registrations) ? ha.registrations[0] : ha.registrations;
+          const rawAth = Array.isArray(rawReg?.athletes) ? rawReg?.athletes[0] : rawReg?.athletes;
+          const rawSchool = Array.isArray(rawAth?.schools) ? rawAth?.schools[0] : rawAth?.schools;
+
+          const athleteName = rawAth?.full_name?.toLowerCase() || '';
+          const schoolName = rawSchool?.name?.toLowerCase() || '';
+          const athleteNo = rawAth?.athlete_number?.toLowerCase() || '';
 
           if (
             athleteName.includes(cleanQuery) ||
@@ -127,8 +148,8 @@ export function PublicProgramViewer({
           ) {
             lanesCount++;
             eventHasMatch = true;
-            if (ha.registrations?.athletes?.full_name) {
-              athleteNames.add(ha.registrations.athletes.full_name);
+            if (rawAth?.full_name) {
+              athleteNames.add(rawAth.full_name);
             }
           }
         });
@@ -162,9 +183,13 @@ export function PublicProgramViewer({
         const matchingHeats = (ce.heats || []).filter((h) => {
           if (eventNameMatches) return true;
           return h.heat_assignments?.some((ha) => {
-            const athleteName = ha.registrations?.athletes?.full_name?.toLowerCase() || '';
-            const schoolName = ha.registrations?.athletes?.schools?.name?.toLowerCase() || '';
-            const athleteNo = ha.registrations?.athletes?.athlete_number?.toLowerCase() || '';
+            const rawReg = Array.isArray(ha.registrations) ? ha.registrations[0] : ha.registrations;
+            const rawAth = Array.isArray(rawReg?.athletes) ? rawReg?.athletes[0] : rawReg?.athletes;
+            const rawSchool = Array.isArray(rawAth?.schools) ? rawAth?.schools[0] : rawAth?.schools;
+
+            const athleteName = rawAth?.full_name?.toLowerCase() || '';
+            const schoolName = rawSchool?.name?.toLowerCase() || '';
+            const athleteNo = rawAth?.athlete_number?.toLowerCase() || '';
             return (
               athleteName.includes(cleanQuery) ||
               schoolName.includes(cleanQuery) ||
@@ -220,13 +245,25 @@ export function PublicProgramViewer({
               </a>
             ))}
           </div>
-          <button
-            type="button"
-            onClick={handlePrintProgram}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#0f1f3d] hover:bg-[#1e3a8a] text-white px-4 py-2 text-xs font-bold shadow-sm transition-colors cursor-pointer"
-          >
-            <Printer className="h-4 w-4" /> Cetak Buku Acara (A4)
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={handleUpdateProgram}
+              disabled={isRefreshing}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 px-3.5 py-2 text-xs font-bold shadow-2xs transition-colors cursor-pointer"
+              title="Sinkronkan data seri heat & atlet terbaru secara realtime"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 text-blue-600 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Memperbarui...' : 'Update Buku Acara'}
+            </button>
+            <button
+              type="button"
+              onClick={handlePrintProgram}
+              className="inline-flex items-center gap-2 rounded-xl bg-[#0f1f3d] hover:bg-[#1e3a8a] text-white px-4 py-2 text-xs font-bold shadow-sm transition-colors cursor-pointer"
+            >
+              <Printer className="h-4 w-4" /> Cetak Buku Acara (A4)
+            </button>
+          </div>
         </div>
 
         {/* ===== SEARCH BAR NAMA ATLET (FITUR UTAMA) ===== */}
@@ -404,7 +441,7 @@ export function PublicProgramViewer({
           </div>
           <div className="flex items-center gap-2 text-white">
             <FileText className="h-5 w-5 text-cyan-300" />
-            <span className="text-sm font-semibold">Rajendra Meet</span>
+            <span className="text-sm font-semibold">Rajendra Swim System</span>
           </div>
         </div>
 
@@ -472,7 +509,8 @@ export function PublicProgramViewer({
                                   .sort((a, b) => a.lane_number - b.lane_number);
 
                                 const fastest = rows.reduce<number | null>((best, r) => {
-                                  const t = r.registrations?.seed_time_ms ?? null;
+                                  const rawReg = Array.isArray(r.registrations) ? r.registrations[0] : r.registrations;
+                                  const t = rawReg?.seed_time_ms ?? null;
                                   if (t && t > 0 && (best === null || t < best)) return t;
                                   return best;
                                 }, null);
@@ -483,12 +521,13 @@ export function PublicProgramViewer({
                                 const heatHasMatch =
                                   cleanQuery &&
                                   rows.some((r) => {
-                                    const athleteName =
-                                      r.registrations?.athletes?.full_name?.toLowerCase() || '';
-                                    const schoolName =
-                                      r.registrations?.athletes?.schools?.name?.toLowerCase() || '';
-                                    const athleteNo =
-                                      r.registrations?.athletes?.athlete_number?.toLowerCase() || '';
+                                    const rawReg = Array.isArray(r.registrations) ? r.registrations[0] : r.registrations;
+                                    const rawAth = Array.isArray(rawReg?.athletes) ? rawReg?.athletes[0] : rawReg?.athletes;
+                                    const rawSchool = Array.isArray(rawAth?.schools) ? rawAth?.schools[0] : rawAth?.schools;
+
+                                    const athleteName = rawAth?.full_name?.toLowerCase() || '';
+                                    const schoolName = rawSchool?.name?.toLowerCase() || '';
+                                    const athleteNo = rawAth?.athlete_number?.toLowerCase() || '';
                                     return (
                                       athleteName.includes(cleanQuery) ||
                                       schoolName.includes(cleanQuery) ||
@@ -536,12 +575,13 @@ export function PublicProgramViewer({
                                       </thead>
                                       <tbody className="divide-y divide-border">
                                         {rows.map((r) => {
-                                          const rawName =
-                                            r.registrations?.athletes?.full_name ?? '—';
-                                          const schoolName =
-                                            r.registrations?.athletes?.schools?.name ?? null;
-                                          const seed =
-                                            r.registrations?.seed_time_ms ?? null;
+                                          const rawReg = Array.isArray(r.registrations) ? r.registrations[0] : r.registrations;
+                                          const rawAth = Array.isArray(rawReg?.athletes) ? rawReg?.athletes[0] : rawReg?.athletes;
+                                          const rawSchool = Array.isArray(rawAth?.schools) ? rawAth?.schools[0] : rawAth?.schools;
+
+                                          const rawName = rawAth?.full_name ?? '—';
+                                          const schoolName = rawSchool?.name ?? null;
+                                          const seed = rawReg?.seed_time_ms ?? null;
                                           const resObj = Array.isArray(r.results)
                                             ? r.results[0]
                                             : r.results;
@@ -648,7 +688,7 @@ export function PublicProgramViewer({
 
         {/* Footer Buku Acara */}
         <footer className="printable-area flex items-center justify-between border-t border-border px-6 py-3 text-xs text-[var(--m-muted)]">
-          <span>Powered by Rajendra Meet</span>
+          <span>Powered by Rajendra Swim System</span>
           <span className="font-mono">Program resmi · Cetak mandiri</span>
         </footer>
       </div>

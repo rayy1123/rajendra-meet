@@ -537,7 +537,7 @@ export function DaftarLombaDirectory({ events }: DaftarLombaDirectoryProps) {
                         className="h-8 w-auto object-contain bg-white/20 rounded-md p-1 backdrop-blur-xs"
                       />
                       <span className="text-[10px] font-mono font-bold tracking-widest text-cyan-200 uppercase">
-                        SCMS TOURNAMENT
+                        RAJENDRA SWIM SYSTEM
                       </span>
                     </div>
 

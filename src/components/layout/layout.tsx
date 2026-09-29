@@ -80,7 +80,7 @@ export default function DashboardLayout({
           collapsed ? 'w-[76px]' : 'w-72'
         }`}
       >
-        {/* Header Sidebar dengan Logo Rajendra Meet + Design by Rajendra Project */}
+        {/* Header Sidebar dengan Logo Rajendra Swim System + Design by Rajendra Project */}
         <div
           className={`border-b border-border transition-all ${
             collapsed ? 'flex h-16 items-center justify-center px-2' : 'px-5 py-3 space-y-2'
@@ -91,9 +91,14 @@ export default function DashboardLayout({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/brand/logo.png"
-                alt="Rajendra Meet"
+                alt="Rajendra Swim System"
                 className="h-7 w-auto object-contain"
               />
+              {!collapsed && (
+                <span className="font-heading font-black text-sm text-[var(--m-ink)]">
+                  Rajendra <span className="text-[var(--m-aqua)]">Swim System</span>
+                </span>
+              )}
             </Link>
 
             <button
@@ -125,7 +130,7 @@ export default function DashboardLayout({
               {/* Status Badges */}
               <div className="flex items-center gap-1.5">
                 <span className="px-2 py-0.5 rounded-md text-[10px] font-bold text-slate-600 bg-slate-100 border border-slate-200">
-                  {isAdmin ? 'Rajendra Meet Admin v4.8' : 'Portal Peserta v4.8'}
+                  {isAdmin ? 'Rajendra Swim System Admin v4.8' : 'Portal Peserta v4.8'}
                 </span>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -221,7 +226,7 @@ export default function DashboardLayout({
 
         <footer className="border-t border-border bg-background print:hidden">
           <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-4 text-xs text-muted-foreground sm:flex-row sm:px-6">
-            <p>© {new Date().getFullYear()} Rajendra Meet — Sistem Manajemen Kejuaraan Renang</p>
+            <p>© {new Date().getFullYear()} Rajendra Swim System — Sistem Manajemen Kejuaraan Renang</p>
             <div className="flex items-center gap-4">
               <Link href="/" className="hover:text-foreground">Beranda</Link>
               <Link href="/scoreboard" className="hover:text-foreground">Live Scoreboard</Link>

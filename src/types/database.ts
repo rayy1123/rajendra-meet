@@ -1,5 +1,5 @@
 /**
- * Tipe domain SCMS — selaras dengan supabase/migrations/0001_init.sql.
+ * Tipe domain Rajendra Swim System — selaras dengan supabase/migrations/0001_init.sql.
  * Jika skema DB berubah, perbarui file ini.
  */
 

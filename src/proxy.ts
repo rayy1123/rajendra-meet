@@ -45,6 +45,21 @@ export async function proxy(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-pathname', request.nextUrl.pathname);
 
+  // Cloudflare Header Handling: Tangkap IP Pengunjung Asli (CF-Connecting-IP)
+  const clientIp =
+    request.headers.get('cf-connecting-ip') ||
+    request.headers.get('x-real-ip') ||
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim();
+  if (clientIp) {
+    requestHeaders.set('x-client-ip', clientIp);
+    requestHeaders.set('x-real-ip', clientIp);
+  }
+
+  const cfCountry = request.headers.get('cf-ipcountry');
+  if (cfCountry) {
+    requestHeaders.set('x-client-country', cfCountry);
+  }
+
   let response = NextResponse.next({
     request: { headers: requestHeaders },
   });
@@ -202,8 +217,8 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
 
   const csp = [
     "default-src 'self'",
-    // Supabase JS butuh wasm + WS untuk realtime; izinkan host Supabase.
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+    // Supabase JS, Brevo API, & Cloudflare; izinkan host terkait.
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.brevo.com https://*.cloudflare.com",
     // Style inline diperlukan oleh Tailwind (CDN-free, tapi ada style dinamis).
     "style-src 'self' 'unsafe-inline'",
     // Script: hanya milik sendiri (Next.js menyajikan dari /_next).

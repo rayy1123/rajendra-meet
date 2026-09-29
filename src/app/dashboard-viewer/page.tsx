@@ -188,7 +188,7 @@ export default async function DashboardViewerPage() {
     activeEvent = {
       id: latestEvent.id,
       name: latestEvent.name,
-      organizer: latestEvent.organizer || 'Panitia Pelaksana Rajendra Meet',
+      organizer: latestEvent.organizer || 'Panitia Pelaksana Rajendra Swim System',
       location: latestEvent.location || 'Kolam Renang Resmi',
       startDate: latestEvent.start_date,
       endDate: latestEvent.end_date,

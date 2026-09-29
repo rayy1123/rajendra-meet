@@ -5,31 +5,58 @@ import Link from 'next/link';
 import { SplitAuthShell } from '@/components/layout/split-auth-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { createClient } from '@/lib/supabase/client';
+import { BrandedSpinner } from '@/components/ui/branded-loading';
+import { EmailOtpDialog } from '@/components/modules/email-otp-dialog';
+import { ArrowLeft, CheckCircle2, KeyRound } from 'lucide-react';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [targetOtpEmail, setTargetOtpEmail] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    const rawEmail = email.trim().toLowerCase();
+    if (!rawEmail) {
+      setErrorMsg('Email atau username akun wajib diisi.');
+      return;
+    }
+
+    const resolvedEmail = rawEmail.includes('@') ? rawEmail : `${rawEmail}@gmail.com`;
+    setTargetOtpEmail(resolvedEmail);
+    setShowOtpModal(true);
+  };
+
+  const executeResetPassword = async () => {
+    setShowOtpModal(false);
     setLoading(true);
     setErrorMsg('');
     setSuccessMsg('');
 
-    if (!email.trim()) {
-      setErrorMsg('Email wajib diisi.');
-      setLoading(false);
-      return;
-    }
-
     try {
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      setSuccessMsg('Instruksi reset kata sandi telah dikirim ke email Anda.');
-      setEmail('');
-    } catch {
-      setErrorMsg('Gagal mengirim permintaan reset password.');
+      const supabase = createClient();
+      const redirectTo = `${window.location.origin}/reset-password`;
+
+      const { error } = await supabase.auth.resetPasswordForEmail(targetOtpEmail, {
+        redirectTo,
+      });
+
+      if (error) {
+        setErrorMsg(error.message || 'Gagal mengirim instruksi reset kata sandi.');
+      } else {
+        setSuccessMsg(`Email terverifikasi OTP! Tautan reset kata sandi telah dikirim ke ${targetOtpEmail}. Silakan periksa email Anda.`);
+        setEmail('');
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Terjadi kesalahan sistem.';
+      setErrorMsg(msg);
     } finally {
       setLoading(false);
     }
@@ -72,8 +99,18 @@ export default function ForgotPasswordPage() {
           />
         </div>
 
-        <Button type="submit" className="w-full bg-primary text-white hover:bg-primary/90" disabled={loading}>
-          Kirim Tautan Reset
+        <Button type="submit" className="w-full bg-primary text-white hover:bg-primary/90 font-bold text-xs h-10 rounded-xl cursor-pointer" disabled={loading}>
+          {loading ? (
+            <span className="flex items-center gap-2">
+              <BrandedSpinner className="h-4 w-4" />
+              <span>Mengirim Email via Brevo...</span>
+            </span>
+          ) : (
+            <span className="flex items-center justify-center gap-2">
+              <KeyRound className="h-4 w-4" />
+              <span>Kirim Tautan Reset Kata Sandi</span>
+            </span>
+          )}
         </Button>
       </form>
 
@@ -82,6 +119,13 @@ export default function ForgotPasswordPage() {
           ← Kembali ke login
         </Link>
       </div>
+
+      <EmailOtpDialog
+        open={showOtpModal}
+        email={targetOtpEmail}
+        onClose={() => setShowOtpModal(false)}
+        onVerified={executeResetPassword}
+      />
     </SplitAuthShell>
   );
 }

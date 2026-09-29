@@ -3,7 +3,7 @@ import { BookOpen, UserPlus, Trophy, Layers, Waves, Clock } from 'lucide-react';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Panduan — Rajendra Meet',
+  title: 'Panduan — Rajendra Swim System',
 };
 
 const SECTIONS = [
@@ -60,7 +60,7 @@ export default function GuidePage() {
   return (
     <PublicShell
       title="Buku Panduan"
-      subtitle="Cara menggunakan Rajendra Meet: dari mendaftar, menginput data, hingga melihat scoreboard."
+      subtitle="Cara menggunakan Rajendra Swim System: dari mendaftar, menginput data, hingga melihat scoreboard."
       breadcrumbItems={[
         { label: 'Beranda', href: '/' },
         { label: 'Panduan' },

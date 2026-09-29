@@ -16,9 +16,9 @@ import { ServicesSection } from '@/components/modules/services-section';
 import { ClientsSection } from '@/components/modules/clients-section';
 
 export const metadata = {
-  title: 'Rajendra Meet — Sistem Manajemen Kejuaraan Renang',
+  title: 'Rajendra Swim System — Sistem Manajemen Kejuaraan Renang',
   description:
-    'Rajendra Meet membantu panitia menyelenggarakan kejuaraan renang dengan mudah: pendaftaran peserta, penyusunan heat, input hasil, dan live scoreboard real-time.',
+    'Rajendra Swim System membantu panitia menyelenggarakan kejuaraan renang dengan mudah: pendaftaran peserta, penyusunan heat, input hasil, dan live scoreboard real-time.',
 };
 
 export const dynamic = 'force-dynamic';
@@ -32,7 +32,7 @@ const TESTIMONIALS: Testimonial[] = [
     highlight: 'Suasana Ramah & Fun untuk Anak',
     rating: 5,
     club: 'Harahap Swimming School',
-    text: 'Ini pertama kalinya anak saya ikut kompetisi yang diselenggarakan bersama Rajendra Meet, dan saya benar-benar menikmati setiap momennya! Suasananya sangat mendukung, panitianya ramah dan informatif, serta acaranya fun banget. Anak jadi tidak trauma berlomba, malah nggak sabar mau ikut event selanjutnya!',
+    text: 'Ini pertama kalinya anak saya ikut kompetisi yang diselenggarakan bersama Rajendra Swim System, dan saya benar-benar menikmati setiap momennya! Suasananya sangat mendukung, panitianya ramah dan informatif, serta acaranya fun banget. Anak jadi tidak trauma berlomba, malah nggak sabar mau ikut event selanjutnya!',
   },
   {
     name: 'Koko Nugroho',
@@ -42,7 +42,7 @@ const TESTIMONIALS: Testimonial[] = [
     highlight: 'Disiplin Waktu & Terorganisir Rapih',
     rating: 5,
     club: 'Klub Akuatik Tirta',
-    text: 'Event lomba renang dari Rajendra Meet sangat terorganisir dengan baik. Panggilan Call Room tertib, jadwal seri tepat waktu, dan anak saya jadi semakin percaya diri serta bersemangat berlatih renang. Suasana kompetisinya seru tapi tetap menyenangkan untuk anak-anak!',
+    text: 'Event lomba renang dari Rajendra Swim System sangat terorganisir dengan baik. Panggilan Call Room tertib, jadwal seri tepat waktu, dan anak saya jadi semakin percaya diri serta bersemangat berlatih renang. Suasana kompetisinya seru tapi tetap menyenangkan untuk anak-anak!',
   },
   {
     name: 'Willy Surya',
@@ -52,7 +52,7 @@ const TESTIMONIALS: Testimonial[] = [
     highlight: 'Live Scoreboard Real-Time & Transparan',
     rating: 5,
     club: 'Jangkar Swimming Club',
-    text: 'Sebagai pelatih, saya sangat mengapresiasi sistem Rajendra Meet. Fasilitas memadai, panitia ramah, hasil waktu muncul real-time di scoreboard, dan seluruh rangkaian acara berjalan lancar tepat waktu. Pengalaman yang sangat positif untuk pembinaan atlet muda.',
+    text: 'Sebagai pelatih, saya sangat mengapresiasi sistem Rajendra Swim System. Fasilitas memadai, panitia ramah, hasil waktu muncul real-time di scoreboard, dan seluruh rangkaian acara berjalan lancar tepat waktu. Pengalaman yang sangat positif untuk pembinaan atlet muda.',
   },
   {
     name: 'Elly Anggraini',
@@ -62,14 +62,14 @@ const TESTIMONIALS: Testimonial[] = [
     highlight: 'Sertifikat & Medali Resmi Instan',
     rating: 5,
     club: 'Mandiri / Sekolah',
-    text: 'Terima kasih Rajendra Meet sudah membuat event yang penuh semangat, sportivitas, dan keceriaan. Transparansi nomor lomba sangat jelas, dan sertifikat resmi berstempel langsung siap diunduh setelah acara selesai. Ditunggu event selanjutnya!',
+    text: 'Terima kasih Rajendra Swim System sudah membuat event yang penuh semangat, sportivitas, dan keceriaan. Transparansi nomor lomba sangat jelas, dan sertifikat resmi berstempel langsung siap diunduh setelah acara selesai. Ditunggu event selanjutnya!',
   },
 ];
 
 export default async function HomePage() {
   const supabase = await createClient();
 
-  // Ambil data showcase yang telah diatur di Kelola Beranda SCMS (Poster, Stat, Galeri, Tentang, Pilar, Layanan/RAB, Client)
+  // Ambil data showcase yang telah diatur di Kelola Beranda (Poster, Stat, Galeri, Tentang, Pilar, Layanan/RAB, Client)
   const posters = getServerShowcases('poster');
   const stats = getServerShowcases('stat');
   const gallery = getServerShowcases('gallery');
@@ -133,7 +133,7 @@ export default async function HomePage() {
               </span>
             </h1>
             <p className="mx-auto mt-5 max-w-xl text-base text-[var(--m-muted)] sm:text-lg">
-              Rajendra Meet membantu panitia mengelola pendaftaran peserta, menyusun
+              Rajendra Swim System membantu panitia mengelola pendaftaran peserta, menyusun
               heat, menginput hasil, dan menampilkan scoreboard secara real-time —
               semua dalam satu sistem yang ramah & menyenangkan.
             </p>
@@ -181,7 +181,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ===== LOMBA YANG AKAN DATANG (TERHUBUNG KE KELOLA BERANDA SCMS) ===== */}
+      {/* ===== LOMBA YANG AKAN DATANG (TERHUBUNG KE KELOLA BERANDA) ===== */}
       <section className="pub-container py-12 sm:py-16">
         <div className="mb-8 text-center">
           <span className="pub-eyebrow">Event</span>

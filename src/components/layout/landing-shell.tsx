@@ -87,7 +87,10 @@ export function LandingShell({ children }: { children: React.ReactNode }) {
           {/* Sisi Kiri: Logo + Slogan + Breadcrumb Menu Button */}
           <div className="flex items-center gap-2.5 sm:gap-3.5">
             <Link href="/" className="flex items-center gap-2.5 transition-opacity hover:opacity-90">
-              <img src="/brand/logo.png" alt="Rajendra Meet" className="h-8 sm:h-9 w-auto object-contain" />
+              <img src="/brand/logo.png" alt="Rajendra Swim System" className="h-8 sm:h-9 w-auto object-contain" />
+              <span className="font-heading font-black text-base sm:text-lg tracking-tight text-[var(--m-ink)]">
+                Rajendra <span className="text-[var(--m-aqua)]">Swim System</span>
+              </span>
               <span className="hidden lg:inline-block text-xs italic font-medium text-[var(--m-muted)] border-l border-[var(--m-border)] pl-2.5">
                 &ldquo;We Organize, You Achieve&rdquo;
               </span>

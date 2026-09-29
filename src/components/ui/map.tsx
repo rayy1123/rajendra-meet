@@ -38,7 +38,7 @@ export function Map({
       )}
       <iframe
         ref={iframeRef}
-        title="Peta Kantor Rajendra Meet"
+        title="Peta Kantor Rajendra Swim System"
         src={srcSearch}
         onLoad={() => setLoaded(true)}
         className={className ?? 'h-full w-full border-0'}

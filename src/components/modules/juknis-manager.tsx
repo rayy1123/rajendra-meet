@@ -105,7 +105,7 @@ function HaornasBottomLeftWave() {
 
 /**
  * Header Lembar Juknis Resmi (Template Haornas Swim Fest)
- * - Sisi Kiri: Logo Rajendra Meet (proporsional & ringkas)
+ * - Sisi Kiri: Logo Rajendra Swim System (proporsional & ringkas)
  * - Tengah: Judul Event, Tempat, dan Tanggal (Luas & Rapi)
  * - Sisi Kanan: Logo Rajendra Swimming Organizer (Aman & Bebas Halangan)
  */
@@ -120,12 +120,12 @@ function HaornasSheetHeader({
 }) {
   return (
     <div className="relative z-10 flex items-center justify-between border-b-2 border-slate-900 pb-3 gap-3">
-      {/* SISI KIRI: Logo Rajendra Meet */}
+      {/* SISI KIRI: Logo Rajendra Swim System */}
       <div contentEditable={false} className="relative z-20 flex shrink-0 items-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/brand/logo.png"
-          alt="Rajendra Meet"
+          alt="Rajendra Swim System"
           className="h-7 w-auto sm:h-8 max-w-[105px] object-contain"
         />
       </div>
@@ -175,7 +175,7 @@ function HaornasSheetFooter({
       {/* Kontak Person */}
       <div className="flex items-center justify-between pb-1 text-[11px] sm:text-xs">
         <span className="hidden sm:inline-block font-semibold uppercase tracking-wider text-[9px] text-slate-400">
-          Official Technical Handbook · Rajendra Meet
+          Official Technical Handbook · Rajendra Swim System
         </span>
         <p className="ml-auto text-right font-black tracking-tight text-slate-950 text-xs sm:text-[13px]">
           Kontak Person :{' '}
@@ -446,7 +446,7 @@ export function JuknisManager({
               )}
             </div>
             <p className="text-xs text-muted-foreground">
-              Dokumen petunjuk teknis pelaksanaan kejuaraan renang Rajendra Meet.
+              Dokumen petunjuk teknis pelaksanaan kejuaraan renang Rajendra Swim System.
             </p>
           </div>
 
@@ -633,13 +633,13 @@ export function JuknisManager({
               }}
             />
 
-            {/* Header Bar Cover: Rajendra Meet (Kiri) & Rajendra Organizer (Kanan) */}
+            {/* Header Bar Cover: Rajendra Swim System (Kiri) & Rajendra Organizer (Kanan) */}
             <div className="relative z-10 flex items-center justify-between border-b-2 border-slate-900 pb-2.5 gap-3">
               <div contentEditable={false} className="relative z-20 flex shrink-0 items-center">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/brand/logo.png"
-                  alt="Rajendra Meet"
+                  alt="Rajendra Swim System"
                   className="h-7.5 w-auto sm:h-8.5 max-w-[115px] object-contain"
                 />
               </div>
@@ -649,7 +649,7 @@ export function JuknisManager({
                   OFFICIAL TECHNICAL HANDBOOK
                 </span>
                 <p className="text-[9px] sm:text-[10px] font-semibold text-slate-500">
-                  PERATURAN RESMI RAJENDRA MEET
+                  PERATURAN RESMI RAJENDRA SWIM SYSTEM
                 </p>
               </div>
 
@@ -938,7 +938,7 @@ export function JuknisManager({
               <ul className="space-y-0.5 text-slate-800">
                 <li className="flex items-baseline gap-2">
                   <span>•</span>
-                  <span>Peraturan perlombaan menggunakan ketentuan resmi kejuaraan Rajendra Meet.</span>
+                  <span>Peraturan perlombaan menggunakan ketentuan resmi kejuaraan Rajendra Swim System.</span>
                 </li>
                 <li className="flex items-baseline gap-2">
                   <span>•</span>
@@ -955,7 +955,7 @@ export function JuknisManager({
             <section className="space-y-1">
               <h3 className="text-xs sm:text-sm font-black uppercase text-slate-950">9. METODE PENDAFTARAN</h3>
               <p className="text-slate-800">
-                Pendaftaran dilakukan melalui Sistem Resmi Rajendra Meet pada tautan portal resmi pendaftaran kejuaraan atau Formulir Digital resmi yang disediakan oleh panitia.
+                Pendaftaran dilakukan melalui Sistem Resmi Rajendra Swim System pada tautan portal resmi pendaftaran kejuaraan atau Formulir Digital resmi yang disediakan oleh panitia.
               </p>
             </section>
 
@@ -1146,7 +1146,7 @@ export function JuknisManager({
               <ul className="space-y-0.5 text-slate-800">
                 <li className="flex items-baseline gap-2">
                   <span>•</span>
-                  <span>Hasil perlombaan akan dirilis secara real-time pada Live Scoreboard Rajendra Meet dan dibagikan ke WhatsApp Grup Resmi.</span>
+                  <span>Hasil perlombaan akan dirilis secara real-time pada Live Scoreboard Rajendra Swim System dan dibagikan ke WhatsApp Grup Resmi.</span>
                 </li>
                 <li className="flex items-baseline gap-2">
                   <span>•</span>
@@ -1249,7 +1249,7 @@ export function JuknisManager({
                 </li>
                 <li className="flex items-baseline gap-2">
                   <span>•</span>
-                  <span>Panitia menyediakan Buku Acara digital yang dapat diunduh melalui platform Rajendra Meet.</span>
+                  <span>Panitia menyediakan Buku Acara digital yang dapat diunduh melalui platform Rajendra Swim System.</span>
                 </li>
                 <li className="flex items-baseline gap-2">
                   <span>•</span>

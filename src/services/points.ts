@@ -110,6 +110,7 @@ function tieKey(e: ScoredEntry): string {
 /**
  * Klasemen per SEKOLAH/KLUB.
  * `groupBy` menentukan jenis klasemen: overall, grade, atau class.
+ * `sortBy`: 'points' (default - akumulasi poin dahulu) atau 'medals' (perolehan medali emas terbanyak dahulu).
  */
 export function buildStandings(
   entries: ScoredEntry[],
@@ -117,9 +118,10 @@ export function buildStandings(
   options: {
     groupBy?: 'overall' | 'grade' | 'class';
     deadHeat?: DeadHeatPolicy;
+    sortBy?: 'points' | 'medals';
   } = {}
 ): StandingRow[] {
-  const { groupBy = 'overall', deadHeat = 'split' } = options;
+  const { groupBy = 'overall', deadHeat = 'split', sortBy = 'points' } = options;
   if (!entries || entries.length === 0) return [];
 
   const ties = tieCounts(entries);
@@ -150,16 +152,26 @@ export function buildStandings(
     else if (medal === 'bronze') row.bronze++;
   }
 
-  return sortStandings([...rows.values()]);
+  return sortStandings([...rows.values()], sortBy);
 }
 
-/** Urutan klasemen: poin, lalu emas, perak, perunggu. */
-export function sortStandings(rows: StandingRow[]): StandingRow[] {
+/** Urutan klasemen: opsional berdasarkan poin atau medali terbanyak. */
+export function sortStandings(
+  rows: StandingRow[],
+  sortBy: 'points' | 'medals' = 'points'
+): StandingRow[] {
   return [...rows].sort((a, b) => {
-    if (b.points !== a.points) return b.points - a.points;
-    if (b.gold !== a.gold) return b.gold - a.gold;
-    if (b.silver !== a.silver) return b.silver - a.silver;
-    if (b.bronze !== a.bronze) return b.bronze - a.bronze;
+    if (sortBy === 'medals') {
+      if (b.gold !== a.gold) return b.gold - a.gold;
+      if (b.silver !== a.silver) return b.silver - a.silver;
+      if (b.bronze !== a.bronze) return b.bronze - a.bronze;
+      if (b.points !== a.points) return b.points - a.points;
+    } else {
+      if (b.points !== a.points) return b.points - a.points;
+      if (b.gold !== a.gold) return b.gold - a.gold;
+      if (b.silver !== a.silver) return b.silver - a.silver;
+      if (b.bronze !== a.bronze) return b.bronze - a.bronze;
+    }
     return a.key.localeCompare(b.key);
   });
 }

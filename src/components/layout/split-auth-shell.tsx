@@ -38,12 +38,12 @@ export function SplitAuthShell({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/brand/logo.png"
-              alt="Rajendra Meet"
+              alt="Rajendra Swim System"
               className="h-8 w-auto object-contain transition-transform group-hover:scale-105"
             />
             <div className="flex flex-col">
               <span className="font-heading text-sm font-black tracking-tight text-slate-950">
-                RAJENDRA MEET
+                RAJENDRA SWIM SYSTEM
               </span>
               <span className="text-[9px] font-mono font-bold text-slate-400 -mt-0.5 tracking-wider uppercase">
                 Swimming Championship

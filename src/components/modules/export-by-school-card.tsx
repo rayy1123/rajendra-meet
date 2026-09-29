@@ -142,7 +142,7 @@ export function ExportBySchoolCard({
 
       // 2. Bangun Workbook ExcelJS
       const workbook = new ExcelJS.Workbook();
-      workbook.creator = 'Rajendra Meet';
+      workbook.creator = 'Rajendra Swim System';
       workbook.created = new Date();
 
       const ws = workbook.addWorksheet('Pendaftar_Cabang', {

@@ -631,7 +631,7 @@ export function ProfileManager({
       <ConfirmDialog
         open={showLogout}
         title="Konfirmasi Keluar Akun"
-        message="Apakah Anda yakin ingin keluar dari sesi akun Rajendra Meet saat ini?"
+        message="Apakah Anda yakin ingin keluar dari sesi akun Rajendra Swim System saat ini?"
         confirmLabel={loggingOut ? 'Memproses...' : 'Ya, Keluar Akun'}
         destructive
         onConfirm={handleLogout}

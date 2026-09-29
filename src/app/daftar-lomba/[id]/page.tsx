@@ -76,12 +76,18 @@ export default async function DaftarLombaEventPage({ params }: { params: Promise
     .eq('event_id', id)
     .order('distance_meters', { ascending: true });
 
-  // Atlet milik viewer (bisa dipilih saat mendaftar ke event ini).
-  const { data: myAthletes } = await supabase
+  // Atlet tersimpan (jika admin: tampilkan seluruh atlet kejuaraan untuk pilihan pendaftaran manual panitia)
+  let athletesQuery = supabase
     .from('athletes')
-    .select('id, full_name, birth_date, gender, grade_level, school_id, schools(name)')
-    .eq('owner_id', user.id)
-    .order('full_name');
+    .select('id, full_name, birth_date, gender, grade_level, school_id, schools(name)');
+
+  if (!isAdmin) {
+    athletesQuery = athletesQuery.eq('owner_id', user.id);
+  }
+
+  const { data: myAthletes } = await athletesQuery
+    .order('full_name')
+    .limit(500);
 
   const existingAthletes: AthleteDTO[] = (myAthletes ?? []).map((a: any) => {
     const rawSchool = Array.isArray(a.schools) ? a.schools[0] : a.schools;

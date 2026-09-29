@@ -386,17 +386,17 @@ export function BukuAcaraManager({
               </SelectContent>
             </Select>
 
-            {/* Tombol Sinkronkan Hasil Lomba */}
+            {/* Tombol Update & Sinkronkan Buku Acara */}
             <Button
               variant="outline"
               size="sm"
               onClick={handleSyncResults}
               disabled={isSyncing}
-              className="gap-1.5 text-xs font-semibold h-9 border-slate-300 bg-white hover:bg-slate-50 text-slate-800 shadow-2xs"
-              title="Perbarui data waktu & peringkat hasil lomba secara realtime"
+              className="gap-1.5 text-xs font-bold h-9 border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-900 shadow-2xs cursor-pointer"
+              title="Perbarui data seri heat, lintasan, & waktu hasil lomba secara realtime ke halaman publik"
             >
               <RefreshCw className={cn('h-3.5 w-3.5 text-blue-600', isSyncing && 'animate-spin')} />
-              {isSyncing ? 'Menyinkronkan...' : 'Sinkronkan Hasil'}
+              {isSyncing ? 'Memperbarui...' : 'Update Buku Acara'}
             </Button>
 
             {/* Tombol Menuju Input Hasil Lomba */}
@@ -566,10 +566,10 @@ export function BukuAcaraManager({
         {/* COVER HALAMAN UTAMA (Dengan Logo Rajendra & Logo Sponsor) */}
         {showCoverPage && (
           <div className="buku-page-break rounded-2xl border border-slate-200 print:border-none print:shadow-none bg-white p-8 sm:p-12 text-center shadow-xs space-y-6">
-            {/* Header Logos: Rajendra Meet di Kiri & Rajendra Swimming Organizer di Kanan */}
+            {/* Header Logos: Rajendra Swim System di Kiri & Rajendra Swimming Organizer di Kanan */}
             <div className="flex items-center justify-between border-b border-slate-200 pb-3 gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/brand/logo.png" alt="Rajendra Meet" className="h-8 sm:h-9 w-auto max-w-[120px] object-contain shrink-0" />
+              <img src="/brand/logo.png" alt="Rajendra Swim System" className="h-8 sm:h-9 w-auto max-w-[120px] object-contain shrink-0" />
               <div className="text-center px-3 flex-1 min-w-0">
                 <span className="font-mono text-xs font-black tracking-widest text-slate-800 uppercase block">
                   OFFICIAL MEET PROGRAM
@@ -625,7 +625,7 @@ export function BukuAcaraManager({
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/brand/banner-rajendra.jpg"
-                  alt="Rajendra Meet Swimming System - Champion Sports (Mascot Rajen & Dara)"
+                  alt="Rajendra Swim System Swimming System - Champion Sports (Mascot Rajen & Dara)"
                   className="w-full h-auto object-cover max-h-28"
                 />
               </div>
@@ -648,7 +648,7 @@ export function BukuAcaraManager({
             <div className="flex items-center justify-between gap-4">
               <div className="w-24 sm:w-32 flex items-center justify-start">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/brand/logo.png" alt="Rajendra Meet" className="h-10 sm:h-12 w-auto max-w-[120px] object-contain" />
+                <img src="/brand/logo.png" alt="Rajendra Swim System" className="h-10 sm:h-12 w-auto max-w-[120px] object-contain" />
               </div>
 
               <div className="text-center flex-1">

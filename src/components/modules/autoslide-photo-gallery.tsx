@@ -13,17 +13,17 @@ export interface GalleryPhotoItem {
 
 // ── ROW 1: 11 FOTO ASLI AKSI KOLAM DARI RAJENDRARENANG.COM ──
 export const DEFAULT_ACTION_PHOTOS: GalleryPhotoItem[] = [
-  { id: 'act-1', imageSrc: '/gallery/swiper1.jpg', fallbackSrc: '/slider/hero-1.jpg', alt: 'Aksi perlombaan renang Rajendra Meet 1' },
-  { id: 'act-2', imageSrc: '/gallery/swiper2.jpg', fallbackSrc: '/slider/hero-2.jpg', alt: 'Aksi perlombaan renang Rajendra Meet 2' },
-  { id: 'act-3', imageSrc: '/gallery/swiper3.jpg', fallbackSrc: '/slider/about-1.jpg', alt: 'Aksi perlombaan renang Rajendra Meet 3' },
-  { id: 'act-4', imageSrc: '/gallery/swiper44.jpg', fallbackSrc: '/slider/about-3.jpg', alt: 'Aksi perlombaan renang Rajendra Meet 4' },
-  { id: 'act-5', imageSrc: '/gallery/swiper5.jpg', fallbackSrc: '/slider/hero-3.jpg', alt: 'Aksi perlombaan renang Rajendra Meet 5' },
-  { id: 'act-6', imageSrc: '/gallery/swiper6.jpg', fallbackSrc: '/slider/hero-4.jpg', alt: 'Aksi perlombaan renang Rajendra Meet 6' },
-  { id: 'act-7', imageSrc: '/gallery/swiper7.jpg', fallbackSrc: '/slider/hero-1.jpg', alt: 'Aksi perlombaan renang Rajendra Meet 7' },
-  { id: 'act-8', imageSrc: '/gallery/swiper8.jpg', fallbackSrc: '/slider/hero-2.jpg', alt: 'Aksi perlombaan renang Rajendra Meet 8' },
-  { id: 'act-9', imageSrc: '/gallery/swiper9.jpg', fallbackSrc: '/slider/about-2.jpg', alt: 'Aksi perlombaan renang Rajendra Meet 9' },
-  { id: 'act-10', imageSrc: '/gallery/swiper10.jpg', fallbackSrc: '/slider/hero-3.jpg', alt: 'Aksi perlombaan renang Rajendra Meet 10' },
-  { id: 'act-11', imageSrc: '/gallery/swiper11.jpg', fallbackSrc: '/slider/hero-4.jpg', alt: 'Aksi perlombaan renang Rajendra Meet 11' },
+  { id: 'act-1', imageSrc: '/gallery/swiper1.jpg', fallbackSrc: '/slider/hero-1.jpg', alt: 'Aksi perlombaan renang Rajendra Swim System 1' },
+  { id: 'act-2', imageSrc: '/gallery/swiper2.jpg', fallbackSrc: '/slider/hero-2.jpg', alt: 'Aksi perlombaan renang Rajendra Swim System 2' },
+  { id: 'act-3', imageSrc: '/gallery/swiper3.jpg', fallbackSrc: '/slider/about-1.jpg', alt: 'Aksi perlombaan renang Rajendra Swim System 3' },
+  { id: 'act-4', imageSrc: '/gallery/swiper44.jpg', fallbackSrc: '/slider/about-3.jpg', alt: 'Aksi perlombaan renang Rajendra Swim System 4' },
+  { id: 'act-5', imageSrc: '/gallery/swiper5.jpg', fallbackSrc: '/slider/hero-3.jpg', alt: 'Aksi perlombaan renang Rajendra Swim System 5' },
+  { id: 'act-6', imageSrc: '/gallery/swiper6.jpg', fallbackSrc: '/slider/hero-4.jpg', alt: 'Aksi perlombaan renang Rajendra Swim System 6' },
+  { id: 'act-7', imageSrc: '/gallery/swiper7.jpg', fallbackSrc: '/slider/hero-1.jpg', alt: 'Aksi perlombaan renang Rajendra Swim System 7' },
+  { id: 'act-8', imageSrc: '/gallery/swiper8.jpg', fallbackSrc: '/slider/hero-2.jpg', alt: 'Aksi perlombaan renang Rajendra Swim System 8' },
+  { id: 'act-9', imageSrc: '/gallery/swiper9.jpg', fallbackSrc: '/slider/about-2.jpg', alt: 'Aksi perlombaan renang Rajendra Swim System 9' },
+  { id: 'act-10', imageSrc: '/gallery/swiper10.jpg', fallbackSrc: '/slider/hero-3.jpg', alt: 'Aksi perlombaan renang Rajendra Swim System 10' },
+  { id: 'act-11', imageSrc: '/gallery/swiper11.jpg', fallbackSrc: '/slider/hero-4.jpg', alt: 'Aksi perlombaan renang Rajendra Swim System 11' },
 ];
 
 // ── ROW 2: 11 FOTO ASLI JUARA & PODIUM DARI RAJENDRARENANG.COM ──

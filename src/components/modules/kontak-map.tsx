@@ -27,7 +27,7 @@ export function KontakMap() {
           </div>
           <div className="min-w-0 flex-1">
             <h4 className="text-sm font-bold text-[var(--m-ink)]">
-              Kantor Rajendra Meet
+              Kantor Rajendra Swim System
             </h4>
             <p className="mt-1 text-xs leading-relaxed text-[var(--m-muted)]">
               Jl. Setu Babakan No. 14A, Srengseng Sawah, Jagakarsa, Jakarta Selatan

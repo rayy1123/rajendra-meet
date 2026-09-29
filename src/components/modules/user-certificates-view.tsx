@@ -48,7 +48,7 @@ export function UserCertificatesView({
       month: 'long',
       year: 'numeric',
     }),
-    organizerChairman: 'Panitia Pelaksana Rajendra Meet',
+    organizerChairman: 'Panitia Pelaksana Rajendra Swim System',
     organizerChairmanTitle: 'Ketua Panitia Kejuaraan',
     technicalDelegate: 'Technical Delegate / FINA Referee',
     technicalDelegateTitle: 'Referee Akuatik Indonesia',
@@ -159,7 +159,7 @@ export function UserCertificatesView({
                 Sertifikat Juara &amp; Penghargaan Resmi
               </h2>
               <p className="text-xs text-slate-600">
-                Sertifikat penghargaan resmi diterbitkan dan disahkan oleh Panitia Pelaksana Rajendra Meet untuk atlet binaan Anda yang berhasil meraih podium kejuaraan.
+                Sertifikat penghargaan resmi diterbitkan dan disahkan oleh Panitia Pelaksana Rajendra Swim System untuk atlet binaan Anda yang berhasil meraih podium kejuaraan.
               </p>
             </div>
           </div>
@@ -181,7 +181,7 @@ export function UserCertificatesView({
               description={
                 userAthletesCount === 0
                   ? 'Anda belum mendaftarkan atlet binaan. Daftarkan atlet Anda dan ikuti kejuaraan resmi untuk meraih sertifikat penghargaan.'
-                  : 'Sertifikat resmi akan otomatis muncul di sini setelah atlet binaan Anda meraih Juara 1 (Emas), Juara 2 (Perak), Juara 3 (Perunggu), atau Rekor Baru pada kejuaraan renang Rajendra Meet.'
+                  : 'Sertifikat resmi akan otomatis muncul di sini setelah atlet binaan Anda meraih Juara 1 (Emas), Juara 2 (Perak), Juara 3 (Perunggu), atau Rekor Baru pada kejuaraan renang Rajendra Swim System.'
               }
               action={
                 <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2">
@@ -343,7 +343,7 @@ export function UserCertificatesView({
 
               <div className="flex items-center justify-between pt-2 border-t text-xs">
                 <p className="text-slate-500">
-                  Sertifikat diterbitkan secara otomatis dengan segel sanction <b>Rajendra Meet</b>.
+                  Sertifikat diterbitkan secara otomatis dengan segel sanction <b>Rajendra Swim System</b>.
                 </p>
                 <div className="flex items-center gap-2">
                   <Button

@@ -34,7 +34,7 @@ export function ViewerEventCard({
         <div className="absolute inset-0">
           <img
             src="/brand/logo.png"
-            alt="Rajendra Meet"
+            alt="Rajendra Swim System"
             className="h-full w-full object-contain p-4 opacity-80"
           />
         </div>

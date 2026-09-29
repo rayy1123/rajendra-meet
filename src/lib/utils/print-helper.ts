@@ -1,5 +1,5 @@
 /**
- * Utility Cetak Presisi Tinggi untuk SCMS Rajendra Meet
+ * Utility Cetak Presisi Tinggi untuk Rajendra Swim System
  * Menggunakan iframe terisolasi agar hasil cetak dokumen (Invoice, Sertifikat, ID Pass)
  * selalu 100% tampil, warna pekat (exact color adjust), dan terbebas dari bug
  * blank page akibat modal dialog atau scroll-lock Radix UI.
@@ -20,7 +20,7 @@ export function printElement(
   if (typeof window === 'undefined') return;
 
   const {
-    title = 'Dokumen Resmi Rajendra Meet',
+    title = 'Dokumen Resmi Rajendra Swim System',
     isLandscape = false,
     pageMargin = isLandscape ? '0mm' : '8mm 10mm',
     onBeforePrint,
