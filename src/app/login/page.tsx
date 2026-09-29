@@ -59,17 +59,18 @@ export default function LoginPage() {
       }
 
       const supabase = createClient();
+      const cleanId = loginIdentifier.toLowerCase();
 
-      // Susun kandidat email jika input berupa username (tanpa @)
-      const candidateEmails = loginIdentifier.includes('@')
-        ? [loginIdentifier]
+      // Susun kandidat email secara fleksibel jika input berupa username (tanpa @)
+      const candidateEmails = cleanId.includes('@')
+        ? [cleanId, loginIdentifier]
         : Array.from(
             new Set([
-              `${loginIdentifier}@scms.local`,
-              `${loginIdentifier}@rajendra.id`,
-              loginIdentifier.toLowerCase() === 'admin' ? 'admin@rajendra.id' : '',
-              loginIdentifier.toLowerCase() === 'panitia' ? 'panitia@rajendra.id' : '',
-              `${loginIdentifier}@gmail.com`,
+              `${cleanId}@scms.local`,
+              `${cleanId}@rajendra.id`,
+              'admin@rajendra.id',
+              'panitia@rajendra.id',
+              `${cleanId}@gmail.com`,
             ].filter(Boolean))
           );
 
@@ -91,7 +92,10 @@ export default function LoginPage() {
       }
 
       if (!sessionData || !sessionData.session) {
-        setErrorMsg('Login gagal. Periksa kembali email/username dan kata sandi Anda.');
+        const detailMsg = lastAuthError?.message
+          ? ` (${lastAuthError.message})`
+          : '';
+        setErrorMsg(`Login gagal. Periksa kembali email/username dan kata sandi Anda.${detailMsg}`);
         setLoading(false);
         return;
       }
@@ -218,24 +222,9 @@ export default function LoginPage() {
         {/* Dynamic Role Capability Box */}
         <div className="p-2.5 rounded-xl border border-slate-200 bg-slate-50/70 text-[11px] text-slate-600 leading-snug space-y-1">
           {activeRoleBadge === 'admin' ? (
-            <>
-              <p>
-                <b className="text-blue-900 font-bold">Wewenang Panitia / Juri:</b> Manajemen kejuaraan penuh, seeding otomatis, buku acara A4, rekonsiliasi kas, dan otoritas penerbitan sertifikat resmi.
-              </p>
-              <div className="flex items-center justify-between text-[11px] pt-1 text-slate-500 border-t border-slate-200/60 mt-1">
-                <span>Butuh akses panitia pelaksana?</span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setUsername('admin@rajendra.id');
-                    setPassword('Panitia#2026');
-                  }}
-                  className="text-blue-600 font-bold hover:underline cursor-pointer"
-                >
-                  Gunakan Akun Panitia (admin@rajendra.id)
-                </button>
-              </div>
-            </>
+            <p>
+              <b className="text-blue-900 font-bold">Wewenang Panitia / Juri:</b> Manajemen kejuaraan penuh, seeding otomatis, buku acara A4, rekonsiliasi kas, dan otoritas penerbitan sertifikat resmi.
+            </p>
           ) : activeRoleBadge === 'coach' ? (
             <>
               <p>
@@ -294,13 +283,7 @@ export default function LoginPage() {
                 : 'Email atau Username'}
             </span>
             <span className="text-[10px] text-slate-400 font-normal">
-              {activeRoleBadge === 'admin'
-                ? 'admin atau panitia@rajendra.id'
-                : activeRoleBadge === 'coach'
-                ? 'pelatih@klub.id atau username'
-                : activeRoleBadge === 'athlete'
-                ? 'atlet@email.com atau username'
-                : 'Contoh: admin atau nama@email.com'}
+              Contoh: nama@domain.com atau username
             </span>
           </label>
           <div className="relative">
@@ -309,12 +292,12 @@ export default function LoginPage() {
               type="text"
               placeholder={
                 activeRoleBadge === 'admin'
-                  ? 'Masukkan username panitia atau admin@rajendra.id'
+                  ? 'Masukkan email atau username resmi panitia'
                   : activeRoleBadge === 'coach'
-                  ? 'Masukkan username klub atau email pelatih'
+                  ? 'Masukkan email atau username resmi klub/pelatih'
                   : activeRoleBadge === 'athlete'
-                  ? 'Masukkan username atlet atau email resmi'
-                  : 'Masukkan username atau email resmi'
+                  ? 'Masukkan email atau username resmi atlet'
+                  : 'Masukkan email atau username resmi'
               }
               className="h-11 rounded-xl bg-white pl-10 text-sm font-medium text-slate-900 border-slate-300 focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-600 shadow-2xs"
               value={username}
