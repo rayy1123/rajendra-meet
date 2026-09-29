@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Check, ChevronLeft, ChevronRight, Upload, CreditCard, School, Plus, Building } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Upload, CreditCard, School, Plus, Building, Search } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -76,6 +76,19 @@ export function RegistrationWizard({
   const [athleteId, setAthleteId] = useState<string | null>(
     existingAthletes[0]?.id ?? null
   );
+
+  const [athleteSearch, setAthleteSearch] = useState("");
+
+  const filteredExistingAthletes = useMemo(() => {
+    if (!athleteSearch.trim()) return existingAthletes;
+    const q = athleteSearch.toLowerCase();
+    return existingAthletes.filter(
+      (a) =>
+        a.full_name.toLowerCase().includes(q) ||
+        (a.school_name || '').toLowerCase().includes(q) ||
+        a.grade_level.toLowerCase().includes(q)
+    );
+  }, [existingAthletes, athleteSearch]);
 
   // Kode unik pendaftaran (dihitung sekali saat flow dibuka)
   const [uniqueCode] = useState<number>(() => {
@@ -170,13 +183,16 @@ export function RegistrationWizard({
   const calcMode = event?.fee_calculation_mode || 'per_event';
   const pkgLimit = Number(event?.flat_package_limit) || 3;
   const pkgPrice = Number(event?.flat_package_price) || 275000;
+  const extraFeePerEvent = Number((event as any)?.extra_fee_per_event) || 80000;
 
   let baseAmount = 0;
+  let extraCount = 0;
   if (calcMode === 'flat_package' && validSelectedCats.length > 0) {
     if (validSelectedCats.length <= pkgLimit) {
       baseAmount = pkgPrice;
     } else {
-      baseAmount = pkgPrice + (validSelectedCats.length - pkgLimit) * feePerEvent;
+      extraCount = validSelectedCats.length - pkgLimit;
+      baseAmount = pkgPrice + extraCount * extraFeePerEvent;
     }
   } else {
     baseAmount = feePerEvent * validSelectedCats.length;
@@ -292,32 +308,50 @@ export function RegistrationWizard({
 
           {mode === "existing" ? (
             <div className="space-y-3">
-              {existingAthletes.map((a) => {
-                const ku = calculateAgeCategory(new Date(a.birth_date));
-                const sel = a.id === athleteId;
-                return (
-                  <button type="button" key={a.id} onClick={() => {
-                    if (a.id !== athleteId) setSelectedCats([]);
-                    setAthleteId(a.id);
-                  }}
-                    className={`flex w-full items-center justify-between rounded-xl border p-4 text-left transition-colors ${sel ? "border-[var(--m-aqua)] bg-[var(--m-aqua-soft)]" : "border-[var(--m-border)] hover:border-[var(--m-aqua)]"}`}>
-                    <div>
-                      <div className="font-semibold text-[var(--m-ink)] flex items-center gap-2">
-                        <span>{a.full_name}</span>
-                        {primarySchoolId && a.school_id && a.school_id !== primarySchoolId && (
-                          <span className="text-[10px] font-bold text-rose-800 bg-rose-100 px-2 py-0.5 rounded border border-rose-300">
-                            ⚠️ Beda Klub ({a.school_name || 'Lainnya'})
-                          </span>
-                        )}
+              {/* Search Bar Atlet Tersimpan (Item #2) */}
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                <Input
+                  type="text"
+                  placeholder="Cari nama atlet, klub, atau KU..."
+                  value={athleteSearch}
+                  onChange={(e) => setAthleteSearch(e.target.value)}
+                  className="pl-9 text-xs rounded-xl bg-slate-50/80 border-slate-200"
+                />
+              </div>
+
+              {filteredExistingAthletes.length === 0 ? (
+                <div className="p-6 text-center text-xs text-slate-500 rounded-xl border border-dashed">
+                  Tidak ada atlet yang cocok dengan pencarian &quot;{athleteSearch}&quot;.
+                </div>
+              ) : (
+                filteredExistingAthletes.map((a) => {
+                  const ku = calculateAgeCategory(new Date(a.birth_date));
+                  const sel = a.id === athleteId;
+                  return (
+                    <button type="button" key={a.id} onClick={() => {
+                      if (a.id !== athleteId) setSelectedCats([]);
+                      setAthleteId(a.id);
+                    }}
+                      className={`flex w-full items-center justify-between rounded-xl border p-4 text-left transition-colors ${sel ? "border-[var(--m-aqua)] bg-[var(--m-aqua-soft)]" : "border-[var(--m-border)] hover:border-[var(--m-aqua)]"}`}>
+                      <div>
+                        <div className="font-semibold text-[var(--m-ink)] flex items-center gap-2">
+                          <span>{a.full_name}</span>
+                          {primarySchoolId && a.school_id && a.school_id !== primarySchoolId && (
+                            <span className="text-[10px] font-bold text-rose-800 bg-rose-100 px-2 py-0.5 rounded border border-rose-300">
+                              ⚠️ Beda Klub ({a.school_name || 'Lainnya'})
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-[var(--m-muted)]">
+                          {ku}{a.school_name ? ` · ${a.school_name}` : ""}
+                        </div>
                       </div>
-                      <div className="text-xs text-[var(--m-muted)]">
-                        {ku}{a.school_name ? ` · ${a.school_name}` : ""}
-                      </div>
-                    </div>
-                    <span className={`h-5 w-5 rounded-full border-2 ${sel ? "border-[var(--m-aqua)] bg-[var(--m-aqua)]" : "border-[var(--m-border)]"}`} />
-                  </button>
-                );
-              })}
+                      <span className={`h-5 w-5 rounded-full border-2 ${sel ? "border-[var(--m-aqua)] bg-[var(--m-aqua)]" : "border-[var(--m-border)]"}`} />
+                    </button>
+                  );
+                })
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -490,6 +524,21 @@ export function RegistrationWizard({
             })}
 
             <div className="border-t border-dashed pt-2 space-y-1.5">
+              {calcMode === 'flat_package' && (
+                <div className="p-2.5 rounded-xl bg-blue-50/80 border border-blue-200 text-xs space-y-1">
+                  <div className="flex justify-between font-bold text-blue-950">
+                    <span>Skema Paket Hemat ({pkgLimit} Nomor Pertama):</span>
+                    <span>Rp {pkgPrice.toLocaleString('id-ID')}</span>
+                  </div>
+                  {extraCount > 0 && (
+                    <div className="flex justify-between text-blue-900">
+                      <span>+ {extraCount} Nomor Tambahan (@ Rp {extraFeePerEvent.toLocaleString('id-ID')}):</span>
+                      <span>+Rp {(extraCount * extraFeePerEvent).toLocaleString('id-ID')}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="flex justify-between text-xs">
                 <dt className="text-[var(--m-muted)]">Subtotal ({validSelectedCats.length} nomor lomba)</dt>
                 <dd className="font-semibold text-[var(--m-ink)]">Rp {baseAmount.toLocaleString('id-ID')}</dd>

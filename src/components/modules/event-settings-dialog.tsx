@@ -29,10 +29,11 @@ export function EventSettingsDialog({ event }: EventSettingsDialogProps) {
   const [success, setSuccess] = useState(false);
 
   const [form, setForm] = useState({
-    fee_per_event: String(event.fee_per_event || 100000),
+    fee_per_event: String(event.fee_per_event || 50000),
     fee_calculation_mode: (event as any).fee_calculation_mode || 'per_event', // 'per_event' or 'flat_package'
     flat_package_limit: String((event as any).flat_package_limit || 3),
     flat_package_price: String((event as any).flat_package_price || 275000),
+    extra_fee_per_event: String((event as any).extra_fee_per_event || 80000),
     use_unique_code: event.use_unique_code ?? true,
     unique_code_mode: event.unique_code_mode || 'random_3_digit',
     unique_code_fixed: String(event.unique_code_fixed || 0),
@@ -52,10 +53,11 @@ export function EventSettingsDialog({ event }: EventSettingsDialogProps) {
         if (res.success && res.data) {
           const d = res.data;
           setForm({
-            fee_per_event: String(d.fee_per_event ?? 100000),
+            fee_per_event: String(d.fee_per_event ?? 50000),
             fee_calculation_mode: d.fee_calculation_mode || 'per_event',
             flat_package_limit: String(d.flat_package_limit || 3),
             flat_package_price: String(d.flat_package_price || 275000),
+            extra_fee_per_event: String(d.extra_fee_per_event || 80000),
             use_unique_code: d.use_unique_code ?? true,
             unique_code_mode: d.unique_code_mode || 'random_3_digit',
             unique_code_fixed: String(d.unique_code_fixed || 0),
@@ -80,10 +82,11 @@ export function EventSettingsDialog({ event }: EventSettingsDialogProps) {
 
     try {
       const payload = {
-        fee_per_event: Number(form.fee_per_event) || 100000,
+        fee_per_event: Number(form.fee_per_event) || 50000,
         fee_calculation_mode: form.fee_calculation_mode,
         flat_package_limit: Number(form.flat_package_limit) || 3,
         flat_package_price: Number(form.flat_package_price) || 275000,
+        extra_fee_per_event: Number(form.extra_fee_per_event) || 80000,
         use_unique_code: Boolean(form.use_unique_code),
         unique_code_mode: form.unique_code_mode,
         unique_code_fixed: Number(form.unique_code_fixed) || 0,
@@ -184,7 +187,7 @@ export function EventSettingsDialog({ event }: EventSettingsDialogProps) {
             </div>
 
             {form.fee_calculation_mode === 'flat_package' && (
-              <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-200">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 border-t border-slate-200">
                 <div className="space-y-1">
                   <label className="font-semibold text-slate-700">Maks Nomor Paket</label>
                   <Input
@@ -208,8 +211,20 @@ export function EventSettingsDialog({ event }: EventSettingsDialogProps) {
                     placeholder="Misal: 275000"
                   />
                 </div>
-                <p className="col-span-2 text-[11px] text-muted-foreground">
-                  Contoh: 3 nomor pertama dikenakan total Rp 275.000, kelipatan/nomor ke-4 dan seterusnya mengikuti biaya per nomor biasa.
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-700">Nomor Tambahan (Rp)</label>
+                  <Input
+                    type="number"
+                    min={0}
+                    step={1000}
+                    value={form.extra_fee_per_event}
+                    onChange={(e) => setForm((f) => ({ ...f, extra_fee_per_event: e.target.value }))}
+                    className="h-8 text-xs bg-white"
+                    placeholder="Misal: 80000"
+                  />
+                </div>
+                <p className="col-span-1 sm:col-span-3 text-[11px] text-muted-foreground">
+                  💡 Peserta mendaftar s/d {form.flat_package_limit} nomor cukup bayar total paket Rp {Number(form.flat_package_price || 275000).toLocaleString('id-ID')}. Nomor tambahan berikutnya dikenakan Rp {Number(form.extra_fee_per_event || 80000).toLocaleString('id-ID')}/nomor.
                 </p>
               </div>
             )}

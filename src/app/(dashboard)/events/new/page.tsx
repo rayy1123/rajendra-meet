@@ -27,6 +27,7 @@ export default function NewEventPage() {
     fee_calculation_mode: 'per_event',
     flat_package_limit: '3',
     flat_package_price: '275000',
+    extra_fee_per_event: '80000',
     use_unique_code: true,
     unique_code_mode: 'random_3_digit',
     unique_code_fixed: '0',
@@ -73,6 +74,10 @@ export default function NewEventPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             fee_per_event: Number(form.fee_per_event) || 50000,
+            fee_calculation_mode: form.fee_calculation_mode,
+            flat_package_limit: Number(form.flat_package_limit) || 3,
+            flat_package_price: Number(form.flat_package_price) || 275000,
+            extra_fee_per_event: Number(form.extra_fee_per_event) || 80000,
             use_unique_code: form.use_unique_code,
             unique_code_mode: form.unique_code_mode,
             unique_code_fixed: Number(form.unique_code_fixed) || 0,
@@ -189,7 +194,7 @@ export default function NewEventPage() {
               </div>
 
               {form.fee_calculation_mode === 'flat_package' && (
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 grid grid-cols-1 gap-4 sm:grid-cols-3">
                   <div className="space-y-1">
                     <label htmlFor="flat_package_limit" className="text-xs font-bold text-foreground">Maks Nomor Paket (Contoh: 3)</label>
                     <Input
@@ -213,8 +218,21 @@ export default function NewEventPage() {
                       className="h-8 text-xs bg-white"
                     />
                   </div>
-                  <p className="col-span-2 text-[11px] text-muted-foreground">
-                    💡 Peserta yang mendaftar hingga {form.flat_package_limit} nomor pertama cukup membayar total Rp {Number(form.flat_package_price || 275000).toLocaleString('id-ID')}, dan kelipatan nomor berikutnya dihitung tarif reguler.
+                  <div className="space-y-1">
+                    <label htmlFor="extra_fee_per_event" className="text-xs font-bold text-foreground">Biaya Nomor Tambahan (Rp)</label>
+                    <Input
+                      id="extra_fee_per_event"
+                      type="number"
+                      min={0}
+                      step={1000}
+                      value={form.extra_fee_per_event}
+                      onChange={set('extra_fee_per_event')}
+                      placeholder="80000"
+                      className="h-8 text-xs bg-white"
+                    />
+                  </div>
+                  <p className="col-span-1 sm:col-span-3 text-[11px] text-muted-foreground">
+                    💡 Peserta yang mendaftar hingga {form.flat_package_limit} nomor pertama membayar total paket <b>Rp {Number(form.flat_package_price || 275000).toLocaleString('id-ID')}</b>, dan setiap nomor tambahan setelahnya dikenakan biaya <b>Rp {Number(form.extra_fee_per_event || 80000).toLocaleString('id-ID')}/nomor</b>.
                   </p>
                 </div>
               )}
@@ -277,7 +295,11 @@ export default function NewEventPage() {
                   )}
 
                   <div className="text-[11px] text-slate-600 bg-white p-2.5 rounded-lg border border-slate-200">
-                    💡 <b>Contoh Hasil:</b> Jika atlet mendaftar 3 nomor lomba (3 × Rp {Number(form.fee_per_event || 50000).toLocaleString('id-ID')} = Rp {(3 * Number(form.fee_per_event || 50000)).toLocaleString('id-ID')}), maka total tagihan pendaftar menjadi <b>Rp {((3 * Number(form.fee_per_event || 50000)) + 382).toLocaleString('id-ID')}</b>.
+                    💡 <b>Contoh Hasil:</b> Rentang kode unik{' '}
+                    {form.unique_code_mode === 'custom_range'
+                      ? `${form.unique_code_min} s/d ${form.unique_code_max}`
+                      : '100 s/d 999'}
+                    . Jika atlet mendaftar 3 nomor lomba (3 × Rp {Number(form.fee_per_event || 50000).toLocaleString('id-ID')} = Rp {(3 * Number(form.fee_per_event || 50000)).toLocaleString('id-ID')}), maka total tagihan pendaftar menjadi <b>Rp {((3 * Number(form.fee_per_event || 50000)) + (form.unique_code_mode === 'custom_range' ? Number(form.unique_code_min) || 900 : 382)).toLocaleString('id-ID')}</b>.
                   </div>
                 </div>
               )}

@@ -4,6 +4,10 @@ import path from 'path';
 export interface EventSettings {
   eventId: string;
   fee_per_event: number;
+  fee_calculation_mode?: 'per_event' | 'flat_package';
+  flat_package_limit?: number;
+  flat_package_price?: number;
+  extra_fee_per_event?: number;
   use_unique_code: boolean;
   unique_code_mode: string;
   unique_code_fixed: number;
@@ -20,7 +24,11 @@ export interface EventSettings {
 const STORE_PATH = path.join(process.cwd(), 'src', 'lib', 'data', 'event-settings-store.json');
 
 export const DEFAULT_EVENT_SETTINGS: Omit<EventSettings, 'eventId'> = {
-  fee_per_event: 100000,
+  fee_per_event: 50000,
+  fee_calculation_mode: 'per_event',
+  flat_package_limit: 3,
+  flat_package_price: 275000,
+  extra_fee_per_event: 80000,
   use_unique_code: true,
   unique_code_mode: 'random_3_digit',
   unique_code_fixed: 0,

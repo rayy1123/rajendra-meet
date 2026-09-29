@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import {
@@ -37,8 +37,10 @@ import {
   CalendarCheck,
   IdCard,
   User,
+  Search,
   type LucideIcon,
 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -161,6 +163,7 @@ export function SidebarNav({
 }) {
   const pathname = usePathname();
   const [activeRole, setActiveRole] = useState<string>(role || 'viewer');
+  const [menuSearchQuery, setMenuSearchQuery] = useState('');
   const supabase = createClient();
 
   useEffect(() => {
@@ -191,17 +194,46 @@ export function SidebarNav({
   const isAdmin = ADMIN_ROLE_LIST.includes(activeRole);
   const currentGroups = isAdmin ? adminNavGroups : viewerNavGroups;
 
+  const filteredGroups = useMemo(() => {
+    if (!menuSearchQuery.trim()) return currentGroups;
+    const q = menuSearchQuery.toLowerCase();
+    return currentGroups
+      .map((g) => ({
+        ...g,
+        items: g.items.filter(
+          (it) =>
+            it.title.toLowerCase().includes(q) ||
+            (it.description || '').toLowerCase().includes(q)
+        ),
+      }))
+      .filter((g) => g.items.length > 0);
+  }, [currentGroups, menuSearchQuery]);
+
   return (
     <div className="flex h-full flex-col justify-between py-2">
       <nav className="space-y-4 px-3">
-        {currentGroups.map((group) => (
+        {/* Search Bar Mobilisasi Menu Sidebar (Poin Item #8) */}
+        {!collapsed && (
+          <div className="relative px-1 pb-1">
+            <Search className="absolute left-3.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
+            <Input
+              type="text"
+              placeholder="Cari menu sidebar..."
+              value={menuSearchQuery}
+              onChange={(e) => setMenuSearchQuery(e.target.value)}
+              className="h-8 rounded-xl bg-slate-100/80 border-slate-200 pl-8 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-primary/20 shadow-2xs"
+            />
+          </div>
+        )}
+
+        {filteredGroups.map((group: NavGroup) => (
           <div key={group.label} className="space-y-1">
             {!collapsed && (
               <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70">
                 {group.label}
               </p>
             )}
-            {group.items.map((item) => {
+            {group.items.map((item: NavItem) => {
               const Icon = item.icon;
               const isActive =
                 item.href === '/dashboard' || item.href === '/dashboard-viewer'

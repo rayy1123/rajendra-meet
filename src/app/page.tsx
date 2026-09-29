@@ -3,7 +3,7 @@ import { Testimonials, type Testimonial } from '@/components/modules/testimonial
 import { PhotoSlider } from '@/components/modules/photo-slider';
 import { HeroBannerSlider } from '@/components/modules/hero-banner-slider';
 import { AutoslidePhotoGallery } from '@/components/modules/autoslide-photo-gallery';
-import { Waves, Phone, Mail, Share2, ArrowRight, Trophy, Sparkles } from 'lucide-react';
+import { Waves, Phone, Mail, Share2, ArrowRight, Trophy, Sparkles, Crown } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getServerShowcases } from '@/lib/data/landing-showcases-server';
@@ -217,6 +217,30 @@ export default async function HomePage() {
         </div>
 
         <ServicesSection services={services && services.length > 0 ? services : undefined} />
+      </section>
+
+      {/* ===== RAJENDRA RECORD SHOWCASE HIGHLIGHT ===== */}
+      <section id="records" className="pub-container scroll-mt-20 py-12 sm:py-16">
+        <div className="pub-card bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white p-8 sm:p-10 rounded-3xl shadow-xl border border-blue-900/50 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="space-y-3 text-center md:text-left max-w-2xl">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-400/30">
+              <Crown className="h-3.5 w-3.5 text-amber-400" /> RAJENDRA RECORD HIGHLIGHT
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white font-heading">
+              Rekor Kejuaraan Renang Resmi (Rajendra Record)
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              Pantau seluruh rekor waktu tercepat yang pernah terpecahkan sepanjang sejarah kejuaraan renang Rajendra Swim System, lengkap dengan nama perenang, klub/sekolah, dan event tempat rekor diraih.
+            </p>
+          </div>
+          <Link
+            href="/rajendra-record"
+            className="inline-flex items-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs sm:text-sm px-6 py-3.5 shadow-lg transition-all hover:scale-105 shrink-0 cursor-pointer"
+          >
+            <span>Lihat Seluruh Rajendra Record</span>
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
       </section>
 
       {/* ===== KLIEN KAMI & DOKUMENTASI KOMUNITAS ===== */}

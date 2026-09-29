@@ -2,9 +2,10 @@
 import { createClient } from '@/lib/supabase/server';
 import { PublicShell } from '@/components/layout/public-shell';
 import { RouteEventSelect } from '@/components/modules/route-event-select';
-import { Medal } from 'lucide-react';
+import { Medal, Lock } from 'lucide-react';
 import { PrintButton } from '@/components/modules/print-button';
 import { EmptyState } from '@/components/ui/empty-state';
+import { checkEventResultsVisibility } from '@/lib/data/live-scoreboard-settings';
 
 interface SchoolTally {
   name: string;
@@ -32,13 +33,22 @@ export default async function MedalTallyPage({
 
   const { data: events } = await supabase
     .from('events')
-    .select('id, name')
+    .select('id, name, start_date, end_date')
     .order('start_date', { ascending: false });
   const current = events?.find((e) => e.id === eventId) ?? events?.[0] ?? null;
 
+  // Cek otorisasi publikasi hasil / klasemen dari panitia (open / closed / auto)
+  let isResultsVisible = true;
+  if (current) {
+    const { getEventLiveConfig } = await import('@/lib/data/live-scoreboard-server');
+    const liveConfig = getEventLiveConfig(current.id);
+    const visResult = checkEventResultsVisibility(current, liveConfig);
+    isResultsVisible = visResult.isVisible;
+  }
+
   const tally: Record<string, SchoolTally> = {};
 
-  if (current) {
+  if (current && isResultsVisible) {
     // 3 query total (hindari N+1 per competition_event)
     const { data: heats } = await supabase
       .from('heats')
@@ -140,7 +150,14 @@ export default async function MedalTallyPage({
           <PrintButton />
         </div>
 
-        {rows.length === 0 ? (
+        {!isResultsVisible ? (
+          <EmptyState
+            icon={<Lock className="h-6 w-6 text-amber-600" />}
+            title="Klasemen Medali Ditingkatkan / Ditutup Sementara"
+            description="Panitia pelaksana sedang memverifikasi hasil resmi kejuaraan. Klasemen medali publik akan muncul setelah panitia menekan tombol publikasi hasil."
+            className="no-print my-6 bg-amber-50/50 border-amber-200"
+          />
+        ) : rows.length === 0 ? (
           <EmptyState
             icon={<Medal className="h-6 w-6" />}
             title="Belum ada hasil"
