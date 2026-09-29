@@ -1,12 +1,14 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { validateUserSession } from '@/lib/auth/session-limiter';
 
 /**
  * Proxy (menggantikan middleware yang sudah deprecated di Next.js 16).
  * Tugas:
  *   1. Refresh sesi Supabase (set cookie session lewat response).
  *   2. Guard rute — hanya rute publik yang boleh diakses tanpa login.
- *   3. Suntikkan security headers pada SETIAP response.
+ *   3. Batasi konkurensi sesi (single active session enforcement).
+ *   4. Suntikkan security headers pada SETIAP response.
  */
 
 const PUBLIC_ROUTE_PREFIXES = [
@@ -30,6 +32,7 @@ const PUBLIC_ROUTE_PREFIXES = [
   '/brand',
   '/uploads',
   '/403',
+  '/api/auth',
   '/api/register',
   '/api/schools',
   '/api/scoreboard',
@@ -101,7 +104,54 @@ export async function proxy(request: NextRequest) {
     return applySecurityHeaders(redirectResponse);
   }
 
+  // Pembatasan Sesi Bersamaan (Concurrent Session Limit):
+  // Pastikan akun hanya aktif pada satu sesi tunggal. Jika ada login baru di perangkat lain,
+  // sesi lama langsung dihentikan dan dialihkan ke login.
+  if (user && !isPublicRoute) {
+    const clientSessionId = request.cookies.get('scms_session_id')?.value;
+    const { isValid, activeSessionId } = await validateUserSession(user.id, clientSessionId);
+
+    if (!isValid) {
+      if (pathname.startsWith('/api/')) {
+        return applySecurityHeaders(
+          NextResponse.json(
+            { error: 'Sesi Anda telah berakhir karena akun ini sedang aktif di perangkat lain.' },
+            { status: 401 }
+          )
+        );
+      }
+
+      const url = request.nextUrl.clone();
+      url.pathname = '/login';
+      url.searchParams.set('error', 'concurrent_session');
+      const redirectResponse = NextResponse.redirect(url);
+
+      request.cookies.getAll().forEach((c) => {
+        if (c.name.includes('supabase') || c.name.startsWith('sb-') || c.name === 'scms_session_id') {
+          redirectResponse.cookies.set(c.name, '', { path: '/', maxAge: 0 });
+        }
+      });
+      return applySecurityHeaders(redirectResponse);
+    }
+
+    // Jika sesi valid dan response belum memiliki cookie scms_session_id, sertakan
+    if (activeSessionId && !clientSessionId) {
+      response.cookies.set('scms_session_id', activeSessionId, {
+        path: '/',
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 7 * 24 * 60 * 60,
+      });
+    }
+  }
+
   if (user && pathname === '/login') {
+    // Jangan redirect jika ada notifikasi error sesi bersamaan
+    if (request.nextUrl.searchParams.has('error')) {
+      return applySecurityHeaders(response);
+    }
+
     // Sudah login: arahkan ke dashboard masing-masing, bukan /dashboard
     // (yang hanya untuk admin & akan memantulkan viewer ke landing).
     const { data: profile } = await supabase

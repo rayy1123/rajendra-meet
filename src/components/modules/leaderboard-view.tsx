@@ -95,20 +95,40 @@ export function LeaderboardView({ compEvents, embedded, showHeatTab = true }: Le
       .eq('competition_event_id', selectedCompEventId)
       .order('heat_number', { ascending: true });
 
+    const allAssignIds = (data || []).flatMap((h: any) =>
+      (h.heat_assignments || []).map((a: any) => a.id)
+    );
+
+    const directResultsMap: Record<string, { id: string; time_ms: number | null; status: string }> = {};
+    if (allAssignIds.length > 0) {
+      const { data: dbRes } = await supabase
+        .from('results')
+        .select('id, heat_assignment_id, time_ms, status')
+        .in('heat_assignment_id', allAssignIds);
+      if (dbRes) {
+        dbRes.forEach((r: any) => {
+          directResultsMap[r.heat_assignment_id] = r;
+        });
+      }
+    }
+
     const flat: HeatGroup[] = (data || []).flatMap((h: RawHeat) =>
-      (h.heat_assignments || []).map((a: RawAssignment) => ({
-        id: h.id,
-        heat_number: h.heat_number,
-        lane_number: a.lane_number,
-        registration_id: a.registrations?.id ?? null,
-        seed_time_ms: a.registrations?.seed_time_ms ?? null,
-        athlete_name: a.registrations?.athletes?.full_name ?? null,
-        athlete_number: a.registrations?.athletes?.athlete_number ?? null,
-        school_name: a.registrations?.athletes?.schools?.name ?? null,
-        result_id: a.results?.[0]?.id ?? null,
-        time_ms: a.results?.[0]?.time_ms ?? null,
-        status: a.results?.[0]?.status ?? null,
-      }))
+      (h.heat_assignments || []).map((a: RawAssignment) => {
+        const direct = directResultsMap[a.id];
+        return {
+          id: h.id,
+          heat_number: h.heat_number,
+          lane_number: a.lane_number,
+          registration_id: a.registrations?.id ?? null,
+          seed_time_ms: a.registrations?.seed_time_ms ?? null,
+          athlete_name: a.registrations?.athletes?.full_name ?? null,
+          athlete_number: a.registrations?.athletes?.athlete_number ?? null,
+          school_name: a.registrations?.athletes?.schools?.name ?? null,
+          result_id: direct?.id ?? a.results?.[0]?.id ?? null,
+          time_ms: direct?.time_ms ?? a.results?.[0]?.time_ms ?? null,
+          status: direct?.status ?? a.results?.[0]?.status ?? null,
+        };
+      })
     );
     setHeats(flat);
   }, [selectedCompEventId, supabase]);

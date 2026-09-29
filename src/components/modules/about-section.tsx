@@ -25,6 +25,11 @@ export function AboutSection({
   about?: ShowcaseItem;
   pillars?: ShowcaseItem[];
 }) {
+  const photoSrc =
+    about.imageUrl && about.imageUrl !== '/brand/team-about.png'
+      ? about.imageUrl
+      : '/slider/tentang-kami.jpg';
+
   return (
     <div className="space-y-16">
       {/* 1. Tentang Kami Card */}
@@ -35,7 +40,13 @@ export function AboutSection({
             <div className="relative aspect-[16/10] overflow-hidden rounded-xl shadow-md">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={about.imageUrl || '/brand/team-about.png'}
+                src={photoSrc}
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (!target.src.includes('tentang%20kami.jpg') && !target.src.includes('tentang-kami.jpg')) {
+                    target.src = '/slider/tentang kami.jpg';
+                  }
+                }}
                 alt={about.title || 'Tentang Rajendra Swimming Organizer'}
                 className="h-full w-full object-cover"
               />
@@ -53,7 +64,7 @@ export function AboutSection({
             </p>
             <p className="text-xs sm:text-sm leading-relaxed text-slate-600">
               {about.value ||
-                'Dengan perpaduan antara manajemen event yang solid, pemanfaatan teknologi, dan kecintaan pada olahraga renang, kami memastikan setiap event berjalan lancar, akurat, dan berkesan bagi atlet, official, maupun penonton.'}
+                'Dengan perpaduan antara manajemen acara yang solid, pemanfaatan teknologi, dan kecintaan pada olahraga renang, kami memastikan setiap event berjalan lancar, akurat, dan berkesan bagi atlet, official tim, maupun penonton.'}
             </p>
           </div>
         </div>

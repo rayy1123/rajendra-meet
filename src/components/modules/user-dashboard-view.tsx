@@ -21,6 +21,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { formatKuDisplay } from '@/lib/age-category';
 
 export interface UserAthleteItem {
   id: string;
@@ -95,6 +96,24 @@ export function UserDashboardView({
       (r) => r.paymentStatus === 'pending' || r.paymentStatus === 'unpaid'
     ).length;
   }, [registrations]);
+
+  const primarySchoolName = useMemo(() => {
+    const counts = new Map<string, number>();
+    athletes.forEach((a) => {
+      if (a.schoolName) {
+        counts.set(a.schoolName, (counts.get(a.schoolName) || 0) + 1);
+      }
+    });
+    let max = 0;
+    let topName: string | null = null;
+    counts.forEach((cnt, name) => {
+      if (cnt > max) {
+        max = cnt;
+        topName = name;
+      }
+    });
+    return topName;
+  }, [athletes]);
 
   const totalBillAmount = useMemo(() => {
     return registrations.reduce((acc, r) => acc + (r.amountDue || 0), 0);
@@ -562,8 +581,18 @@ export function UserDashboardView({
                             {ath.gender === 'female' ? 'PI' : 'PA'}
                           </span>
                         </div>
-                        <p className="text-[10px] text-slate-500 mt-0.5 truncate">
-                          ID: <span className="font-mono font-bold text-slate-700">{ath.athleteNumber}</span> • KU: <span className="font-bold text-slate-700">{ath.ageGroup}</span> • {ath.schoolName}
+                        <p className="text-[10px] text-slate-500 mt-0.5 truncate flex items-center gap-1 flex-wrap">
+                          <span>ID: <span className="font-mono font-bold text-slate-700">{ath.athleteNumber}</span></span>
+                          <span>•</span>
+                          <span className="font-bold text-slate-700">{formatKuDisplay(ath.ageGroup)}</span>
+                          <span>•</span>
+                          {primarySchoolName && ath.schoolName && ath.schoolName !== primarySchoolName ? (
+                            <span className="font-black text-rose-800 bg-rose-100 px-1.5 py-0.2 rounded border border-rose-300 text-[9.5px]">
+                              ⚠️ Beda Klub: {ath.schoolName}
+                            </span>
+                          ) : (
+                            <span>{ath.schoolName}</span>
+                          )}
                         </p>
                       </div>
                     </div>

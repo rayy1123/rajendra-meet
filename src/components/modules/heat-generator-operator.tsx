@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { formatMsToTime } from '@/lib/utils';
+import { formatCompEventSubtitle } from '@/lib/age-category';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -221,7 +222,7 @@ export function HeatGeneratorOperator({
               <SelectContent>
                 {compEvents.map((ce) => (
                   <SelectItem key={ce.id} value={ce.id}>
-                    {ce.name} - {ce.grade_level} ({ce.gender === 'female' ? 'Putri' : 'Putra'})
+                    {formatCompEventSubtitle(ce.name, ce.grade_level)} ({ce.gender === 'female' ? 'Putri' : 'Putra'})
                   </SelectItem>
                 ))}
               </SelectContent>

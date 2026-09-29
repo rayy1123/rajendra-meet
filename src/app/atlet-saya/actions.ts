@@ -73,6 +73,11 @@ export async function saveAthlete(formData: FormData): Promise<AthleteFormState>
   if (result.error) return { ok: false, error: result.error.message };
   revalidatePath('/atlet-saya');
   revalidatePath('/data-saya');
+  revalidatePath('/dashboard-viewer');
+  revalidatePath('/profile');
+  revalidatePath('/daftar-lomba');
+  revalidatePath('/pendaftaran-saya');
+  revalidatePath('/athletes');
   return { ok: true };
 }
 

@@ -59,17 +59,27 @@ export default async function HeatLanePage({
           .order('lane_number', { ascending: true });
 
         const regIds = (assigns ?? []).map((a: any) => a.registration_id).filter(Boolean);
-        const { data: regRows } = await supabase
-          .from('registrations')
-          .select('id, athlete_id')
-          .in('id', regIds);
+        let regRows: any[] = [];
+        if (regIds.length > 0) {
+          const { data } = await supabase
+            .from('registrations')
+            .select('id, athlete_id')
+            .in('id', regIds);
+          regRows = data ?? [];
+        }
+
         const athleteOfReg: Record<string, string> = {};
-        (regRows ?? []).forEach((r: any) => (athleteOfReg[r.id] = r.athlete_id));
-        const athIds = Object.values(athleteOfReg);
-        const { data: athRows } = await supabase
-          .from('athletes')
-          .select('id, full_name, school_id')
-          .in('id', athIds);
+        regRows.forEach((r: any) => (athleteOfReg[r.id] = r.athlete_id));
+        const athIds = Array.from(new Set(Object.values(athleteOfReg).filter(Boolean)));
+
+        let athRows: any[] = [];
+        if (athIds.length > 0) {
+          const { data } = await supabase
+            .from('athletes')
+            .select('id, full_name, school_id')
+            .in('id', athIds);
+          athRows = data ?? [];
+        }
         const schoolName: Record<string, string> = {};
         const athName: Record<string, string> = {};
         (athRows ?? []).forEach((a: any) => {

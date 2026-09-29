@@ -1,73 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createClient } from '@/lib/supabase/server';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
-import { EmptyState } from '@/components/ui/empty-state';
-import { Wrench, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Activity } from 'lucide-react';
+import { EquipmentTelemetryManager } from '@/components/modules/equipment-telemetry-manager';
+import { getEquipmentServer } from '@/lib/data/equipment-server';
 
 export const dynamic = 'force-dynamic';
 
-const STATUS_STYLE: Record<string, string> = {
-  scheduled: 'bg-[var(--m-aqua-soft)] text-[var(--m-aqua-ink)]',
-  in_progress: 'bg-amber-100 text-amber-700',
-  done: 'bg-emerald-100 text-emerald-700',
-  overdue: 'bg-red-100 text-red-700',
-};
-
 export default async function EquipmentPage() {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from('equipment_maintenance')
-    .select('*')
-    .order('due_date', { ascending: true });
-  const items = data ?? [];
+  const items = await getEquipmentServer();
 
   return (
-    <>
-      <div className="mx-auto max-w-7xl space-y-6 p-6">
-        <Breadcrumb items={[{ label: 'Dasbor', href: '/dashboard' }, { label: 'Peralatan' }]} className="mb-2" />
-        <PageHeader
-          title="Pemeliharaan Peralatan"
-          description="Lacak kesiapan teknis peralatan: touchpad, starting block, konsol waktu, dan kalibrasinya."
-        />
-        {items.length === 0 ? (
-          <EmptyState
-            icon={<Wrench className="h-6 w-6" />}
-            title="Belum Ada Data Peralatan"
-            description="Data peralatan arena belum tersedia."
-          />
-        ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {items.map((it: any) => (
-              <div key={it.id} className="glass-panel p-4">
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-[var(--m-ink)]">{it.name}</span>
-                  <span
-                    className={
-                      'rounded-full px-2 py-0.5 text-xs font-semibold ' +
-                      (STATUS_STYLE[it.status] ?? 'bg-[var(--m-soft)] text-[var(--m-muted)]')
-                    }
-                  >
-                    {it.status}
-                  </span>
-                </div>
-                <p className="mt-1 text-sm text-[var(--m-muted)]">{it.location}</p>
-                <div className="mt-3 flex items-center gap-2 text-xs text-[var(--m-muted)]">
-                  {it.status === 'overdue' ? (
-                    <AlertTriangle className="h-4 w-4 text-red-500" />
-                  ) : (
-                    <CheckCircle2 className="h-4 w-4 text-[var(--m-aqua)]" />
-                  )}
-                  Jatuh tempo: {it.due_date ?? '—'}
-                </div>
-                {it.technician && (
-                  <p className="mt-1 text-xs text-[var(--m-muted)]">Teknisi: {it.technician}</p>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </>
+    <div className="mx-auto max-w-7xl space-y-6 p-6">
+      <Breadcrumb items={[{ label: 'Dasbor', href: '/dashboard' }, { label: 'Peralatan & Telemetri Arena' }]} className="mb-2" />
+      <PageHeader
+        title="Status Peralatan & Telemetri Arena"
+        description="Pantau telemetri real-time Swiss Timing Omega Console, sensor touchpad 8 lintasan, papan skor digital LED, dan kalibrasi logistik kolam."
+        icon={<Activity className="h-6 w-6" />}
+      />
+
+      <EquipmentTelemetryManager maintenanceItems={items} />
+    </div>
   );
 }

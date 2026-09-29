@@ -35,12 +35,14 @@ export function ProfileMenu() {
 
   const handleLogout = async () => {
     try {
+      try {
+        await fetch('/api/auth/session', { method: 'DELETE' });
+      } catch {}
       const supabase = createClient();
       await supabase.auth.signOut();
     } finally {
       setOpen(false);
-      router.push('/login');
-      router.refresh();
+      window.location.assign('/login');
     }
   };
 

@@ -58,7 +58,7 @@ export default async function AthleteProfilePage({
     )
     .eq('id', id)
     .eq('owner_id', user.id)
-    .single();
+    .maybeSingle();
 
   if (!athlete) notFound();
 

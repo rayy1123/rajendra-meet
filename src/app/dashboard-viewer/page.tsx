@@ -8,6 +8,7 @@ import {
   type ActiveChampionshipSpotlight,
 } from '@/components/modules/user-dashboard-view';
 import { getEventSettings } from '@/lib/data/event-settings-server';
+import { getKuCode } from '@/lib/age-category';
 
 export const dynamic = 'force-dynamic';
 
@@ -143,7 +144,7 @@ export default async function DashboardViewerPage() {
       athleteNumber: a.athlete_number || '#ATH-001',
       gender: a.gender || 'male',
       birthDate: a.birth_date || '',
-      ageGroup: a.age_group || a.grade_level || 'Umum',
+      ageGroup: a.birth_date ? getKuCode(a.birth_date) : (a.age_group || a.grade_level || 'Umum'),
       gradeLevel: a.grade_level || null,
       schoolName: rawSchool?.name || 'Klub Mandiri',
       registrationCount: regCountByAthlete.get(a.id) || 0,

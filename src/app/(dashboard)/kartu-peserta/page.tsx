@@ -8,6 +8,7 @@ import {
   type ParticipantCardData,
   type ParticipantCardRaceItem,
 } from '@/components/modules/participant-card-manager';
+import { getKuCode, formatKuDisplay } from '@/lib/age-category';
 
 export const dynamic = 'force-dynamic';
 
@@ -172,6 +173,10 @@ export default async function KartuPesertaPage({
 
     const isVerified = payInfo?.status === 'verified';
 
+    const athleteKuStr = formatKuDisplay(
+      rawAth.birth_date ? getKuCode(rawAth.birth_date) : rawAth.age_group
+    );
+
     const raceItem: ParticipantCardRaceItem = {
       registrationId: row.id,
       orderNo: rawComp?.order_no || null,
@@ -179,7 +184,7 @@ export default async function KartuPesertaPage({
       stroke: rawComp?.stroke || 'freestyle',
       distanceMeters: rawComp?.distance_meters || 50,
       gender: rawComp?.gender || rawAth.gender || 'male',
-      ageGroup: rawAth.age_group || 'Umum',
+      ageGroup: athleteKuStr,
       seedTimeMs: row.seed_time_ms,
       paymentStatus: payInfo?.status || 'pending',
       isVerified,
@@ -196,7 +201,7 @@ export default async function KartuPesertaPage({
           fullName: rawAth.full_name || 'Nama Atlet',
           gender: rawAth.gender || 'male',
           birthDate: rawAth.birth_date || '',
-          ageGroup: rawAth.age_group || 'Umum',
+          ageGroup: athleteKuStr,
           schoolName: rawSchool?.name || 'Klub / Kontingen Mandiri',
         },
         event: {

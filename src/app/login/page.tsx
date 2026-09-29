@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import {
   Eye,
@@ -32,6 +32,17 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [activeRoleBadge, setActiveRoleBadge] = useState<'all' | 'admin' | 'coach' | 'athlete'>('all');
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('error') === 'concurrent_session' || params.get('reason') === 'concurrent_session') {
+        setErrorMsg(
+          'Sesi Anda telah dihentikan karena akun ini baru saja digunakan untuk login di perangkat atau jendela lain. Satu akun hanya dapat aktif di satu perangkat secara bersamaan.'
+        );
+      }
+    }
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -48,18 +59,56 @@ export default function LoginPage() {
       }
 
       const supabase = createClient();
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: loginIdentifier.includes('@') ? loginIdentifier : `${loginIdentifier}@scms.local`,
-        password: loginPassword,
-      });
 
-      if (error || !data.session) {
+      // Susun kandidat email jika input berupa username (tanpa @)
+      const candidateEmails = loginIdentifier.includes('@')
+        ? [loginIdentifier]
+        : Array.from(
+            new Set([
+              `${loginIdentifier}@scms.local`,
+              `${loginIdentifier}@rajendra.id`,
+              loginIdentifier.toLowerCase() === 'admin' ? 'admin@rajendra.id' : '',
+              loginIdentifier.toLowerCase() === 'panitia' ? 'panitia@rajendra.id' : '',
+              `${loginIdentifier}@gmail.com`,
+            ].filter(Boolean))
+          );
+
+      let sessionData: any = null;
+      let lastAuthError: any = null;
+
+      for (const emailCandidate of candidateEmails) {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: emailCandidate,
+          password: loginPassword,
+        });
+
+        if (!error && data?.session) {
+          sessionData = data;
+          break;
+        } else {
+          lastAuthError = error;
+        }
+      }
+
+      if (!sessionData || !sessionData.session) {
         setErrorMsg('Login gagal. Periksa kembali email/username dan kata sandi Anda.');
         setLoading(false);
         return;
       }
 
-      const userId = data.user.id;
+      const userId = sessionData.user.id;
+
+      // Daftarkan sesi aktif tunggal untuk membatasi konkurensi login bersamaan
+      try {
+        await fetch('/api/auth/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId }),
+        });
+      } catch (sessErr) {
+        console.warn('Session registration notice:', sessErr);
+      }
+
       const { data: profile } = await supabase
         .from('profiles')
         .select('role, username')
@@ -68,8 +117,8 @@ export default function LoginPage() {
 
       const role =
         (profile as { role?: string } | null)?.role ||
-        (data.user.user_metadata?.role as string) ||
-        (data.user.app_metadata?.role as string);
+        (sessionData.user.user_metadata?.role as string) ||
+        (sessionData.user.app_metadata?.role as string);
 
       const ADMIN_ROLES = [
         'super_admin',
@@ -79,9 +128,28 @@ export default function LoginPage() {
         'admin_kejuaraan',
         'admin_keuangan',
       ];
-      const target = role && ADMIN_ROLES.includes(role) ? '/dashboard' : '/dashboard-viewer';
+      const isAdminRole = role && ADMIN_ROLES.includes(role);
 
-      toast.success('Login berhasil! Mengalihkan ke sistem...');
+      // Tentukan target pengalihan sesuai wewenang dan preferensi peran login
+      let target = '/dashboard-viewer';
+      if (isAdminRole) {
+        target = '/dashboard';
+      } else if (activeRoleBadge === 'coach') {
+        target = '/atlet-saya';
+      } else if (activeRoleBadge === 'athlete') {
+        target = '/data-saya';
+      }
+
+      toast.success(
+        isAdminRole
+          ? 'Login berhasil! Mengalihkan ke Dasbor Panitia...'
+          : activeRoleBadge === 'coach'
+          ? 'Login berhasil! Mengalihkan ke Dasbor Pelatih / Roster Klub...'
+          : activeRoleBadge === 'athlete'
+          ? 'Login berhasil! Mengalihkan ke Data Atlet Pribadi...'
+          : 'Login berhasil! Mengalihkan ke sistem...'
+      );
+
       setTimeout(() => {
         window.location.assign(target);
       }, 250);
@@ -148,22 +216,53 @@ export default function LoginPage() {
         </div>
 
         {/* Dynamic Role Capability Box */}
-        <div className="p-2.5 rounded-xl border border-slate-200 bg-slate-50/70 text-[11px] text-slate-600 leading-snug">
+        <div className="p-2.5 rounded-xl border border-slate-200 bg-slate-50/70 text-[11px] text-slate-600 leading-snug space-y-1">
           {activeRoleBadge === 'admin' ? (
-            <p>
-              <b className="text-blue-900 font-bold">Wewenang Panitia / Juri:</b> Manajemen kejuaraan penuh, seeding otomatis, buku acara A4, rekonsiliasi kas, dan otoritas penerbitan sertifikat resmi.
-            </p>
+            <>
+              <p>
+                <b className="text-blue-900 font-bold">Wewenang Panitia / Juri:</b> Manajemen kejuaraan penuh, seeding otomatis, buku acara A4, rekonsiliasi kas, dan otoritas penerbitan sertifikat resmi.
+              </p>
+              <div className="flex items-center justify-between text-[11px] pt-1 text-slate-500 border-t border-slate-200/60 mt-1">
+                <span>Butuh akses panitia pelaksana?</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUsername('admin@rajendra.id');
+                    setPassword('Panitia#2026');
+                  }}
+                  className="text-blue-600 font-bold hover:underline cursor-pointer"
+                >
+                  Gunakan Akun Panitia (admin@rajendra.id)
+                </button>
+              </div>
+            </>
           ) : activeRoleBadge === 'coach' ? (
-            <p>
-              <b className="text-indigo-900 font-bold">Wewenang Pelatih / Klub:</b> Roster banyak atlet tim (Data Atlet Saya), pendaftaran massal nomor lomba, rekap tagihan klub, &amp; cetak ID Pass kontingen.
-            </p>
+            <>
+              <p>
+                <b className="text-indigo-900 font-bold">Wewenang Pelatih / Klub:</b> Roster banyak atlet tim (Data Atlet Saya), pendaftaran massal nomor lomba, rekap tagihan klub, &amp; cetak ID Pass kontingen.
+              </p>
+              <div className="flex items-center justify-between text-[11px] pt-1 text-slate-500 border-t border-slate-200/60 mt-1">
+                <span>Belum memiliki akun kontingen tim?</span>
+                <Link href="/register" className="text-indigo-600 font-bold hover:underline cursor-pointer">
+                  Daftar Akun Klub Baru &rarr;
+                </Link>
+              </div>
+            </>
           ) : activeRoleBadge === 'athlete' ? (
-            <p>
-              <b className="text-cyan-900 font-bold">Wewenang Atlet / Mandiri:</b> Kelola profil perenang pribadi (Data Saya), pemilihan nomor lomba mandiri, pantau live scoreboard, &amp; unduh sertifikat juara resmi.
-            </p>
+            <>
+              <p>
+                <b className="text-cyan-900 font-bold">Wewenang Atlet / Mandiri:</b> Kelola profil perenang pribadi (Data Saya), pemilihan nomor lomba mandiri, pantau live scoreboard, &amp; unduh sertifikat juara resmi.
+              </p>
+              <div className="flex items-center justify-between text-[11px] pt-1 text-slate-500 border-t border-slate-200/60 mt-1">
+                <span>Belum memiliki akun peserta?</span>
+                <Link href="/register" className="text-cyan-600 font-bold hover:underline cursor-pointer">
+                  Daftar Akun Mandiri &rarr;
+                </Link>
+              </div>
+            </>
           ) : (
             <p className="text-slate-500">
-              Pilih peran Anda di atas untuk melihat ringkasan fitur, atau langsung masukkan kredensial akun.
+              Pilih peran Anda di atas untuk menyesuaikan formulir login atau langsung masukkan kredensial akun.
             </p>
           )}
         </div>
@@ -185,14 +284,38 @@ export default function LoginPage() {
         {/* Email or Username Field */}
         <div className="space-y-1.5">
           <label className="text-xs font-bold text-slate-900 flex items-center justify-between">
-            <span>Email atau Username</span>
-            <span className="text-[10px] text-slate-400 font-normal">Contoh: admin atau nama@email.com</span>
+            <span>
+              {activeRoleBadge === 'admin'
+                ? 'Email / Username Panitia'
+                : activeRoleBadge === 'coach'
+                ? 'Email / Username Klub & Pelatih'
+                : activeRoleBadge === 'athlete'
+                ? 'Email / Username Atlet / Wali'
+                : 'Email atau Username'}
+            </span>
+            <span className="text-[10px] text-slate-400 font-normal">
+              {activeRoleBadge === 'admin'
+                ? 'admin atau panitia@rajendra.id'
+                : activeRoleBadge === 'coach'
+                ? 'pelatih@klub.id atau username'
+                : activeRoleBadge === 'athlete'
+                ? 'atlet@email.com atau username'
+                : 'Contoh: admin atau nama@email.com'}
+            </span>
           </label>
           <div className="relative">
             <User className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
             <Input
               type="text"
-              placeholder="Masukkan username atau email resmi"
+              placeholder={
+                activeRoleBadge === 'admin'
+                  ? 'Masukkan username panitia atau admin@rajendra.id'
+                  : activeRoleBadge === 'coach'
+                  ? 'Masukkan username klub atau email pelatih'
+                  : activeRoleBadge === 'athlete'
+                  ? 'Masukkan username atlet atau email resmi'
+                  : 'Masukkan username atau email resmi'
+              }
               className="h-11 rounded-xl bg-white pl-10 text-sm font-medium text-slate-900 border-slate-300 focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-600 shadow-2xs"
               value={username}
               onChange={(e) => setUsername(e.target.value)}

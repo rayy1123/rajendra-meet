@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Plus, Pencil, Trash2, Copy, Search, X, Download, ClipboardList, IdCard, CalendarDays, Users } from 'lucide-react';
+import { Plus, Pencil, Trash2, Copy, Search, X, Download, ClipboardList, IdCard, CalendarDays, Users, AlertTriangle } from 'lucide-react';
 import {
   deleteAthlete,
   bulkDeleteAthletes,
@@ -97,6 +97,26 @@ export function AthleteSayaManager({
     }
     return m;
   }, [registrations]);
+
+  const { primarySchoolId, hasMultipleClubs } = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const a of athletes) {
+      const key = a.school_id || a.schools?.name || 'mandiri';
+      counts.set(key, (counts.get(key) || 0) + 1);
+    }
+    let max = 0;
+    let topId: string | null = null;
+    counts.forEach((cnt, id) => {
+      if (cnt > max) {
+        max = cnt;
+        topId = id;
+      }
+    });
+    return {
+      primarySchoolId: topId,
+      hasMultipleClubs: counts.size > 1,
+    };
+  }, [athletes]);
 
   const filtered = useMemo(() => {
     let list = athletes.filter((a) => {
@@ -250,6 +270,22 @@ export function AthleteSayaManager({
       )}
 
       {/* Toolbar */}
+      {hasMultipleClubs && (
+        <div className="rounded-2xl border border-rose-300 bg-rose-50/90 p-4 shadow-xs text-rose-950 flex items-start gap-3">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-rose-600 text-white font-black text-xs shadow-2xs mt-0.5">
+            <AlertTriangle className="h-4 w-4" />
+          </span>
+          <div className="space-y-0.5">
+            <h4 className="font-heading font-black text-xs sm:text-sm text-rose-950">
+              ⚠️ Deteksi Klub Berbeda pada Roster Atlet
+            </h4>
+            <p className="text-xs text-rose-800 leading-relaxed">
+              Terdapat atlet yang terdaftar di bawah kontingen/klub yang berbeda dalam akun Anda. Atlet dengan klub berbeda diberi penanda peringatan merah <b>Beda Klub</b> untuk memudahkan verifikasi panitia.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -426,7 +462,15 @@ export function AthleteSayaManager({
                           <td className="px-3 py-3">{a.gender === 'female' ? 'Putri' : 'Putra'}</td>
                           <td className="px-3 py-3">{a.birth_date}</td>
                           <td className="px-3 py-3">{age(a.birth_date)}</td>
-                          <td className="px-3 py-3">{a.schools?.name ?? '-'}</td>
+                          <td className="px-3 py-3">
+                            {primarySchoolId && (a.school_id || a.schools?.name || 'mandiri') !== primarySchoolId ? (
+                              <span className="inline-flex items-center gap-1 rounded-md bg-rose-100 text-rose-900 px-2 py-0.5 text-xs font-bold border border-rose-300" title="Klub berbeda dari kontingen utama akun">
+                                ⚠️ {a.schools?.name ?? 'Klub Berbeda'}
+                              </span>
+                            ) : (
+                              <span>{a.schools?.name ?? '-'}</span>
+                            )}
+                          </td>
                           <td className="px-3 py-3 text-right">
                             <div className="flex justify-end gap-1.5">
                               <Link
