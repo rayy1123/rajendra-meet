@@ -22,7 +22,7 @@ export default async function PartisipasiDetailPage({
     .from('events')
     .select('*')
     .eq('id', id)
-    .single();
+    .maybeSingle();
 
   if (!event) {
     notFound();

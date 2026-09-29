@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Check, ChevronLeft, ChevronRight, Upload, CreditCard } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Upload, CreditCard, School, Plus, Building } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,8 @@ import {
   calculateAgeCategory,
   STROKE_LABELS,
   formatRupiah,
+  isEventEligibleForAthlete,
+  formatCompEventSubtitle,
 } from "@/lib/age-category";
 import { createAthleteAndRegisterAction } from "@/app/daftar-lomba/actions";
 
@@ -31,6 +33,7 @@ export interface AthleteDTO {
   gender: "male" | "female";
   grade_level: string;
   school_id: string | null;
+  school_name?: string | null;
 }
 
 const STEPS = ["Data Atlet", "Pilih Nomor Lomba", "Ringkasan & Bayar"];
@@ -55,6 +58,7 @@ export interface RegistrationWizardProps {
   };
   competitionEvents: CompEventDTO[];
   existingAthletes: AthleteDTO[];
+  schools?: { id: string; name: string }[];
   isAdmin?: boolean;
 }
 
@@ -63,6 +67,7 @@ export function RegistrationWizard({
   event,
   competitionEvents,
   existingAthletes,
+  schools = [],
   isAdmin = false,
 }: RegistrationWizardProps) {
   const router = useRouter();
@@ -91,7 +96,24 @@ export function RegistrationWizard({
   const [gender, setGender] = useState<"male" | "female">("male");
   const [gradeLevel, setGradeLevel] = useState("");
   const [className, setClassName] = useState("");
+  const [schoolId, setSchoolId] = useState("");
   const [schoolName, setSchoolName] = useState("");
+  const [isCustomSchool, setIsCustomSchool] = useState(false);
+  const [schoolsList, setSchoolsList] = useState<{ id: string; name: string }[]>(schools || []);
+
+  useEffect(() => {
+    if (schools && schools.length > 0) {
+      setSchoolsList(schools);
+    } else {
+      fetch("/api/schools")
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data)) setSchoolsList(data);
+          else if (data?.data && Array.isArray(data.data)) setSchoolsList(data.data);
+        })
+        .catch((err) => console.warn("Fetch schools in wizard error:", err));
+    }
+  }, [schools]);
 
   const [selectedCats, setSelectedCats] = useState<string[]>([]);
   const [proof, setProof] = useState("");
@@ -99,70 +121,47 @@ export function RegistrationWizard({
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const primarySchoolId = useMemo(() => {
+    const counts = new Map<string, number>();
+    existingAthletes.forEach((a) => {
+      if (a.school_id) {
+        counts.set(a.school_id, (counts.get(a.school_id) || 0) + 1);
+      }
+    });
+    let max = 0;
+    let topId: string | null = null;
+    counts.forEach((cnt, id) => {
+      if (cnt > max) {
+        max = cnt;
+        topId = id;
+      }
+    });
+    return topId;
+  }, [existingAthletes]);
+
   const chosen = mode === "existing"
     ? existingAthletes.find((a) => a.id === athleteId) ?? null
     : { full_name: fullName, birth_date: birthDate, gender, grade_level: gradeLevel };
 
   const athleteKU = chosen && chosen.birth_date ? calculateAgeCategory(new Date(chosen.birth_date)) : "";
 
-  const normalizeGender = (g: string | undefined): 'male' | 'female' => {
-    if (!g) return 'male';
-    const s = g.toLowerCase();
-    if (s.includes('fem') || s.includes('putri') || s.includes('perempuan') || s === 'f') return 'female';
-    return 'male';
-  };
-
+  // Saring ketat nomor lomba: jika atlet KU 1, HANYA tampilkan nomor lomba yang berkualifikasi KU 1 (dan gender cocok).
+  // Seluruh nomor lomba KU lain (KU 2-5, Senior, SD, SMP, dll.) otomatis dihilangkan.
   const eligibleCats = competitionEvents.filter((c) => {
     if (!chosen) return false;
-
-    // Cek Gender yang robust (menangani male/putra/laki-laki & female/putri/perempuan)
-    const athleteGen = normalizeGender(chosen.gender);
-    const eventGen = normalizeGender(c.gender);
-    if (eventGen !== athleteGen) return false;
-
-    // Saring sangat ketat berdasarkan Kelompok Umur (KU)
-    const ageGroupStr = `${c.age_group || ''} ${c.grade_level || ''} ${c.name || ''}`.toLowerCase();
-
-    if (athleteKU.includes('ku senior')) {
-      return ageGroupStr.includes('senior') || ageGroupStr.includes('umum') || ageGroupStr.includes('19');
-    }
-    if (athleteKU.includes('ku i')) {
-      // KU I (SMA) -> HANYA izinkan yang ada indikator KU I, KU 1, atau SMA. Tolak tegas PAUD, TK, SD, SMP, Senior, KU II-V.
-      const isKu1 = ageGroupStr.includes('ku i') || ageGroupStr.includes('ku 1') || ageGroupStr.includes('sma');
-      const isOther = ageGroupStr.includes('smp') || ageGroupStr.includes('sd') || ageGroupStr.includes('paud') || ageGroupStr.includes('tk') || ageGroupStr.includes('senior') || ageGroupStr.includes('ku ii') || ageGroupStr.includes('ku 2') || ageGroupStr.includes('ku iii') || ageGroupStr.includes('ku 3') || ageGroupStr.includes('ku iv') || ageGroupStr.includes('ku 4') || ageGroupStr.includes('ku v') || ageGroupStr.includes('ku 5');
-      return isKu1 && !isOther;
-    }
-    if (athleteKU.includes('ku ii')) {
-      const isKu2 = ageGroupStr.includes('ku ii') || ageGroupStr.includes('ku 2') || ageGroupStr.includes('smp');
-      const isOther = ageGroupStr.includes('sma') || ageGroupStr.includes('sd') || ageGroupStr.includes('paud') || ageGroupStr.includes('tk') || ageGroupStr.includes('senior') || ageGroupStr.includes('ku i') || ageGroupStr.includes('ku 1') || ageGroupStr.includes('ku iii') || ageGroupStr.includes('ku 3');
-      return isKu2 && !isOther;
-    }
-    if (athleteKU.includes('ku iii')) {
-      const isKu3 = ageGroupStr.includes('ku iii') || ageGroupStr.includes('ku 3');
-      const isOther = ageGroupStr.includes('sma') || ageGroupStr.includes('smp') || ageGroupStr.includes('senior') || ageGroupStr.includes('ku i') || ageGroupStr.includes('ku ii') || ageGroupStr.includes('ku iv');
-      return isKu3 && !isOther;
-    }
-    if (athleteKU.includes('ku iv')) {
-      const isKu4 = ageGroupStr.includes('ku iv') || ageGroupStr.includes('ku 4');
-      const isOther = ageGroupStr.includes('sma') || ageGroupStr.includes('smp') || ageGroupStr.includes('senior') || ageGroupStr.includes('ku i') || ageGroupStr.includes('ku ii') || ageGroupStr.includes('ku iii');
-      return isKu4 && !isOther;
-    }
-    if (athleteKU.includes('ku v')) {
-      const isKu5 = ageGroupStr.includes('ku v') || ageGroupStr.includes('ku 5') || ageGroupStr.includes('paud') || ageGroupStr.includes('tk') || ageGroupStr.includes('sd');
-      const isOther = ageGroupStr.includes('sma') || ageGroupStr.includes('smp') || ageGroupStr.includes('senior') || ageGroupStr.includes('ku i') || ageGroupStr.includes('ku ii');
-      return isKu5 && !isOther;
-    }
-
-    return true;
+    return isEventEligibleForAthlete(chosen, c);
   });
 
   const toggleCat = (cid: string) =>
     setSelectedCats((prev) => (prev.includes(cid) ? prev.filter((x) => x !== cid) : [...prev, cid]));
 
+  // Pastikan kategori yang dipilih tetap valid (tidak ada kebocoran nomor yang tidak eligible)
+  const validSelectedCats = selectedCats.filter((cid) => eligibleCats.some((c) => c.id === cid));
+
   const goNext = () => {
     if (step === 0 && mode === "existing" && !athleteId) return;
     if (step === 0 && mode === "new" && (!fullName || !birthDate)) return;
-    if (step === 1 && selectedCats.length === 0) return;
+    if (step === 1 && validSelectedCats.length === 0) return;
     setStep((s) => Math.min(STEPS.length - 1, s + 1));
   };
   const goBack = () => setStep((s) => Math.max(0, s - 1));
@@ -173,14 +172,14 @@ export function RegistrationWizard({
   const pkgPrice = Number(event?.flat_package_price) || 275000;
 
   let baseAmount = 0;
-  if (calcMode === 'flat_package' && selectedCats.length > 0) {
-    if (selectedCats.length <= pkgLimit) {
+  if (calcMode === 'flat_package' && validSelectedCats.length > 0) {
+    if (validSelectedCats.length <= pkgLimit) {
       baseAmount = pkgPrice;
     } else {
-      baseAmount = pkgPrice + (selectedCats.length - pkgLimit) * feePerEvent;
+      baseAmount = pkgPrice + (validSelectedCats.length - pkgLimit) * feePerEvent;
     }
   } else {
-    baseAmount = feePerEvent * selectedCats.length;
+    baseAmount = feePerEvent * validSelectedCats.length;
   }
 
   const totalAmount = baseAmount + uniqueCode;
@@ -192,9 +191,11 @@ export function RegistrationWizard({
     fd.set("eventId", eventId);
     fd.set("proofUrl", proof);
     fd.set("amountDue", String(totalAmount));
-    selectedCats.forEach((c) => fd.append("competitionEventId", c));
+    validSelectedCats.forEach((c) => fd.append("competitionEventId", c));
     if (mode === "existing" && athleteId) {
       fd.set("athleteId", athleteId);
+      if (schoolId) fd.set("schoolId", schoolId);
+      if (schoolName) fd.set("schoolName", schoolName);
       const res = await createAthleteAndRegisterAction(fd);
       setSubmitting(false);
       if (res.ok) setDone(true);
@@ -205,6 +206,7 @@ export function RegistrationWizard({
       fd.set("gender", gender);
       fd.set("gradeLevel", gradeLevel);
       fd.set("className", className);
+      fd.set("schoolId", schoolId);
       fd.set("schoolName", schoolName);
       const res = await createAthleteAndRegisterAction(fd);
       setSubmitting(false);
@@ -294,11 +296,23 @@ export function RegistrationWizard({
                 const ku = calculateAgeCategory(new Date(a.birth_date));
                 const sel = a.id === athleteId;
                 return (
-                  <button type="button" key={a.id} onClick={() => setAthleteId(a.id)}
+                  <button type="button" key={a.id} onClick={() => {
+                    if (a.id !== athleteId) setSelectedCats([]);
+                    setAthleteId(a.id);
+                  }}
                     className={`flex w-full items-center justify-between rounded-xl border p-4 text-left transition-colors ${sel ? "border-[var(--m-aqua)] bg-[var(--m-aqua-soft)]" : "border-[var(--m-border)] hover:border-[var(--m-aqua)]"}`}>
                     <div>
-                      <div className="font-semibold text-[var(--m-ink)]">{a.full_name}</div>
-                      <div className="text-xs text-[var(--m-muted)]">{ku}</div>
+                      <div className="font-semibold text-[var(--m-ink)] flex items-center gap-2">
+                        <span>{a.full_name}</span>
+                        {primarySchoolId && a.school_id && a.school_id !== primarySchoolId && (
+                          <span className="text-[10px] font-bold text-rose-800 bg-rose-100 px-2 py-0.5 rounded border border-rose-300">
+                            ⚠️ Beda Klub ({a.school_name || 'Lainnya'})
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-[var(--m-muted)]">
+                        {ku}{a.school_name ? ` · ${a.school_name}` : ""}
+                      </div>
                     </div>
                     <span className={`h-5 w-5 rounded-full border-2 ${sel ? "border-[var(--m-aqua)] bg-[var(--m-aqua)]" : "border-[var(--m-border)]"}`} />
                   </button>
@@ -312,8 +326,22 @@ export function RegistrationWizard({
                 <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Nama atlet" />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-semibold">Tanggal Lahir</label>
-                <Input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold">Tanggal Lahir</label>
+                  {birthDate && (
+                    <span className="text-[10px] font-bold text-[var(--m-aqua-ink)] bg-[var(--m-aqua-soft)] px-2 py-0.5 rounded-full">
+                      {calculateAgeCategory(new Date(birthDate))}
+                    </span>
+                  )}
+                </div>
+                <Input
+                  type="date"
+                  value={birthDate}
+                  onChange={(e) => {
+                    setBirthDate(e.target.value);
+                    setSelectedCats([]);
+                  }}
+                />
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-semibold">Gender</label>
@@ -331,9 +359,73 @@ export function RegistrationWizard({
                 <label className="text-xs font-semibold">Kelas</label>
                 <Input value={className} onChange={(e) => setClassName(e.target.value)} placeholder="Kelas 8" />
               </div>
-              <div className="space-y-1">
-                <label className="text-xs font-semibold">Sekolah / Klub</label>
-                <Input value={schoolName} onChange={(e) => setSchoolName(e.target.value)} placeholder="Nama sekolah" />
+
+              {/* Sekolah / Klub dengan Opsi Database Terdaftar */}
+              <div className="space-y-1.5 sm:col-span-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-slate-900 flex items-center gap-1.5">
+                    <School className="h-3.5 w-3.5 text-blue-600" />
+                    <span>Sekolah / Klub Kontingen</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCustomSchool((v) => !v);
+                      if (!isCustomSchool) {
+                        setSchoolId("");
+                      }
+                    }}
+                    className="text-[11px] font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                  >
+                    {isCustomSchool ? "← Pilih dari Database Klub" : "+ Input Klub Lain / Baru"}
+                  </button>
+                </div>
+
+                {!isCustomSchool ? (
+                  <select
+                    value={schoolId}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === "__custom__") {
+                        setIsCustomSchool(true);
+                        setSchoolId("");
+                      } else {
+                        setSchoolId(val);
+                        const found = schoolsList.find((s) => s.id === val);
+                        setSchoolName(found?.name || "");
+                      }
+                    }}
+                    className="h-10 w-full rounded-xl border border-slate-300 bg-white px-3 text-xs font-medium text-slate-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 shadow-2xs"
+                  >
+                    <option value="">-- Pilih dari Database Klub / Kontingen Terdaftar --</option>
+                    {schoolsList.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                    <option value="__custom__">+ Ketik Nama Klub / Sekolah Baru...</option>
+                  </select>
+                ) : (
+                  <div className="space-y-1">
+                    <Input
+                      value={schoolName}
+                      onChange={(e) => setSchoolName(e.target.value)}
+                      placeholder="Ketik nama lengkap klub atau kontingen sekolah baru"
+                      className="h-10 text-xs rounded-xl"
+                      autoFocus
+                    />
+                    <p className="text-[10px] text-slate-500">
+                      Nama klub baru akan otomatis tersimpan ke master database dan dikaitkan ke atlet ini.
+                    </p>
+                  </div>
+                )}
+
+                {((schoolId && primarySchoolId && schoolId !== primarySchoolId) || (isCustomSchool && schoolName.trim())) && (
+                  <div className="rounded-xl border border-rose-300 bg-rose-50 p-2.5 text-xs font-bold text-rose-900 flex items-center gap-2">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-600 text-white text-[10px]">!</span>
+                    <span>⚠️ Deteksi Klub Berbeda: Atlet ini akan terdaftar di bawah kontingen {schoolName || 'klub baru'} (berbeda dari klub utama Anda).</span>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -364,7 +456,7 @@ export function RegistrationWizard({
                   className={`flex w-full items-center justify-between rounded-xl border p-4 text-left transition-colors ${sel ? "border-[var(--m-aqua)] bg-[var(--m-aqua-soft)]" : "border-[var(--m-border)] hover:border-[var(--m-aqua)]"}`}>
                   <div>
                     <div className="font-semibold text-[var(--m-ink)]">{c.distance_meters}m {STROKE_LABELS[c.stroke] ?? c.stroke}</div>
-                    <div className="text-xs text-[var(--m-muted)]">{c.name}{c.grade_level ? ` · ${c.grade_level}` : ""}</div>
+                    <div className="text-xs text-[var(--m-muted)]">{formatCompEventSubtitle(c.name, c.grade_level, c.age_group)}</div>
                   </div>
                   <span className={`h-5 w-5 rounded border-2 ${sel ? "border-[var(--m-aqua)] bg-[var(--m-aqua)]" : "border-[var(--m-border)]"}`} />
                 </button>
@@ -373,7 +465,7 @@ export function RegistrationWizard({
           </div>
           <div className="mt-5 flex items-center justify-between">
             <Button variant="outline" onClick={goBack}><ChevronLeft className="h-4 w-4" /> Kembali</Button>
-            <Button onClick={goNext} disabled={selectedCats.length === 0}>Lanjut <ChevronRight className="h-4 w-4" /></Button>
+            <Button onClick={goNext} disabled={validSelectedCats.length === 0}>Lanjut <ChevronRight className="h-4 w-4" /></Button>
           </div>
         </Card>
       )}
@@ -386,20 +478,20 @@ export function RegistrationWizard({
             <div className="flex justify-between"><dt className="text-[var(--m-muted)]">Atlet</dt><dd className="font-semibold text-[var(--m-ink)]">{chosen?.full_name || fullName}</dd></div>
             <div className="flex justify-between"><dt className="text-[var(--m-muted)]">Event</dt><dd className="font-semibold text-[var(--m-ink)]">{event?.name || 'Kejuaraan Renang'}</dd></div>
             <div className="border-t pt-2" />
-            {selectedCats.map((cid) => {
+            {validSelectedCats.map((cid) => {
               const c = competitionEvents.find((x) => x.id === cid);
               if (!c) return null;
               return (
                 <div key={cid} className="flex justify-between text-xs sm:text-sm">
-                  <dt className="text-[var(--m-muted)]">{c.distance_meters}m {STROKE_LABELS[c.stroke] ?? c.stroke} ({c.name})</dt>
+                  <dt className="text-[var(--m-muted)]">{c.distance_meters}m {STROKE_LABELS[c.stroke] ?? c.stroke} ({formatCompEventSubtitle(c.name, c.grade_level, c.age_group)})</dt>
                   <dd className="font-medium text-[var(--m-ink)]">Rp {feePerEvent.toLocaleString('id-ID')}</dd>
                 </div>
               );
             })}
-            
+
             <div className="border-t border-dashed pt-2 space-y-1.5">
               <div className="flex justify-between text-xs">
-                <dt className="text-[var(--m-muted)]">Subtotal ({selectedCats.length} nomor lomba)</dt>
+                <dt className="text-[var(--m-muted)]">Subtotal ({validSelectedCats.length} nomor lomba)</dt>
                 <dd className="font-semibold text-[var(--m-ink)]">Rp {baseAmount.toLocaleString('id-ID')}</dd>
               </div>
 

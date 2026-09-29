@@ -164,10 +164,6 @@ export function generateMeetProgramHtml(data: MeetProgramData): string {
       </div>
 
       ${eventsHtml}
-
-      <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #cbd5e1; text-align: center;">
-        <img src="/brand/banner-rajendra.jpg" alt="Rajendra Meet Swimming System - Champion Sports (Mascot Rajen & Dara)" style="width: 100%; max-height: 100px; object-fit: cover; border-radius: 6px;" />
-      </div>
     </body>
     </html>
   `;

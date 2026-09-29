@@ -1,6 +1,8 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { getKuCode } from "@/lib/age-category";
+import { revalidatePath } from "next/cache";
 
 export interface ActionResult {
   ok: boolean;
@@ -37,7 +39,7 @@ export async function submitRegistrationAction(formData: FormData): Promise<Acti
   // mendaftarkan atlet orang lain.
   const { data: athlete } = await supabase
     .from("athletes")
-    .select("id, event_id")
+    .select("id, event_id, full_name, gender, birth_date, age_group, grade_level")
     .eq("id", athleteId)
     .maybeSingle();
 
@@ -64,6 +66,24 @@ export async function submitRegistrationAction(formData: FormData): Promise<Acti
   }
 
   try {
+    // Saring ketat nomor lomba di server: pastikan kualifikasi KU & gender valid 100%
+    const { data: compEvents } = await supabase
+      .from("competition_events")
+      .select("id, name, stroke, gender, age_group, grade_level, class_name")
+      .in("id", competitionEventIds);
+
+    const { isEventEligibleForAthlete } = await import('@/lib/age-category');
+    const validCompEventIds = (compEvents || [])
+      .filter((ce) => isEventEligibleForAthlete(athlete, ce))
+      .map((ce) => ce.id);
+
+    if (validCompEventIds.length === 0) {
+      return {
+        ok: false,
+        error: "Nomor lomba yang dipilih tidak memenuhi kualifikasi kategori umur (KU) atau gender atlet.",
+      };
+    }
+
     // Ambil konfigurasi biaya & kode unik event
     let eventData: any = null;
     const { data: fullEvtData } = await supabase
@@ -104,10 +124,10 @@ export async function submitRegistrationAction(formData: FormData): Promise<Acti
     }
 
     const feePerEvent = Number(eventData?.fee_per_event) || 50000;
-    const computedTotal = (feePerEvent * competitionEventIds.length) + uniqueCode;
+    const computedTotal = (feePerEvent * validCompEventIds.length) + uniqueCode;
     const finalAmountDue = amountDue > 0 ? amountDue : computedTotal;
 
-    for (const ceId of competitionEventIds) {
+    for (const ceId of validCompEventIds) {
       // Cegah duplikat (unique athlete_id + competition_event_id)
       const { data: existing } = await supabase
         .from("registrations")
@@ -156,6 +176,10 @@ export async function submitRegistrationAction(formData: FormData): Promise<Acti
         return { ok: false, error: payErr.message || "Gagal membuat verifikasi pembayaran." };
       }
     }
+    revalidatePath('/pendaftaran-saya');
+    revalidatePath('/dashboard-viewer');
+    revalidatePath('/verifikasi-pembayaran');
+    revalidatePath('/tagihan');
     return { ok: true };
   } catch {
     return { ok: false, error: "Terjadi kesalahan saat menyimpan pendaftaran." };
@@ -179,6 +203,8 @@ export async function createAthleteAndRegisterAction(formData: FormData): Promis
   const gender = formData.get('gender')?.toString();
   const gradeLevel = formData.get('gradeLevel')?.toString() || '';
   const classname = formData.get('className')?.toString() || '';
+  const schoolId = formData.get('schoolId')?.toString()?.trim() || '';
+  const schoolName = formData.get('schoolName')?.toString()?.trim() || '';
   const competitionEventIds = formData
     .getAll('competitionEventId')
     .map((c) => c.toString())
@@ -188,6 +214,18 @@ export async function createAthleteAndRegisterAction(formData: FormData): Promis
 
   if (!eventId || competitionEventIds.length === 0) {
     return { ok: false, error: 'Data pendaftaran tidak lengkap.' };
+  }
+
+  // Resolve ID sekolah / klub agar atlet terhubung dan tidak otomatis independen
+  let resolvedSchoolId: string | null = schoolId || null;
+  if (!resolvedSchoolId && schoolName) {
+    try {
+      const { saveSchoolServer } = await import('@/lib/data/schools-server');
+      const sch = await saveSchoolServer({ name: schoolName });
+      resolvedSchoolId = sch.id;
+    } catch (err) {
+      console.warn('Auto resolve school error:', err);
+    }
   }
 
   let finalAthleteId = athleteId;
@@ -207,8 +245,8 @@ export async function createAthleteAndRegisterAction(formData: FormData): Promis
         birth_date: birthDate,
         grade_level: gradeLevel,
         class_name: classname,
-        age_group: '',
-        school_id: null,
+        age_group: getKuCode(birthDate),
+        school_id: resolvedSchoolId,
         owner_id: user.id,
       })
       .select('id')
@@ -223,7 +261,7 @@ export async function createAthleteAndRegisterAction(formData: FormData): Promis
     // pernah dia daftarkan. Cegah mendaftarkan atlet orang lain.
     const { data: owned } = await supabase
       .from('athletes')
-      .select('id')
+      .select('id, school_id')
       .eq('id', finalAthleteId)
       .eq('owner_id', user.id)
       .maybeSingle();
@@ -238,9 +276,61 @@ export async function createAthleteAndRegisterAction(formData: FormData): Promis
         return { ok: false, error: 'Anda tidak berwenang mendaftarkan atlet ini.' };
       }
     }
+
+    // Jika atlet lama belum terhubung ke klub dan sekarang dipilih klub baru, update asosiasinya
+    if (resolvedSchoolId && (!owned?.school_id || owned.school_id !== resolvedSchoolId)) {
+      await supabase
+        .from('athletes')
+        .update({ school_id: resolvedSchoolId })
+        .eq('id', finalAthleteId);
+    }
   }
 
   try {
+    // Saring ketat nomor lomba di server: pastikan kualifikasi KU & gender valid 100%
+    let athleteObj: {
+      birth_date?: string | Date | null;
+      gender?: string | null;
+      age_group?: string | null;
+      grade_level?: string | null;
+    } = {};
+
+    if (finalAthleteId) {
+      const { data: athRecord } = await supabase
+        .from('athletes')
+        .select('full_name, gender, birth_date, grade_level, age_group')
+        .eq('id', finalAthleteId)
+        .maybeSingle();
+      if (athRecord) {
+        athleteObj = athRecord;
+      }
+    }
+    if (!athleteObj.birth_date && birthDate) {
+      athleteObj = {
+        gender: gender || 'male',
+        birth_date: birthDate,
+        grade_level: gradeLevel,
+        age_group: '',
+      };
+    }
+
+    const { data: compEvents } = await supabase
+      .from('competition_events')
+      .select('id, name, stroke, gender, age_group, grade_level, class_name')
+      .in('id', competitionEventIds);
+
+    const { isEventEligibleForAthlete } = await import('@/lib/age-category');
+    const validCompEventIds = (compEvents || [])
+      .filter((ce) => isEventEligibleForAthlete(athleteObj, ce))
+      .map((ce) => ce.id);
+
+    if (validCompEventIds.length === 0) {
+      return {
+        ok: false,
+        error: 'Nomor lomba yang dipilih tidak memenuhi kualifikasi kategori umur (KU) atau gender atlet.',
+      };
+    }
+
     // Ambil konfigurasi biaya & kode unik event
     let eventData: any = null;
     const { data: fullEvtData } = await supabase
@@ -279,10 +369,10 @@ export async function createAthleteAndRegisterAction(formData: FormData): Promis
     }
 
     const feePerEvent = Number(eventData?.fee_per_event) || 50000;
-    const computedTotal = (feePerEvent * competitionEventIds.length) + uniqueCode;
+    const computedTotal = (feePerEvent * validCompEventIds.length) + uniqueCode;
     const finalAmountDue = amountDue > 0 ? amountDue : computedTotal;
 
-    for (const ceId of competitionEventIds) {
+    for (const ceId of validCompEventIds) {
       // Cegah duplikat (unique athlete_id + competition_event_id)
       const { data: existing } = await supabase
         .from('registrations')
@@ -329,6 +419,13 @@ export async function createAthleteAndRegisterAction(formData: FormData): Promis
 
       if (payErr) return { ok: false, error: payErr.message || 'Gagal membuat verifikasi pembayaran.' };
     }
+    revalidatePath('/atlet-saya');
+    revalidatePath('/data-saya');
+    revalidatePath('/dashboard-viewer');
+    revalidatePath('/profile');
+    revalidatePath('/pendaftaran-saya');
+    revalidatePath('/verifikasi-pembayaran');
+    revalidatePath('/tagihan');
     return { ok: true };
   } catch {
     return { ok: false, error: 'Terjadi kesalahan saat menyimpan pendaftaran.' };

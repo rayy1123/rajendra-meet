@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { formatMsToTime } from '@/lib/utils';
+import { formatKuDisplay } from '@/lib/age-category';
 
 export interface UserRegistrationItem {
   id: string;
@@ -283,7 +284,7 @@ export function UserPaymentManager({
                         <span className="flex items-center gap-1 font-semibold text-foreground">
                           <User className="w-3.5 h-3.5 text-primary" /> {item.athletes?.full_name}
                         </span>
-                        <span>(KU: {item.athletes?.age_group || 'Umum'})</span>
+                        <span>({formatKuDisplay(item.athletes?.age_group)})</span>
                         {item.athletes?.schools?.name && (
                           <span className="flex items-center gap-1">
                             <Building className="w-3.5 h-3.5 text-primary" /> {item.athletes.schools.name}

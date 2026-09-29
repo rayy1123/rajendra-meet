@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import {
   LayoutDashboard,
   CalendarDays,
+  Calendar,
   Users,
   ClipboardList,
   UserCircle,
@@ -80,6 +81,7 @@ const adminNavGroups: NavGroup[] = [
     label: 'Kejuaraan & Dokumen',
     items: [
       { title: 'Kejuaraan / Events', href: '/events', icon: CalendarDays, description: 'Kelola daftar kejuaraan' },
+      { title: 'Jadwal & Agenda', href: '/jadwal', icon: Calendar, description: 'Rundown acara & timeline lomba' },
       { title: 'Daftar Perlombaan', href: '/perlombaan', icon: CalendarCheck, description: 'Kartu kejuaraan & import Excel' },
       { title: 'Data Atlet', href: '/athletes', icon: Users, description: 'Master seluruh data atlet' },
       { title: 'Sekolah & Klub', href: '/schools', icon: School, description: 'Master data kontingen' },
@@ -111,7 +113,7 @@ const adminNavGroups: NavGroup[] = [
       { title: 'Pengeluaran (Expenses)', href: '/expenses', icon: TrendingDown, description: 'Catat pengeluaran operasional' },
       { title: 'Laporan Keuangan (Report)', href: '/report', icon: BarChart3, description: 'Laporan kas & ekspor Excel' },
       { title: 'Verifikasi Pembayaran', href: '/verifikasi-pembayaran', icon: CreditCard, description: 'Cek bukti transfer pendaftaran' },
-      { title: 'Peralatan Arena', href: '/equipment', icon: Wrench, description: 'Logistik & fasilitas kolam' },
+      { title: 'Peralatan & Telemetri', href: '/equipment', icon: Wrench, description: 'Telemetri timing & logistik arena' },
       { title: 'Log Audit', href: '/audit', icon: ShieldCheck, description: 'Riwayat aktivitas sistem' },
       { title: 'Pengaturan Sistem', href: '/settings', icon: Settings, description: 'Konfigurasi poin & database' },
       { title: 'Panduan Operasional', href: '/panduan', icon: BookOpen, description: 'Buku panduan operasional panitia' },

@@ -6,6 +6,7 @@ import {
   type ProfileAthleteItem,
 } from '@/components/modules/profile-manager';
 import { ViewerSubHeader } from '@/components/modules/viewer-subheader';
+import { getKuCode } from '@/lib/age-category';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,6 +45,7 @@ export default async function ProfilePage() {
       full_name,
       athlete_number,
       gender,
+      birth_date,
       age_group,
       grade_level,
       schools (
@@ -60,7 +62,7 @@ export default async function ProfilePage() {
       fullName: a.full_name,
       athleteNumber: a.athlete_number || '–',
       gender: a.gender || 'male',
-      ageGroup: a.age_group || a.grade_level || 'Umum',
+      ageGroup: a.birth_date ? getKuCode(a.birth_date) : (a.age_group || a.grade_level || 'Umum'),
       schoolName: rawSchool?.name || 'Klub Mandiri',
     };
   });

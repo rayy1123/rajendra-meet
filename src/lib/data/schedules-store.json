@@ -1,0 +1,43 @@
+[
+  {
+    "id": "sch-1",
+    "time": "09:00",
+    "category": "Pendaftaran",
+    "title": "Batas Penutupan Perubahan Nama",
+    "description": "Scratch / penggantian perenang di nomor estafet dan nomor individu.",
+    "location": "Sekretariat Panitia & Helpdesk IT",
+    "status": "completed",
+    "orderNo": 1
+  },
+  {
+    "id": "sch-2",
+    "time": "14:00",
+    "category": "Technical Meeting",
+    "title": "Technical Meeting & Drawing Seri",
+    "description": "Ruang Media Akuatik Senayan & Zoom Live bersama Official & Coach.",
+    "location": "Ruang Rapat VIP & Zoom Live",
+    "status": "ongoing",
+    "eventId": null,
+    "createdAt": "2026-09-28T16:09:18.927Z"
+  },
+  {
+    "id": "sch-3",
+    "time": "16:30",
+    "category": "Teknis Kolam",
+    "title": "Trial Touchpad & Sensor Start",
+    "description": "Uji kalibrasi false start detector & touch plates lintasan 1–8.",
+    "location": "Kolam Perlombaan Utama (50M)",
+    "status": "upcoming",
+    "orderNo": 3
+  },
+  {
+    "id": "sch-4",
+    "time": "07:30",
+    "category": "Hari Perlombaan",
+    "title": "Pemanasan Atlet & Call Room Buka",
+    "description": "Sesi pemanasan resmi kolam pemanasan & absensi atlet Call Room Sesi Pagi.",
+    "location": "Call Room & Kolam Pemanasan",
+    "status": "upcoming",
+    "orderNo": 4
+  }
+]

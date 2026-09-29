@@ -39,6 +39,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { BrandedSpinner } from '@/components/ui/branded-loading';
 import { cn } from '@/lib/utils';
+import { formatKuDisplay } from '@/lib/age-category';
 
 const ROLE_LABELS: Record<string, { label: string; badgeCls: string }> = {
   super_admin: { label: 'Super Admin Panitia', badgeCls: 'bg-purple-100 text-purple-900 border-purple-200' },
@@ -169,6 +170,9 @@ export function ProfileManager({
 
   async function handleLogout() {
     setLoggingOut(true);
+    try {
+      await fetch('/api/auth/session', { method: 'DELETE' });
+    } catch {}
     const supabase = createClient();
     await supabase.auth.signOut();
     window.location.assign('/login');
@@ -600,7 +604,7 @@ export function ProfileManager({
                           {ath.fullName}
                         </p>
                         <p className="text-[10px] text-slate-500 mt-0.5 truncate">
-                          ID: <span className="font-mono font-bold text-slate-700">{ath.athleteNumber}</span> • KU: <span className="font-bold text-slate-700">{ath.ageGroup}</span> • {ath.schoolName}
+                          ID: <span className="font-mono font-bold text-slate-700">{ath.athleteNumber}</span> • <span className="font-bold text-slate-700">{formatKuDisplay(ath.ageGroup)}</span> • {ath.schoolName}
                         </p>
                       </div>
                     </div>

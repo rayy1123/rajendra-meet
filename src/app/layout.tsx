@@ -24,6 +24,16 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: 'Rajendra Meet',
   description: 'Rajendra Meet — Platform Manajemen Kejuaraan Renang',
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/brand/favicon.png', type: 'image/png' },
+      { url: '/icon.png', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-icon.png' },
+    ],
+  },
 };
 
 export default function RootLayout({

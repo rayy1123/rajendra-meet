@@ -1,8 +1,9 @@
 'use client';
 
 import { QrCodeSvg } from './qr-code-svg';
-import { User, Building, Calendar, ShieldCheck, Waves, Award, Sparkles, MapPin } from 'lucide-react';
+import { User, Building, Calendar, ShieldCheck, Waves, Award, Sparkles, MapPin, Clock } from 'lucide-react';
 import type { ParticipantCardData } from './participant-card-manager';
+import { formatKuDisplay } from '@/lib/age-category';
 
 export function AthleteParticipantCard({
   data,
@@ -135,7 +136,7 @@ export function AthleteParticipantCard({
                 {athlete.athleteNumber}
               </span>
               <span className="rounded-md bg-blue-100 text-blue-900 px-2 py-0.5 text-[9px] font-black border border-blue-200">
-                KU {athlete.ageGroup || 'Umum'}
+                {formatKuDisplay(athlete.ageGroup)}
               </span>
             </div>
 
@@ -198,6 +199,15 @@ export function AthleteParticipantCard({
                 </div>
               </div>
             ))}
+            {/* ── PETUNJUK WAKTU DUDUK / LAPOR CALL ROOM (CoC RUNDOWN) ── */}
+            <div className="rounded-lg bg-amber-50 p-2 border border-amber-200/90 text-[9.5px] text-amber-950 flex items-center justify-between font-mono shadow-2xs mt-2">
+              <span className="font-bold flex items-center gap-1">
+                <Clock className="h-3 w-3 text-amber-700 shrink-0" /> LAPOR / DUDUK CALL ROOM (CoC):
+              </span>
+              <span className="font-black text-amber-900 bg-amber-200/80 px-2 py-0.5 rounded text-[9px]">
+                15 MENIT SEBELUM SERI
+              </span>
+            </div>
           </div>
         </div>
 

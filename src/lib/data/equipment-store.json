@@ -1,0 +1,74 @@
+[
+  {
+    "id": "eq-1",
+    "name": "Set Touchpad OSV9 Lintasan 1–8",
+    "location": "Dinding Kolam Finish (50M)",
+    "category": "Touchpad Plates",
+    "status": "done",
+    "due_date": "2026-10-15",
+    "technician": "Tim Swiss Timing & Budi Santoso",
+    "note": "Sensitivitas 2.5 kg terkalibrasi normal, bebas bocor air."
+  },
+  {
+    "id": "eq-2",
+    "name": "Konsol Utama Swiss Timing Quantum",
+    "location": "Meja Operator Utama / Ruang Timing",
+    "category": "Timing Console",
+    "status": "done",
+    "due_date": "2026-10-18",
+    "technician": "Budi Santoso (Head IT)",
+    "note": "Firmware v4.8 terinstal, backup baterai UPS standby 4 jam."
+  },
+  {
+    "id": "eq-3",
+    "name": "Kabel Terminal BUS & Horn False Start",
+    "location": "Podium Starting Block 1–8",
+    "category": "Sensor Start",
+    "status": "in_progress",
+    "due_date": "2026-10-12",
+    "technician": "Tim Logistik Kolam",
+    "note": "Pengecekan kontinuitas jalur kabel lintasan 4 & 5 sedang dilakukan."
+  },
+  {
+    "id": "eq-4",
+    "name": "Videotron / LED Matrix P10 HD Arena",
+    "location": "Tribun Barat Kolam Akuatik",
+    "category": "Scoreboard LED",
+    "status": "scheduled",
+    "due_date": "2026-10-20",
+    "technician": "Vendor Display Arena",
+    "note": "Jadwal uji coba transmisi HDMI & kontroler Novastar."
+  },
+  {
+    "id": "eq-5",
+    "name": "Stopwatch Cadangan Seiko S141 (8 Unit)",
+    "location": "Meja Call Room & Chief Timer",
+    "category": "Timer Manual",
+    "status": "done",
+    "due_date": "2026-10-25",
+    "technician": "Koordinator Juri Waktu",
+    "note": "8 unit baterai baru, memory 300 lap siap pakai untuk juri cadangan."
+  },
+  {
+    "id": "d22fbcb2-a30b-44a7-8604-3f2e433dbf89",
+    "name": "Starting Blocks 1-8",
+    "location": "Kolam Utama",
+    "category": "block",
+    "status": "done",
+    "due_date": "2026-08-16",
+    "technician": "T. Miller",
+    "note": "Pemeriksaan karet pijakan.",
+    "created_at": "2026-09-28T23:44:01.208Z"
+  },
+  {
+    "id": "7b57c2cb-85b1-40a0-8242-008b299b085c",
+    "name": "Sensor Lane 4",
+    "location": "Kolam Utama",
+    "category": "sensor",
+    "status": "done",
+    "due_date": "2026-08-19",
+    "technician": "M. Rivera",
+    "note": "Ganti kabel sensor.",
+    "created_at": "2026-09-28T23:44:11.404Z"
+  }
+]

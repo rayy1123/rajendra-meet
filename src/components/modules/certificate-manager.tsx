@@ -32,6 +32,7 @@ import {
 import Link from 'next/link';
 import { type SponsorItem, getCachedSponsors } from '@/lib/data/sponsors';
 import { printElement } from '@/lib/utils/print-helper';
+import { formatKuDisplay } from '@/lib/age-category';
 
 export interface CertificateRecipient {
   id: string;
@@ -596,7 +597,7 @@ export function CertificateManager({
 
                       <td className="p-3">
                         <p className="font-semibold text-foreground line-clamp-1">{r.competitionEventName}</p>
-                        <p className="text-[10px] text-muted-foreground">KU {r.ageGroup}</p>
+                        <p className="text-[10px] text-muted-foreground">{formatKuDisplay(r.ageGroup)}</p>
                       </td>
 
                       <td className="p-3 text-right font-mono font-bold text-foreground">

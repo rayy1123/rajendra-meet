@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { formatMsToTime } from '@/lib/utils';
+import { formatCompEventSubtitle } from '@/lib/age-category';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -109,7 +110,7 @@ export function LiveScoreboardView({ compEvents }: LiveScoreboardViewProps) {
             <SelectContent>
               {compEvents.map((ce) => (
                 <SelectItem key={ce.id} value={ce.id}>
-                  {ce.name} - {ce.grade_level} ({ce.gender === 'female' ? 'Putri' : 'Putra'})
+                  {formatCompEventSubtitle(ce.name, ce.grade_level)} ({ce.gender === 'female' ? 'Putri' : 'Putra'})
                 </SelectItem>
               ))}
             </SelectContent>

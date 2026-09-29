@@ -4,6 +4,7 @@ import DashboardLayout from '@/components/layout/layout';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { RegistrationWizard, type CompEventDTO, type AthleteDTO } from '@/components/modules/registration-wizard';
 import { ViewerSubHeader } from '@/components/modules/viewer-subheader';
+import { getSchoolsServer } from '@/lib/data/schools-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -78,18 +79,25 @@ export default async function DaftarLombaEventPage({ params }: { params: Promise
   // Atlet milik viewer (bisa dipilih saat mendaftar ke event ini).
   const { data: myAthletes } = await supabase
     .from('athletes')
-    .select('id, full_name, birth_date, gender, grade_level, school_id')
+    .select('id, full_name, birth_date, gender, grade_level, school_id, schools(name)')
     .eq('owner_id', user.id)
     .order('full_name');
 
-  const existingAthletes: AthleteDTO[] = (myAthletes ?? []).map((a) => ({
-    id: a.id,
-    full_name: a.full_name,
-    birth_date: a.birth_date,
-    gender: a.gender === 'female' ? 'female' : 'male',
-    grade_level: a.grade_level ?? '',
-    school_id: a.school_id,
-  }));
+  const existingAthletes: AthleteDTO[] = (myAthletes ?? []).map((a: any) => {
+    const rawSchool = Array.isArray(a.schools) ? a.schools[0] : a.schools;
+    return {
+      id: a.id,
+      full_name: a.full_name,
+      birth_date: a.birth_date,
+      gender: a.gender === 'female' ? 'female' : 'male',
+      grade_level: a.grade_level ?? '',
+      school_id: a.school_id,
+      school_name: rawSchool?.name || '',
+    };
+  });
+
+  // Ambil master database sekolah / klub yang terdaftar
+  const schools = await getSchoolsServer();
 
   return (
     <DashboardLayout>
@@ -111,6 +119,7 @@ export default async function DaftarLombaEventPage({ params }: { params: Promise
           event={event as any}
           competitionEvents={(compEvents ?? []) as CompEventDTO[]}
           existingAthletes={existingAthletes}
+          schools={schools}
           isAdmin={isAdmin}
         />
       </div>

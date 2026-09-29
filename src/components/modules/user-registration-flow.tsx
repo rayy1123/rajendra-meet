@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { formatTimeToMs } from '@/lib/utils';
+import { formatKuDisplay } from '@/lib/age-category';
 
 export interface EventOption {
   id: string;
@@ -260,7 +261,7 @@ export function UserRegistrationFlow({
                 <SelectContent>
                   {myAthletes.map((a) => (
                     <SelectItem key={a.id} value={a.id}>
-                      {a.full_name} ({a.gender === 'female' ? 'Putri' : 'Putra'} - {a.age_group || 'KU'})
+                      {a.full_name} ({a.gender === 'female' ? 'Putri' : 'Putra'} - {formatKuDisplay(a.age_group)})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -354,7 +355,7 @@ export function UserRegistrationFlow({
                           )}
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          Gaya: {ce.stroke} · Jarak: {ce.distance_meters}m · KU: {ce.age_group || 'Umum'} · Gender: {ce.gender === 'female' ? 'Putri' : 'Putra'}
+                          Gaya: {ce.stroke} · Jarak: {ce.distance_meters}m · {formatKuDisplay(ce.age_group)} · Gender: {ce.gender === 'female' ? 'Putri' : 'Putra'}
                         </p>
                       </div>
                     </div>

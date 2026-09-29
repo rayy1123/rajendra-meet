@@ -9,7 +9,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * 2. Konversi Milidetik ke Format Waktu Renang (e.g. 65120 ms -> "01:05.12" atau 28450 ms -> "28.45")
+ * 2. Konversi Milidetik ke Format Waktu Renang Standar (e.g. 65120 ms -> "01:05.12" atau 28450 ms -> "28.45")
  */
 export function formatMsToTime(ms: number | null | undefined): string {
   if (ms === null || ms === undefined || isNaN(ms) || ms <= 0) {
@@ -35,47 +35,107 @@ export function formatMsToTime(ms: number | null | undefined): string {
 }
 
 /**
- * 3. Konversi String Waktu Input Operator ke Milidetik (e.g. "01:05.12", "28.45", atau "28,45" -> ms)
+ * 2b. Konversi Milidetik ke Format Final Time 3-Digit Grup (MM.SS.MS: "00.20.21" atau "01.05.12")
+ */
+export function formatMsToFinalTime(ms: number | null | undefined): string {
+  if (ms === null || ms === undefined || isNaN(ms) || ms <= 0) {
+    return '';
+  }
+
+  const totalHundredths = Math.round(ms / 10);
+  const minutes = Math.floor(totalHundredths / 6000);
+  const remainingHundredths = totalHundredths % 6000;
+  const seconds = Math.floor(remainingHundredths / 100);
+  const hundredths = remainingHundredths % 100;
+
+  const pad = (num: number) => String(num).padStart(2, '0');
+  return `${pad(minutes)}.${pad(seconds)}.${pad(hundredths)}`;
+}
+
+/**
+ * 2c. Parsing & Auto-Format Input Waktu Renang Operator
+ * Mendukung input fleksibel:
+ *   - "002021" -> "00.20.21", 20210 ms
+ *   - "2021"   -> "00.20.21", 20210 ms
+ *   - "10512"  -> "01.05.12", 65120 ms
+ *   - "20.21"  -> "00.20.21", 20210 ms
+ *   - "01:05.12" -> "01.05.12", 65120 ms
+ */
+export function parseSwimTimeInput(raw: string | null | undefined): {
+  formatted: string;
+  timeMs: number | null;
+} {
+  if (!raw || typeof raw !== 'string') {
+    return { formatted: '', timeMs: null };
+  }
+
+  const clean = raw.trim().toUpperCase();
+  if (clean === '' || ['NT', 'DNS', 'DSQ', 'DNF', 'SCR'].includes(clean)) {
+    return { formatted: clean, timeMs: null };
+  }
+
+  const digitsOnly = clean.replace(/\D/g, '');
+  let min = 0;
+  let sec = 0;
+  let ms = 0;
+
+  // Cek pemisah titik, titik dua, atau koma (e.g. "00.20.21" atau "01:05.12")
+  const parts = clean.split(/[:.,]/).filter(Boolean);
+
+  if (parts.length === 3) {
+    min = parseInt(parts[0], 10) || 0;
+    sec = parseInt(parts[1], 10) || 0;
+    ms = parseInt(parts[2].padEnd(2, '0').slice(0, 2), 10) || 0;
+  } else if (parts.length === 2) {
+    sec = parseInt(parts[0], 10) || 0;
+    ms = parseInt(parts[1].padEnd(2, '0').slice(0, 2), 10) || 0;
+  } else if (digitsOnly.length > 0) {
+    // Input angka beruntun e.g. "002021", "2021", "10512"
+    const len = digitsOnly.length;
+    if (len >= 6) {
+      min = parseInt(digitsOnly.slice(0, len - 4), 10) || 0;
+      sec = parseInt(digitsOnly.slice(len - 4, len - 2), 10) || 0;
+      ms = parseInt(digitsOnly.slice(len - 2, len), 10) || 0;
+    } else if (len === 5) {
+      min = parseInt(digitsOnly.slice(0, 1), 10) || 0;
+      sec = parseInt(digitsOnly.slice(1, 3), 10) || 0;
+      ms = parseInt(digitsOnly.slice(3, 5), 10) || 0;
+    } else if (len === 4) {
+      min = 0;
+      sec = parseInt(digitsOnly.slice(0, 2), 10) || 0;
+      ms = parseInt(digitsOnly.slice(2, 4), 10) || 0;
+    } else if (len === 3) {
+      min = 0;
+      sec = parseInt(digitsOnly.slice(0, 1), 10) || 0;
+      ms = parseInt(digitsOnly.slice(1, 3), 10) || 0;
+    } else {
+      min = 0;
+      sec = parseInt(digitsOnly, 10) || 0;
+      ms = 0;
+    }
+  } else {
+    return { formatted: '', timeMs: null };
+  }
+
+  // Normalisasi detik ke menit jika detik >= 60
+  if (sec >= 60) {
+    min += Math.floor(sec / 60);
+    sec = sec % 60;
+  }
+
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const formatted = `${pad(min)}.${pad(sec)}.${pad(ms)}`;
+  const totalMs = (min * 60 + sec) * 1000 + ms * 10;
+
+  return { formatted, timeMs: totalMs > 0 ? totalMs : null };
+}
+
+/**
+ * 3. Konversi String Waktu Input Operator ke Milidetik (e.g. "00.20.21", "01:05.12", "002021" -> ms)
  */
 export function formatTimeToMs(timeStr: string): number | null {
-  if (!timeStr || typeof timeStr !== 'string') return null;
-
-  // Ganti koma ke titik, hilangkan spasi, dan bersihkan string
-  const cleanStr = timeStr.trim().replace(',', '.').toUpperCase();
-
-  if (cleanStr === '' || cleanStr === 'NT' || cleanStr === 'DNS' || cleanStr === 'DSQ' || cleanStr === 'DNF') {
-    return null;
-  }
-
-  let minutes = 0;
-  let seconds = 0;
-  let hundredths = 0;
-
-  try {
-    if (cleanStr.includes(':')) {
-      const [minPart, secPart] = cleanStr.split(':');
-      minutes = parseInt(minPart, 10) || 0;
-
-      if (secPart.includes('.')) {
-        const [s, h] = secPart.split('.');
-        seconds = parseInt(s, 10) || 0;
-        hundredths = parseInt(h.padEnd(2, '0').slice(0, 2), 10) || 0;
-      } else {
-        seconds = parseInt(secPart, 10) || 0;
-      }
-    } else if (cleanStr.includes('.')) {
-      const [s, h] = cleanStr.split('.');
-      seconds = parseInt(s, 10) || 0;
-      hundredths = parseInt(h.padEnd(2, '0').slice(0, 2), 10) || 0;
-    } else {
-      seconds = parseInt(cleanStr, 10) || 0;
-    }
-
-    const totalMs = (minutes * 60 + seconds) * 1000 + hundredths * 10;
-    return isNaN(totalMs) || totalMs <= 0 ? null : totalMs;
-  } catch {
-    return null;
-  }
+  const parsed = parseSwimTimeInput(timeStr);
+  return parsed.timeMs;
 }
 
 /**

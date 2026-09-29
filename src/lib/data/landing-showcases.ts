@@ -136,8 +136,8 @@ export const DEFAULT_ABOUT: ShowcaseItem = {
   type: 'about',
   title: 'Tentang Kami',
   subtitle: 'Hadir sejak tahun 2023, Rajendra Swimming Organizer adalah mitra strategis dan terpercaya dalam penyelenggaraan acara olahraga renang di Indonesia. Kami berdedikasi untuk mengangkat standar setiap kompetisi.',
-  value: 'Dengan perpaduan antara manajemen event yang solid, pemanfaatan teknologi, dan kecintaan pada olahraga renang, kami memastikan setiap event berjalan lancar, akurat, dan berkesan bagi atlet, official, maupun penonton.',
-  imageUrl: '/brand/team-about.png',
+  value: 'Dengan perpaduan antara manajemen acara yang solid, pemanfaatan teknologi, dan kecintaan pada olahraga renang, kami memastikan setiap event berjalan lancar, akurat, dan berkesan bagi atlet, official tim, maupun penonton.',
+  imageUrl: '/slider/tentang-kami.jpg',
   orderNo: 1,
   isActive: true,
 };

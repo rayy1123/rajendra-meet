@@ -23,6 +23,7 @@ import type { CertificateRecipient, CertificateSettings } from './certificate-ma
 import type { SponsorItem } from '@/lib/data/sponsors';
 import { printElement } from '@/lib/utils/print-helper';
 import { cn } from '@/lib/utils';
+import { formatKuDisplay } from '@/lib/age-category';
 
 export interface UserCertificatesViewProps {
   recipients: CertificateRecipient[];
@@ -257,7 +258,7 @@ export function UserCertificatesView({
                           {rec.swimmerName}
                         </h3>
                         <p className="text-xs text-slate-500 font-mono mt-0.5">
-                          ID: {rec.athleteNumber} • KU: {rec.ageGroup} • {rec.schoolName}
+                          ID: {rec.athleteNumber} • {formatKuDisplay(rec.ageGroup)} • {rec.schoolName}
                         </p>
                       </div>
 

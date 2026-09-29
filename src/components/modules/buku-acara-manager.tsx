@@ -36,6 +36,33 @@ import { SponsorLogosStrip } from './sponsor-logos-strip';
 import { formatMsToTime, cn } from '@/lib/utils';
 import Link from 'next/link';
 
+export function calculateHeatTiming(
+  heatIndex: number,
+  startTimeStr: string = '08:00',
+  durationMin: number = 1,
+  cocOffsetMin: number = 15
+) {
+  const [h, m] = (startTimeStr || '08:00').split(':').map((v) => parseInt(v, 10) || 0);
+  const startBaseMs = (h * 60 + m) * 60 * 1000;
+
+  const heatStartMs = startBaseMs + Math.max(0, heatIndex) * Math.max(0.2, durationMin) * 60 * 1000;
+  const cocReportMs = heatStartMs - Math.max(0, cocOffsetMin) * 60 * 1000;
+
+  const formatTimeStr = (totalMs: number) => {
+    let dayMs = totalMs % (24 * 60 * 60 * 1000);
+    if (dayMs < 0) dayMs += 24 * 60 * 60 * 1000;
+    const hours = Math.floor(dayMs / (60 * 60 * 1000));
+    const mins = Math.floor((dayMs % (60 * 60 * 1000)) / (60 * 1000));
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${pad(hours)}:${pad(mins)}`;
+  };
+
+  return {
+    estStart: formatTimeStr(heatStartMs),
+    estCoc: formatTimeStr(cocReportMs),
+  };
+}
+
 export interface BukuEventItem {
   id: string;
   orderNo?: number | null;
@@ -119,6 +146,9 @@ export function BukuAcaraManager({
   const [pageBreakPerEvent, setPageBreakPerEvent] = useState<boolean>(false);
   const [autoSortByResult, setAutoSortByResult] = useState<boolean>(true); // Otomatis urutkan tercepat di atas saat final time ada
   const [viewLayoutMode, setViewLayoutMode] = useState<'heats' | 'combined'>('heats'); // 'heats' (per seri) atau 'combined' (rekap gabungan)
+  const [sessionStartTime, setSessionStartTime] = useState<string>('08:00');
+  const [heatDurationMinutes, setHeatDurationMinutes] = useState<number>(1);
+  const [cocOffsetMinutes, setCocOffsetMinutes] = useState<number>(15);
   const [openSettingsModal, setOpenSettingsModal] = useState<boolean>(false);
   const [athleteSearch, setAthleteSearch] = useState<string>('');
 
@@ -132,6 +162,9 @@ export function BukuAcaraManager({
   const [tempPageBreakPerEvent, setTempPageBreakPerEvent] = useState<boolean>(false);
   const [tempAutoSortByResult, setTempAutoSortByResult] = useState<boolean>(true);
   const [tempViewLayoutMode, setTempViewLayoutMode] = useState<'heats' | 'combined'>('heats');
+  const [tempSessionStartTime, setTempSessionStartTime] = useState<string>('08:00');
+  const [tempHeatDurationMinutes, setTempHeatDurationMinutes] = useState<number>(1);
+  const [tempCocOffsetMinutes, setTempCocOffsetMinutes] = useState<number>(15);
 
   const handleOpenSettings = () => {
     setTempEventFilterMode(eventFilterMode);
@@ -143,6 +176,9 @@ export function BukuAcaraManager({
     setTempPageBreakPerEvent(pageBreakPerEvent);
     setTempAutoSortByResult(autoSortByResult);
     setTempViewLayoutMode(viewLayoutMode);
+    setTempSessionStartTime(sessionStartTime);
+    setTempHeatDurationMinutes(heatDurationMinutes);
+    setTempCocOffsetMinutes(cocOffsetMinutes);
     setOpenSettingsModal(true);
   };
 
@@ -156,6 +192,9 @@ export function BukuAcaraManager({
     setPageBreakPerEvent(tempPageBreakPerEvent);
     setAutoSortByResult(tempAutoSortByResult);
     setViewLayoutMode(tempViewLayoutMode);
+    setSessionStartTime(tempSessionStartTime);
+    setHeatDurationMinutes(tempHeatDurationMinutes);
+    setCocOffsetMinutes(tempCocOffsetMinutes);
     setOpenSettingsModal(false);
   };
 
@@ -169,6 +208,9 @@ export function BukuAcaraManager({
     setTempPageBreakPerEvent(false);
     setTempAutoSortByResult(true);
     setTempViewLayoutMode('heats');
+    setTempSessionStartTime('08:00');
+    setTempHeatDurationMinutes(1);
+    setTempCocOffsetMinutes(15);
   };
 
   // Filtered Events and Heats
@@ -412,11 +454,6 @@ export function BukuAcaraManager({
             onClick={() => {
               const next = !autoSortByResult;
               setAutoSortByResult(next);
-              toast.info(
-                next
-                  ? 'Urutan diatur otomatis: Perenang tercepat di posisi paling atas'
-                  : 'Urutan diatur sesuai nomor lintasan (Start List asli 1-8)'
-              );
             }}
             className={cn(
               'flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all border shadow-2xs cursor-pointer',
@@ -424,10 +461,10 @@ export function BukuAcaraManager({
                 ? 'bg-blue-600 text-white border-blue-700 hover:bg-blue-700'
                 : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             )}
-            title="Klik untuk mengubah mode urutan (Tercepat di atas vs Nomor lintasan)"
+            title="Klik untuk mengubah mode urutan waktu akhir vs nomor lintasan"
           >
             <ArrowDownWideNarrow className="h-3.5 w-3.5" />
-            <span>Urutan: {autoSortByResult ? 'Tercepat di Atas (Otomatis)' : 'Nomor Lintasan (1-8)'}</span>
+            <span>Urutan: {autoSortByResult ? 'Waktu Akhir' : 'Nomor Lintasan (1-8)'}</span>
           </button>
 
           {/* Toggle Tampilan Per Seri vs Peringkat Terpadu */}
@@ -671,7 +708,7 @@ export function BukuAcaraManager({
                 Tidak ada acara yang cocok dengan kriteria pengaturan halaman yang dipilih.
               </div>
             ) : (
-              filteredEvents.map((eventItem) => {
+              filteredEvents.map((eventItem, eventIdx) => {
                 // Perhitungan peringkat Time Final per nomor acara untuk semua perenang yang selesai (finished)
                 const finishedAthletes = eventItem.heats
                   .flatMap((h) => h.assignments)
@@ -748,16 +785,11 @@ export function BukuAcaraManager({
                       pageBreakPerEvent && 'buku-event-page-break'
                     )}
                   >
-                    {/* Event Section Header (Sesuai Format: Event 103, Freestyle SD/MI 3-4 - Man 100meter - Final) */}
+                    {/* Event Section Header (Sesuai Format: Event 103, Freestyle SD/MI 3-4 - Man 100meter - Time Final) */}
                     <div className="border-b-2 border-slate-900 pb-1.5 pt-2 px-3 bg-slate-50/50 flex items-center justify-between">
                       <h3 className="text-xs sm:text-sm font-black text-slate-950 uppercase tracking-tight">
                         Event {eventItem.orderNo || '—'}, {eventItem.stroke} {eventItem.name} - {eventItem.gender === 'female' ? 'Women' : 'Men'} {eventItem.distanceMeters}meter - Time Final
                       </h3>
-                      {autoSortByResult && finishedAthletes.length > 0 && (
-                        <span className="text-[10px] font-bold text-blue-700 bg-blue-100/80 px-2 py-0.5 rounded print:hidden flex items-center gap-1">
-                          <ArrowDownWideNarrow className="h-3 w-3" /> Tercepat di Atas
-                        </span>
-                      )}
                     </div>
 
                     {/* Mode Tampilan Peringkat Terpadu (Semua Seri Digabung) */}
@@ -908,7 +940,19 @@ export function BukuAcaraManager({
                     ) : (
                       /* Mode Tampilan Standar Per Seri (Heats) */
                       <div className="p-3 space-y-4">
-                        {eventItem.heats.map((heat) => {
+                        {eventItem.heats.map((heat, heatIdx) => {
+                          const priorHeatsCount = filteredEvents
+                            .slice(0, eventIdx)
+                            .reduce((acc, e) => acc + e.heats.length, 0);
+                          const currentHeatGlobalIndex = priorHeatsCount + heatIdx;
+
+                          const timing = calculateHeatTiming(
+                            currentHeatGlobalIndex,
+                            sessionStartTime,
+                            heatDurationMinutes,
+                            cocOffsetMinutes
+                          );
+
                           // Urutkan perenang di seri ini: tercepat paling atas jika finalTimeMs tersedia
                           const sortedAssignments = !autoSortByResult
                             ? [...heat.assignments].sort((a, b) => a.laneNumber - b.laneNumber)
@@ -941,8 +985,16 @@ export function BukuAcaraManager({
 
                           return (
                             <div key={heat.id} className="space-y-1.5">
-                              <div className="flex items-center justify-between text-xs font-bold text-blue-950 bg-blue-50/90 px-3 py-1 rounded">
-                                <span className="uppercase">SERI {heat.heatNumber}</span>
+                              <div className="flex flex-wrap items-center justify-between text-xs font-bold text-blue-950 bg-blue-50/90 px-3 py-1 rounded">
+                                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                                  <span className="uppercase font-heading font-black">SERI {heat.heatNumber}</span>
+                                  <span className="text-[11px] font-mono text-blue-950 font-bold border-l border-blue-300/60 pl-2">
+                                    Start: <span className="text-blue-700 font-extrabold">{timing.estStart} WIB</span>
+                                  </span>
+                                  <span className="text-[11px] font-mono text-amber-950 font-bold border-l border-blue-300/60 pl-2">
+                                    Duduk / Lapor CoC: <span className="text-amber-700 font-extrabold">{timing.estCoc} WIB</span>
+                                  </span>
+                                </div>
                                 <span className="text-[11px] font-mono text-blue-800 font-semibold">{heat.assignments.length} Perenang</span>
                               </div>
 
@@ -1067,16 +1119,8 @@ export function BukuAcaraManager({
             )}
           </div>
 
-          {/* FOOTER BANNER CHAMPION SPORTS & MASCOT RAJEN & DARA */}
+          {/* FOOTER SPONSORS & OFFICIAL PARTNERS */}
           <div className="pt-6 -mx-6 sm:-mx-10 -mb-6 sm:-mb-10 space-y-3 bg-slate-50/70 border-t border-slate-200 print:bg-white print:border-none">
-            <div className="w-full overflow-hidden border-b border-slate-200">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/brand/banner-rajendra.jpg"
-                alt="Rajendra Meet Swimming System - Champion Sports (Mascot Rajen & Dara)"
-                className="w-full h-auto object-cover max-h-24 sm:max-h-32 block"
-              />
-            </div>
             <div className="px-6 sm:px-10 pb-4">
               <SponsorLogosStrip sponsors={sponsorsList} size="sm" />
             </div>
@@ -1297,6 +1341,50 @@ export function BukuAcaraManager({
                   </button>
                 </div>
               </div>
+            </div>
+
+            {/* Bagian 5: Estimasi Jam Tanding & Rundown Call Room (CoC) */}
+            <div className="space-y-2 pt-2 border-t border-slate-100">
+              <label className="font-bold text-slate-900 block text-xs">
+                5. Estimasi Jam Tanding &amp; Rundown Call Room (CoC)
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="space-y-1">
+                  <span className="text-[10px] text-slate-500 font-bold">Jam Mulai Sesi</span>
+                  <Input
+                    type="time"
+                    value={tempSessionStartTime}
+                    onChange={(e) => setTempSessionStartTime(e.target.value)}
+                    className="h-8 text-xs font-mono font-bold"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-[10px] text-slate-500 font-bold">Durasi / Seri (Mnt)</span>
+                  <Input
+                    type="number"
+                    step="0.5"
+                    min="0.2"
+                    value={tempHeatDurationMinutes}
+                    onChange={(e) => setTempHeatDurationMinutes(Number(e.target.value) || 1)}
+                    className="h-8 text-xs font-mono font-bold"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-[10px] text-slate-500 font-bold">Lapor CoC (Mnt)</span>
+                  <Input
+                    type="number"
+                    min="0"
+                    value={tempCocOffsetMinutes}
+                    onChange={(e) => setTempCocOffsetMinutes(Number(e.target.value) || 15)}
+                    className="h-8 text-xs font-mono font-bold"
+                  />
+                </div>
+              </div>
+              <p className="text-[10px] text-slate-400">
+                Waktu tanding seri dihitung otomatis (contoh: 08:00, 08:01, 08:02). Atlet wajib duduk/lapor di CoC {tempCocOffsetMinutes} menit sebelum start seri.
+              </p>
             </div>
           </div>
 

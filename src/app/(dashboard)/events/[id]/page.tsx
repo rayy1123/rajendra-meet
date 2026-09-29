@@ -24,7 +24,7 @@ export default async function EventDetailPage({ params }: PageProps) {
   const { id } = await params;
   const supabase = await createClient();
 
-  const { data: rawEvent } = await supabase.from('events').select('*').eq('id', id).single();
+  const { data: rawEvent } = await supabase.from('events').select('*').eq('id', id).maybeSingle();
   if (!rawEvent) notFound();
 
   const savedSettings = getEventSettings(id);

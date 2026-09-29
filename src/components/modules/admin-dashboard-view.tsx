@@ -33,6 +33,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { type ScheduleItem } from '@/lib/data/schedules-server';
 
 export interface ActiveEventSpotlight {
   id: string;
@@ -69,6 +70,7 @@ export interface AdminDashboardViewProps {
   totalRevenue: number;
   pendingPaymentCount: number;
   clubsSummary: ClubSummaryRow[];
+  schedules?: ScheduleItem[];
   seasonYear?: string;
 }
 
@@ -81,6 +83,7 @@ export function AdminDashboardView({
   totalRevenue,
   pendingPaymentCount,
   clubsSummary,
+  schedules = [],
   seasonYear = '2026',
 }: AdminDashboardViewProps) {
   const [clubFilter, setClubFilter] = useState<'all' | 'pending'>('all');
@@ -640,6 +643,13 @@ export function AdminDashboardView({
                   Telemetri sensor start block dan timing scoreboard pool Senayan.
                 </p>
               </div>
+
+              <Link
+                href="/equipment"
+                className="text-[11px] font-bold text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1 shrink-0"
+              >
+                <span>Kelola &rarr;</span>
+              </Link>
             </div>
 
             <div className="space-y-2.5 text-xs">
@@ -676,6 +686,15 @@ export function AdminDashboardView({
                 </Badge>
               </div>
             </div>
+
+            <div className="pt-1 border-t border-slate-100">
+              <Link
+                href="/equipment"
+                className="w-full py-2 rounded-xl bg-slate-50 hover:bg-blue-50 text-blue-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors border border-slate-200"
+              >
+                <Sliders className="h-3.5 w-3.5" /> Buka Telemetri &amp; Peralatan Lengkap &rarr;
+              </Link>
+            </div>
           </div>
 
           {/* Card 2: Jadwal & Agenda Hari Ini */}
@@ -687,51 +706,93 @@ export function AdminDashboardView({
                   Jadwal &amp; Agenda Hari Ini
                 </h3>
               </div>
-              <span className="text-[10px] font-mono text-slate-400 font-bold">WIB (GMT+7)</span>
+
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono text-slate-400 font-bold">WIB (GMT+7)</span>
+                <Link
+                  href="/jadwal"
+                  className="text-[11px] font-bold text-blue-600 hover:text-blue-800 hover:underline"
+                >
+                  Catat &rarr;
+                </Link>
+              </div>
             </div>
 
             <div className="space-y-3 text-xs">
-              {/* Agenda 1 */}
-              <div className="p-3 rounded-xl border border-blue-100 bg-blue-50/40 space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono font-bold text-blue-900 text-xs bg-blue-100 px-2 py-0.5 rounded">
-                    09:00
-                  </span>
-                  <span className="text-[10px] font-bold text-slate-500">Pendaftaran</span>
-                </div>
-                <p className="font-bold text-slate-900 pt-1">Batas Penutupan Perubahan Nama</p>
-                <p className="text-[11px] text-slate-600 leading-snug">
-                  Scratch / penggantian perenang di nomor estafet dan nomor individu.
-                </p>
-              </div>
+              {(schedules && schedules.length > 0 ? schedules.slice(0, 4) : [
+                {
+                  id: 'def-1',
+                  time: '09:00',
+                  category: 'Pendaftaran',
+                  title: 'Batas Penutupan Perubahan Nama',
+                  description: 'Scratch / penggantian perenang di nomor estafet dan nomor individu.',
+                  status: 'completed',
+                },
+                {
+                  id: 'def-2',
+                  time: '14:00',
+                  category: 'Technical Meeting',
+                  title: 'Technical Meeting & Drawing Seri',
+                  description: 'Ruang Media Akuatik Senayan & Zoom Live bersama Coach.',
+                  status: 'ongoing',
+                },
+                {
+                  id: 'def-3',
+                  time: '16:30',
+                  category: 'Teknis Kolam',
+                  title: 'Trial Touchpad & Sensor Start',
+                  description: 'Uji kalibrasi false start detector & touch plates lintasan 1–8.',
+                  status: 'upcoming',
+                },
+              ]).map((item) => {
+                const isOngoing = item.status === 'ongoing';
+                const isCompleted = item.status === 'completed';
 
-              {/* Agenda 2 */}
-              <div className="p-3 rounded-xl border border-indigo-100 bg-indigo-50/40 space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono font-bold text-indigo-900 text-xs bg-indigo-100 px-2 py-0.5 rounded">
-                    14:00
-                  </span>
-                  <span className="text-[10px] font-bold text-slate-500">Technical Meeting</span>
-                </div>
-                <p className="font-bold text-slate-900 pt-1">Technical Meeting &amp; Drawing Seri</p>
-                <p className="text-[11px] text-slate-600 leading-snug">
-                  Ruang Media Akuatik Senayan &amp; Zoom Live bersama Coach.
-                </p>
-              </div>
+                return (
+                  <div
+                    key={item.id}
+                    className={cn(
+                      'p-3 rounded-xl border space-y-1 transition-all',
+                      isOngoing
+                        ? 'border-amber-300 bg-amber-50/60 ring-1 ring-amber-300'
+                        : isCompleted
+                        ? 'border-slate-200 bg-slate-50/70'
+                        : 'border-blue-100 bg-blue-50/40'
+                    )}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span
+                        className={cn(
+                          'font-mono font-bold text-xs px-2 py-0.5 rounded',
+                          isOngoing
+                            ? 'bg-amber-500 text-white'
+                            : isCompleted
+                            ? 'bg-slate-200 text-slate-700'
+                            : 'bg-blue-100 text-blue-900'
+                        )}
+                      >
+                        {item.time}
+                      </span>
+                      <span className="text-[10px] font-bold text-slate-500">{item.category}</span>
+                    </div>
+                    <p className="font-bold text-slate-900 pt-1 leading-snug">{item.title}</p>
+                    {item.description && (
+                      <p className="text-[11px] text-slate-600 leading-snug">
+                        {item.description}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
 
-              {/* Agenda 3 */}
-              <div className="p-3 rounded-xl border border-teal-100 bg-teal-50/40 space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono font-bold text-teal-900 text-xs bg-teal-100 px-2 py-0.5 rounded">
-                    16:30
-                  </span>
-                  <span className="text-[10px] font-bold text-slate-500">Teknis Kolam</span>
-                </div>
-                <p className="font-bold text-slate-900 pt-1">Trial Touchpad &amp; Sensor Start</p>
-                <p className="text-[11px] text-slate-600 leading-snug">
-                  Uji kalibrasi false start detector &amp; touch plates lintasan 1–8.
-                </p>
-              </div>
+            <div className="pt-1 border-t border-slate-100">
+              <Link
+                href="/jadwal"
+                className="w-full py-2 rounded-xl bg-slate-50 hover:bg-blue-50 text-blue-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors border border-slate-200"
+              >
+                <Plus className="h-3.5 w-3.5" /> Catat &amp; Kelola Timeline Agenda Lomba &rarr;
+              </Link>
             </div>
           </div>
         </div>

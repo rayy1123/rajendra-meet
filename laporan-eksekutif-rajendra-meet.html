@@ -238,7 +238,7 @@
       </div>
       <div class="meta-item">
         <strong>Status Validasi</strong>
-        124 Unit Tests Lulus (100% Pass)
+        157 Unit Tests Lulus (100% Pass)
       </div>
     </div>
   </div>
@@ -402,8 +402,64 @@
       <li class="feature-item">
         <span class="feature-icon">✓</span>
         <div class="feature-content">
-          <strong>Bagian Testimoni Baru & Rute Layanan RAB</strong>
-          <p>Ulasan autentik peserta dengan metrik kepuasan (4.9/5.0) dan navigasi langsung ke rincian paket RAB kejuaraan.</p>
+          <strong>Bagian Testimoni Baru, Layanan RAB, & Tentang Kami</strong>
+          <p>Foto resmi tim Rajendra Swimming Organizer terpasang dengan narasi visi misi akurat serta ulasan autentik kepuasan peserta (4.9/5.0).</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Poin 6 -->
+  <div class="section-card">
+    <h2>6. Integritas Pendaftaran, Isolasi KU, & Verifikasi Pembayaran</h2>
+    <ul class="feature-list">
+      <li class="feature-item">
+        <span class="feature-icon">✓</span>
+        <div class="feature-content">
+          <strong>Isolasi Ketat Kategori Umur (KU 1 s/d KU V & Senior)</strong>
+          <p>Penyaringan nomor lomba berbasis regex eksak tanpa kebocoran substring: atlet KU 1 hanya disajikan nomor perlombaan berkualifikasi KU 1/SMA dan gender yang sesuai, nomor lainnya dieliminasi total.</p>
+        </div>
+      </li>
+      <li class="feature-item">
+        <span class="feature-icon">✓</span>
+        <div class="feature-content">
+          <strong>Validasi Ganda Sisi Server (Server-Side Guard)</strong>
+          <p>Server Actions <code>submitRegistrationAction</code> dan <code>createAthleteAndRegisterAction</code> memverifikasi ulang eligibility nomor lomba sebelum data dimasukkan ke database.</p>
+        </div>
+      </li>
+      <li class="feature-item">
+        <span class="feature-icon">✓</span>
+        <div class="feature-content">
+          <strong>Sinkronisasi Antrean Verifikasi Pembayaran Panitia</strong>
+          <p>Koreksi query dan pemetaan enum status (<code>pending</code>, <code>verified</code>, <code>rejected</code>) memastikan seluruh bukti bayar dan kode unik pendaftaran langsung terdata rapi di dasbor panitia.</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Poin 7 -->
+  <div class="section-card">
+    <h2>7. Telemetri Sensor Arena & Manajemen Jadwal/Agenda Kejuaraan</h2>
+    <ul class="feature-list">
+      <li class="feature-item">
+        <span class="feature-icon">✓</span>
+        <div class="feature-content">
+          <strong>Modul Telemetri Peralatan Arena Live (<code>/equipment</code>)</strong>
+          <p>Pemantauan status konsol Swiss Timing Omega, touchpad 8 lintasan (dengan simulator sentuh interaktif), papan skor LED arena, dan sinkronisasi streaming cloud.</p>
+        </div>
+      </li>
+      <li class="feature-item">
+        <span class="feature-icon">✓</span>
+        <div class="feature-content">
+          <strong>Manajemen Pencatatan Jadwal & Rundown Acara (<code>/jadwal</code>)</strong>
+          <p>Rute terpadu untuk mencatat, mengedit, dan memantau timeline hari perlombaan, batas scratch nama, serta technical meeting yang tersinkronisasi langsung ke dasbor panitia.</p>
+        </div>
+      </li>
+      <li class="feature-item">
+        <span class="feature-icon">✓</span>
+        <div class="feature-content">
+          <strong>Pembatasan Sesi Bersamaan (Concurrent Session Limiter)</strong>
+          <p>Satu akun hanya dapat aktif pada satu perangkat secara bersamaan. Sesi baru otomatis membatalkan sesi lama dan melindungi data kontingen dari akses ganda.</p>
         </div>
       </li>
     </ul>

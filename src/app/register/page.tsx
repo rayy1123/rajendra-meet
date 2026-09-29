@@ -16,6 +16,9 @@ import {
   ArrowRight,
   Info,
   Check,
+  Plus,
+  X,
+  Building2,
 } from 'lucide-react';
 import { SplitAuthShell } from '@/components/layout/split-auth-shell';
 import { Button } from '@/components/ui/button';
@@ -46,6 +49,10 @@ export default function RegisterPage() {
   const [successMsg, setSuccessMsg] = useState('');
   const [schools, setSchools] = useState<SchoolOption[]>([]);
   const [schoolsLoaded, setSchoolsLoaded] = useState(false);
+  const [showAddClubModal, setShowAddClubModal] = useState(false);
+  const [newClubName, setNewClubName] = useState('');
+  const [newClubCity, setNewClubCity] = useState('');
+  const [savingNewClub, setSavingNewClub] = useState(false);
 
   const loadSchools = async () => {
     try {
@@ -62,6 +69,44 @@ export default function RegisterPage() {
       }
     } finally {
       setSchoolsLoaded(true);
+    }
+  };
+
+  const handleCreateClub = async () => {
+    const trimmedName = newClubName.trim();
+    if (!trimmedName) {
+      toast.error('Nama klub atau kontingen sekolah wajib diisi.');
+      return;
+    }
+    setSavingNewClub(true);
+    try {
+      const res = await fetch('/api/schools', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: trimmedName,
+          city: newClubCity.trim() || null,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data?.data) {
+        const created: SchoolOption = {
+          id: data.data.id,
+          name: data.data.name,
+        };
+        setSchools((prev) => [created, ...prev.filter((s) => s.id !== created.id)]);
+        setSelectedSchoolId(created.id);
+        setShowAddClubModal(false);
+        setNewClubName('');
+        setNewClubCity('');
+        toast.success(`Klub "${created.name}" berhasil ditambahkan dan dipilih!`);
+      } else {
+        toast.error(data.error || 'Gagal menambahkan klub.');
+      }
+    } catch {
+      toast.error('Terjadi kesalahan saat menambahkan klub.');
+    } finally {
+      setSavingNewClub(false);
     }
   };
 
@@ -214,26 +259,60 @@ export default function RegisterPage() {
       <form onSubmit={handleSubmit} className="space-y-3.5">
         {/* Pilihan Kontingen Klub (Jika tipe klub) */}
         {affiliationType === 'club' && (
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-900 flex items-center justify-between">
-              <span>Nama Klub / Sekolah</span>
-              <span className="text-[10px] text-blue-600 font-semibold">*Wajib dipilih</span>
-            </label>
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                <School className="h-3.5 w-3.5 text-blue-600" />
+                <span>Nama Klub / Kontingen Sekolah</span>
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowAddClubModal(true)}
+                className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+              >
+                <Plus className="h-3 w-3" /> Tambah Klub Baru
+              </button>
+            </div>
             <Select
               value={selectedSchoolId ?? ''}
-              onValueChange={(v) => setSelectedSchoolId(v || null)}
+              onValueChange={(v) => {
+                if (v === '__add_new_club__') {
+                  setShowAddClubModal(true);
+                } else {
+                  setSelectedSchoolId(v || null);
+                }
+              }}
             >
               <SelectTrigger className="h-10 rounded-xl bg-white border-slate-300 text-xs font-semibold text-slate-900 focus-visible:ring-2 focus-visible:ring-blue-500/20 shadow-2xs">
                 <SelectValue placeholder="-- Pilih Kontingen Klub / Sekolah --" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem
+                  value="__add_new_club__"
+                  className="text-xs font-bold text-blue-600 bg-blue-50/70 hover:bg-blue-100 cursor-pointer border-b border-slate-100"
+                >
+                  <span className="flex items-center gap-1">
+                    <Plus className="h-3.5 w-3.5" /> + Tambahkan Klub Baru...
+                  </span>
+                </SelectItem>
                 {schools.map((s) => (
-                  <SelectItem key={s.id} value={s.id} className="text-xs">
+                  <SelectItem key={s.id} value={s.id} className="text-xs font-medium">
                     {s.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            <p className="text-[10px] text-slate-500">
+              Klub Anda belum ada di daftar? Klik{' '}
+              <button
+                type="button"
+                onClick={() => setShowAddClubModal(true)}
+                className="text-blue-600 font-bold underline cursor-pointer"
+              >
+                Tambah Klub Baru
+              </button>{' '}
+              untuk mendaftarkannya secara instan.
+            </p>
           </div>
         )}
 
@@ -380,6 +459,76 @@ export default function RegisterPage() {
           Data atlet terlindungi dan terhubung langsung ke basis data Rajendra Meet.
         </p>
       </div>
+
+      {/* Modal Tambah Klub / Kontingen Baru */}
+      {showAddClubModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between border-b pb-3">
+              <div className="flex items-center gap-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                  <School className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">Tambah Klub / Kontingen Baru</h3>
+                  <p className="text-[11px] text-slate-500">Daftarkan nama klub Anda untuk akun pendaftaran</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAddClubModal(false)}
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 cursor-pointer"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-900">Nama Klub / Sekolah *</label>
+                <Input
+                  type="text"
+                  placeholder="Contoh: Tirta Jaya Swimming Club"
+                  value={newClubName}
+                  onChange={(e) => setNewClubName(e.target.value)}
+                  className="h-10 text-xs rounded-xl"
+                  autoFocus
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-900">Kota / Kabupaten</label>
+                <Input
+                  type="text"
+                  placeholder="Contoh: Jakarta Selatan / Tangerang"
+                  value={newClubCity}
+                  onChange={(e) => setNewClubCity(e.target.value)}
+                  className="h-10 text-xs rounded-xl"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowAddClubModal(false)}
+                className="h-9 px-3 text-xs"
+              >
+                Batal
+              </Button>
+              <Button
+                type="button"
+                onClick={handleCreateClub}
+                disabled={savingNewClub || !newClubName.trim()}
+                className="h-9 px-4 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white gap-1.5"
+              >
+                {savingNewClub ? <BrandedSpinner className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                Simpan &amp; Pilih Klub
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </SplitAuthShell>
   );
 }

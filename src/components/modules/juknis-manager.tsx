@@ -437,7 +437,7 @@ export function JuknisManager({
             <div className="flex items-center gap-2">
               <h3 className="flex items-center gap-2 text-base font-bold text-foreground">
                 <FileText className="h-5 w-5 text-primary" />
-                Petunjuk Teknis Perlombaan (Template Haornas Swim Fest)
+                Petunjuk Teknis Perlombaan (Juknis Resmi)
               </h3>
               {customHtml && (
                 <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-800 text-[10px] font-bold">
@@ -446,7 +446,7 @@ export function JuknisManager({
               )}
             </div>
             <p className="text-xs text-muted-foreground">
-              Format buku juknis resmi standar nasional: Logo Rajendra Meet di kiri & Logo Rajendra Organizer di kanan.
+              Dokumen petunjuk teknis pelaksanaan kejuaraan renang Rajendra Meet.
             </p>
           </div>
 
@@ -649,7 +649,7 @@ export function JuknisManager({
                   OFFICIAL TECHNICAL HANDBOOK
                 </span>
                 <p className="text-[9px] sm:text-[10px] font-semibold text-slate-500">
-                  STANDAR FINA / AKUATIK INDONESIA
+                  PERATURAN RESMI RAJENDRA MEET
                 </p>
               </div>
 
@@ -938,7 +938,7 @@ export function JuknisManager({
               <ul className="space-y-0.5 text-slate-800">
                 <li className="flex items-baseline gap-2">
                   <span>•</span>
-                  <span>Peraturan perlombaan menggunakan peraturan Akuatik Indonesia terbaru yang disesuaikan.</span>
+                  <span>Peraturan perlombaan menggunakan ketentuan resmi kejuaraan Rajendra Meet.</span>
                 </li>
                 <li className="flex items-baseline gap-2">
                   <span>•</span>

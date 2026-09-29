@@ -66,7 +66,7 @@ describe('3. Pengujian Showcases Beranda (Poster HD, Tentang Kami, 5 Pilar)', ()
   it('memiliki Tentang Kami dengan foto tim', () => {
     const about = getServerShowcases('about');
     expect(about.length).toBeGreaterThan(0);
-    expect(about[0].imageUrl).toContain('team-about');
+    expect(about[0].imageUrl).toMatch(/tentang|team-about/i);
   });
 
   it('memiliki 5 pilar keunggulan lengkap', () => {

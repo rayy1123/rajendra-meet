@@ -21,6 +21,9 @@ import { Event } from '@/types/database';
 import { EventLogoDialog } from '@/components/modules/event-logo-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import { EventLogoImage } from '@/components/ui/event-logo-image';
+import { parseAndImportExcel, downloadExcelTemplate } from '@/services/excel-parser';
+import { useRouter } from 'next/navigation';
+import { BrandedSpinner } from '@/components/ui/branded-loading';
 
 export interface EventCardData extends Event {
   participant_count: number;
@@ -31,12 +34,52 @@ export interface EventCardData extends Event {
 }
 
 export function PerlombaanCardList({ events }: { events: EventCardData[] }) {
+  const router = useRouter();
   const [selectedEventForImport, setSelectedEventForImport] = useState<EventCardData | null>(null);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importing, setImporting] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
-    setTimeout(() => setToastMsg(null), 3000);
+    setTimeout(() => setToastMsg(null), 3500);
+  };
+
+  const handleDownloadTemplate = async () => {
+    try {
+      showToast('Menyiapkan & mengunduh Template Excel Resmi...');
+      await downloadExcelTemplate();
+      showToast('Template Excel berhasil diunduh!');
+    } catch {
+      showToast('Gagal mengunduh template Excel.');
+    }
+  };
+
+  const handleExecuteImport = async () => {
+    if (!importFile || !selectedEventForImport) {
+      showToast('Pilih file Excel terlebih dahulu.');
+      return;
+    }
+
+    setImporting(true);
+    showToast('Memproses impor data peserta...');
+
+    try {
+      const res = await parseAndImportExcel(importFile, selectedEventForImport.id);
+      setImporting(false);
+      if (res.success) {
+        showToast(res.message || 'Impor data peserta berhasil!');
+        setSelectedEventForImport(null);
+        setImportFile(null);
+        router.refresh();
+      } else {
+        showToast(res.message || 'Gagal mengimpor file.');
+      }
+    } catch (err) {
+      setImporting(false);
+      const msg = err instanceof Error ? err.message : 'Gagal memproses file Excel.';
+      showToast(msg);
+    }
   };
 
   return (
@@ -235,39 +278,43 @@ export function PerlombaanCardList({ events }: { events: EventCardData[] }) {
             <div className="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center space-y-2 hover:border-emerald-400 transition-colors">
               <FileSpreadsheet className="h-8 w-8 text-emerald-600 mx-auto" />
               <div className="text-xs font-semibold text-slate-700">
-                Pilih file Excel (.xlsx / .xls)
+                {importFile ? importFile.name : 'Pilih file Excel (.xlsx / .xls)'}
               </div>
-              <input type="file" accept=".xlsx, .xls, .csv" className="text-xs text-slate-500" />
+              <input
+                type="file"
+                accept=".xlsx, .xls"
+                onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+                className="text-xs text-slate-500 cursor-pointer"
+              />
             </div>
 
             <div className="flex justify-between items-center pt-2">
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  showToast('Template Excel sedang diunduh...');
-                }}
-                className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline"
+              <button
+                type="button"
+                onClick={handleDownloadTemplate}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline cursor-pointer"
               >
                 <Download className="h-3.5 w-3.5" /> Template Excel
-              </a>
+              </button>
               <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => setSelectedEventForImport(null)}
-                  className="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                  onClick={() => {
+                    setSelectedEventForImport(null);
+                    setImportFile(null);
+                  }}
+                  className="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    showToast('Impor peserta Excel berhasil diproses!');
-                    setSelectedEventForImport(null);
-                  }}
-                  className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 text-xs font-bold shadow-md"
+                  onClick={handleExecuteImport}
+                  disabled={importing || !importFile}
+                  className="rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white px-4 py-1.5 text-xs font-bold shadow-md cursor-pointer flex items-center gap-1.5"
                 >
-                  Import Sekarang
+                  {importing ? <BrandedSpinner className="h-3.5 w-3.5" /> : <Upload className="h-3.5 w-3.5" />}
+                  {importing ? 'Mengimpor...' : 'Import Sekarang'}
                 </button>
               </div>
             </div>

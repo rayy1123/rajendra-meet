@@ -45,20 +45,47 @@ export default function NewEventPage() {
     e.preventDefault();
     setSaving(true);
     setError('');
-    const { error } = await supabase.from('events').insert({
-      name: form.name,
-      organizer: form.organizer,
-      location: form.location,
-      start_date: form.start_date || new Date().toISOString().slice(0, 10),
-      end_date: form.end_date || form.start_date || new Date().toISOString().slice(0, 10),
-      pool_type: form.pool_type,
-      lane_count: Number(form.lane_count) || 8,
-      pool_length_meters: Number(form.pool_length_meters) || 50,
-    });
+    const { data: newEvt, error } = await supabase
+      .from('events')
+      .insert({
+        name: form.name,
+        organizer: form.organizer,
+        location: form.location,
+        start_date: form.start_date || new Date().toISOString().slice(0, 10),
+        end_date: form.end_date || form.start_date || new Date().toISOString().slice(0, 10),
+        pool_type: form.pool_type,
+        lane_count: Number(form.lane_count) || 8,
+        pool_length_meters: Number(form.pool_length_meters) || 50,
+      })
+      .select('id')
+      .single();
+
     if (error) {
       setError(error.message);
       setSaving(false);
       return;
+    }
+
+    if (newEvt?.id) {
+      try {
+        await fetch(`/api/events/${newEvt.id}/settings`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fee_per_event: Number(form.fee_per_event) || 50000,
+            use_unique_code: form.use_unique_code,
+            unique_code_mode: form.unique_code_mode,
+            unique_code_fixed: Number(form.unique_code_fixed) || 0,
+            unique_code_min: Number(form.unique_code_min) || 100,
+            unique_code_max: Number(form.unique_code_max) || 999,
+            bank_name: form.bank_name,
+            bank_account_no: form.bank_account_no,
+            bank_account_name: form.bank_account_name,
+          }),
+        });
+      } catch (err) {
+        console.warn('Failed to save additional event settings:', err);
+      }
     }
     router.push('/events');
     router.refresh();

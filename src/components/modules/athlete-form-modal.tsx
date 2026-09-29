@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { saveAthlete, type AthleteFormState } from '@/app/atlet-saya/actions';
+import { calculateAgeCategory } from '@/lib/age-category';
 
 export interface AthleteFormValues {
   id?: string;
@@ -37,6 +38,15 @@ export function AthleteFormModal({
 }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [birthDate, setBirthDate] = useState(initial?.birth_date ?? '');
+  const [selectedSchoolId, setSelectedSchoolId] = useState(initial?.school_id ?? '');
+
+  useEffect(() => {
+    setBirthDate(initial?.birth_date ?? '');
+    setSelectedSchoolId(initial?.school_id ?? '');
+  }, [initial, open]);
+
+  const kuPreview = birthDate ? calculateAgeCategory(new Date(birthDate)) : '';
 
   if (!open) return null;
 
@@ -99,12 +109,20 @@ export function AthleteFormModal({
               </select>
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium">Tanggal Lahir *</label>
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium">Tanggal Lahir *</label>
+                {kuPreview && (
+                  <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                    {kuPreview}
+                  </span>
+                )}
+              </div>
               <input
                 type="date"
                 name="birth_date"
                 required
-                defaultValue={v?.birth_date ?? ''}
+                value={birthDate}
+                onChange={(e) => setBirthDate(e.target.value)}
                 className="w-full rounded-lg border border-border px-3 py-2 text-sm"
               />
             </div>
@@ -136,13 +154,21 @@ export function AthleteFormModal({
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm font-medium">Sekolah / Klub</label>
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Sekolah / Kontingen Klub</label>
+              {selectedSchoolId && (
+                <span className="text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
+                  ⚠️ Deteksi Klub Terpilih
+                </span>
+              )}
+            </div>
             <select
               name="school_id"
-              defaultValue={v?.school_id ?? ''}
+              value={selectedSchoolId}
+              onChange={(e) => setSelectedSchoolId(e.target.value)}
               className="w-full rounded-lg border border-border px-3 py-2 text-sm"
             >
-              <option value="">— Tanpa sekolah —</option>
+              <option value="">— Tanpa sekolah / Mandiri —</option>
               {schools.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name}
