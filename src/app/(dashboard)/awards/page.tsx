@@ -8,6 +8,8 @@ import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { AwardsManager, type EventOption } from '@/components/modules/awards-manager';
 
+import { getEventLiveConfig } from '@/lib/data/live-scoreboard-server';
+
 export const dynamic = 'force-dynamic';
 
 const DEFAULT_RULES: PointRule[] = [
@@ -221,6 +223,8 @@ export default async function AwardsPage({
   const byClass = buildStandings(entries, rules, { groupBy: 'class' });
   const bestSwimmers = selectBestSwimmers(swimmerEntries, rules);
 
+  const liveConfig = currentEvent ? getEventLiveConfig(currentEvent.id) : null;
+
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
       <div className="no-print">
@@ -249,6 +253,7 @@ export default async function AwardsPage({
         schoolNameMap={schoolNameMap}
         totalEntriesScored={entries.length}
         totalCompEventsScored={byComp.size}
+        resultsMode={liveConfig?.resultsMode || 'auto'}
       />
     </div>
   );

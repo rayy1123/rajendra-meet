@@ -32,6 +32,8 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { type PointRule, type StandingRow, sortStandings } from '@/services/points';
 import { type BestSwimmerGroup } from '@/services/records';
 import { cn } from '@/lib/utils';
+import { EventResultsToggle } from './event-results-toggle';
+import type { ResultsVisibilityMode } from '@/lib/data/live-scoreboard-settings';
 
 export interface EventOption {
   id: string;
@@ -52,6 +54,7 @@ export interface AwardsManagerProps {
   schoolNameMap: Record<string, string>;
   totalEntriesScored: number;
   totalCompEventsScored: number;
+  resultsMode?: ResultsVisibilityMode;
 }
 
 export function AwardsManager({
@@ -65,6 +68,7 @@ export function AwardsManager({
   schoolNameMap,
   totalEntriesScored,
   totalCompEventsScored,
+  resultsMode = 'auto',
 }: AwardsManagerProps) {
   const [activeTab, setActiveTab] = useState<'overall' | 'grade' | 'class' | 'swimmer'>('overall');
   const [showGuide, setShowGuide] = useState(true);
@@ -202,6 +206,16 @@ export function AwardsManager({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            {event && (
+              <EventResultsToggle
+                eventId={event.id}
+                initialMode={resultsMode}
+                event={{
+                  start_date: event.startDate,
+                  end_date: event.endDate,
+                }}
+              />
+            )}
             <Button
               variant="outline"
               size="sm"
