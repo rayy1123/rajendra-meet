@@ -161,7 +161,7 @@ export default async function PendaftaranSayaPage() {
                         <Icon className="h-3.5 w-3.5" /> {st.label}
                       </span>
                       <Link
-                        href={`/invoice/${r.id}`}
+                        href={`/invoice/${r.id}?scope=athlete`}
                         target="_blank"
                         className="inline-flex items-center gap-1 text-xs font-bold text-primary bg-primary/10 hover:bg-primary/20 px-2.5 py-1 rounded-full transition-colors"
                       >

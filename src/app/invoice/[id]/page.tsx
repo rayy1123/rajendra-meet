@@ -2,12 +2,13 @@ import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import { InvoiceCard, type InvoiceData, type InvoiceAthleteGroup, type InvoicePaymentTransaction } from '@/components/modules/invoice-card';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
 interface InvoicePageProps {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ print?: string }>;
+  searchParams?: Promise<{ print?: string; scope?: string; athleteId?: string; single?: string }>;
 }
 
 export default async function InvoicePage({ params, searchParams }: InvoicePageProps) {
@@ -196,6 +197,17 @@ export default async function InvoicePage({ params, searchParams }: InvoicePageP
     activeRegs = fullRelatedRegs;
   }
 
+  // Opsi Scope Cetak Invoice: 'athlete' (khusus 1 atlet) vs 'club' (seluruh kontingen)
+  // Jika scope tidak ditentukan secara eksplisit sebagai 'club', default filter ke atlet pendaftaran utama
+  const isClubScope = sParams.scope === 'club';
+  const targetAthleteId = sParams.athleteId || mainReg.athlete_id;
+
+  if (!isClubScope && targetAthleteId) {
+    activeRegs = activeRegs.filter(
+      (r: any) => r.athlete_id === targetAthleteId || r.athletes?.id === targetAthleteId
+    );
+  }
+
   // Ambil data profil pendaftar
   let registrantName = 'Peserta';
   if (mainReg.registrant_id) {
@@ -304,14 +316,16 @@ export default async function InvoicePage({ params, searchParams }: InvoicePageP
   const yearShort = String(regDateObj.getFullYear()).slice(-2);
   const invoiceNumber = `INV/CLUB/${yearShort}/${shortId}`;
 
+  const mainAthleteName = (mainReg.athletes as any)?.full_name || 'Atlet';
+
   const invoiceData: InvoiceData = {
     invoiceNumber,
     subject: (mainReg.events as any).name || 'Kejuaraan Renang Rajendra',
     date: dateFormatted,
     dueDate: dueDateFormatted,
     status: latestStatus,
-    recipientName: registrantName,
-    recipientClubOrSchool: schoolName,
+    recipientName: !isClubScope ? mainAthleteName : registrantName,
+    recipientClubOrSchool: !isClubScope ? (schoolName ? `${schoolName}` : 'Mandiri') : schoolName,
     athletes: athletesList,
     subtotal: totalBaseAmount,
     uniqueCode,
@@ -326,7 +340,7 @@ export default async function InvoicePage({ params, searchParams }: InvoicePageP
 
   return (
     <div className="min-h-screen bg-slate-100/70 py-8 px-4 sm:px-6 print:min-h-0 print:p-0 print:m-0 print:bg-white print:block">
-      <div className="mx-auto max-w-4xl mb-4 no-print">
+      <div className="mx-auto max-w-4xl mb-4 no-print space-y-3">
         <Breadcrumb
           items={[
             { label: 'Beranda', href: '/' },
@@ -334,6 +348,41 @@ export default async function InvoicePage({ params, searchParams }: InvoicePageP
             { label: invoiceNumber },
           ]}
         />
+
+        {/* Scope Switcher Bar: Opsi Cetak Invoice per Atlet vs Seluruh Kontingen */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-white border border-slate-200 rounded-2xl shadow-xs">
+          <div className="space-y-0.5">
+            <p className="text-xs font-bold text-slate-900">Opsi Cakupan Invoice</p>
+            <p className="text-[11px] text-slate-500">
+              {isClubScope
+                ? 'Menampilkan rincian seluruh atlet & nomor lomba kontingen.'
+                : `Menampilkan khusus tagihan atlet ${mainAthleteName}.`}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              href={`/invoice/${id}?scope=athlete${autoPrint ? '&print=true' : ''}`}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                !isClubScope
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-2xs'
+                  : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+              }`}
+            >
+              👤 Invoice Atlet ({mainAthleteName})
+            </Link>
+            <Link
+              href={`/invoice/${id}?scope=club${autoPrint ? '&print=true' : ''}`}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                isClubScope
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-2xs'
+                  : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+              }`}
+            >
+              🏢 Invoice Kontingen ({schoolName || 'Seluruh Rombongan'})
+            </Link>
+          </div>
+        </div>
       </div>
       <InvoiceCard invoice={invoiceData} backUrl="/pendaftaran-saya" autoPrint={autoPrint} />
     </div>

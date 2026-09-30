@@ -232,18 +232,23 @@ export function InvoiceCard({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200/90 text-xs">
           <div className="space-y-1">
             <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
-              Ditujukan Kepada (Kontingen / Klub)
+              {invoice.athletes.length > 1 ? 'Ditujukan Kepada (Kontingen / Klub)' : 'Ditujukan Kepada (Atlet)'}
             </p>
             <h2 className="text-base font-black text-slate-950 uppercase font-heading">
-              {invoice.recipientClubOrSchool || invoice.recipientName}
+              {invoice.athletes.length === 1 ? invoice.recipientName : (invoice.recipientClubOrSchool || invoice.recipientName)}
             </h2>
-            {invoice.recipientClubOrSchool && invoice.recipientName !== invoice.recipientClubOrSchool && (
+            {invoice.recipientClubOrSchool && (
               <p className="text-xs text-slate-600 font-medium">
-                Penanggung Jawab / Official: <b>{invoice.recipientName}</b>
+                {invoice.athletes.length === 1 ? 'Klub / Kontingen:' : 'Penanggung Jawab / Official:'}{' '}
+                <b>{invoice.athletes.length === 1 ? invoice.recipientClubOrSchool : invoice.recipientName}</b>
               </p>
             )}
             <p className="text-[11px] text-slate-500 font-mono">
-              Total Rombongan: <b>{invoice.athletes.length} Atlet</b> • <b>{totalEntriesCount} Nomor Lomba</b>
+              {invoice.athletes.length > 1 ? (
+                <>Total Rombongan: <b>{invoice.athletes.length} Atlet</b> • <b>{totalEntriesCount} Nomor Lomba</b></>
+              ) : (
+                <>Tagihan Perorangan: <b>1 Atlet</b> • <b>{totalEntriesCount} Nomor Lomba</b></>
+              )}
             </p>
           </div>
 

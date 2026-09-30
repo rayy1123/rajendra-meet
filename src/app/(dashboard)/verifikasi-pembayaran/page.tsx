@@ -231,7 +231,7 @@ export default async function VerifikasiPembayaranPage({
                   </div>
                   <div className="flex items-center gap-2.5">
                     <Link
-                      href={`/invoice/${r.id}`}
+                      href={`/invoice/${r.id}?scope=athlete`}
                       target="_blank"
                       className="inline-flex items-center gap-1 text-xs font-bold text-[var(--m-aqua-ink)] bg-[var(--m-aqua-soft)] hover:bg-[var(--m-aqua)] hover:text-white px-2.5 py-1 rounded-lg transition-colors"
                     >

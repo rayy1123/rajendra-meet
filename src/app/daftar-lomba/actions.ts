@@ -84,20 +84,34 @@ export async function submitRegistrationAction(formData: FormData): Promise<Acti
       };
     }
 
-    // Ambil konfigurasi biaya & kode unik event
-    let eventData: any = null;
+    // Ambil konfigurasi biaya & kode unik event (gabungkan store lokal + database Supabase)
+    const { getEventSettings } = await import('@/lib/data/event-settings-server');
+    const storeSettings = getEventSettings(eventId);
     const { data: fullEvtData } = await supabase
       .from("events")
-      .select("id, fee_per_event, use_unique_code, unique_code_mode, unique_code_fixed, unique_code_min, unique_code_max")
+      .select("id, description")
       .eq("id", eventId)
       .maybeSingle();
 
-    if (fullEvtData && (fullEvtData as any).fee_per_event !== undefined) {
-      eventData = fullEvtData;
-    } else {
-      const { getEventSettings } = await import('@/lib/data/event-settings-server');
-      eventData = getEventSettings(eventId);
+    let descSettings: any = {};
+    if (fullEvtData?.description) {
+      try {
+        const parsed = JSON.parse(fullEvtData.description);
+        if (parsed && typeof parsed === 'object') descSettings = parsed;
+      } catch {}
     }
+
+    const eventData = {
+      ...storeSettings,
+      ...(fullEvtData || {}),
+      ...descSettings,
+      use_unique_code: descSettings?.use_unique_code ?? storeSettings?.use_unique_code ?? true,
+      unique_code_mode: descSettings?.unique_code_mode || storeSettings?.unique_code_mode || 'random_3_digit',
+      unique_code_fixed: descSettings?.unique_code_fixed ?? storeSettings?.unique_code_fixed ?? 0,
+      unique_code_min: descSettings?.unique_code_min ?? storeSettings?.unique_code_min ?? 100,
+      unique_code_max: descSettings?.unique_code_max ?? storeSettings?.unique_code_max ?? 999,
+      fee_per_event: descSettings?.fee_per_event || storeSettings?.fee_per_event || 50000,
+    };
 
     const { count: regCount } = await supabase
       .from("registrations")
@@ -340,20 +354,34 @@ export async function createAthleteAndRegisterAction(formData: FormData): Promis
       };
     }
 
-    // Ambil konfigurasi biaya & kode unik event
-    let eventData: any = null;
+    // Ambil konfigurasi biaya & kode unik event (gabungkan store lokal + database Supabase)
+    const { getEventSettings } = await import('@/lib/data/event-settings-server');
+    const storeSettings = getEventSettings(eventId);
     const { data: fullEvtData } = await supabase
       .from('events')
-      .select('id, fee_per_event, use_unique_code, unique_code_mode, unique_code_fixed, unique_code_min, unique_code_max')
+      .select('id, description')
       .eq('id', eventId)
       .maybeSingle();
 
-    if (fullEvtData && (fullEvtData as any).fee_per_event !== undefined) {
-      eventData = fullEvtData;
-    } else {
-      const { getEventSettings } = await import('@/lib/data/event-settings-server');
-      eventData = getEventSettings(eventId);
+    let descSettings: any = {};
+    if (fullEvtData?.description) {
+      try {
+        const parsed = JSON.parse(fullEvtData.description);
+        if (parsed && typeof parsed === 'object') descSettings = parsed;
+      } catch {}
     }
+
+    const eventData = {
+      ...storeSettings,
+      ...(fullEvtData || {}),
+      ...descSettings,
+      use_unique_code: descSettings?.use_unique_code ?? storeSettings?.use_unique_code ?? true,
+      unique_code_mode: descSettings?.unique_code_mode || storeSettings?.unique_code_mode || 'random_3_digit',
+      unique_code_fixed: descSettings?.unique_code_fixed ?? storeSettings?.unique_code_fixed ?? 0,
+      unique_code_min: descSettings?.unique_code_min ?? storeSettings?.unique_code_min ?? 100,
+      unique_code_max: descSettings?.unique_code_max ?? storeSettings?.unique_code_max ?? 999,
+      fee_per_event: descSettings?.fee_per_event || storeSettings?.fee_per_event || 50000,
+    };
 
     const { count: regCount } = await supabase
       .from('registrations')
