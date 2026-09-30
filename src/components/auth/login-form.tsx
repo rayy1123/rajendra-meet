@@ -76,7 +76,7 @@ export function LoginForm({ initialMode = 'email' }: LoginFormProps) {
           return;
         }
 
-        const ADMIN_ROLES = ['super_admin', 'event_admin', 'operator', 'admin', 'admin_kejuaraan', 'admin_keuangan'];
+        const ADMIN_ROLES = ['super_admin', 'event_admin', 'operator', 'admin', 'admin_kejuaraan', 'admin_keuangan', 'admin_technical', 'admin-technical'];
         const userId = data.user?.id;
         const { data: profile } = await supabase
           .from('profiles')
@@ -121,7 +121,7 @@ export function LoginForm({ initialMode = 'email' }: LoginFormProps) {
           .eq('id', userId)
           .maybeSingle();
 
-        const ADMIN_ROLES = ['super_admin', 'event_admin', 'operator', 'admin', 'admin_kejuaraan', 'admin_keuangan'];
+        const ADMIN_ROLES = ['super_admin', 'event_admin', 'operator', 'admin', 'admin_kejuaraan', 'admin_keuangan', 'admin_technical', 'admin-technical'];
         const role = (profile as { role?: string } | null)?.role ||
           (data.user?.user_metadata?.role as string) ||
           (data.user?.app_metadata?.role as string);

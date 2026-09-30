@@ -45,6 +45,8 @@ export default async function CertificatePage({
     'admin',
     'admin_kejuaraan',
     'admin_keuangan',
+    'admin_technical',
+    'admin-technical',
   ];
   const isAdmin = ADMIN_ROLES.includes(userRole);
 

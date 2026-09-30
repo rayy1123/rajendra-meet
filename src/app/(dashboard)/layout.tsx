@@ -11,6 +11,8 @@ const ADMIN_ROLES: UserRole[] = [
   'admin',
   'admin_kejuaraan',
   'admin_keuangan',
+  'admin_technical',
+  'admin-technical',
 ];
 
 const ALLOWED_VIEWER_ROUTES = [

@@ -29,12 +29,15 @@ import {
   Medal,
   ArrowDownWideNarrow,
   Layers,
+  ArrowRightLeft,
+  Sparkles,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { type SponsorItem, getCachedSponsors } from '@/lib/data/sponsors';
 import { SponsorLogosStrip } from './sponsor-logos-strip';
 import { formatMsToTime, cn } from '@/lib/utils';
 import Link from 'next/link';
+import { ManualLaneEditorDialog } from './manual-lane-editor-dialog';
 
 export function calculateHeatTiming(
   heatIndex: number,
@@ -134,6 +137,63 @@ export function BukuAcaraManager({
       setIsSyncing(false);
       toast.success('Buku Acara berhasil disinkronkan dengan data hasil lomba terkini!');
     }, 600);
+  };
+
+  // Manual Lane Editor State
+  const [manualEditorOpen, setManualEditorOpen] = useState(false);
+  const [selectedEditorEvent, setSelectedEditorEvent] = useState<{ id: string; name: string } | null>(null);
+  const [isGeneratingAll, setIsGeneratingAll] = useState(false);
+  const [generatingEventId, setGeneratingEventId] = useState<string | null>(null);
+
+  const handleOpenManualEditor = (id: string, name: string) => {
+    setSelectedEditorEvent({ id, name });
+    setManualEditorOpen(true);
+  };
+
+  const handleGenerateEvent = async (ceId: string, ceName: string) => {
+    if (!event) return;
+    if (!confirm(`Generate otomatis susunan seri & lintasan untuk nomor "${ceName}" menggunakan algoritma Spearhead standar FINA/Akuatik? Seri lama pada nomor ini akan diperbarui.`)) {
+      return;
+    }
+    setGeneratingEventId(ceId);
+    try {
+      const res = await fetch('/api/heats/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ compEventId: ceId, laneCount: event.laneCount || 8 }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Gagal generate seri');
+      toast.success(json.message);
+      router.refresh();
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Gagal memproses pembagian acara.');
+    } finally {
+      setGeneratingEventId(null);
+    }
+  };
+
+  const handleGenerateAllEvents = async () => {
+    if (!event) return;
+    if (!confirm(`Generate otomatis seluruh susunan seri & lintasan untuk SEMUA (${bukuEvents.length}) nomor lomba di kejuaraan ini? Ini akan menyusun heats dan lintasan seluruh peserta secara instan.`)) {
+      return;
+    }
+    setIsGeneratingAll(true);
+    try {
+      const res = await fetch('/api/heats/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ eventId: event.id, laneCount: event.laneCount || 8 }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Gagal generate seri massal');
+      toast.success(json.message);
+      router.refresh();
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Gagal memproses pembagian acara massal.');
+    } finally {
+      setIsGeneratingAll(false);
+    }
   };
 
   // State Pengaturan Halaman & Cetak Acara / Seri
@@ -385,6 +445,19 @@ export function BukuAcaraManager({
                 ))}
               </SelectContent>
             </Select>
+
+            {/* Tombol Auto-Generate Seluruh Acara (1-Klik) */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleGenerateAllEvents}
+              disabled={isGeneratingAll}
+              className="gap-1.5 text-xs font-bold h-9 border-[var(--m-aqua)] bg-[var(--m-aqua-soft)] hover:bg-sky-100 text-[var(--m-aqua-ink)] shadow-2xs cursor-pointer"
+              title="Generate otomatis susunan seri dan lintasan seluruh nomor lomba menggunakan algoritma Spearhead Seeding"
+            >
+              <Sparkles className={cn('h-3.5 w-3.5 text-[var(--m-aqua)]', isGeneratingAll && 'animate-spin')} />
+              {isGeneratingAll ? 'Menyusun Acara...' : 'Auto-Generate Semua Acara'}
+            </Button>
 
             {/* Tombol Update & Sinkronkan Buku Acara */}
             <Button
@@ -784,10 +857,35 @@ export function BukuAcaraManager({
                     )}
                   >
                     {/* Event Section Header (Sesuai Format: Event 103, Freestyle SD/MI 3-4 - Man 100meter - Time Final) */}
-                    <div className="border-b-2 border-slate-900 pb-1.5 pt-2 px-3 bg-slate-50/50 flex items-center justify-between">
+                    <div className="border-b-2 border-slate-900 pb-1.5 pt-2 px-3 bg-slate-50/50 flex flex-wrap items-center justify-between gap-2">
                       <h3 className="text-xs sm:text-sm font-black text-slate-950 uppercase tracking-tight">
                         Event {eventItem.orderNo || '—'}, {eventItem.stroke} {eventItem.name} - {eventItem.gender === 'female' ? 'Women' : 'Men'} {eventItem.distanceMeters}meter - Time Final
                       </h3>
+
+                      {/* Tombol Aksi Langsung: Edit Manual Lintasan & Auto-Generate Acara Ini */}
+                      <div className="no-print flex items-center gap-1.5 shrink-0">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleOpenManualEditor(eventItem.id, `Event ${eventItem.orderNo || ''}: ${eventItem.stroke} ${eventItem.name}`)}
+                          className="h-7 px-2.5 text-[11px] font-bold border-blue-300 bg-blue-50 text-blue-900 hover:bg-blue-100 shadow-2xs gap-1 cursor-pointer"
+                          title="Pindahkan atlet antar lintasan/seri, atau tambahkan atlet manual ke lintasan"
+                        >
+                          <ArrowRightLeft className="h-3 w-3" />
+                          Edit Manual Lintasan
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={generatingEventId === eventItem.id}
+                          onClick={() => handleGenerateEvent(eventItem.id, `${eventItem.stroke} ${eventItem.name}`)}
+                          className="h-7 px-2.5 text-[11px] font-bold border-slate-300 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs gap-1 cursor-pointer"
+                          title="Susun seri dan lintasan otomatis untuk nomor lomba ini"
+                        >
+                          <Sparkles className={cn('h-3 w-3 text-amber-500', generatingEventId === eventItem.id && 'animate-spin')} />
+                          {generatingEventId === eventItem.id ? 'Menyusun...' : 'Generate Acara'}
+                        </Button>
+                      </div>
                     </div>
 
                     {/* Mode Tampilan Peringkat Terpadu (Semua Seri Digabung) */}
@@ -1418,6 +1516,21 @@ export function BukuAcaraManager({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Modal Dialog Editor Manual Lintasan & Atlet */}
+      {manualEditorOpen && selectedEditorEvent && (
+        <ManualLaneEditorDialog
+          isOpen={manualEditorOpen}
+          onClose={() => {
+            setManualEditorOpen(false);
+            setSelectedEditorEvent(null);
+          }}
+          compEventId={selectedEditorEvent.id}
+          compEventName={selectedEditorEvent.name}
+          laneCount={event?.laneCount || 8}
+          onChanged={() => router.refresh()}
+        />
+      )}
     </div>
   );
 }

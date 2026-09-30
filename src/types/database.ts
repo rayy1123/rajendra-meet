@@ -10,6 +10,8 @@ export type UserRole =
   | 'admin'
   | 'admin_kejuaraan'
   | 'admin_keuangan'
+  | 'admin_technical'
+  | 'admin-technical'
   | 'viewer';
 export type GenderType = 'male' | 'female';
 export type ResultStatus = 'finished' | 'dns' | 'dnf' | 'dq' | 'scr';

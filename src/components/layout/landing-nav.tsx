@@ -134,6 +134,8 @@ export function LandingSidebarDrawer({
     'admin',
     'admin_kejuaraan',
     'admin_keuangan',
+    'admin_technical',
+    'admin-technical',
   ];
   const isAdmin = role && ADMIN_ROLES.includes(role);
   const dashboardHref = isAdmin ? '/dashboard' : '/dashboard-viewer';
@@ -183,6 +185,7 @@ export function LandingSidebarDrawer({
                   <Link
                     key={item.label}
                     href={item.href}
+                    prefetch={true}
                     onClick={onClose}
                     className={cn(
                       'group flex items-center justify-between rounded-xl px-3 py-2.5 transition-all',

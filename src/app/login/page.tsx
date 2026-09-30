@@ -68,6 +68,9 @@ export default function LoginPage() {
             new Set([
               `${cleanId}@scms.local`,
               `${cleanId}@rajendra.id`,
+              'admin-technical@rajendra.id',
+              'admin-technical@scms.local',
+              'technical@rajendra.id',
               'admin@rajendra.id',
               'panitia@rajendra.id',
               `${cleanId}@gmail.com`,
@@ -152,6 +155,8 @@ export default function LoginPage() {
         'admin',
         'admin_kejuaraan',
         'admin_keuangan',
+        'admin_technical',
+        'admin-technical',
       ];
       const isAdminRole = role && ADMIN_ROLES.includes(role);
 

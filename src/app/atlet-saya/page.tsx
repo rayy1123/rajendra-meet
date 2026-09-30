@@ -59,6 +59,8 @@ export default async function AtletSayaPage() {
     'admin',
     'admin_kejuaraan',
     'admin_keuangan',
+    'admin_technical',
+    'admin-technical',
   ];
   if (ADMIN_ROLES.includes(userRole)) {
     redirect('/athletes');

@@ -28,6 +28,7 @@ import {
   Image,
   Building2,
   BookmarkCheck,
+  ClipboardCheck,
   Menu,
   X,
   Receipt,
@@ -69,6 +70,8 @@ const ADMIN_ROLE_LIST = [
   'admin',
   'admin_kejuaraan',
   'admin_keuangan',
+  'admin_technical',
+  'admin-technical',
 ];
 
 // Menu khusus Panitia / Admin
@@ -84,6 +87,7 @@ const adminNavGroups: NavGroup[] = [
     items: [
       { title: 'Kejuaraan / Events', href: '/events', icon: CalendarDays, description: 'Kelola daftar kejuaraan' },
       { title: 'Jadwal & Agenda', href: '/jadwal', icon: Calendar, description: 'Rundown acara & timeline lomba' },
+      { title: 'Checklist Teknis (TD)', href: '/checklist-teknis', icon: ClipboardCheck, description: 'Rekognisi kolam, TM, & kalibrasi arena' },
       { title: 'Daftar Perlombaan', href: '/perlombaan', icon: CalendarCheck, description: 'Kartu kejuaraan & import Excel' },
       { title: 'Data Atlet', href: '/athletes', icon: Users, description: 'Master seluruh data atlet' },
       { title: 'Sekolah & Klub', href: '/schools', icon: School, description: 'Master data kontingen' },
@@ -244,6 +248,7 @@ export function SidebarNav({
                 <Link
                   key={item.href}
                   href={item.href}
+                  prefetch={true}
                   onClick={onItemClick}
                   title={item.title}
                   className={cn(

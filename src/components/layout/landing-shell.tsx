@@ -52,7 +52,7 @@ export function LandingShell({ children }: { children: React.ReactNode }) {
           <Link
             href={
               role &&
-              ['super_admin', 'event_admin', 'operator', 'admin', 'admin_kejuaraan', 'admin_keuangan'].includes(
+              ['super_admin', 'event_admin', 'operator', 'admin', 'admin_kejuaraan', 'admin_keuangan', 'admin_technical', 'admin-technical'].includes(
                 role
               )
                 ? '/dashboard'

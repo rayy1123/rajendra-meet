@@ -30,6 +30,8 @@ export default async function DaftarLombaEventPage({ params }: { params: Promise
     'admin',
     'admin_kejuaraan',
     'admin_keuangan',
+    'admin_technical',
+    'admin-technical',
   ];
   const isAdmin = ADMIN_ROLES.includes(userRole);
 

@@ -5,6 +5,9 @@ const SESSION_TTL_SECONDS = 7 * 24 * 60 * 60; // 7 hari
 // In-memory fallback map jika redis belum terkonfigurasi
 const localSessionStore = new Map<string, { sessionId: string; updatedAt: number }>();
 
+// Cache validasi sesi in-memory singkat (5 detik) untuk menghindari round-trip berulang pada navigasi cepat
+const fastValidationCache = new Map<string, { isValid: boolean; activeSessionId: string; expiresAt: number }>();
+
 export function generateSessionId(): string {
   const rand = Math.random().toString(36).substring(2, 10);
   const time = Date.now().toString(36);
@@ -19,6 +22,7 @@ export async function setActiveSession(userId: string, sessionId: string): Promi
     console.warn('[SessionLimiter] Redis set warning:', err);
   }
   localSessionStore.set(userId, { sessionId, updatedAt: Date.now() });
+  fastValidationCache.set(userId, { isValid: true, activeSessionId: sessionId, expiresAt: Date.now() + 5000 });
 }
 
 export async function getActiveSession(userId: string): Promise<string | null> {
@@ -42,6 +46,7 @@ export async function clearActiveSession(userId: string): Promise<void> {
     console.warn('[SessionLimiter] Redis del warning:', err);
   }
   localSessionStore.delete(userId);
+  fastValidationCache.delete(userId);
 }
 
 /**
@@ -57,22 +62,42 @@ export async function validateUserSession(
   const userMetadataSession =
     typeof userOrId === 'object' ? userOrId.user_metadata?.active_session_id : null;
 
+  // 1. Fast path: jika cookie klien persis cocok dengan metadata auth Supabase, langsung sahkan 0ms
+  if (clientSessionId && userMetadataSession && clientSessionId === userMetadataSession) {
+    return { isValid: true, activeSessionId: clientSessionId };
+  }
+
+  // 2. Fast cache: jika sesi baru saja divalidasi dalam 5 detik terakhir di server ini
+  if (clientSessionId) {
+    const cached = fastValidationCache.get(userId);
+    if (cached && cached.expiresAt > Date.now()) {
+      if (cached.activeSessionId === clientSessionId) {
+        return { isValid: cached.isValid, activeSessionId: cached.activeSessionId };
+      } else {
+        return { isValid: false, activeSessionId: cached.activeSessionId };
+      }
+    }
+  }
+
   // Prioritaskan session ID dari user metadata Supabase Auth (sumber terpusat)
   const activeSessionId = userMetadataSession || (await getActiveSession(userId));
 
-  // 1. Jika belum ada sesi di store ATAU klien belum memiliki cookie sessionId:
+  // 3. Jika belum ada sesi di store ATAU klien belum memiliki cookie sessionId:
   // adopsi/daftarkan sesi saat ini sebagai sesi aktif resmi tanpa menendang user.
   if (!activeSessionId || !clientSessionId) {
     const newOrExisting = clientSessionId || activeSessionId || generateSessionId();
     await setActiveSession(userId, newOrExisting);
+    fastValidationCache.set(userId, { isValid: true, activeSessionId: newOrExisting, expiresAt: Date.now() + 5000 });
     return { isValid: true, activeSessionId: newOrExisting };
   }
 
-  // 2. Jika clientSessionId ada tetapi tidak cocok dengan activeSessionId yang tersimpan:
+  // 4. Jika clientSessionId ada tetapi tidak cocok dengan activeSessionId yang tersimpan:
   // Sesi di perangkat lain baru saja mengambil alih akun -> sesi lama invalid.
   if (clientSessionId !== activeSessionId) {
+    fastValidationCache.delete(userId);
     return { isValid: false, activeSessionId };
   }
 
+  fastValidationCache.set(userId, { isValid: true, activeSessionId, expiresAt: Date.now() + 5000 });
   return { isValid: true, activeSessionId };
 }

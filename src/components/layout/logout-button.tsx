@@ -84,6 +84,8 @@ export function ProfileMenu() {
                 'admin',
                 'admin_kejuaraan',
                 'admin_keuangan',
+                'admin_technical',
+                'admin-technical',
               ];
               const isAdmin = profile?.role && ADMIN_ROLES.includes(profile.role);
               const dashboardHref = isAdmin ? '/dashboard' : '/dashboard-viewer';
