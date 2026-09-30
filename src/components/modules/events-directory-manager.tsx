@@ -407,7 +407,7 @@ export function EventsDirectoryManager({
           </div>
           <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center gap-1.5 text-xs text-slate-600 font-medium">
             <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-            <span>Afiliasi {totalSchoolsCount} Klub Akuatik Resmi</span>
+            <span>Afiliasi {totalSchoolsCount} Klub Renang Resmi</span>
           </div>
         </div>
 
@@ -451,7 +451,7 @@ export function EventsDirectoryManager({
           </div>
           <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center gap-1.5 text-xs text-slate-600 font-medium">
             <CheckCircle2 className="h-3.5 w-3.5 text-indigo-600 shrink-0" />
-            <span>Sesuai Regulasi PB Akuatik Indonesia</span>
+            <span>Sesuai Regulasi World Aquatics</span>
           </div>
         </div>
       </div>

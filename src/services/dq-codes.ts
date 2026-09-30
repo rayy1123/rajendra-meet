@@ -1,6 +1,6 @@
 /**
  * Kamus Resmi Kode Diskualifikasi (Disqualification / DQ Codes)
- * Standar World Aquatics / PB Akuatik Indonesia (PRSI)
+ * Standar World Aquatics (FINA)
  *
  * Digunakan oleh Referee, Starter, dan Stroke/Turn Judges
  * untuk mencatat alasan diskualifikasi yang sah sesuai buku peraturan FINA.

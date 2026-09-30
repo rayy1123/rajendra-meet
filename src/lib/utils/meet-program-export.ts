@@ -1,6 +1,6 @@
 /**
  * Generator Buku Acara / Heat Sheet (Meet Program) Standar Nasional/Internasional
- * Format resmi PB Akuatik Indonesia (PRSI) & World Aquatics
+ * Format resmi World Aquatics (FINA)
  *
  * Menghasilkan lembar start list resmi per heat untuk Technical Delegate,
  * Referee, Starter, dan Juri Pencatat Waktu Lintasan (Lane Timekeepers).
@@ -40,7 +40,7 @@ export interface MeetProgramData {
   dates?: string | null;
   poolType?: string | null; // e.g. "LCM 50m" | "SCM 25m"
   laneCount: number;
-  sanctionBy?: string;     // e.g. "PB Akuatik Indonesia"
+  sanctionBy?: string;     // e.g. "Rajendra Swim System"
   events: MeetProgramEvent[];
 }
 

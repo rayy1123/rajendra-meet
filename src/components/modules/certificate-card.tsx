@@ -102,7 +102,7 @@ export function CertificateCard({
               fill="#0f2b5c"
               letterSpacing="0.22em"
             >
-              RAJENDRA-MEET SWIMSYS
+              RAJENDRA SWIM SYSTEM
             </text>
             <text
               x="10"
@@ -113,7 +113,7 @@ export function CertificateCard({
               fill="#b48a3c"
               letterSpacing="0.16em"
             >
-              OFFICIAL SANCTIONED • AQUATIC INDONESIA
+              OFFICIAL SANCTIONED • RAJENDRA SWIM SYSTEM
             </text>
             <text
               x="10"
@@ -144,7 +144,7 @@ export function CertificateCard({
           <path id={`circleTextPath-${recipient.id}`} d="M 200, 200 m -158, 0 a 158,158 0 1,1 316,0 a 158,158 0 1,1 -316,0" fill="none" />
           <text fontSize="10.5" fontWeight="900" letterSpacing="0.22em" fill="#0f2b5c">
             <textPath href={`#circleTextPath-${recipient.id}`} startOffset="50%" textAnchor="middle">
-              ★ RAJENDRA-MEET SWIMSYS • OFFICIAL SANCTIONED COMPETITION • AQUATIC INDONESIA ★
+              ★ RAJENDRA SWIM SYSTEM • OFFICIAL SANCTIONED COMPETITION ★
             </textPath>
           </text>
 
@@ -213,7 +213,7 @@ export function CertificateCard({
                   <Star className="h-5 w-5 text-blue-600 drop-shadow-xs" />
                 )}
                 <span className="absolute -bottom-1 px-1.5 py-0.2 bg-amber-500 text-white font-mono text-[7px] font-black rounded-full uppercase tracking-tighter shadow-2xs">
-                  MEET
+                  SWIM
                 </span>
               </div>
               <p className="text-[8px] font-mono font-bold tracking-widest text-slate-600 uppercase mt-1">
@@ -340,7 +340,7 @@ export function CertificateCard({
                 {settings.technicalDelegate || 'Technical Delegate'}
               </p>
               <p className="text-[8px] text-slate-500">
-                {settings.technicalDelegateTitle || 'Referee Akuatik Indonesia'}
+                {settings.technicalDelegateTitle || 'Technical Delegate / Referee'}
               </p>
             </div>
 
