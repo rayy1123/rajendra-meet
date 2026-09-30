@@ -1,4 +1,4 @@
-import { redis, getCache, setCache } from '@/lib/cache/redis';
+import { redis, isRedisAvailable } from '@/lib/cache/redis';
 
 const SESSION_TTL_SECONDS = 7 * 24 * 60 * 60; // 7 hari
 
@@ -46,8 +46,8 @@ export async function clearActiveSession(userId: string): Promise<void> {
 
 /**
  * Validasi apakah session klien masih merupakan sesi aktif tunggal yang sah.
- * Jika ada orang lain yang login bersamaan menggunakan akun ini, sessionId akan berubah
- * sehingga sesi lama otomatis tidak valid (concurrent session limit).
+ * Jika ada orang lain yang login bersamaan menggunakan akun ini di perangkat lain,
+ * sessionId akan diperbarui sehingga sesi di perangkat lama otomatis dihentikan.
  */
 export async function validateUserSession(
   userId: string,
@@ -55,17 +55,17 @@ export async function validateUserSession(
 ): Promise<{ isValid: boolean; activeSessionId: string | null }> {
   const activeSessionId = await getActiveSession(userId);
 
-  // Jika belum ada sesi aktif yang tercatat, sesi saat ini didaftarkan sebagai sesi aktif
-  if (!activeSessionId) {
-    if (clientSessionId) {
-      await setActiveSession(userId, clientSessionId);
-      return { isValid: true, activeSessionId: clientSessionId };
-    }
-    return { isValid: true, activeSessionId: null };
+  // 1. Jika belum ada sesi di store ATAU klien belum memiliki cookie sessionId:
+  // adopsi/daftarkan sesi saat ini sebagai sesi aktif resmi tanpa menendang user.
+  if (!activeSessionId || !clientSessionId) {
+    const newOrExisting = clientSessionId || activeSessionId || generateSessionId();
+    await setActiveSession(userId, newOrExisting);
+    return { isValid: true, activeSessionId: newOrExisting };
   }
 
-  // Jika ada sesi aktif dan klien tidak memiliki sessionId atau berbeda -> konkurensi terdeteksi
-  if (!clientSessionId || clientSessionId !== activeSessionId) {
+  // 2. Jika clientSessionId ada tetapi tidak cocok dengan activeSessionId yang tersimpan:
+  // Sesi di perangkat lain baru saja mengambil alih akun -> sesi lama invalid.
+  if (clientSessionId !== activeSessionId) {
     return { isValid: false, activeSessionId };
   }
 
