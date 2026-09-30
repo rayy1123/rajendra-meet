@@ -1,13 +1,12 @@
 import { createClient } from '@/lib/supabase/server';
 import { detectBrokenRecords, type RecordCandidate, type ExistingRecord } from '@/services/records';
-import { PageHeader } from '@/components/ui/page-header';
-import { Breadcrumb } from '@/components/ui/breadcrumb';
+import { PublicShell } from '@/components/layout/public-shell';
 import { Crown } from 'lucide-react';
 import { RecordsManager, type RecordItemView } from '@/components/modules/records-manager';
 
 export const dynamic = 'force-dynamic';
 
-export default async function RajendraRecordPage({
+export default async function PublicRajendraRecordPage({
   searchParams,
 }: {
   searchParams: Promise<{ eventId?: string }>;
@@ -130,19 +129,21 @@ export default async function RajendraRecordPage({
   });
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6">
-      <Breadcrumb items={[{ label: 'Dasbor', href: '/dashboard' }, { label: 'Rajendra Record' }]} className="mb-2" />
-      <PageHeader
-        title="Rajendra Record"
-        description="Deteksi otomatis rekor baru per nomor lomba. Rekor memecahkan catatan tercepat sebelumnya."
-        icon={<Crown className="h-6 w-6" />}
-      />
-
-      <RecordsManager
-        events={events}
-        activeEventId={activeEventId}
-        records={formattedRecords}
-      />
-    </div>
+    <PublicShell
+      title="Rajendra Record"
+      subtitle="Daftar rekor resmi kejuaraan renang Rajendra Swim System. Memuat nama atlet, klub/sekolah, waktu rekor, dan kejuaraan tempat rekor diraih."
+      breadcrumbItems={[
+        { label: 'Beranda', href: '/' },
+        { label: 'Rajendra Record' },
+      ]}
+    >
+      <div className="pub-container pb-16">
+        <RecordsManager
+          events={events}
+          activeEventId={activeEventId}
+          records={formattedRecords}
+        />
+      </div>
+    </PublicShell>
   );
 }

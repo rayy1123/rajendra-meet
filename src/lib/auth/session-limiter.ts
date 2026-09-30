@@ -50,10 +50,15 @@ export async function clearActiveSession(userId: string): Promise<void> {
  * sessionId akan diperbarui sehingga sesi di perangkat lama otomatis dihentikan.
  */
 export async function validateUserSession(
-  userId: string,
+  userOrId: { id: string; user_metadata?: Record<string, any> } | string,
   clientSessionId?: string | null
 ): Promise<{ isValid: boolean; activeSessionId: string | null }> {
-  const activeSessionId = await getActiveSession(userId);
+  const userId = typeof userOrId === 'string' ? userOrId : userOrId.id;
+  const userMetadataSession =
+    typeof userOrId === 'object' ? userOrId.user_metadata?.active_session_id : null;
+
+  // Prioritaskan session ID dari user metadata Supabase Auth (sumber terpusat)
+  const activeSessionId = userMetadataSession || (await getActiveSession(userId));
 
   // 1. Jika belum ada sesi di store ATAU klien belum memiliki cookie sessionId:
   // adopsi/daftarkan sesi saat ini sebagai sesi aktif resmi tanpa menendang user.

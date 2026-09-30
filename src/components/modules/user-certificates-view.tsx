@@ -50,7 +50,7 @@ export function UserCertificatesView({
     }),
     organizerChairman: 'Panitia Pelaksana Rajendra Swim System',
     organizerChairmanTitle: 'Ketua Panitia Kejuaraan',
-    technicalDelegate: 'Technical Delegate / FINA Referee',
+    technicalDelegate: 'Technical Delegate / Referee',
     technicalDelegateTitle: 'Technical Delegate / Referee',
     certificateType: 'achievement',
     showSponsors: true,

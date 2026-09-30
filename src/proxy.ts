@@ -16,6 +16,7 @@ const PUBLIC_ROUTE_PREFIXES = [
   '/public-live',
   '/scoreboard',
   '/medali',
+  '/rajendra-record',
   '/guide',
   '/register',
   '/forgot-password',
@@ -73,6 +74,30 @@ export async function proxy(request: NextRequest) {
     );
   }
 
+  const pathname = request.nextUrl.pathname;
+  const isPrefetch =
+    request.headers.get('purpose') === 'prefetch' ||
+    request.headers.get('next-router-prefetch') === '1' ||
+    request.headers.get('sec-purpose') === 'prefetch';
+
+  const isPublicRoute =
+    pathname === '/login' ||
+    PUBLIC_ROUTE_PREFIXES.some(
+      (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+    );
+
+  // Cek apakah ada cookie sesi auth Supabase
+  const allCookies = request.cookies.getAll();
+  const hasAuthCookie = allCookies.some((c) =>
+    c.name.includes('supabase') || c.name.startsWith('sb-')
+  );
+
+  // 1. Optimasi Navigasi Publik: Jika rute publik dan tidak ada cookie auth,
+  // langsung kembalikan response tanpa network call ke auth server (Instan 0ms overhead).
+  if (isPublicRoute && !hasAuthCookie) {
+    return applySecurityHeaders(response);
+  }
+
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
@@ -96,14 +121,6 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const pathname = request.nextUrl.pathname;
-
-  const isPublicRoute =
-    pathname === '/login' ||
-    PUBLIC_ROUTE_PREFIXES.some(
-      (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
-    );
-
   if (!user && !isPublicRoute) {
     if (pathname.startsWith('/api/')) {
       return applySecurityHeaders(
@@ -120,11 +137,11 @@ export async function proxy(request: NextRequest) {
   }
 
   // Pembatasan Sesi Bersamaan (Concurrent Session Limit):
-  // Pastikan akun hanya aktif pada satu sesi tunggal. Jika ada login baru di perangkat lain,
-  // sesi lama langsung dihentikan dan dialihkan ke login.
-  if (user && !isPublicRoute) {
+  // Pastikan akun hanya aktif pada satu sesi tunggal.
+  // Lewati pemeriksaan sesi berat pada request prefetch agar navigasi klik instan.
+  if (user && !isPublicRoute && !isPrefetch) {
     const clientSessionId = request.cookies.get('scms_session_id')?.value;
-    const { isValid, activeSessionId } = await validateUserSession(user.id, clientSessionId);
+    const { isValid, activeSessionId } = await validateUserSession(user, clientSessionId);
 
     if (!isValid) {
       if (pathname.startsWith('/api/')) {
