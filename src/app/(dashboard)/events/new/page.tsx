@@ -117,7 +117,7 @@ export default function NewEventPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-1">
                   <label htmlFor="organizer" className="text-sm font-medium">Penyelenggara</label>
-                  <Input id="organizer" value={form.organizer} onChange={set('organizer')} placeholder="Pengprov PRSI / Rajendra Swimming Organizer" />
+                  <Input id="organizer" value={form.organizer} onChange={set('organizer')} placeholder="Panitia Pelaksana / Rajendra Swimming Organizer" />
                 </div>
                 <div className="space-y-1">
                   <label htmlFor="location" className="text-sm font-medium">Lokasi / Venue Kolam</label>

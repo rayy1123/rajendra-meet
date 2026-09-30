@@ -255,7 +255,7 @@ export function InvoiceCard({
               Panitia Pelaksana Kejuaraan Renang Rajendra Swim System
             </p>
             <p className="text-[11px] text-slate-600 leading-snug">
-              Sekretariat Pertandingan &amp; Tim Keuangan Akuatik Indonesia
+              Sekretariat Pertandingan &amp; Tim Keuangan
             </p>
             <p className="text-[10px] font-mono text-emerald-700 font-bold flex items-center gap-1">
               <BadgeCheck className="h-3 w-3" /> OFFICIAL TOURNAMENT INVOICE
@@ -291,8 +291,8 @@ export function InvoiceCard({
                     <span className="font-bold text-slate-950 uppercase tracking-tight">
                       {group.athleteName}
                     </span>
-                    <span className="text-slate-500 text-[11px] font-medium">
-                      ({group.gender}{group.birthDate ? `, Tgl Lahir: ${group.birthDate}` : ''})
+                    <span className="text-slate-500 text-[11px] font-semibold">
+                      ({group.gender === 'female' || group.gender === 'Perempuan' || group.gender === 'Putri' ? 'Putri' : 'Putra'})
                     </span>
                   </div>
                 </div>

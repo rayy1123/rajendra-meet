@@ -420,22 +420,19 @@ export function FinancialReportManager({
               </p>
             </div>
 
-            {/* Logo Rajendra Swim System */}
+            {/* Logo Rajendra Swim System Emblem */}
             <div className="flex flex-col items-center justify-center text-center shrink-0 pr-1">
-              <svg
-                className="h-10 w-14 text-white fill-none stroke-current stroke-[2.4] mb-1.5 opacity-95"
-                viewBox="0 0 52 36"
-              >
-                <path d="M4 6 Q 16 1, 26 6 T 48 6" strokeLinecap="round" />
-                <path d="M4 14 Q 16 9, 26 14 T 48 14" strokeLinecap="round" />
-                <path d="M4 22 Q 16 17, 26 22 T 48 22" strokeLinecap="round" />
-                <path d="M4 30 Q 16 25, 26 30 T 48 30" strokeLinecap="round" />
-              </svg>
-              <p className="text-sm sm:text-base font-black tracking-[0.24em] text-white leading-tight">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand/logo.png"
+                alt="Rajendra Swim System"
+                className="h-10 w-auto object-contain bg-white/20 rounded-lg p-1.5 backdrop-blur-xs mb-1"
+              />
+              <p className="text-sm sm:text-base font-black tracking-[0.18em] text-white leading-tight font-heading">
                 RAJENDRA
               </p>
-              <p className="text-[11px] sm:text-xs font-black tracking-[0.38em] text-white/95 uppercase leading-tight mt-0.5">
-                MEET
+              <p className="text-[10px] sm:text-xs font-black tracking-[0.22em] text-cyan-200 uppercase leading-tight mt-0.5">
+                SWIM SYSTEM
               </p>
             </div>
           </div>

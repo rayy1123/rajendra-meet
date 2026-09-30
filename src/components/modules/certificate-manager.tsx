@@ -881,7 +881,7 @@ export function CertificateManager({
               <Input
                 value={settings.technicalDelegateTitle}
                 onChange={(e) => setSettings((s) => ({ ...s, technicalDelegateTitle: e.target.value }))}
-                placeholder="Contoh: Technical Delegate Akuatik Indonesia"
+                placeholder="Contoh: Technical Delegate / Referee"
                 className="h-8 text-xs bg-background"
               />
             </div>
