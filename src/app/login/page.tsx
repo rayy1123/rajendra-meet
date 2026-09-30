@@ -108,12 +108,27 @@ export default function LoginPage() {
 
       const userId = sessionData.user.id;
 
-      // Daftarkan sesi aktif tunggal untuk membatasi konkurensi login bersamaan
+      // Buat & daftarkan sesi aktif baru di browser ini
+      const newSessionId = `sess_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+
       try {
+        // 1. Simpan sesi aktif ke Supabase Auth User Metadata (sumber terpusat antar-perangkat)
+        await supabase.auth.updateUser({
+          data: { active_session_id: newSessionId },
+        });
+
+        // 2. Tanam cookie sesi langsung di browser jendela ini
+        if (typeof document !== 'undefined') {
+          document.cookie = `scms_session_id=${newSessionId}; path=/; max-age=604800; SameSite=Lax`;
+          // Bersihkan parameter error dari URL agar tidak memicu pesan gagal saat redirect
+          window.history.replaceState({}, '', '/login');
+        }
+
+        // 3. Daftarkan juga ke endpoint API session
         await fetch('/api/auth/session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId }),
+          body: JSON.stringify({ userId, sessionId: newSessionId }),
         });
       } catch (sessErr) {
         console.warn('Session registration notice:', sessErr);

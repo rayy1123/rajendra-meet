@@ -124,7 +124,7 @@ export function CertificateManager({
     organizerChairman: 'Dr. H. Hendra Wijaya, M.Pd',
     organizerChairmanTitle: 'Ketua Panitia Pelaksana',
     technicalDelegate: 'Bambang S., S.Pd',
-    technicalDelegateTitle: 'Technical Delegate / FINA Referee',
+    technicalDelegateTitle: 'Technical Delegate /Referee',
     certificateType: 'auto',
     showSponsors: true,
   });

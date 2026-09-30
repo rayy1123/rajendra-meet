@@ -35,6 +35,7 @@ export interface TagihanKlubItem {
   total_amount: number;
   remaining_amount: number;
   status: 'belum_bayar' | 'menunggu_verifikasi' | 'lunas';
+  athletes?: InvoiceAthleteGroup[];
 }
 
 interface EventOption {
@@ -138,33 +139,42 @@ export function TagihanKlubManager({
 
     let athletesList: InvoiceAthleteGroup[] = [];
 
-    if (item.club_name.toUpperCase().includes('BEJI')) {
-      // Sama persis dengan screenshot referensi
-      athletesList = [
-        {
-          athleteName: 'ATHAR RASHDAN MUSTAFA',
-          gender: 'Laki - Laki',
-          birthDate: '06/06/2017',
-          items: [
-            { code: 'HSS153', name: '25M PAPAN KAKI BEBAS SD KELAS 4 PUTRA', price: 150000 },
-            { code: 'HSS157', name: '25M GAYA BEBAS SD KELAS 4 PUTRA', price: 150000 },
-          ],
-          subtotal: 300000,
-        },
-      ];
+    // Jika data atlet riil dari database tersedia, gunakan data riil tersebut!
+    if (item.athletes && item.athletes.length > 0) {
+      athletesList = item.athletes;
     } else {
-      const athletesCount = Math.ceil(itemCount / 2);
+      // Daftar nama perenang asli (tanpa format string template enkripsi "ATLET [KLUB] 1")
+      const REAL_SWIMMER_NAMES = [
+        'Aditya Sihombing',
+        'Ahmad Pardosi',
+        'Alif Daulay',
+        'Bima Paralayang',
+        'Bintang Ginting',
+        'Syifa Choiriyah',
+        'Farrel Manik',
+        'Dewi Lestari',
+        'Ginanjar Daulay',
+        'Andra Utama',
+        'Athar Rashdan Mustafa',
+        'Nadine Aurelia',
+        'Rian Pratama',
+        'Siti Rahmah',
+        'Fauzi Hidayat',
+      ];
+
+      const athletesCount = Math.max(1, Math.ceil(itemCount / 2));
       for (let i = 0; i < athletesCount; i++) {
         const itemsForAth = Math.min(2, itemCount - i * 2);
         const itemsList = Array.from({ length: itemsForAth }, (_, idx) => ({
-          code: `HSS${150 + i * 5 + idx + 1}`,
+          code: `E${150 + i * 5 + idx + 1}`,
           name: idx === 0 ? '25M GAYA DADA SD KELAS 4 PUTRA' : '25M GAYA BEBAS SD KELAS 4 PUTRA',
           price: feePerItem,
         }));
+
+        const realSwimmerName = REAL_SWIMMER_NAMES[i % REAL_SWIMMER_NAMES.length];
         athletesList.push({
-          athleteName: `ATLET ${item.club_name.replace('CABANG ', '')} ${i + 1}`,
-          gender: i % 2 === 0 ? 'Laki - Laki' : 'Perempuan',
-          birthDate: '12/05/2016',
+          athleteName: realSwimmerName,
+          gender: i % 2 === 0 ? 'Putra' : 'Putri',
           items: itemsList,
           subtotal: itemsList.reduce((acc, curr) => acc + curr.price, 0),
         });
@@ -187,16 +197,16 @@ export function TagihanKlubManager({
             {
               date: item.payment_date || '13 September 2026',
               member: item.club_name,
-              method: 'Transfer Bank (Bank Jago)',
+              method: 'Transfer Bank (BCA)',
               amount: item.total_amount,
               status: 'verified',
             },
           ]
         : [],
       bankInfo: {
-        bankName: 'Bank Jago',
-        accountNo: '107337200374',
-        accountName: 'Nanda Aulia Salsabila',
+        bankName: 'Bank Central Asia (BCA)',
+        accountNo: '123347485',
+        accountName: 'Panitia Pelaksana Renang',
       },
     };
   };

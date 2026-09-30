@@ -21,22 +21,22 @@ export async function POST(request: Request) {
     } = await supabase.auth.getUser();
 
     let targetUserId = user?.id;
+    let providedSessionId: string | null = null;
 
-    // Jika client mengirim userId saat login
-    if (!targetUserId) {
-      try {
-        const body = await request.json();
-        if (body?.userId) targetUserId = body.userId;
-      } catch {
-        // body may be empty
-      }
+    // Jika client mengirim userId / sessionId saat login
+    try {
+      const body = await request.json();
+      if (body?.userId) targetUserId = body.userId;
+      if (body?.sessionId) providedSessionId = body.sessionId;
+    } catch {
+      // body may be empty
     }
 
     if (!targetUserId) {
       return NextResponse.json({ error: 'Pengguna tidak terautentikasi.' }, { status: 401 });
     }
 
-    const sessionId = generateSessionId();
+    const sessionId = providedSessionId || generateSessionId();
     await setActiveSession(targetUserId, sessionId);
 
     const response = NextResponse.json({
