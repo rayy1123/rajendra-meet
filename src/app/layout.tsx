@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { Plus_Jakarta_Sans, Outfit, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { LoadingScreen } from '@/components/loading-screen';
+import { Suspense } from 'react';
+import { RouteProgress } from '@/components/layout/route-progress';
 
 const plusJakarta = Plus_Jakarta_Sans({
   variable: '--font-sans',
@@ -47,6 +49,9 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${plusJakarta.variable} ${outfit.variable} ${jetbrainsMono.variable} font-sans antialiased`}
       >
+        <Suspense fallback={null}>
+          <RouteProgress />
+        </Suspense>
         {children}
       </body>
     </html>

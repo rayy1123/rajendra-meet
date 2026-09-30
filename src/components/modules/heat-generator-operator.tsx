@@ -10,7 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Sparkles, Trash2, Users } from 'lucide-react';
+import { Sparkles, Trash2, Users, ArrowRightLeft } from 'lucide-react';
+import { ManualLaneEditorDialog } from './manual-lane-editor-dialog';
 
 interface AthleteRef {
   id?: string | null;
@@ -64,6 +65,7 @@ export function HeatGeneratorOperator({
   const [selectedCompEventId, setSelectedCompEventId] = useState(initialCompEventId);
   const [generating, setGenerating] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [manualEditorOpen, setManualEditorOpen] = useState(false);
 
   // Urutan Lintasan Renang (Spearhead / Zig-Zag dari Tengah Outward)
   // Untuk 8 Lane: [4, 5, 3, 6, 2, 7, 1, 8]
@@ -233,16 +235,28 @@ export function HeatGeneratorOperator({
         {/* Action Buttons */}
         <div className="flex items-center gap-2 w-full lg:w-auto justify-end pt-2 lg:pt-0">
           {existingHeats.length > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleDeleteHeats}
-              disabled={deleting || generating}
-              className="text-red-600 hover:bg-red-50 hover:text-red-700"
-            >
-              <Trash2 className="w-4 h-4 mr-1" />
-              Reset Acara
-            </Button>
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setManualEditorOpen(true)}
+                className="gap-1.5 border-blue-300 bg-blue-50 text-blue-900 hover:bg-blue-100 font-semibold cursor-pointer"
+                title="Pindahkan atau tukar atlet antar lintasan/seri, atau tambahkan atlet manual"
+              >
+                <ArrowRightLeft className="w-4 h-4 text-blue-600" />
+                Edit Manual Lintasan
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDeleteHeats}
+                disabled={deleting || generating}
+                className="text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer"
+              >
+                <Trash2 className="w-4 h-4 mr-1" />
+                Reset Acara
+              </Button>
+            </>
           )}
 
           <Button
@@ -318,6 +332,20 @@ export function HeatGeneratorOperator({
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Manual Lane Editor Dialog */}
+      {manualEditorOpen && (
+        <ManualLaneEditorDialog
+          isOpen={manualEditorOpen}
+          onClose={() => setManualEditorOpen(false)}
+          compEventId={selectedCompEventId}
+          compEventName={
+            compEvents.find((c) => c.id === selectedCompEventId)?.name || 'Nomor Lomba'
+          }
+          laneCount={laneCount}
+          onChanged={() => router.refresh()}
+        />
       )}
     </div>
   );

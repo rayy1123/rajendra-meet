@@ -32,6 +32,8 @@ export default async function DaftarLombaPage() {
     'admin',
     'admin_kejuaraan',
     'admin_keuangan',
+    'admin_technical',
+    'admin-technical',
   ];
   if (ADMIN_ROLES.includes(userRole)) {
     redirect('/events');

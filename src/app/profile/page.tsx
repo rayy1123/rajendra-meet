@@ -32,6 +32,8 @@ export default async function ProfilePage() {
     'admin',
     'admin_kejuaraan',
     'admin_keuangan',
+    'admin_technical',
+    'admin-technical',
   ];
   const isAdmin = ADMIN_ROLES.includes(userRole);
   const dashboardHref = isAdmin ? '/dashboard' : '/dashboard-viewer';

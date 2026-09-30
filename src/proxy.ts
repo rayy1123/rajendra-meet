@@ -199,6 +199,8 @@ export async function proxy(request: NextRequest) {
       'admin',
       'admin_kejuaraan',
       'admin_keuangan',
+      'admin_technical',
+      'admin-technical',
     ];
     const target = role && ADMIN_ROLES.includes(role) ? '/dashboard' : '/dashboard-viewer';
     const url = request.nextUrl.clone();

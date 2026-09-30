@@ -14,6 +14,8 @@ const ROLE_LABELS: Record<string, string> = {
   admin: 'Dasbor Panitia',
   admin_kejuaraan: 'Dasbor Panitia',
   admin_keuangan: 'Dasbor Keuangan',
+  admin_technical: 'Dasbor Teknis Lomba',
+  'admin-technical': 'Dasbor Teknis Lomba',
   viewer: 'Dasbor Peserta',
 };
 
@@ -59,6 +61,8 @@ export default function DashboardLayout({
     'admin',
     'admin_kejuaraan',
     'admin_keuangan',
+    'admin_technical',
+    'admin-technical',
   ];
   const isAdmin = ADMIN_ROLES.includes(activeRole);
   const roleLabel = ROLE_LABELS[activeRole] ?? (isAdmin ? 'Dasbor' : 'Dasbor Peserta');

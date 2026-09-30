@@ -59,6 +59,8 @@ export async function requireViewer() {
     'admin',
     'admin_kejuaraan',
     'admin_keuangan',
+    'admin_technical',
+    'admin-technical',
   ];
   if (role && ADMIN_ROLES.includes(role)) {
     redirect('/dashboard');
