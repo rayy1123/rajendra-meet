@@ -35,28 +35,47 @@ export default async function DaftarLombaEventPage({ params }: { params: Promise
 
   // Izinkan admin/viewer mengakses halaman daftar lomba tanpa .eq('is_published', true) jika event ada
   let event: any = null;
+  const { getEventSettings } = await import('@/lib/data/event-settings-server');
+  const storeSettings = getEventSettings(id);
+
   const { data: fullEvent } = await supabase
     .from('events')
-    .select('id, name, location, start_date, end_date, lane_count, pool_type, fee_per_event, use_unique_code, unique_code_mode, unique_code_fixed, unique_code_min, unique_code_max, bank_name, bank_account_no, bank_account_name')
+    .select('id, name, location, start_date, end_date, lane_count, pool_type, description')
     .eq('id', id)
     .maybeSingle();
 
-  if (!fullEvent) {
-    const { data: basicEvent } = await supabase
-      .from('events')
-      .select('id, name, location, start_date, end_date, lane_count, pool_type')
-      .eq('id', id)
-      .maybeSingle();
-    if (basicEvent) {
-      const { getEventSettings } = await import('@/lib/data/event-settings-server');
-      const settings = getEventSettings(id);
-      event = {
-        ...basicEvent,
-        ...settings,
-      };
+  let descSettings: any = {};
+  if (fullEvent?.description) {
+    try {
+      const parsed = JSON.parse(fullEvent.description);
+      if (parsed && typeof parsed === 'object') {
+        descSettings = parsed;
+      }
+    } catch {
+      // not json
     }
-  } else {
-    event = fullEvent;
+  }
+
+  if (fullEvent || storeSettings) {
+    event = {
+      ...storeSettings,
+      ...(fullEvent || {}),
+      ...descSettings,
+      // Pengaturan dari store atau description diprioritaskan
+      fee_per_event: descSettings?.fee_per_event ?? storeSettings?.fee_per_event ?? 50000,
+      fee_calculation_mode: descSettings?.fee_calculation_mode ?? storeSettings?.fee_calculation_mode ?? 'per_event',
+      flat_package_limit: descSettings?.flat_package_limit ?? storeSettings?.flat_package_limit ?? 3,
+      flat_package_price: descSettings?.flat_package_price ?? storeSettings?.flat_package_price ?? 275000,
+      extra_fee_per_event: descSettings?.extra_fee_per_event ?? storeSettings?.extra_fee_per_event ?? 80000,
+      use_unique_code: descSettings?.use_unique_code ?? storeSettings?.use_unique_code ?? true,
+      unique_code_mode: descSettings?.unique_code_mode || storeSettings?.unique_code_mode || 'random_3_digit',
+      unique_code_fixed: descSettings?.unique_code_fixed ?? storeSettings?.unique_code_fixed ?? 0,
+      unique_code_min: descSettings?.unique_code_min ?? storeSettings?.unique_code_min ?? 100,
+      unique_code_max: descSettings?.unique_code_max ?? storeSettings?.unique_code_max ?? 999,
+      bank_name: descSettings?.bank_name || storeSettings?.bank_name || 'Bank Central Asia (BCA)',
+      bank_account_no: descSettings?.bank_account_no || storeSettings?.bank_account_no || '',
+      bank_account_name: descSettings?.bank_account_name || storeSettings?.bank_account_name || 'Panitia Pelaksana Renang',
+    };
   }
 
   if (!event) {

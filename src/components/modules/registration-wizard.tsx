@@ -95,9 +95,13 @@ export function RegistrationWizard({
     if (event?.use_unique_code === false) return 0;
     if (event?.unique_code_mode === 'fixed') return Number(event?.unique_code_fixed) || 0;
     if (event?.unique_code_mode === 'custom_range') {
-      const min = Number(event?.unique_code_min) || 100;
-      const max = Number(event?.unique_code_max) || 999;
-      return Math.floor(Math.random() * (max - min + 1)) + min;
+      const minVal = Number(event?.unique_code_min);
+      const maxVal = Number(event?.unique_code_max);
+      const safeMin = !isNaN(minVal) && minVal > 0 ? minVal : 100;
+      const safeMax = !isNaN(maxVal) && maxVal > 0 ? maxVal : 999;
+      const actualMin = Math.min(safeMin, safeMax);
+      const actualMax = Math.max(safeMin, safeMax);
+      return Math.floor(Math.random() * (actualMax - actualMin + 1)) + actualMin;
     }
     // Default 3 digit random: 100 - 999
     return Math.floor(Math.random() * 900) + 100;
