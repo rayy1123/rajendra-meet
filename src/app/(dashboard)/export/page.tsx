@@ -18,7 +18,7 @@ export default async function ExportPage({
   const [{ data: events }, { data: schools }] = await Promise.all([
     supabase
       .from('events')
-      .select('id, name, location, start_date, end_date')
+      .select('id, name, location, start_date, end_date, lane_count')
       .order('start_date', { ascending: false }),
     supabase
       .from('schools')
@@ -27,6 +27,8 @@ export default async function ExportPage({
   ]);
 
   const activeEventId = params.eventId || events?.[0]?.id || '';
+  const activeEvent = (events || []).find((e) => e.id === activeEventId);
+  const poolLaneCount = activeEvent?.lane_count || 8;
 
   // 2. Ambil data nomor lomba & susunan seri/lintasan untuk diekspor
   let exportData: ExportCompEvent[] = [];
@@ -128,6 +130,7 @@ export default async function ExportPage({
             initialEventId={activeEventId}
             exportData={exportData}
             showEventSelector={false}
+            poolLaneCount={poolLaneCount}
           />
         </div>
       )}

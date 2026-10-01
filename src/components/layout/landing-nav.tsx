@@ -19,6 +19,7 @@ import {
   LayoutDashboard,
   HelpCircle,
   Home,
+  Flame,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
@@ -76,6 +77,13 @@ export const MAIN_MENU_ITEMS: LandingMenuItem[] = [
     label: 'Klasemen Medali',
     description: 'Rekap perolehan medali per kontingen',
     icon: Trophy,
+  },
+  {
+    href: '/rajendra-record',
+    label: 'Rajendra Record',
+    description: 'Rekor resmi kejuaraan renang terverifikasi',
+    icon: Flame,
+    badge: 'REKOR',
   },
   {
     href: '/kontak',

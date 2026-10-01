@@ -262,7 +262,10 @@ export function FinancialReportManager({
             <label className="text-xs font-semibold text-slate-500">Tipe Transaksi :</label>
             <select
               value={filterType}
-              onChange={(e) => setFilterType(e.target.value as any)}
+              onChange={(e) => {
+                setFilterType(e.target.value as any);
+                setCurrentPage(1);
+              }}
               className="block w-40 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/30"
             >
               <option value="all">Semua Tipe</option>
@@ -270,14 +273,6 @@ export function FinancialReportManager({
               <option value="expense">Pengeluaran Saja</option>
             </select>
           </div>
-
-          <button
-            type="button"
-            onClick={() => setCurrentPage(1)}
-            className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-5 py-2.5 shadow-sm transition-colors mt-auto"
-          >
-            Generate
-          </button>
         </div>
       </div>
 
@@ -361,19 +356,6 @@ export function FinancialReportManager({
             className="inline-flex items-center gap-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-4 py-2.5 shadow-sm transition-colors cursor-pointer"
           >
             <Printer className="h-4 w-4" /> Print Laporan Rekap
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              printElement('printable-event-expenses-area', {
-                title: `Laporan-Pengeluaran-Event-${selectedEventId}`,
-                isLandscape: false,
-              });
-            }}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-[#0f2b5c] hover:bg-[#0369a1] text-white text-xs font-bold px-4 py-2.5 shadow-sm transition-colors cursor-pointer"
-          >
-            <Printer className="h-4 w-4 text-cyan-300" /> Cetak Pengeluaran Event (Template Resmi)
           </button>
         </div>
 
