@@ -39,6 +39,7 @@ import {
   IdCard,
   User,
   Search,
+  KeyRound,
   type LucideIcon,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -115,6 +116,7 @@ const adminNavGroups: NavGroup[] = [
   {
     label: 'Keuangan & Sistem',
     items: [
+      { title: 'Antrean Kode OTP', href: '/antrean-otp', icon: KeyRound, description: 'Kode OTP saat limitasi email Brevo' },
       { title: 'Tagihan Klub', href: '/tagihan', icon: Receipt, description: 'Tagihan per klub & cetak rekap' },
       { title: 'Pengeluaran (Expenses)', href: '/expenses', icon: TrendingDown, description: 'Catat pengeluaran operasional' },
       { title: 'Laporan Keuangan (Report)', href: '/report', icon: BarChart3, description: 'Laporan kas & ekspor Excel' },
