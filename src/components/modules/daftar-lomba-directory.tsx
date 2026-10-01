@@ -273,7 +273,7 @@ export function DaftarLombaDirectory({ events }: DaftarLombaDirectoryProps) {
             <div>
               <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Standar Regulasi</p>
               <p className="text-xs font-black text-emerald-800 mt-1 uppercase">
-                World Aquatics SW 3.1
+                Standar Akuatik Resmi
               </p>
             </div>
           </div>

@@ -231,7 +231,7 @@ export function AthleteParticipantCard({
               <ShieldCheck className="h-3 w-3 text-blue-600" /> RAJENDRA SANCTIONED
             </div>
             <p className="text-[8px] font-mono font-bold text-slate-400">
-              WORLD AQUATICS RULE SW 3.1
+              OFFICIAL COMPETITION PASS
             </p>
           </div>
         </div>
@@ -239,7 +239,7 @@ export function AthleteParticipantCard({
 
       {/* Security Microtext Strip di Bawah */}
       <div className="bg-slate-900 py-1 px-3 text-center text-[7.5px] font-mono font-bold tracking-widest text-slate-400 uppercase border-t border-slate-800">
-        ★ RAJENDRA SWIM SYSTEM SWIMSYS • OFFICIAL COMPETITION ID PASS • CALL ROOM READY ★
+        ★ RAJENDRA SWIM SYSTEM • OFFICIAL COMPETITION ID PASS ★
       </div>
     </div>
   );
