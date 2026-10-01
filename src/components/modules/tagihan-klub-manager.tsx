@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useTransition } from 'react';
 import Link from 'next/link';
 import {
   Printer,
@@ -16,11 +16,18 @@ import {
   Calendar,
   X,
   School,
+  Eye,
+  Check,
+  XCircle,
+  ShieldCheck,
+  ExternalLink,
 } from 'lucide-react';
 import { formatRupiah } from '@/lib/utils';
 import { printElement } from '@/lib/utils/print-helper';
 import { InvoiceCard, type InvoiceData, type InvoiceAthleteGroup } from '@/components/modules/invoice-card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { updatePaymentStatus } from '@/app/(dashboard)/verifikasi-pembayaran/actions';
+import { toast } from 'sonner';
 
 export interface TagihanKlubItem {
   id: string;
@@ -36,6 +43,9 @@ export interface TagihanKlubItem {
   remaining_amount: number;
   status: 'belum_bayar' | 'menunggu_verifikasi' | 'lunas';
   athletes?: InvoiceAthleteGroup[];
+  payment_ids?: string[];
+  proof_urls?: string[];
+  registration_ids?: string[];
 }
 
 interface EventOption {
@@ -63,10 +73,14 @@ export function TagihanKlubManager({
   const [invoices, setInvoices] = useState<TagihanKlubItem[]>(initialInvoices);
   const [selectedEventId, setSelectedEventId] = useState<string>('all');
   const [selectedClubId, setSelectedClubId] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'menunggu_verifikasi' | 'belum_bayar' | 'lunas'>('all');
   const [search, setSearch] = useState('');
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [selectedInvoice, setSelectedInvoice] = useState<TagihanKlubItem | null>(null);
+  const [verifyingInvoice, setVerifyingInvoice] = useState<TagihanKlubItem | null>(null);
+  const [isPendingAction, startTransition] = useTransition();
+  const [actionBusy, setActionBusy] = useState<'approve' | 'reject' | null>(null);
 
   // Print ref
   const printAreaRef = useRef<HTMLDivElement>(null);
@@ -74,9 +88,20 @@ export function TagihanKlubManager({
   const handleReset = () => {
     setSelectedEventId('all');
     setSelectedClubId('all');
+    setStatusFilter('all');
     setSearch('');
     setCurrentPage(1);
   };
+
+  // Status counts
+  const statusCounts = useMemo(() => {
+    return {
+      all: invoices.length,
+      menunggu_verifikasi: invoices.filter((i) => i.status === 'menunggu_verifikasi').length,
+      belum_bayar: invoices.filter((i) => i.status === 'belum_bayar').length,
+      lunas: invoices.filter((i) => i.status === 'lunas').length,
+    };
+  }, [invoices]);
 
   const filtered = useMemo(() => {
     return invoices.filter((it) => {
@@ -84,6 +109,9 @@ export function TagihanKlubManager({
         return false;
       }
       if (selectedClubId !== 'all' && it.club_id !== selectedClubId) {
+        return false;
+      }
+      if (statusFilter !== 'all' && it.status !== statusFilter) {
         return false;
       }
       if (search.trim()) {
@@ -96,7 +124,7 @@ export function TagihanKlubManager({
       }
       return true;
     });
-  }, [invoices, selectedEventId, selectedClubId, search]);
+  }, [invoices, selectedEventId, selectedClubId, statusFilter, search]);
 
   const totalPages = Math.ceil(filtered.length / pageSize) || 1;
   const paginated = useMemo(() => {
@@ -214,8 +242,147 @@ export function TagihanKlubManager({
   const selectedEventName = events.find((e) => e.id === selectedEventId)?.name || 'Semua Kejuaraan';
   const selectedClubName = clubs.find((c) => c.id === selectedClubId)?.name || 'Semua Klub';
 
+  const handleApprovePayment = async (inv: TagihanKlubItem) => {
+    setActionBusy('approve');
+    startTransition(async () => {
+      try {
+        if (inv.payment_ids && inv.payment_ids.length > 0) {
+          for (const pid of inv.payment_ids) {
+            const fd = new FormData();
+            fd.set('id', pid);
+            fd.set('status', 'verified');
+            await updatePaymentStatus(fd);
+          }
+        }
+        setInvoices((prev) =>
+          prev.map((item) =>
+            item.id === inv.id
+              ? {
+                  ...item,
+                  status: 'lunas',
+                  remaining_amount: 0,
+                  payment_date: new Date().toISOString().slice(0, 10),
+                }
+              : item
+          )
+        );
+        toast.success(`Tagihan ${inv.club_name} (${inv.invoice_no}) berhasil diverifikasi LUNAS.`);
+        setVerifyingInvoice(null);
+      } catch (err) {
+        toast.error('Gagal memperbarui status verifikasi.');
+      } finally {
+        setActionBusy(null);
+      }
+    });
+  };
+
+  const handleRejectPayment = async (inv: TagihanKlubItem) => {
+    setActionBusy('reject');
+    startTransition(async () => {
+      try {
+        if (inv.payment_ids && inv.payment_ids.length > 0) {
+          for (const pid of inv.payment_ids) {
+            const fd = new FormData();
+            fd.set('id', pid);
+            fd.set('status', 'rejected');
+            await updatePaymentStatus(fd);
+          }
+        }
+        setInvoices((prev) =>
+          prev.map((item) =>
+            item.id === inv.id
+              ? {
+                  ...item,
+                  status: 'belum_bayar',
+                  remaining_amount: item.total_amount,
+                }
+              : item
+          )
+        );
+        toast.warning(`Pembayaran ${inv.club_name} ditolak. Status dikembalikan ke Belum Bayar.`);
+        setVerifyingInvoice(null);
+      } catch (err) {
+        toast.error('Gagal menolak verifikasi.');
+      } finally {
+        setActionBusy(null);
+      }
+    });
+  };
+
   return (
     <div className="space-y-6">
+      {/* ── Status Filter Tabs (Quick Triage) ── */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 print:hidden">
+        <button
+          type="button"
+          onClick={() => {
+            setStatusFilter('all');
+            setCurrentPage(1);
+          }}
+          className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
+            statusFilter === 'all'
+              ? 'bg-[#1b2e4b] text-white shadow-xs'
+              : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+          }`}
+        >
+          Semua Status <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-slate-200/60 text-slate-800">{statusCounts.all}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setStatusFilter('menunggu_verifikasi');
+            setCurrentPage(1);
+          }}
+          className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
+            statusFilter === 'menunggu_verifikasi'
+              ? 'bg-amber-600 text-white shadow-xs'
+              : 'bg-amber-50 border border-amber-200 text-amber-900 hover:bg-amber-100'
+          }`}
+        >
+          <Clock className="h-3.5 w-3.5" /> Menunggu Verifikasi{' '}
+          <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${statusFilter === 'menunggu_verifikasi' ? 'bg-white/20 text-white' : 'bg-amber-200 text-amber-900'}`}>
+            {statusCounts.menunggu_verifikasi}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setStatusFilter('belum_bayar');
+            setCurrentPage(1);
+          }}
+          className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
+            statusFilter === 'belum_bayar'
+              ? 'bg-rose-600 text-white shadow-xs'
+              : 'bg-rose-50 border border-rose-200 text-rose-900 hover:bg-rose-100'
+          }`}
+        >
+          <AlertCircle className="h-3.5 w-3.5" /> Belum Bayar{' '}
+          <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${statusFilter === 'belum_bayar' ? 'bg-white/20 text-white' : 'bg-rose-200 text-rose-900'}`}>
+            {statusCounts.belum_bayar}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setStatusFilter('lunas');
+            setCurrentPage(1);
+          }}
+          className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
+            statusFilter === 'lunas'
+              ? 'bg-emerald-600 text-white shadow-xs'
+              : 'bg-emerald-50 border border-emerald-200 text-emerald-900 hover:bg-emerald-100'
+          }`}
+        >
+          <CheckCircle2 className="h-3.5 w-3.5" /> Lunas{' '}
+          <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${statusFilter === 'lunas' ? 'bg-white/20 text-white' : 'bg-emerald-200 text-emerald-900'}`}>
+            {statusCounts.lunas}
+          </span>
+        </button>
+      </div>
+
       {/* 1. Filter Tagihan Card */}
       <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm space-y-4 print:hidden">
         <h3 className="text-base font-bold text-slate-800">Filter Tagihan</h3>
@@ -498,15 +665,38 @@ export function TagihanKlubManager({
                         </span>
                       </td>
                       <td className="py-3.5 px-3 text-center print:hidden">
-                        <div className="flex items-center justify-center gap-1.5">
+                        <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                          {item.status === 'menunggu_verifikasi' ? (
+                            <button
+                              type="button"
+                              onClick={() => setVerifyingInvoice(item)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold shadow-xs transition-colors cursor-pointer"
+                              title="Cek Bukti Transfer & Verifikasi Pembayaran"
+                            >
+                              <ShieldCheck className="h-3.5 w-3.5" />
+                              Verifikasi
+                            </button>
+                          ) : item.status === 'belum_bayar' ? (
+                            <button
+                              type="button"
+                              onClick={() => setVerifyingInvoice(item)}
+                              className="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-[11px] font-semibold transition-colors cursor-pointer"
+                              title="Tandai Bayar Manual / Verifikasi"
+                            >
+                              <CreditCard className="h-3 w-3 text-slate-500" />
+                              Bayar
+                            </button>
+                          ) : null}
+
                           <button
                             type="button"
                             onClick={() => setSelectedInvoice(item)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#1b2e4b] text-white hover:bg-[#1b2e4b]/90 text-[11px] font-bold shadow-xs transition-colors"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#1b2e4b] text-white hover:bg-[#1b2e4b]/90 text-[11px] font-bold shadow-xs transition-colors cursor-pointer"
                           >
                             <FileText className="h-3 w-3" />
                             Invoice
                           </button>
+
                           {item.event_id && item.club_id && (
                             <Link
                               href={`/events/${item.event_id}/rekap-klub?clubId=${item.club_id}`}
@@ -633,6 +823,181 @@ export function TagihanKlubManager({
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Quick Verification Drawer / Modal (Fase 1 Konsolidasi) ── */}
+      <Dialog open={!!verifyingInvoice} onOpenChange={(open) => !open && setVerifyingInvoice(null)}>
+        <DialogContent
+          showCloseButton={false}
+          className="w-[95vw] max-w-2xl p-0 overflow-hidden bg-white rounded-2xl border border-slate-200 shadow-2xl max-h-[90vh] flex flex-col"
+        >
+          <DialogHeader className="sr-only">
+            <DialogTitle>Verifikasi Pembayaran Klub</DialogTitle>
+          </DialogHeader>
+
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 py-4 bg-slate-900 text-white shrink-0">
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-400">
+                <ShieldCheck className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-bold leading-tight">
+                  Verifikasi Pembayaran &bull; {verifyingInvoice?.club_name}
+                </p>
+                <p className="text-[11px] text-slate-400 leading-tight">
+                  Invoice {verifyingInvoice?.invoice_no} &bull; {verifyingInvoice?.event_name}
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setVerifyingInvoice(null)}
+              className="rounded-lg p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* Body */}
+          {verifyingInvoice && (
+            <div className="flex-1 overflow-y-auto p-5 space-y-4 text-xs">
+              {/* Ringkasan Biaya */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                  <span className="text-[10px] uppercase font-bold text-slate-500">Total Tagihan</span>
+                  <p className="text-base font-black text-slate-900 mt-0.5">
+                    {formatRupiah(verifyingInvoice.total_amount)}
+                  </p>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                  <span className="text-[10px] uppercase font-bold text-slate-500">Jumlah Nomor (Qty)</span>
+                  <p className="text-base font-black text-slate-900 mt-0.5">
+                    {verifyingInvoice.qty} nomor lomba
+                  </p>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 col-span-2 sm:col-span-1">
+                  <span className="text-[10px] uppercase font-bold text-slate-500">Status Saat Ini</span>
+                  <div className="mt-1">
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                        verifyingInvoice.status === 'lunas'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : verifyingInvoice.status === 'menunggu_verifikasi'
+                          ? 'bg-amber-100 text-amber-800'
+                          : 'bg-rose-100 text-rose-800'
+                      }`}
+                    >
+                      {verifyingInvoice.status === 'lunas'
+                        ? 'Lunas'
+                        : verifyingInvoice.status === 'menunggu_verifikasi'
+                        ? 'Menunggu Verifikasi'
+                        : 'Belum Bayar'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bukti Transfer Box */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                    <CreditCard className="h-3.5 w-3.5 text-blue-600" />
+                    <span>Bukti Transfer Pembayaran</span>
+                  </label>
+                  {verifyingInvoice.proof_urls && verifyingInvoice.proof_urls.length > 0 && (
+                    <a
+                      href={verifyingInvoice.proof_urls[0]}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:underline"
+                    >
+                      Buka Gambar Asli <ExternalLink className="h-3 w-3" />
+                    </a>
+                  )}
+                </div>
+
+                {verifyingInvoice.proof_urls && verifyingInvoice.proof_urls.length > 0 ? (
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-2 flex justify-center max-h-64 overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={verifyingInvoice.proof_urls[0]}
+                      alt="Bukti Transfer Pembayaran"
+                      className="max-h-60 object-contain rounded-lg shadow-2xs"
+                    />
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/70 p-6 text-center text-slate-500 space-y-1">
+                    <FileText className="h-8 w-8 text-slate-400 mx-auto" />
+                    <p className="font-semibold text-slate-700">Belum ada file bukti transfer terunggah</p>
+                    <p className="text-[11px] text-slate-400">
+                      Anda tetap dapat menandai tagihan ini sebagai Lunas secara manual (misal: pembayaran tunai di sekretariat).
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Roster Atlet Terdaftar */}
+              {verifyingInvoice.athletes && verifyingInvoice.athletes.length > 0 && (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-900">Roster Atlet dalam Tagihan Ini:</label>
+                  <div className="max-h-36 overflow-y-auto rounded-xl border border-slate-200 divide-y divide-slate-100 bg-white">
+                    {verifyingInvoice.athletes.map((ath, i) => (
+                      <div key={i} className="p-2.5 flex items-center justify-between">
+                        <div>
+                          <p className="font-bold text-slate-800">{ath.athleteName}</p>
+                          <p className="text-[10px] text-slate-500">
+                            {ath.items.map((it) => it.name).join(' &bull; ')}
+                          </p>
+                        </div>
+                        <span className="font-mono font-bold text-slate-700">
+                          {formatRupiah(ath.subtotal)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Footer Action Buttons */}
+          <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                if (verifyingInvoice) setSelectedInvoice(verifyingInvoice);
+                setVerifyingInvoice(null);
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 bg-white text-slate-700 font-bold hover:bg-slate-100 transition-colors text-xs cursor-pointer"
+            >
+              <FileText className="h-3.5 w-3.5" /> Buka Invoice Resmi
+            </button>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => verifyingInvoice && handleRejectPayment(verifyingInvoice)}
+                disabled={isPendingAction}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-red-200 bg-red-50 text-red-700 font-bold hover:bg-red-100 transition-colors text-xs disabled:opacity-60 cursor-pointer"
+              >
+                <XCircle className="h-3.5 w-3.5" />
+                {actionBusy === 'reject' ? 'Memproses...' : 'Tolak Pembayaran'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => verifyingInvoice && handleApprovePayment(verifyingInvoice)}
+                disabled={isPendingAction}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-colors text-xs shadow-xs disabled:opacity-60 cursor-pointer"
+              >
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                {actionBusy === 'approve' ? 'Memproses...' : 'Setujui & Tandai Lunas'}
+              </button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
