@@ -34,6 +34,8 @@ import {
   Layers,
   Sparkles,
   RotateCcw,
+  ChevronRight,
+  ChevronLeft,
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -136,11 +138,58 @@ export function ResultInputOperator({
     return { total: assigns.length, filled: filledCount, isComplete };
   };
 
+  // Heats yang terurut berdasarkan heat_number
+  const sortedHeats = useMemo(() => {
+    return [...(heatsData || [])].sort((a, b) => (a.heat_number ?? 0) - (b.heat_number ?? 0));
+  }, [heatsData]);
+
+  // Index dan navigasi antar nomor lomba (competition event)
+  const currentCompEventIndex = useMemo(
+    () => compEvents.findIndex((ce) => ce.id === selectedCompEventId),
+    [compEvents, selectedCompEventId]
+  );
+  const nextCompEvent =
+    currentCompEventIndex >= 0 && currentCompEventIndex < compEvents.length - 1
+      ? compEvents[currentCompEventIndex + 1]
+      : null;
+  const prevCompEvent = currentCompEventIndex > 0 ? compEvents[currentCompEventIndex - 1] : null;
+
   // Filter heat sesuai pilihan operator (Semua Seri vs Seri Tertentu)
   const filteredHeats = useMemo(() => {
-    if (selectedHeatFilter === 'all') return heatsData;
-    return heatsData.filter((h) => h.id === selectedHeatFilter);
+    const list =
+      selectedHeatFilter === 'all'
+        ? heatsData
+        : heatsData.filter((h) => h.id === selectedHeatFilter);
+    return [...(list || [])].sort((a, b) => (a.heat_number ?? 0) - (b.heat_number ?? 0));
   }, [heatsData, selectedHeatFilter]);
+
+  // Navigasi cepat antar Seri dengan auto-scroll dan auto-focus ke lintasan pertama
+  const handleNavigateHeat = (targetHeatId: string, targetHeatNumber?: number) => {
+    if (selectedHeatFilter !== 'all') {
+      setSelectedHeatFilter(targetHeatId);
+    }
+    if (targetHeatNumber !== undefined) {
+      toast.info(`Beralih ke Seri ${targetHeatNumber}...`);
+    }
+    setTimeout(() => {
+      const el = document.getElementById(`heat-card-${targetHeatId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      const targetHeat = heatsData.find((h) => h.id === targetHeatId);
+      if (targetHeat?.heat_assignments && targetHeat.heat_assignments.length > 0) {
+        const sortedAssigns = [...targetHeat.heat_assignments].sort(
+          (a, b) => a.lane_number - b.lane_number
+        );
+        const firstAssignId = sortedAssigns[0].id;
+        const firstInput = inputRefs.current[firstAssignId];
+        if (firstInput) {
+          firstInput.focus();
+          firstInput.select();
+        }
+      }
+    }, 60);
+  };
 
   // Urutan seluruh assignment secara linier untuk auto-focus enter ke lane berikutnya
   const orderedAssignmentIds = useMemo(() => {
@@ -387,6 +436,15 @@ export function ResultInputOperator({
           nextInputEl.focus();
           nextInputEl.select();
         }
+      } else if (
+        currentIndex === orderedAssignmentIds.length - 1 &&
+        selectedHeatFilter !== 'all'
+      ) {
+        const curHeatIdx = sortedHeats.findIndex((h) => h.id === selectedHeatFilter);
+        if (curHeatIdx >= 0 && curHeatIdx < sortedHeats.length - 1) {
+          const nextH = sortedHeats[curHeatIdx + 1];
+          handleNavigateHeat(nextH.id, nextH.heat_number);
+        }
       }
     }
   };
@@ -479,7 +537,7 @@ export function ResultInputOperator({
               Semua Seri ({heatsData.length})
             </button>
 
-            {heatsData.map((heat) => {
+            {sortedHeats.map((heat) => {
               const { total, filled, isComplete } = getHeatCompletionStatus(heat);
               const isSelected = selectedHeatFilter === heat.id;
 
@@ -520,6 +578,50 @@ export function ResultInputOperator({
                 </button>
               );
             })}
+
+            {/* Quick Next/Prev buttons in the toolbar when filtered to a single heat */}
+            {selectedHeatFilter !== 'all' && (
+              <div className="flex items-center gap-1.5 ml-auto">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    const curIdx = sortedHeats.findIndex((h) => h.id === selectedHeatFilter);
+                    if (curIdx > 0) {
+                      handleNavigateHeat(
+                        sortedHeats[curIdx - 1].id,
+                        sortedHeats[curIdx - 1].heat_number
+                      );
+                    }
+                  }}
+                  disabled={sortedHeats.findIndex((h) => h.id === selectedHeatFilter) <= 0}
+                  className="h-8 px-2.5 text-xs font-bold bg-white text-slate-700 hover:bg-slate-100 cursor-pointer"
+                >
+                  <ChevronLeft className="h-3.5 w-3.5 mr-0.5" /> Seri Sebelumnya
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => {
+                    const curIdx = sortedHeats.findIndex((h) => h.id === selectedHeatFilter);
+                    if (curIdx >= 0 && curIdx < sortedHeats.length - 1) {
+                      handleNavigateHeat(
+                        sortedHeats[curIdx + 1].id,
+                        sortedHeats[curIdx + 1].heat_number
+                      );
+                    }
+                  }}
+                  disabled={
+                    sortedHeats.findIndex((h) => h.id === selectedHeatFilter) >=
+                    sortedHeats.length - 1
+                  }
+                  className="h-8 px-2.5 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white cursor-pointer shadow-xs"
+                >
+                  Seri Selanjutnya <ChevronRight className="h-3.5 w-3.5 ml-0.5" />
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -532,10 +634,17 @@ export function ResultInputOperator({
       ) : (
         filteredHeats.map((heat) => {
           const { total, filled, isComplete } = getHeatCompletionStatus(heat);
+          const heatIndex = sortedHeats.findIndex((h) => h.id === heat.id);
+          const nextHeat =
+            heatIndex >= 0 && heatIndex < sortedHeats.length - 1
+              ? sortedHeats[heatIndex + 1]
+              : null;
+          const prevHeat = heatIndex > 0 ? sortedHeats[heatIndex - 1] : null;
 
           return (
             <Card
               key={heat.id}
+              id={`heat-card-${heat.id}`}
               className={cn(
                 'border-t-4 rounded-2xl overflow-hidden shadow-xs transition-all',
                 isComplete ? 'border-t-emerald-500 border-emerald-200' : 'border-t-blue-600'
@@ -560,7 +669,7 @@ export function ResultInputOperator({
                   )}
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <Button
                     size="sm"
                     variant="outline"
@@ -571,6 +680,45 @@ export function ResultInputOperator({
                     <Save className="h-3.5 w-3.5" />
                     Simpan Semua Lintasan
                   </Button>
+
+                  {/* TOMBOL UX MOBILISASI: KE SERI SEBELUMNYA / SELANJUTNYA */}
+                  {prevHeat && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleNavigateHeat(prevHeat.id, prevHeat.heat_number)}
+                      className="h-8 gap-1 text-xs font-bold text-slate-700 bg-white hover:bg-slate-100 border-slate-300 cursor-pointer shadow-2xs"
+                      title={`Pindah ke Seri ${prevHeat.heat_number}`}
+                    >
+                      <ChevronLeft className="h-3.5 w-3.5" /> Seri {prevHeat.heat_number}
+                    </Button>
+                  )}
+
+                  {nextHeat ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => handleNavigateHeat(nextHeat.id, nextHeat.heat_number)}
+                      className="h-8 gap-1.5 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white cursor-pointer shadow-xs"
+                      title={`Pindah langsung ke Seri ${nextHeat.heat_number}`}
+                    >
+                      <span>Ke Seri Selanjutnya (Seri {nextHeat.heat_number})</span>
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </Button>
+                  ) : nextCompEvent ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => handleCompEventChange(nextCompEvent.id)}
+                      className="h-8 gap-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer shadow-xs"
+                      title={`Lanjut ke Nomor Lomba Berikutnya: ${nextCompEvent.name}`}
+                    >
+                      <span>Nomor Lomba Berikutnya</span>
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Button>
+                  ) : null}
+
                   <Link href={`/buku-acara?event=${selectedEventId}`}>
                     <Button
                       size="sm"
@@ -717,6 +865,59 @@ export function ResultInputOperator({
                       );
                     })}
               </CardContent>
+
+              {/* Card Footer: Navigasi Cepat Selesai Seri */}
+              <div className="p-3 bg-slate-50 border-t flex flex-col sm:flex-row items-center justify-between gap-2.5">
+                <div className="flex items-center gap-2 text-xs text-slate-600">
+                  <Clock className="h-3.5 w-3.5 text-blue-600" />
+                  <span>
+                    Acara / Seri {heat.heat_number}: <b>{filled}</b> dari {total} lintasan terisi
+                    {isComplete && (
+                      <span className="text-emerald-700 font-bold ml-1.5">✓ Lengkap</span>
+                    )}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2 flex-wrap">
+                  {prevHeat && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleNavigateHeat(prevHeat.id, prevHeat.heat_number)}
+                      className="h-8 gap-1 text-xs font-bold bg-white text-slate-700 hover:bg-slate-100 border-slate-300 cursor-pointer"
+                    >
+                      <ChevronLeft className="h-3.5 w-3.5" /> Seri {prevHeat.heat_number}
+                    </Button>
+                  )}
+
+                  {nextHeat ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => handleNavigateHeat(nextHeat.id, nextHeat.heat_number)}
+                      className="h-8 gap-1.5 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white cursor-pointer shadow-xs"
+                    >
+                      <span>Ke Seri Selanjutnya (Seri {nextHeat.heat_number}) »</span>
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </Button>
+                  ) : nextCompEvent ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => handleCompEventChange(nextCompEvent.id)}
+                      className="h-8 gap-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer shadow-xs"
+                    >
+                      <span>Ke Nomor Lomba Berikutnya »</span>
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Button>
+                  ) : (
+                    <Badge variant="outline" className="text-xs text-slate-500 bg-white">
+                      Seri Terakhir pada Nomor Lomba Ini
+                    </Badge>
+                  )}
+                </div>
+              </div>
             </Card>
           );
         })
