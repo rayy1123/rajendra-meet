@@ -656,6 +656,13 @@ export function AdminDashboardView({
                   Sinkronisasi kode verifikasi jika kuota email habis atau peserta meminta bantuan.
                 </p>
               </div>
+
+              <Link
+                href="/antrean-otp"
+                className="text-[11px] font-bold text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1 shrink-0"
+              >
+                <span>Lihat Semua &rarr;</span>
+              </Link>
             </div>
 
             {adminOtps.length === 0 ? (
