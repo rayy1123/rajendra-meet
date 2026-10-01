@@ -21,7 +21,11 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: `Kode OTP 6-digit berhasil dikirim ke ${email}`,
+      fallbackToAdmin: res.fallbackToAdmin ?? false,
+      reason: res.reason,
+      message: res.fallbackToAdmin
+        ? 'Kuota email habis atau tertunda. Kode OTP berhasil diteruskan ke Dashboard Panitia/Admin.'
+        : `Kode OTP 6-digit berhasil dikirim ke ${email}`,
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Kesalahan sistem saat mengirim OTP.';

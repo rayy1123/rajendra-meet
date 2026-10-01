@@ -16,6 +16,7 @@ export interface CompEventPayload {
   gender: 'male' | 'female' | 'mixed';
   grade_level?: string | null;
   class_name?: string | null;
+  age_group?: string | null;
   order_no: number;
   session_no?: number | null;
 }
@@ -32,6 +33,12 @@ export async function createCompEventAction(
     return { ok: false, error: 'Sesi login telah berakhir. Silakan login kembali.' };
   }
 
+  const ageGroupVal =
+    payload.age_group?.trim() ||
+    payload.grade_level?.trim() ||
+    payload.class_name?.trim() ||
+    'Umum';
+
   const { data, error } = await supabase
     .from('competition_events')
     .insert({
@@ -42,6 +49,7 @@ export async function createCompEventAction(
       gender: payload.gender,
       grade_level: payload.grade_level?.trim() || null,
       class_name: payload.class_name?.trim() || payload.grade_level?.trim() || null,
+      age_group: ageGroupVal,
       order_no: Number(payload.order_no) || 1,
       session_no: Number(payload.session_no) || 1,
     })
@@ -53,8 +61,12 @@ export async function createCompEventAction(
   }
 
   revalidatePath(`/events/${eventId}`);
+  revalidatePath(`/nomor-lomba`);
+  revalidatePath(`/daftar-lomba`);
   revalidatePath(`/heats`);
   revalidatePath(`/buku-acara`);
+  revalidatePath(`/results`);
+  revalidatePath(`/export`);
   return { ok: true, data };
 }
 
@@ -78,6 +90,9 @@ export async function updateCompEventAction(
   if (payload.gender !== undefined) updateData.gender = payload.gender;
   if (payload.grade_level !== undefined) updateData.grade_level = payload.grade_level?.trim() || null;
   if (payload.class_name !== undefined) updateData.class_name = payload.class_name?.trim() || null;
+  if (payload.age_group !== undefined) {
+    updateData.age_group = payload.age_group?.trim() || payload.class_name?.trim() || null;
+  }
   if (payload.order_no !== undefined) updateData.order_no = Number(payload.order_no);
   if (payload.session_no !== undefined) updateData.session_no = Number(payload.session_no);
 
@@ -94,8 +109,12 @@ export async function updateCompEventAction(
   }
 
   revalidatePath(`/events/${eventId}`);
+  revalidatePath(`/nomor-lomba`);
+  revalidatePath(`/daftar-lomba`);
   revalidatePath(`/heats`);
   revalidatePath(`/buku-acara`);
+  revalidatePath(`/results`);
+  revalidatePath(`/export`);
   return { ok: true, data };
 }
 

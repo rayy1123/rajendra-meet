@@ -19,6 +19,7 @@ import {
   LayoutDashboard,
   HelpCircle,
   Home,
+  Flame,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
@@ -76,6 +77,13 @@ export const MAIN_MENU_ITEMS: LandingMenuItem[] = [
     label: 'Klasemen Medali',
     description: 'Rekap perolehan medali per kontingen',
     icon: Trophy,
+  },
+  {
+    href: '/rajendra-record',
+    label: 'Rajendra Record',
+    description: 'Rekor resmi kejuaraan renang terverifikasi',
+    icon: Flame,
+    badge: 'REKOR',
   },
   {
     href: '/kontak',
@@ -149,14 +157,17 @@ export function LandingSidebarDrawer({
       >
         {/* Header Drawer */}
         <SheetHeader className="flex flex-row items-center justify-between border-b border-[var(--m-border)] px-5 py-4 space-y-0">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <img
               src="/brand/logo.png"
               alt="Rajendra Swim System"
               className="h-8 w-auto object-contain"
             />
-            <div className="border-l border-[var(--m-border)] pl-2.5">
-              <SheetTitle className="text-xs font-semibold italic text-primary leading-tight">
+            <div>
+              <div className="font-heading font-black text-sm text-[var(--m-ink)] leading-tight">
+                Rajendra <span className="text-[var(--m-aqua)]">Swim System</span>
+              </div>
+              <SheetTitle className="text-[10px] font-semibold italic text-primary leading-none mt-0.5">
                 &ldquo;We Organize, You Achieve&rdquo;
               </SheetTitle>
             </div>

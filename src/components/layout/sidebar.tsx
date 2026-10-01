@@ -39,6 +39,7 @@ import {
   IdCard,
   User,
   Search,
+  KeyRound,
   type LucideIcon,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -80,6 +81,7 @@ const adminNavGroups: NavGroup[] = [
     label: 'Utama',
     items: [
       { title: 'Dasbor Panitia', href: '/dashboard', icon: LayoutDashboard, description: 'Statistik dan akses cepat' },
+      { title: 'Antrean Kode OTP', href: '/antrean-otp', icon: KeyRound, description: 'Bypass kode verifikasi limitasi Brevo' },
     ],
   },
   {
@@ -115,6 +117,7 @@ const adminNavGroups: NavGroup[] = [
   {
     label: 'Keuangan & Sistem',
     items: [
+      { title: 'Antrean Kode OTP', href: '/antrean-otp', icon: KeyRound, description: 'Kode OTP saat limitasi email Brevo' },
       { title: 'Tagihan Klub', href: '/tagihan', icon: Receipt, description: 'Tagihan per klub & cetak rekap' },
       { title: 'Pengeluaran (Expenses)', href: '/expenses', icon: TrendingDown, description: 'Catat pengeluaran operasional' },
       { title: 'Laporan Keuangan (Report)', href: '/report', icon: BarChart3, description: 'Laporan kas & ekspor Excel' },
@@ -145,6 +148,7 @@ const viewerNavGroups: NavGroup[] = [
     items: [
       { title: 'Live Scoreboard', href: '/scoreboard', icon: Timer, description: 'Pantauan live timing arena kolam' },
       { title: 'Hasil Lomba', href: '/rankings', icon: Trophy, description: 'Catatan waktu resmi per nomor lomba' },
+      { title: 'Rajendra Record', href: '/rajendra-record', icon: Trophy, description: 'Rekor resmi kejuaraan renang' },
       { title: 'Sertifikat Juara', href: '/sertifikat', icon: Award, description: 'Unduh piagam & sertifikat penghargaan' },
     ],
   },
