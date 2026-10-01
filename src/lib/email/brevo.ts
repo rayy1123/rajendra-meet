@@ -25,10 +25,47 @@ export interface BrevoResult {
   error?: string;
 }
 
-const DEFAULT_SENDER: EmailRecipient = {
-  name: process.env.BREVO_SENDER_NAME || 'Rajendra Swim System',
-  email: process.env.BREVO_SENDER_EMAIL || 'sembilanrouter@gmail.com',
-};
+let cachedSenders: { email: string; active: boolean }[] = [];
+let lastFetchedSendersTime = 0;
+
+async function getActiveBrevoSenderEmail(apiKey: string): Promise<string> {
+  const preferred = (process.env.BREVO_SENDER_EMAIL || 'sembilanrouter@gmail.com').toLowerCase();
+
+  // Cache senders list selama 60 detik
+  if (Date.now() - lastFetchedSendersTime < 60000 && cachedSenders.length > 0) {
+    const isPreferredActive = cachedSenders.some(
+      (s) => s.email.toLowerCase() === preferred && s.active
+    );
+    if (isPreferredActive) return preferred;
+    const fallbackActive = cachedSenders.find((s) => s.active)?.email;
+    if (fallbackActive) return fallbackActive;
+  }
+
+  try {
+    const res = await fetch('https://api.brevo.com/v3/senders', {
+      headers: { 'api-key': apiKey },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data?.senders)) {
+        cachedSenders = data.senders;
+        lastFetchedSendersTime = Date.now();
+
+        const isPreferredActive = cachedSenders.some(
+          (s) => s.email.toLowerCase() === preferred && s.active
+        );
+        if (isPreferredActive) return preferred;
+
+        const firstActive = cachedSenders.find((s) => s.active)?.email;
+        if (firstActive) return firstActive;
+      }
+    }
+  } catch (err) {
+    console.warn('[Brevo Senders Check] Gagal cek senders:', err);
+  }
+
+  return 'revanez891@gmail.com';
+}
 
 /**
  * Kirim Email Transaksional via Brevo REST API v3
@@ -45,6 +82,19 @@ export async function sendBrevoEmail(payload: SendEmailPayload): Promise<BrevoRe
   }
 
   try {
+    const verifiedSenderEmail = await getActiveBrevoSenderEmail(apiKey);
+    const senderName = process.env.BREVO_SENDER_NAME || 'Rajendra Swim System';
+
+    const senderObj: EmailRecipient = payload.sender || {
+      name: senderName,
+      email: verifiedSenderEmail,
+    };
+
+    const replyToObj: EmailRecipient = payload.replyTo || {
+      name: senderName,
+      email: process.env.BREVO_SENDER_EMAIL || 'sembilanrouter@gmail.com',
+    };
+
     const response = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: {
@@ -53,12 +103,12 @@ export async function sendBrevoEmail(payload: SendEmailPayload): Promise<BrevoRe
         Accept: 'application/json',
       },
       body: JSON.stringify({
-        sender: payload.sender || DEFAULT_SENDER,
+        sender: senderObj,
         to: payload.to,
         subject: payload.subject,
         htmlContent: payload.htmlContent,
         textContent: payload.textContent,
-        replyTo: payload.replyTo,
+        replyTo: replyToObj,
       }),
     });
 
