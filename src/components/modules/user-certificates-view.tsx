@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Trophy,
@@ -39,7 +39,7 @@ export function UserCertificatesView({
   const [selectedRecipient, setSelectedRecipient] = useState<CertificateRecipient | null>(null);
   const [printingRecipient, setPrintingRecipient] = useState<CertificateRecipient | null>(null);
 
-  // Default Pengaturan Sertifikat Resmi Terbitan Panitia (Read-only untuk Peserta)
+  // Default Pengaturan Sertifikat Resmi Terbitan Panitia
   const officialSettings: CertificateSettings = {
     skNumber: '028/SK-RM/X/2026',
     issuedCity: 'Jakarta',
@@ -54,7 +54,33 @@ export function UserCertificatesView({
     technicalDelegateTitle: 'Technical Delegate / Referee',
     certificateType: 'achievement',
     showSponsors: true,
+    leftLogoUrl: '/brand/logo.png',
+    leftLogoTitle: 'RAJENDRA SWIM SYSTEM',
+    leftLogoSubtitle: 'OFFICIAL SANCTIONED SYSTEM',
+    mainSponsorLogoUrl: null,
+    mainSponsorTitle: 'OFFICIAL MAIN SPONSOR',
+    mainSponsorSubtitle: 'SPONSOR UTAMA RESMI',
+    showMainSponsor: true,
+    rightLogoUrl: '/brand/rajendra-organizer-logo.png',
+    rightLogoTitle: 'RAJENDRA ORGANIZER',
+    rightLogoSubtitle: 'CHAMPIONSHIP ORGANIZER',
+    backgroundTheme: 'default',
+    borderStyle: 'gold_classic',
+    showWatermark: true,
   };
+
+  const [activeSettings, setActiveSettings] = useState<CertificateSettings>(officialSettings);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('scms-certificate-settings');
+      if (saved) {
+        setActiveSettings((prev) => ({ ...prev, ...JSON.parse(saved) }));
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
 
   const handlePrint = (rec: CertificateRecipient) => {
     setSelectedRecipient(null);
@@ -314,7 +340,7 @@ export function UserCertificatesView({
           <div id="user-certificate-sheet-content">
             <CertificateCard
               recipient={printingRecipient}
-              settings={officialSettings}
+              settings={activeSettings}
               sponsors={sponsors}
               isPrintOnly
             />
@@ -336,7 +362,7 @@ export function UserCertificatesView({
               <div id="modal-certificate-preview-card" className="max-h-[72vh] overflow-y-auto p-1 rounded-xl border bg-slate-100/50">
                 <CertificateCard
                   recipient={selectedRecipient}
-                  settings={officialSettings}
+                  settings={activeSettings}
                   sponsors={sponsors}
                 />
               </div>
