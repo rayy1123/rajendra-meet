@@ -23,10 +23,15 @@ export default async function PublicRajendraRecordPage({
 
   const events = (eventsData || []).map((e) => ({ id: e.id, name: e.name }));
 
-  // 2. Rekor yang sudah tercatat di database
+  // 2. Rekor yang sudah tercatat di database dengan informasi atlet & event sebelumnya
   const { data: existing } = await supabase
     .from('rajendra_records')
-    .select('competition_event_id, time_ms')
+    .select(`
+      competition_event_id,
+      time_ms,
+      athletes ( full_name, schools ( name ) ),
+      competition_events ( name, events ( name ) )
+    `)
     .eq('is_active', true);
 
   // 3. Ambil data nomor lomba untuk detail nama, gaya, jarak, dll
@@ -75,7 +80,7 @@ export default async function PublicRajendraRecordPage({
 
   const { data: results } = await resultsQuery;
 
-  // 5. Normalisasi candidates
+  // 5. Normalisasi candidates dengan nama event
   const candidates: RecordCandidate[] = (results || [])
     .map((r: any) => {
       const ha = r.heat_assignments;
@@ -83,11 +88,15 @@ export default async function PublicRajendraRecordPage({
       const ath = reg?.athletes;
       if (!reg || !ath || !reg.competition_event_id) return null;
 
+      const comp = compMap.get(reg.competition_event_id);
+      const evName = comp?.events?.name || 'Kejuaraan Renang';
+
       return {
         time_ms: r.time_ms ?? 0,
         status: r.status ?? 'finished',
         competition_event_id: reg.competition_event_id,
         event_id: reg.event_id,
+        event_name: evName,
         athlete_id: ath.id ?? '',
         athlete_name: ath.full_name ?? 'Atlet',
         school_name: ath.schools?.name ?? 'Umum / Perorangan',
@@ -95,7 +104,14 @@ export default async function PublicRajendraRecordPage({
     })
     .filter(Boolean) as RecordCandidate[];
 
-  const existingRecs: ExistingRecord[] = (existing || []) as unknown as ExistingRecord[];
+  const existingRecs: ExistingRecord[] = (existing || []).map((e: any) => ({
+    competition_event_id: e.competition_event_id,
+    time_ms: e.time_ms,
+    athlete_name: e.athletes?.full_name || null,
+    school_name: e.athletes?.schools?.name || null,
+    event_name: e.competition_events?.events?.name || null,
+  }));
+
   const broken = detectBrokenRecords(candidates, existingRecs);
 
   // 6. Bentuk record items view yang lengkap
@@ -105,7 +121,7 @@ export default async function PublicRajendraRecordPage({
     const dist = comp?.distance_meters || 50;
     const gender = comp?.gender === 'female' ? 'female' : 'male';
     const grade = comp?.grade_level || 'Umum';
-    const eventName = comp?.events?.name || 'Kejuaraan Renang';
+    const eventName = b.event_name || comp?.events?.name || 'Kejuaraan Renang';
 
     const displayName =
       comp?.name || `${dist}m ${strokeName} ${grade} (${gender === 'female' ? 'Putri' : 'Putra'})`;
@@ -119,7 +135,11 @@ export default async function PublicRajendraRecordPage({
       school_name: b.school_name || 'Umum / Perorangan',
       time_ms: b.time_ms,
       previous_time_ms: b.previous_time_ms,
+      previous_athlete_name: b.previous_athlete_name,
+      previous_school_name: b.previous_school_name,
+      previous_event_name: b.previous_event_name,
       improvement_ms: b.improvement_ms,
+      notes: b.notes,
       comp_name: displayName,
       stroke: strokeName,
       distance_meters: dist,
