@@ -39,7 +39,9 @@ export function CertificateCard({
     : `PERINGKAT KE-${recipient.rank}`;
 
   const certNumber = `${settings.skNumber || 'RM/CERT'}/${recipient.orderNo ? String(recipient.orderNo).padStart(2, '0') : '01'}/${String(recipient.rank).padStart(2, '0')}`;
-  const verificationPayload = `RAJENDRA-MEET:CERT:${recipient.athleteNumber}:${recipient.competitionEventId}:${recipient.rank}:${recipient.finishTimeMs || 0}`;
+  const verificationPayload = typeof window !== 'undefined'
+    ? `${window.location.origin}/verifikasi/${recipient.id}`
+    : `https://scms-app-umber.vercel.app/verifikasi/${recipient.id}`;
 
   const formattedEventTitle = formatCompEventLabel(
     {

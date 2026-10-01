@@ -123,12 +123,51 @@ export default async function ResultsPage({
     }
   }
 
+  // 4. Ambil Rekor Terkini untuk Nomor Lomba Aktif (rajendra_records)
+  let currentRecord: {
+    id?: string;
+    time_ms: number;
+    athlete_name: string;
+    school_name?: string;
+    event_year?: number;
+  } | null = null;
+
+  if (activeCompEventId) {
+    const { data: recordData } = await supabase
+      .from('rajendra_records')
+      .select(`
+        id,
+        time_ms,
+        event_year,
+        athlete_id,
+        athletes (
+          full_name,
+          schools ( name )
+        )
+      `)
+      .eq('competition_event_id', activeCompEventId)
+      .eq('is_active', true)
+      .maybeSingle();
+
+    if (recordData && recordData.time_ms) {
+      const rawAth = Array.isArray(recordData.athletes) ? recordData.athletes[0] : recordData.athletes;
+      const rawSchool = Array.isArray(rawAth?.schools) ? rawAth?.schools[0] : rawAth?.schools;
+      currentRecord = {
+        id: recordData.id,
+        time_ms: Number(recordData.time_ms),
+        athlete_name: rawAth?.full_name || 'Pemegang Rekor',
+        school_name: rawSchool?.name || 'Klub',
+        event_year: recordData.event_year,
+      };
+    }
+  }
+
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
       <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Input Hasil' }]} className="mb-2" />
       <PageHeader
-        title="Input Hasil Lomba"
-        description="Input waktu tempuh per lintasan (lane). Hasil otomatis tersimpan dan terupdate secara realtime."
+        title="Input Hasil Lomba & Record Breaker"
+        description="Input waktu tempuh per lintasan (lane). Hasil otomatis tersimpan, terupdate secara realtime, dan mendeteksi pecah rekor kejuaraan."
         icon={<Trophy className="h-6 w-6" />}
         actions={
           selectedEventObj && liveConfig ? (
@@ -154,6 +193,7 @@ export default async function ResultsPage({
           initialEventId={activeEventId}
           initialCompEventId={activeCompEventId}
           heatsData={heatAssignments}
+          currentRecord={currentRecord}
         />
       )}
     </div>

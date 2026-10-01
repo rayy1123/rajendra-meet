@@ -133,6 +133,8 @@ export function RegistrationWizard({
   }, [schools]);
 
   const [selectedCats, setSelectedCats] = useState<string[]>([]);
+  const [strokeFilter, setStrokeFilter] = useState<string>('all');
+  const [compEventSearch, setCompEventSearch] = useState<string>('');
   const [proof, setProof] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
@@ -164,16 +166,31 @@ export function RegistrationWizard({
 
   // Saring ketat nomor lomba: jika atlet KU 1, HANYA tampilkan nomor lomba yang berkualifikasi KU 1 (dan gender cocok).
   // Seluruh nomor lomba KU lain (KU 2-5, Senior, SD, SMP, dll.) otomatis dihilangkan.
-  const eligibleCats = competitionEvents.filter((c) => {
-    if (!chosen) return false;
-    return isEventEligibleForAthlete(chosen, c);
-  });
+  const eligibleCats = useMemo(() => {
+    return competitionEvents.filter((c) => {
+      if (!chosen) return false;
+      if (!isEventEligibleForAthlete(chosen, c)) return false;
+      if (strokeFilter !== 'all' && c.stroke !== strokeFilter) return false;
+      if (compEventSearch.trim()) {
+        const q = compEventSearch.toLowerCase();
+        const combined = `${c.distance_meters} ${c.stroke} ${STROKE_LABELS[c.stroke] || ''} ${c.name} ${c.grade_level || ''} ${c.age_group || ''}`.toLowerCase();
+        return combined.includes(q);
+      }
+      return true;
+    });
+  }, [competitionEvents, chosen, strokeFilter, compEventSearch]);
+
+  const allEligibleCount = useMemo(() => {
+    return competitionEvents.filter((c) => chosen && isEventEligibleForAthlete(chosen, c)).length;
+  }, [competitionEvents, chosen]);
 
   const toggleCat = (cid: string) =>
     setSelectedCats((prev) => (prev.includes(cid) ? prev.filter((x) => x !== cid) : [...prev, cid]));
 
   // Pastikan kategori yang dipilih tetap valid (tidak ada kebocoran nomor yang tidak eligible)
-  const validSelectedCats = selectedCats.filter((cid) => eligibleCats.some((c) => c.id === cid));
+  const validSelectedCats = selectedCats.filter((cid) =>
+    competitionEvents.some((c) => c.id === cid && chosen && isEventEligibleForAthlete(chosen, c))
+  );
 
   const goNext = () => {
     if (step === 0 && mode === "existing" && !athleteId) return;
@@ -477,33 +494,145 @@ export function RegistrationWizard({
 
       {/* STEP 2 */}
       {step === 1 && chosen && (
-        <Card className="p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-[var(--m-ink)]">Pilih Nomor Lomba</h2>
-            <span className="pub-chip">{chosen.full_name || fullName} · {athleteKU}</span>
+        <Card className="p-6 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
+            <div>
+              <h2 className="text-lg font-bold text-[var(--m-ink)]">Pilih Nomor Lomba</h2>
+              <p className="text-xs text-[var(--m-muted)]">
+                Nomor otomatis disaring ketat berdasarkan gender ({chosen.gender === 'female' ? 'Putri' : 'Putra'}) dan kelompok umur atlet.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 border border-blue-200 text-blue-900">
+                <span className="h-2 w-2 rounded-full bg-blue-600" />
+                {chosen.full_name || fullName}
+              </span>
+              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black bg-cyan-100 text-cyan-900 border border-cyan-300">
+                {athleteKU}
+              </span>
+            </div>
           </div>
-          <p className="mb-3 text-sm text-[var(--m-muted)]">Nomor otomatis tersaring berdasarkan gender & kelompok atlet.</p>
-          <div className="space-y-3">
-            {eligibleCats.length === 0 && (
-              <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">Tidak ada nomor lomba yang sesuai untuk atlet ini.</p>
-            )}
-            {eligibleCats.map((c) => {
-              const sel = selectedCats.includes(c.id);
-              return (
-                <button type="button" key={c.id} onClick={() => toggleCat(c.id)}
-                  className={`flex w-full items-center justify-between rounded-xl border p-4 text-left transition-colors ${sel ? "border-[var(--m-aqua)] bg-[var(--m-aqua-soft)]" : "border-[var(--m-border)] hover:border-[var(--m-aqua)]"}`}>
-                  <div>
-                    <div className="font-semibold text-[var(--m-ink)]">{c.distance_meters}m {STROKE_LABELS[c.stroke] ?? c.stroke}</div>
-                    <div className="text-xs text-[var(--m-muted)]">{formatCompEventSubtitle(c.name, c.grade_level, c.age_group)}</div>
-                  </div>
-                  <span className={`h-5 w-5 rounded border-2 ${sel ? "border-[var(--m-aqua)] bg-[var(--m-aqua)]" : "border-[var(--m-border)]"}`} />
+
+          {/* Stroke Filter Tabs & Search Bar */}
+          <div className="space-y-2.5 pt-1">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+              {[
+                { id: 'all', label: 'Semua Gaya' },
+                { id: 'Freestyle', label: 'Bebas' },
+                { id: 'Breaststroke', label: 'Dada' },
+                { id: 'Backstroke', label: 'Punggung' },
+                { id: 'Butterfly', label: 'Kupu-kupu' },
+                { id: 'Individual Medley', label: 'Ganti (IM)' },
+              ].map((st) => (
+                <button
+                  type="button"
+                  key={st.id}
+                  onClick={() => setStrokeFilter(st.id)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                    strokeFilter === st.id
+                      ? 'bg-blue-600 text-white shadow-2xs'
+                      : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                  }`}
+                >
+                  {st.label}
                 </button>
-              );
-            })}
+              ))}
+            </div>
+
+            <div className="relative">
+              <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+              <Input
+                type="text"
+                placeholder="Cari jarak (25m, 50m, 100m) atau nomor acara..."
+                value={compEventSearch}
+                onChange={(e) => setCompEventSearch(e.target.value)}
+                className="pl-8 text-xs h-9 rounded-xl bg-slate-50 border-slate-200"
+              />
+            </div>
           </div>
-          <div className="mt-5 flex items-center justify-between">
-            <Button variant="outline" onClick={goBack}><ChevronLeft className="h-4 w-4" /> Kembali</Button>
-            <Button onClick={goNext} disabled={validSelectedCats.length === 0}>Lanjut <ChevronRight className="h-4 w-4" /></Button>
+
+          {/* List Nomor Lomba */}
+          <div className="space-y-2.5 max-h-[420px] overflow-y-auto pr-1">
+            {eligibleCats.length === 0 ? (
+              <div className="p-8 text-center text-xs text-slate-500 rounded-xl border border-dashed bg-slate-50 space-y-1">
+                <p className="font-bold text-slate-700">Tidak ada nomor lomba yang cocok</p>
+                <p className="text-[11px] text-slate-500">
+                  {compEventSearch || strokeFilter !== 'all'
+                    ? 'Coba ubah filter gaya atau kata kunci pencarian di atas.'
+                    : `Tidak ada nomor lomba yang dibuka untuk kategori ${athleteKU} pada kejuaraan ini.`}
+                </p>
+              </div>
+            ) : (
+              eligibleCats.map((c) => {
+                const sel = selectedCats.includes(c.id);
+                return (
+                  <button
+                    type="button"
+                    key={c.id}
+                    onClick={() => toggleCat(c.id)}
+                    className={`flex w-full items-center justify-between rounded-xl border p-3.5 text-left transition-all cursor-pointer ${
+                      sel
+                        ? 'border-blue-500 bg-blue-50/80 shadow-2xs'
+                        : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50/70'
+                    }`}
+                  >
+                    <div className="space-y-0.5">
+                      <div className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                        <span>{c.distance_meters}m {STROKE_LABELS[c.stroke] ?? c.stroke}</span>
+                        {sel && (
+                          <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-300">
+                            Terpilih
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-slate-600">
+                        {formatCompEventSubtitle(c.name, c.grade_level, c.age_group)}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-bold font-mono text-slate-700">
+                        Rp {feePerEvent.toLocaleString('id-ID')}
+                      </span>
+                      <span
+                        className={`flex h-5 w-5 items-center justify-center rounded-md border-2 transition-all ${
+                          sel ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-300 bg-white'
+                        }`}
+                      >
+                        {sel && <Check className="h-3.5 w-3.5 stroke-[3]" />}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })
+            )}
+          </div>
+
+          {/* Live Estimate Footer Bar */}
+          <div className="p-3.5 rounded-xl bg-slate-900 text-white flex items-center justify-between shadow-xs">
+            <div>
+              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
+                Total Biaya Sementara
+              </span>
+              <p className="text-base font-black text-cyan-300 font-mono">
+                Rp {totalAmount.toLocaleString('id-ID')}
+              </p>
+            </div>
+            <div className="text-right">
+              <span className="text-[11px] font-bold text-slate-200">
+                {validSelectedCats.length} Nomor Terpilih
+              </span>
+            </div>
+          </div>
+
+          {/* Navigation Controls */}
+          <div className="mt-4 flex items-center justify-between pt-2">
+            <Button variant="outline" onClick={goBack}>
+              <ChevronLeft className="h-4 w-4" /> Kembali
+            </Button>
+            <Button onClick={goNext} disabled={validSelectedCats.length === 0} className="bg-blue-600 hover:bg-blue-700 text-white">
+              Lanjut ke Pembayaran <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
         </Card>
       )}

@@ -1,0 +1,49 @@
+{
+  "checkins": {
+    "a-1": {
+      "id": "a-1",
+      "assignment_id": "a-1",
+      "heat_id": "h-1",
+      "competition_event_id": "ce-1",
+      "event_id": "ev-1",
+      "lane_number": 1,
+      "athlete_name": "Perenang 1",
+      "status": "called",
+      "checked_in_at": "2026-10-01T22:37:25.994Z",
+      "checked_in_by": "Marshall Meja 1",
+      "scratch_reason": null,
+      "notes": "",
+      "updated_at": "2026-10-01T22:37:25.994Z"
+    },
+    "a-2": {
+      "id": "a-2",
+      "assignment_id": "a-2",
+      "heat_id": "h-1",
+      "competition_event_id": "ce-1",
+      "event_id": "ev-1",
+      "lane_number": 2,
+      "athlete_name": "Perenang 2",
+      "status": "called",
+      "checked_in_at": "2026-10-01T22:37:25.994Z",
+      "checked_in_by": "Marshall Meja 1",
+      "scratch_reason": null,
+      "notes": "",
+      "updated_at": "2026-10-01T22:37:25.994Z"
+    },
+    "a-3": {
+      "id": "a-3",
+      "assignment_id": "a-3",
+      "heat_id": "h-1",
+      "competition_event_id": "ce-1",
+      "event_id": "ev-1",
+      "lane_number": 3,
+      "athlete_name": "Perenang 3",
+      "status": "called",
+      "checked_in_at": "2026-10-01T22:37:25.994Z",
+      "checked_in_by": "Marshall Meja 1",
+      "scratch_reason": null,
+      "notes": "",
+      "updated_at": "2026-10-01T22:37:25.994Z"
+    }
+  }
+}

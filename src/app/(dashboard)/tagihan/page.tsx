@@ -50,7 +50,8 @@ export default async function TagihanPage() {
       payment_verifications (
         id,
         status,
-        amount_due
+        amount_due,
+        proof_url
       )
     `);
 
@@ -98,6 +99,8 @@ export default async function TagihanPage() {
 
     const fee = parentEvent?.fee_per_event || 100000;
     const payStatus = rawPay?.status;
+    const payId = rawPay?.id;
+    const proofUrl = rawPay?.proof_url;
 
     if (!invoicesMap.has(key)) {
       const invNumber = `INV/CLUB/26/${1940 + invoicesMap.size + 1}`;
@@ -113,8 +116,16 @@ export default async function TagihanPage() {
         due_date: parentEvent?.start_date || '2026-10-16',
         total_amount: fee,
         remaining_amount: payStatus === 'verified' || payStatus === 'approved' ? 0 : fee,
-        status: payStatus === 'verified' || payStatus === 'approved' ? 'lunas' : 'belum_bayar',
+        status:
+          payStatus === 'verified' || payStatus === 'approved'
+            ? 'lunas'
+            : payStatus === 'pending'
+            ? 'menunggu_verifikasi'
+            : 'belum_bayar',
         athletes: [],
+        payment_ids: payId ? [payId] : [],
+        proof_urls: proofUrl ? [proofUrl] : [],
+        registration_ids: reg.id ? [reg.id] : [],
       });
     } else {
       const existing = invoicesMap.get(key)!;
@@ -122,6 +133,24 @@ export default async function TagihanPage() {
       existing.total_amount += fee;
       if (payStatus !== 'verified' && payStatus !== 'approved') {
         existing.remaining_amount += fee;
+      }
+      if (payId && !existing.payment_ids?.includes(payId)) {
+        existing.payment_ids = existing.payment_ids || [];
+        existing.payment_ids.push(payId);
+      }
+      if (proofUrl && !existing.proof_urls?.includes(proofUrl)) {
+        existing.proof_urls = existing.proof_urls || [];
+        existing.proof_urls.push(proofUrl);
+      }
+      if (reg.id && !existing.registration_ids?.includes(reg.id)) {
+        existing.registration_ids = existing.registration_ids || [];
+        existing.registration_ids.push(reg.id);
+      }
+      // Update status tagihan agregat
+      if (existing.status !== 'lunas') {
+        if (payStatus === 'pending' || (proofUrl && existing.status === 'belum_bayar')) {
+          existing.status = 'menunggu_verifikasi';
+        }
       }
     }
 

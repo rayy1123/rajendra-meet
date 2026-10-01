@@ -36,16 +36,26 @@ import {
   RotateCcw,
   ChevronRight,
   ChevronLeft,
+  Crown,
+  Flame,
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+
+export interface CurrentRecordInfo {
+  id?: string;
+  time_ms: number;
+  athlete_name: string;
+  school_name?: string;
+  event_year?: number;
+}
 
 interface HeatAssignmentRow {
   id: string;
   lane_number: number;
   registrations?: {
     seed_time_ms?: number | null;
-    athletes?: { full_name?: string | null; schools?: { name?: string | null } | null } | null;
+    athletes?: { id?: string; full_name?: string | null; schools?: { name?: string | null } | null } | null;
   } | null;
   results?: { id: string; time_ms?: number | null; status?: string }[] | null;
 }
@@ -62,6 +72,7 @@ interface ResultInputOperatorProps {
   initialEventId: string;
   initialCompEventId: string;
   heatsData: HeatRow[];
+  currentRecord?: CurrentRecordInfo | null;
 }
 
 export function ResultInputOperator({
@@ -70,6 +81,7 @@ export function ResultInputOperator({
   initialEventId,
   initialCompEventId,
   heatsData,
+  currentRecord = null,
 }: ResultInputOperatorProps) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
@@ -279,7 +291,17 @@ export function ResultInputOperator({
         if (error) throw error;
       }
 
-      toast.success('Catatan waktu berhasil disimpan!');
+      // Deteksi Pecah Rekor (Record Breaker Alert)
+      if (timeMs && currentRecord && timeMs < currentRecord.time_ms) {
+        const deltaSec = ((currentRecord.time_ms - timeMs) / 1000).toFixed(2);
+        toast.success(
+          `🏆 PECAH REKOR BARU! Waktu ${formatMsToTime(timeMs)} lebih cepat -${deltaSec} detik dari rekor ${currentRecord.athlete_name} (${formatMsToTime(currentRecord.time_ms)})!`,
+          { duration: 6000 }
+        );
+      } else {
+        toast.success('Catatan waktu berhasil disimpan!');
+      }
+
       router.refresh();
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Gagal menyimpan hasil');
@@ -508,6 +530,35 @@ export function ResultInputOperator({
           </Select>
         </div>
       </div>
+
+      {/* ── Rekor Kejuaraan Saat Ini (Record Anchor Card) ── */}
+      {currentRecord && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-3.5 shadow-2xs flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-2xs shrink-0">
+              <Crown className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="text-xs font-black text-amber-950 flex items-center gap-2">
+                <span>Rekor Kejuaraan: {formatMsToTime(currentRecord.time_ms)}</span>
+                <span className="text-[10px] font-bold text-amber-800 bg-amber-200/80 px-2 py-0.5 rounded-full">
+                  {currentRecord.event_year || 'Terverifikasi'}
+                </span>
+              </p>
+              <p className="text-[11px] text-amber-800/90">
+                Dipegang oleh: <b className="font-bold">{currentRecord.athlete_name}</b> ({currentRecord.school_name || 'Klub'})
+              </p>
+            </div>
+          </div>
+
+          <Link
+            href={`/rajendra-record?eventId=${selectedEventId}`}
+            className="text-[11px] font-bold text-amber-900 hover:underline shrink-0 hidden sm:inline-block"
+          >
+            Lihat Tabel Rekor &rarr;
+          </Link>
+        </div>
+      )}
 
       {/* ── TOOLBAR SELEKSI SERI / HEAT DENGAN INDIKATOR CENTANG LENGKAP (✓) ── */}
       {heatsData && heatsData.length > 0 && (
@@ -767,9 +818,17 @@ export function ResultInputOperator({
                               <span className="text-base font-black leading-none">{assign.lane_number}</span>
                             </span>
                             <div className="min-w-0 self-center">
-                              <p className="font-bold text-sm text-slate-900 leading-tight">
-                                {athlete?.full_name || 'Tidak ada atlet'}
-                              </p>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <p className="font-bold text-sm text-slate-900 leading-tight">
+                                  {athlete?.full_name || 'Tidak ada atlet'}
+                                </p>
+                                {existingResult?.time_ms && currentRecord && existingResult.time_ms < currentRecord.time_ms && (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-300">
+                                    <Crown className="h-3 w-3 text-amber-600" />
+                                    PECAH REKOR (-{((currentRecord.time_ms - existingResult.time_ms) / 1000).toFixed(2)}s)
+                                  </span>
+                                )}
+                              </div>
                               <p className="truncate text-xs text-muted-foreground mt-0.5">
                                 {school?.name || 'Klub / Kontingen Mandiri'}
                               </p>
