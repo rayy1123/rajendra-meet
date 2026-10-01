@@ -81,6 +81,7 @@ const adminNavGroups: NavGroup[] = [
     label: 'Utama',
     items: [
       { title: 'Dasbor Panitia', href: '/dashboard', icon: LayoutDashboard, description: 'Statistik dan akses cepat' },
+      { title: 'Antrean Kode OTP', href: '/antrean-otp', icon: KeyRound, description: 'Bypass kode verifikasi limitasi Brevo' },
     ],
   },
   {
