@@ -447,7 +447,9 @@ export function AwardsManager({
           <p className="mt-1 text-xs text-slate-600 font-mono">
             {topOverall ? (
               <span className="font-bold text-amber-900">
-                {topOverall.points} Poin · {topOverall.gold}🥇 {topOverall.silver}🥈 {topOverall.bronze}🥉
+                {standingsSortBy === 'medals'
+                  ? `${topOverall.gold}🥇 Emas · ${topOverall.silver}🥈 Perak · ${topOverall.bronze}🥉 Perunggu (Total: ${topOverall.gold + topOverall.silver + topOverall.bronze} Medali)`
+                  : `${topOverall.points} Poin · ${topOverall.gold}🥇 ${topOverall.silver}🥈 ${topOverall.bronze}🥉`}
               </span>
             ) : (
               'Belum ada hasil lomba'
@@ -464,7 +466,9 @@ export function AwardsManager({
             {overall.length} <span className="text-xs font-normal text-muted-foreground">Klub / Sekolah</span>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            Kontingen yang telah mengumpulkan poin
+            {standingsSortBy === 'medals'
+              ? 'Kontingen yang telah meraih medali perlombaan'
+              : 'Kontingen yang telah mengumpulkan poin'}
           </p>
         </div>
 
@@ -576,7 +580,9 @@ export function AwardsManager({
                   Klasemen Juara Umum Kontingen (Overall Standings)
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Indikator peringkat utama seluruh sekolah / perkumpulan renang berdasarkan total akumulasi poin di kejuaraan ini.
+                  {standingsSortBy === 'medals'
+                    ? 'Indikator peringkat utama seluruh sekolah / perkumpulan renang berdasarkan perolehan medali emas terbanyak di kejuaraan ini.'
+                    : 'Indikator peringkat utama seluruh sekolah / perkumpulan renang berdasarkan total akumulasi poin di kejuaraan ini.'}
                 </p>
               </div>
             </div>
@@ -594,7 +600,9 @@ export function AwardsManager({
                     <TableRow>
                       <TableHead className="w-16 text-center">Peringkat</TableHead>
                       <TableHead>Nama Sekolah / Klub</TableHead>
-                      <TableHead className="w-28 text-center">Poin Total</TableHead>
+                      {standingsSortBy === 'points' && (
+                        <TableHead className="w-28 text-center">Poin Total</TableHead>
+                      )}
                       <TableHead className="w-20 text-center font-mono">Emas 🥇</TableHead>
                       <TableHead className="w-20 text-center font-mono">Perak 🥈</TableHead>
                       <TableHead className="w-20 text-center font-mono">Perunggu 🥉</TableHead>
@@ -641,9 +649,11 @@ export function AwardsManager({
                               </Badge>
                             )}
                           </TableCell>
-                          <TableCell className="text-center font-mono font-black text-base text-blue-700">
-                            {row.points}
-                          </TableCell>
+                          {standingsSortBy === 'points' && (
+                            <TableCell className="text-center font-mono font-black text-base text-blue-700">
+                              {row.points}
+                            </TableCell>
+                          )}
                           <TableCell className="text-center font-mono font-bold text-amber-700">
                             {row.gold}
                           </TableCell>
@@ -713,7 +723,9 @@ export function AwardsManager({
                       <TableHead className="w-16 text-center">#</TableHead>
                       <TableHead className="w-32">Jenjang / Tingkat</TableHead>
                       <TableHead>Nama Sekolah / Klub</TableHead>
-                      <TableHead className="w-28 text-center">Poin</TableHead>
+                      {standingsSortBy === 'points' && (
+                        <TableHead className="w-28 text-center">Poin</TableHead>
+                      )}
                       <TableHead className="w-20 text-center font-mono">Emas</TableHead>
                       <TableHead className="w-20 text-center font-mono">Perak</TableHead>
                       <TableHead className="w-20 text-center font-mono">Perunggu</TableHead>
@@ -735,9 +747,11 @@ export function AwardsManager({
                           <TableCell className="font-bold text-xs text-slate-950">
                             {getSchoolName(row.school_id)}
                           </TableCell>
-                          <TableCell className="text-center font-mono font-black text-sm text-indigo-700">
-                            {row.points}
-                          </TableCell>
+                          {standingsSortBy === 'points' && (
+                            <TableCell className="text-center font-mono font-black text-sm text-indigo-700">
+                              {row.points}
+                            </TableCell>
+                          )}
                           <TableCell className="text-center font-mono font-bold text-amber-700">
                             {row.gold}
                           </TableCell>
@@ -766,7 +780,9 @@ export function AwardsManager({
                   Klasemen Kontingen per Kelas Spesifik
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Indikator perolehan poin kontingen yang difilter spesifik per kelas atlet (misal SD Kelas 1–6, SMP 7–9).
+                  {standingsSortBy === 'medals'
+                    ? 'Indikator perolehan medali emas kontingen yang difilter spesifik per kelas atlet (misal SD Kelas 1–6, SMP 7–9).'
+                    : 'Indikator perolehan poin kontingen yang difilter spesifik per kelas atlet (misal SD Kelas 1–6, SMP 7–9).'}
                 </p>
               </div>
 
@@ -794,7 +810,7 @@ export function AwardsManager({
               <EmptyState
                 icon={<Users className="h-8 w-8 text-primary" />}
                 title="Belum ada data per kelas"
-                description="Belum ada perolehan poin untuk filter kelas yang dipilih."
+                description="Belum ada perolehan untuk filter kelas yang dipilih."
               />
             ) : (
               <div className="overflow-x-auto rounded-xl border border-slate-200">
@@ -804,7 +820,9 @@ export function AwardsManager({
                       <TableHead className="w-16 text-center">#</TableHead>
                       <TableHead className="w-36">Kelas Spesifik</TableHead>
                       <TableHead>Nama Sekolah / Klub</TableHead>
-                      <TableHead className="w-28 text-center">Poin</TableHead>
+                      {standingsSortBy === 'points' && (
+                        <TableHead className="w-28 text-center">Poin</TableHead>
+                      )}
                       <TableHead className="w-20 text-center font-mono">Emas</TableHead>
                       <TableHead className="w-20 text-center font-mono">Perak</TableHead>
                       <TableHead className="w-20 text-center font-mono">Perunggu</TableHead>
@@ -826,9 +844,11 @@ export function AwardsManager({
                           <TableCell className="font-bold text-xs text-slate-950">
                             {getSchoolName(row.school_id)}
                           </TableCell>
-                          <TableCell className="text-center font-mono font-black text-sm text-emerald-700">
-                            {row.points}
-                          </TableCell>
+                          {standingsSortBy === 'points' && (
+                            <TableCell className="text-center font-mono font-black text-sm text-emerald-700">
+                              {row.points}
+                            </TableCell>
+                          )}
                           <TableCell className="text-center font-mono font-bold text-amber-700">
                             {row.gold}
                           </TableCell>
@@ -960,7 +980,9 @@ export function AwardsManager({
                                     </span>
                                   </div>
                                   <div className="text-right font-mono font-bold text-amber-900">
-                                    {c.points} Poin ({c.gold}🥇 {c.silver}🥈 {c.bronze}🥉)
+                                    {standingsSortBy === 'medals'
+                                      ? `${c.gold}🥇 ${c.silver}🥈 ${c.bronze}🥉`
+                                      : `${c.points} Poin (${c.gold}🥇 ${c.silver}🥈 ${c.bronze}🥉)`}
                                   </div>
                                 </div>
                               ))}
@@ -981,10 +1003,19 @@ export function AwardsManager({
                                 {getSchoolName(winner.school_id)}
                               </p>
                               <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
-                                <span className="font-heading font-black text-blue-700 font-mono text-sm bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
-                                  {winner.points} Poin
-                                </span>
-                                <span className="text-[11px] font-mono font-bold text-slate-700">
+                                {standingsSortBy === 'points' && (
+                                  <span className="font-heading font-black text-blue-700 font-mono text-sm bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                                    {winner.points} Poin
+                                  </span>
+                                )}
+                                <span
+                                  className={cn(
+                                    'text-[11px] font-mono font-bold',
+                                    standingsSortBy === 'medals'
+                                      ? 'text-amber-950 font-black text-xs bg-amber-50 px-2 py-0.5 rounded border border-amber-200'
+                                      : 'text-slate-700'
+                                  )}
+                                >
                                   {winner.gold}🥇 {winner.silver}🥈 {winner.bronze}🥉
                                 </span>
                                 <span className="text-[10px] text-slate-500">

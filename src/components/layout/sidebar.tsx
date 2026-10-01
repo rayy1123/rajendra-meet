@@ -145,6 +145,7 @@ const viewerNavGroups: NavGroup[] = [
     items: [
       { title: 'Live Scoreboard', href: '/scoreboard', icon: Timer, description: 'Pantauan live timing arena kolam' },
       { title: 'Hasil Lomba', href: '/rankings', icon: Trophy, description: 'Catatan waktu resmi per nomor lomba' },
+      { title: 'Rajendra Record', href: '/rajendra-record', icon: Trophy, description: 'Rekor resmi kejuaraan renang' },
       { title: 'Sertifikat Juara', href: '/sertifikat', icon: Award, description: 'Unduh piagam & sertifikat penghargaan' },
     ],
   },
