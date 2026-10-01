@@ -184,14 +184,6 @@ export default function DashboardLayout({
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Swiss Timing Omega Status Badge — Hanya tampil untuk admin */}
-            {isAdmin && (
-              <div className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-900 border border-blue-200 shadow-2xs">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                Swiss Timing Omega: Online
-              </div>
-            )}
-
             <Link
               href="/scoreboard"
               className="rounded-full bg-[var(--m-aqua-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--m-aqua-ink)] transition-colors hover:bg-[var(--m-aqua)] hover:text-white"
@@ -204,27 +196,6 @@ export default function DashboardLayout({
             <ProfileMenu />
           </div>
         </header>
-
-        {/* Status Bar Kejuaraan — Hanya tampil untuk admin */}
-        {isAdmin && (
-          <div className="hidden md:flex items-center gap-2 px-6 py-2 border-b border-slate-200/80 bg-slate-50/70 text-xs overflow-x-auto print:hidden">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold text-blue-900 bg-blue-100/70 border border-blue-200 shrink-0">
-              <Trophy className="h-3 w-3 text-amber-500" /> KEJURNAS SERI I 2026
-            </span>
-            <span className="text-slate-300">•</span>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium text-slate-700 bg-white border border-slate-200 shrink-0">
-              <CheckCircle2 className="h-3 w-3 text-emerald-600" /> WORLD AQUATICS (FINA) RULE SW 3.1
-            </span>
-            <span className="text-slate-300">•</span>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium text-slate-700 bg-white border border-slate-200 shrink-0">
-              <Waves className="h-3 w-3 text-primary" /> KOLAM 50M (8 LINTASAN)
-            </span>
-            <span className="text-slate-300">•</span>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold text-cyan-900 bg-cyan-100/70 border border-cyan-200 shrink-0">
-              <span className="h-1.5 w-1.5 rounded-full bg-cyan-600 animate-pulse" /> TIMING LINK: READY
-            </span>
-          </div>
-        )}
 
         <main className="flex-1 print:p-0 print:m-0 print:block print:w-full">{children}</main>
 

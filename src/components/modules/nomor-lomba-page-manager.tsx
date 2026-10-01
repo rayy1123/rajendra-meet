@@ -124,7 +124,11 @@ export function NomorLombaPageManager({
 
   const openCreateModal = () => {
     setEditingItem(null);
-    setFormEventId(selectedEventId !== 'all' ? selectedEventId : events[0]?.id || '');
+    const initialEvId =
+      selectedEventId !== 'all' && events.some((e) => e.id === selectedEventId)
+        ? selectedEventId
+        : events[0]?.id || '';
+    setFormEventId(initialEvId);
     setFormCode(`HSS${items.length + 101}`);
     setFormName('');
     setFormStroke('Freestyle');
@@ -132,7 +136,8 @@ export function NomorLombaPageManager({
     setFormGender('male');
     setFormClass('SD KELAS 1');
     setFormCategory('Kelas');
-    setFormPrice(activeEvent?.fee_per_event || 150000);
+    const matchedEv = events.find((e) => e.id === initialEvId);
+    setFormPrice(matchedEv?.fee_per_event || 150000);
     setFormMaxParticipants(999);
     setIsModalOpen(true);
   };
@@ -531,12 +536,21 @@ export function NomorLombaPageManager({
 
             <form onSubmit={handleSave} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700">Kejuaraan / Event</label>
+                <label className="text-xs font-bold text-slate-700">
+                  Kejuaraan / Event <span className="text-red-500">*</span>
+                </label>
                 <select
                   value={formEventId}
-                  onChange={(e) => setFormEventId(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  onChange={(e) => {
+                    const newEvId = e.target.value;
+                    setFormEventId(newEvId);
+                    const ev = events.find((x) => x.id === newEvId);
+                    if (ev?.fee_per_event) setFormPrice(ev.fee_per_event);
+                  }}
+                  required
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/30"
                 >
+                  <option value="" disabled>-- Pilih Kejuaraan / Event --</option>
                   {events.map((ev) => (
                     <option key={ev.id} value={ev.id}>
                       {ev.name}
@@ -577,12 +591,12 @@ export function NomorLombaPageManager({
                     onChange={(e) => setFormStroke(e.target.value)}
                     className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/30"
                   >
-                    <option value="Freestyle">Bebas</option>
-                    <option value="Breaststroke">Dada</option>
-                    <option value="Backstroke">Punggung</option>
-                    <option value="Butterfly">Kupu-kupu</option>
-                    <option value="Individual Medley">Ganti (IM)</option>
-                    <option value="Kickboard">Papan Kaki</option>
+                    <option value="Freestyle">Gaya Bebas</option>
+                    <option value="Breaststroke">Gaya Dada</option>
+                    <option value="Backstroke">Gaya Punggung</option>
+                    <option value="Butterfly">Gaya Kupu-kupu</option>
+                    <option value="Individual Medley">Gaya Ganti (IM)</option>
+                    <option value="Kickboard">Papan Kaki (Kickboard)</option>
                   </select>
                 </div>
 
@@ -598,6 +612,10 @@ export function NomorLombaPageManager({
                     <option value={100}>100 m</option>
                     <option value={200}>200 m</option>
                     <option value={400}>400 m</option>
+                    <option value={800}>800 m</option>
+                    <option value={1500}>1500 m</option>
+                    <option value={100}>4x25 m Estafet</option>
+                    <option value={200}>4x50 m Estafet</option>
                   </select>
                 </div>
 
@@ -608,8 +626,9 @@ export function NomorLombaPageManager({
                     onChange={(e) => setFormGender(e.target.value as any)}
                     className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/30"
                   >
-                    <option value="male">Laki-Laki</option>
-                    <option value="female">Perempuan</option>
+                    <option value="male">Laki-Laki (Putra)</option>
+                    <option value="female">Perempuan (Putri)</option>
+                    <option value="mixed">Campuran (Mixed)</option>
                   </select>
                 </div>
               </div>
@@ -622,18 +641,27 @@ export function NomorLombaPageManager({
                     onChange={(e) => setFormClass(e.target.value)}
                     className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/30"
                   >
-                    <option value="PAUD / TK">PAUD / TK</option>
-                    <option value="SD KELAS 1">SD KELAS 1</option>
-                    <option value="SD KELAS 2">SD KELAS 2</option>
-                    <option value="SD KELAS 3">SD KELAS 3</option>
-                    <option value="SD KELAS 4">SD KELAS 4</option>
-                    <option value="SD KELAS 5">SD KELAS 5</option>
-                    <option value="SD KELAS 6">SD KELAS 6</option>
-                    <option value="SMP">SMP</option>
-                    <option value="SMA">SMA</option>
-                    <option value="KU Senior">KU Senior (19-21 Th)</option>
-                    <option value="KU Master">KU Master (22+ Th)</option>
-                    <option value="Umum">Umum / Terbuka</option>
+                    <optgroup label="Standar Kelompok Umur (KU)">
+                      <option value="KU Senior">KU Senior (19+ Tahun)</option>
+                      <option value="KU I">KU I (16-18 Tahun)</option>
+                      <option value="KU II">KU II (14-15 Tahun)</option>
+                      <option value="KU III">KU III (12-13 Tahun)</option>
+                      <option value="KU IV">KU IV (10-11 Tahun)</option>
+                      <option value="KU V">KU V (9 Tahun ke bawah)</option>
+                      <option value="KU Master">KU Master (22+ Tahun)</option>
+                    </optgroup>
+                    <optgroup label="Jenjang Pendidikan">
+                      <option value="PAUD / TK">PAUD / TK</option>
+                      <option value="SD KELAS 1">SD KELAS 1</option>
+                      <option value="SD KELAS 2">SD KELAS 2</option>
+                      <option value="SD KELAS 3">SD KELAS 3</option>
+                      <option value="SD KELAS 4">SD KELAS 4</option>
+                      <option value="SD KELAS 5">SD KELAS 5</option>
+                      <option value="SD KELAS 6">SD KELAS 6</option>
+                      <option value="SMP">SMP</option>
+                      <option value="SMA">SMA</option>
+                      <option value="Umum">Umum / Terbuka</option>
+                    </optgroup>
                   </select>
                 </div>
 

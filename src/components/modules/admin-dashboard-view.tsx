@@ -29,11 +29,17 @@ import {
   Filter,
   ShieldCheck,
   Sliders,
+  KeyRound,
+  Copy,
+  MessageCircle,
+  AlertTriangle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { type ScheduleItem } from '@/lib/data/schedules-server';
+import { type AdminOtpRecord } from '@/lib/data/admin-otp-server';
+import { toast } from 'sonner';
 
 export interface ActiveEventSpotlight {
   id: string;
@@ -71,6 +77,7 @@ export interface AdminDashboardViewProps {
   pendingPaymentCount: number;
   clubsSummary: ClubSummaryRow[];
   schedules?: ScheduleItem[];
+  adminOtps?: AdminOtpRecord[];
   seasonYear?: string;
 }
 
@@ -84,6 +91,7 @@ export function AdminDashboardView({
   pendingPaymentCount,
   clubsSummary,
   schedules = [],
+  adminOtps = [],
   seasonYear = '2026',
 }: AdminDashboardViewProps) {
   const [clubFilter, setClubFilter] = useState<'all' | 'pending'>('all');
@@ -554,7 +562,7 @@ export function AdminDashboardView({
                 </h3>
               </div>
               <Badge variant="outline" className="bg-slate-50 text-slate-600 text-[10px] font-bold">
-                Standard FINA/Aquatics
+                Standar Operasional Resmi
               </Badge>
             </div>
 
@@ -627,6 +635,140 @@ export function AdminDashboardView({
 
         {/* ── KOLOM KANAN (5 Kolom): Telemetri Perangkat & Jadwal Agenda ── */}
         <div className="lg:col-span-4 space-y-6">
+          {/* Card: Antrean Kode OTP Pendaftaran & Bantuan Akun */}
+          <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs space-y-3.5">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                    <KeyRound className="h-4 w-4" />
+                  </div>
+                  <h3 className="font-heading font-black text-sm text-slate-900">
+                    Kode OTP Pendaftaran
+                  </h3>
+                  {adminOtps.filter((o) => o.status !== 'verified' && o.status !== 'expired').length > 0 && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 animate-pulse">
+                      {adminOtps.filter((o) => o.status !== 'verified' && o.status !== 'expired').length} Aktif
+                    </span>
+                  )}
+                </div>
+                <p className="text-[11px] text-slate-500">
+                  Sinkronisasi kode verifikasi jika kuota email habis atau peserta meminta bantuan.
+                </p>
+              </div>
+
+              <Link
+                href="/antrean-otp"
+                className="text-[11px] font-bold text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1 shrink-0"
+              >
+                <span>Lihat Semua &rarr;</span>
+              </Link>
+            </div>
+
+            {adminOtps.length === 0 ? (
+              <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-4 text-center space-y-1">
+                <p className="text-xs font-semibold text-slate-600">Belum ada antrean kode OTP aktif</p>
+                <p className="text-[10px] text-slate-400">
+                  Semua kode OTP yang diminta peserta akan otomatis tercatat dan tersinkronisasi di sini.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2.5 max-h-[360px] overflow-y-auto pr-1">
+                {adminOtps.slice(0, 6).map((item) => {
+                  const isFallback = item.status === 'fallback_to_admin';
+                  const isVerified = item.status === 'verified';
+                  const isExpired = item.status === 'expired' || Date.now() > item.expiresAt;
+
+                  return (
+                    <div
+                      key={item.id}
+                      className={cn(
+                        'p-3 rounded-xl border transition-all space-y-2',
+                        isFallback
+                          ? 'border-amber-200 bg-gradient-to-br from-amber-50/70 to-orange-50/40'
+                          : isVerified
+                          ? 'border-emerald-200 bg-emerald-50/40'
+                          : 'border-slate-200 bg-slate-50/60'
+                      )}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-slate-900 truncate">
+                            {item.fullName || 'Peserta Baru'}
+                          </p>
+                          <p className="text-[11px] text-slate-500 truncate font-mono">
+                            {item.email}
+                          </p>
+                        </div>
+
+                        <span
+                          className={cn(
+                            'text-[9px] font-bold px-2 py-0.5 rounded-full border shrink-0',
+                            isFallback
+                              ? 'bg-amber-100 text-amber-900 border-amber-300'
+                              : isVerified
+                              ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                              : isExpired
+                              ? 'bg-slate-200 text-slate-600 border-slate-300'
+                              : 'bg-blue-100 text-blue-900 border-blue-200'
+                          )}
+                        >
+                          {isFallback
+                            ? 'Kuota Habis / Ke Admin'
+                            : isVerified
+                            ? 'Terverifikasi'
+                            : isExpired
+                            ? 'Kedaluwarsa'
+                            : 'Terkirim Email'}
+                        </span>
+                      </div>
+
+                      {/* Display Kode OTP 6-Digit & Action Buttons */}
+                      <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-200/60">
+                        <div className="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs">
+                          <span className="text-[10px] font-semibold text-slate-400 uppercase">OTP:</span>
+                          <span className="font-mono font-black text-sm tracking-wider text-blue-900">
+                            {item.code}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(item.code);
+                              toast.success(`Kode OTP ${item.code} disalin ke clipboard!`);
+                            }}
+                            className="h-7 px-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-[10px] font-bold inline-flex items-center gap-1 transition-colors cursor-pointer border border-blue-200"
+                            title="Salin kode OTP ke clipboard"
+                          >
+                            <Copy className="h-3 w-3" />
+                            <span>Salin</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const msg = encodeURIComponent(
+                                `Halo ${item.fullName || 'Peserta'}, kode verifikasi OTP akun Rajendra Swim System Anda adalah: *${item.code}*. Masukkan kode ini pada form pendaftaran. Terima kasih.`
+                              );
+                              window.open(`https://wa.me/?text=${msg}`, '_blank');
+                            }}
+                            className="h-7 px-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold inline-flex items-center gap-1 transition-colors cursor-pointer shadow-2xs"
+                            title="Kirim kode ke WhatsApp peserta"
+                          >
+                            <MessageCircle className="h-3 w-3" />
+                            <span>WA</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           {/* Card 1: Status Perangkat • LIVE */}
           <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">

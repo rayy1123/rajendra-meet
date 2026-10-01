@@ -426,7 +426,7 @@ export default function LoginPage() {
           </span>
           <span>•</span>
           <span className="flex items-center gap-1">
-            <CheckCircle2 className="h-3.5 w-3.5 text-blue-600" /> World Aquatics SW 3.1
+            <CheckCircle2 className="h-3.5 w-3.5 text-blue-600" /> Sistem Resmi Terverifikasi
           </span>
         </div>
       </div>

@@ -235,4 +235,37 @@ describe('detectBrokenRecords', () => {
     );
     expect(broken.map((b) => b.competition_event_id)).toEqual(['CE1']);
   });
+
+  it('menghasilkan catatan pemecahan rekor yang membandingkan dengan pemegang rekor sebelumnya', () => {
+    const existingRecordWithAthlete: ExistingRecord[] = [
+      {
+        competition_event_id: 'CE1',
+        time_ms: 20240, // 20.24 detik
+        athlete_name: 'Atlet B',
+        school_name: 'Klub B',
+        event_name: 'Kejuaraan Renang AB',
+      },
+    ];
+
+    const broken = detectBrokenRecords(
+      [
+        cand({
+          athlete_id: 'ath-a',
+          athlete_name: 'Atlet A',
+          time_ms: 20110, // 20.11 detik
+          competition_event_id: 'CE1',
+        }),
+      ],
+      existingRecordWithAthlete
+    );
+
+    expect(broken).toHaveLength(1);
+    expect(broken[0].athlete_name).toBe('Atlet A');
+    expect(broken[0].time_ms).toBe(20110);
+    expect(broken[0].previous_athlete_name).toBe('Atlet B');
+    expect(broken[0].previous_time_ms).toBe(20240);
+    expect(broken[0].notes).toContain('Atlet A mendapatkan rekor');
+    expect(broken[0].notes).toContain('mengalahkan Atlet B');
+    expect(broken[0].notes).toContain('Kejuaraan Renang AB');
+  });
 });

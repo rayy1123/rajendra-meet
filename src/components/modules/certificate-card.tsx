@@ -124,7 +124,7 @@ export function CertificateCard({
               fill="#0284c7"
               letterSpacing="0.12em"
             >
-              WORLD AQUATICS RULE SW 3.1 • TIMING CERTIFIED
+              OFFICIAL CHAMPIONSHIP RECORD • CERTIFIED
             </text>
           </pattern>
         </defs>
@@ -161,7 +161,7 @@ export function CertificateCard({
             SANCTIONED
           </text>
           <text x="200" y="293" textAnchor="middle" fontSize="8.5" fontWeight="800" letterSpacing="0.18em" fill="#0f2b5c">
-            WORLD AQUATICS RULE SW 3.1 COMPLIANT
+            OFFICIAL CHAMPIONSHIP RECORD COMPLIANT
           </text>
         </svg>
       </div>
@@ -227,11 +227,11 @@ export function CertificateCard({
                 <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-blue-50 border border-blue-300 text-[9px] font-black tracking-wider text-blue-950 uppercase shadow-2xs">
                   <ShieldCheck className="h-3 w-3 text-blue-600" /> RAJENDRA SWIM SYSTEM
                 </div>
-                <p className="text-[8px] font-mono text-slate-500 font-bold mt-0.5">OFFICIAL SANCTIONED • SW 3.1</p>
+                <p className="text-[8px] font-mono text-slate-500 font-bold mt-0.5">OFFICIAL SANCTIONED EVENT</p>
               </div>
               <div className="h-10 w-10 rounded-full border-2 border-amber-500 bg-gradient-to-br from-amber-50 to-amber-100 flex flex-col items-center justify-center text-amber-950 font-black text-[9px] shadow-2xs">
-                <span>FINA</span>
-                <span className="text-[6px] font-mono text-amber-700 font-black -mt-0.5">RULES</span>
+                <span>OFFICIAL</span>
+                <span className="text-[6px] font-mono text-amber-700 font-black -mt-0.5">TIMING</span>
               </div>
             </div>
           </div>

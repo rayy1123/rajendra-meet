@@ -33,7 +33,11 @@ export interface RecordItemView {
   school_name: string;
   time_ms: number;
   previous_time_ms: number | null;
+  previous_athlete_name?: string | null;
+  previous_school_name?: string | null;
+  previous_event_name?: string | null;
   improvement_ms: number | null;
+  notes?: string;
   comp_name: string;
   stroke: string;
   distance_meters: number;
@@ -274,6 +278,29 @@ export function RecordsManager({
                     <span>{r.school_name || 'Umum / Perorangan'}</span>
                   </div>
                 </div>
+
+                {/* Catatan Pemecahan Rekor (Atlet A mencetak rekor 20.11 mengalahkan Atlet B sebelumnya mencetak 20.24 di Kejuaraan AB) */}
+                {r.notes ? (
+                  <div className="rounded-xl bg-amber-50/90 border border-amber-200/90 p-3 text-xs text-amber-950 font-medium flex items-start gap-2 shadow-2xs">
+                    <Sparkles className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                    <div className="leading-snug">
+                      <span className="font-bold text-amber-900 block text-[10px] uppercase tracking-wider mb-0.5">
+                        Catatan Pemecahan Rekor:
+                      </span>
+                      <span>{r.notes}</span>
+                    </div>
+                  </div>
+                ) : r.previous_time_ms != null ? (
+                  <div className="rounded-xl bg-slate-50 border border-slate-200 p-2.5 text-xs text-slate-700 font-medium flex items-start gap-2">
+                    <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span>
+                      {r.athlete_name} mencetak rekor {formatMsToTime(r.time_ms)}
+                      {r.previous_athlete_name ? ` mengalahkan ${r.previous_athlete_name}` : ''}
+                      {' '}(rekor sebelumnya: {formatMsToTime(r.previous_time_ms)})
+                      {r.previous_event_name ? ` di ${r.previous_event_name}` : ''}
+                    </span>
+                  </div>
+                ) : null}
               </div>
 
               <div className="pt-2 border-t border-slate-100 flex items-baseline justify-between">

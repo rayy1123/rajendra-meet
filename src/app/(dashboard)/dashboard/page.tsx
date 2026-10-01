@@ -7,6 +7,7 @@ import {
 } from '@/components/modules/admin-dashboard-view';
 import { getEventSettings } from '@/lib/data/event-settings-server';
 import { getSchedulesServer } from '@/lib/data/schedules-server';
+import { getAdminOtpRecords } from '@/lib/data/admin-otp-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -104,6 +105,7 @@ export default async function DashboardPage() {
 
   const pendingPayments = (paymentsData || []).filter((p) => p.status === 'pending').length;
   const schedules = getSchedulesServer();
+  const adminOtps = getAdminOtpRecords();
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
@@ -121,6 +123,7 @@ export default async function DashboardPage() {
         pendingPaymentCount={pendingPayments}
         clubsSummary={clubsSummary}
         schedules={schedules}
+        adminOtps={adminOtps}
         seasonYear="2026"
       />
     </div>

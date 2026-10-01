@@ -258,8 +258,8 @@ export function TechnicalChecklistManager({
 
   return (
     <div className="space-y-6">
-      {/* Header Info & Progress Card */}
-      <div className="glass-panel elevated p-6 rounded-2xl space-y-4 print:border-none print:shadow-none print:p-0">
+      {/* Header Info & Progress Card (Layar Saja - Disembunyikan saat cetak) */}
+      <div className="glass-panel elevated p-6 rounded-2xl space-y-4 print:hidden">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -428,13 +428,13 @@ export function TechnicalChecklistManager({
             <img src="/brand/logo.png" alt="Logo" className="h-12 w-auto object-contain" />
             <div>
               <h1 className="text-base font-black text-slate-950 uppercase tracking-tight">
-                Rajendra Swimming Championship Management System (SCMS)
+                RAJENDRA SWIM SYSTEM
               </h1>
               <p className="text-xs font-bold text-slate-800">
                 BERITA ACARA &amp; DAFTAR KESIAPAN TEKNIS ARENA (OFFICIAL TECHNICAL CHECKLIST)
               </p>
               <p className="text-[10px] text-slate-600">
-                Standar Regulasi Akuatik Indonesia &amp; World Aquatics FR Rules
+                Standar Regulasi Perlombaan Akuatik Nasional
               </p>
             </div>
           </div>
