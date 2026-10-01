@@ -184,14 +184,6 @@ export default function DashboardLayout({
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Swiss Timing Omega Status Badge — Hanya tampil untuk admin */}
-            {isAdmin && (
-              <div className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-900 border border-blue-200 shadow-2xs">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                Swiss Timing Omega: Online
-              </div>
-            )}
-
             <Link
               href="/scoreboard"
               className="rounded-full bg-[var(--m-aqua-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--m-aqua-ink)] transition-colors hover:bg-[var(--m-aqua)] hover:text-white"

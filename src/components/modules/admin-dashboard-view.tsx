@@ -562,7 +562,7 @@ export function AdminDashboardView({
                 </h3>
               </div>
               <Badge variant="outline" className="bg-slate-50 text-slate-600 text-[10px] font-bold">
-                Standard FINA/Aquatics
+                Standar Operasional Resmi
               </Badge>
             </div>
 
