@@ -32,20 +32,22 @@ export default async function ChecklistTeknisPage() {
   const initialItems = getChecklistServer();
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6">
+    <div className="mx-auto max-w-7xl space-y-6 p-6 print:p-0 print:m-0">
       <Breadcrumb
         items={[
           { label: 'Dasbor', href: '/dashboard' },
           { label: 'Checklist Teknis (TD)' },
         ]}
-        className="mb-2"
+        className="mb-2 print:hidden"
       />
 
-      <PageHeader
-        title="Checklist Teknis & Rekognisi Arena"
-        description="Portal operasional Technical Delegate (TD): pantau jadwal rekognisi pemanasan atlet, technical meeting, pengujian sensor touchpad Omega, hingga berita acara pengesahan arena kolam."
-        icon={<ClipboardCheck className="h-6 w-6" />}
-      />
+      <div className="print:hidden">
+        <PageHeader
+          title="Checklist Teknis & Rekognisi Arena"
+          description="Portal operasional Technical Delegate (TD): pantau jadwal rekognisi pemanasan atlet, technical meeting, pengujian sensor touchpad Omega, hingga berita acara pengesahan arena kolam."
+          icon={<ClipboardCheck className="h-6 w-6" />}
+        />
+      </div>
 
       <TechnicalChecklistManager
         initialItems={initialItems}
