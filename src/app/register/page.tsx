@@ -418,14 +418,14 @@ export default function RegisterPage() {
           </div>
         )}
 
-        {/* Username (Nama Lengkap) */}
+        {/* Nama Lengkap */}
         <div className="space-y-1">
-          <label className="text-xs font-bold text-slate-900">Username (Nama Lengkap)</label>
+          <label className="text-xs font-bold text-slate-900">Nama Lengkap Penanggung Jawab / Wali</label>
           <div className="relative">
             <User className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
             <Input
               type="text"
-              placeholder="Nama lengkap / identitas resmi"
+              placeholder="Nama sesuai KTP / Identitas resmi"
               className="h-10 rounded-xl bg-white pl-9 text-xs font-medium text-slate-900 border-slate-300 focus-visible:ring-2 focus-visible:ring-blue-500/20 shadow-2xs"
               value={form.full_name}
               onChange={(e) => setForm((s) => ({ ...s, full_name: e.target.value }))}
@@ -437,7 +437,7 @@ export default function RegisterPage() {
         {/* Username & Nomor WhatsApp */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-900">Email Login</label>
+            <label className="text-xs font-bold text-slate-900">Email</label>
             <Input
               type="text"
               placeholder="huruf_kecil_angka"
