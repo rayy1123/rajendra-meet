@@ -54,12 +54,7 @@ export function formatMsToFinalTime(ms: number | null | undefined): string {
 
 /**
  * 2c. Parsing & Auto-Format Input Waktu Renang Operator
- * Mendukung input fleksibel:
- *   - "002021" -> "00.20.21", 20210 ms
- *   - "2021"   -> "00.20.21", 20210 ms
- *   - "10512"  -> "01.05.12", 65120 ms
- *   - "20.21"  -> "00.20.21", 20210 ms
- *   - "01:05.12" -> "01.05.12", 65120 ms
+ * // ponytail: heuristic digit-slicing parser; add custom tokenizer if non-standard timing hardware protocol parsed
  */
 export function parseSwimTimeInput(raw: string | null | undefined): {
   formatted: string;

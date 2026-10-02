@@ -3,6 +3,7 @@ import path from 'path';
 import { Expense } from '@/types/database';
 import { createClient } from '@/lib/supabase/server';
 
+// ponytail: file-backed JSON store fallback; upgrade to full Supabase offline sync queue when multi-master write needed
 const STORE_PATH = path.join(process.cwd(), 'src', 'lib', 'data', 'expenses-store.json');
 
 function readLocalExpenses(): Expense[] {
