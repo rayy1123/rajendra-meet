@@ -9,11 +9,11 @@
       "lane_number": 1,
       "athlete_name": "Perenang 1",
       "status": "called",
-      "checked_in_at": "2026-10-02T01:31:34.130Z",
+      "checked_in_at": "2026-10-02T02:07:14.945Z",
       "checked_in_by": "Marshall Meja 1",
       "scratch_reason": null,
       "notes": "",
-      "updated_at": "2026-10-02T01:31:34.130Z"
+      "updated_at": "2026-10-02T02:07:14.945Z"
     },
     "a-2": {
       "id": "a-2",
@@ -24,11 +24,11 @@
       "lane_number": 2,
       "athlete_name": "Perenang 2",
       "status": "called",
-      "checked_in_at": "2026-10-02T01:31:34.130Z",
+      "checked_in_at": "2026-10-02T02:07:14.945Z",
       "checked_in_by": "Marshall Meja 1",
       "scratch_reason": null,
       "notes": "",
-      "updated_at": "2026-10-02T01:31:34.130Z"
+      "updated_at": "2026-10-02T02:07:14.945Z"
     },
     "a-3": {
       "id": "a-3",
@@ -39,11 +39,11 @@
       "lane_number": 3,
       "athlete_name": "Perenang 3",
       "status": "called",
-      "checked_in_at": "2026-10-02T01:31:34.130Z",
+      "checked_in_at": "2026-10-02T02:07:14.945Z",
       "checked_in_by": "Marshall Meja 1",
       "scratch_reason": null,
       "notes": "",
-      "updated_at": "2026-10-02T01:31:34.130Z"
+      "updated_at": "2026-10-02T02:07:14.945Z"
     }
   }
 }
