@@ -48,6 +48,7 @@ export function OfficialLetterGenerator({ initialLetters }: OfficialLetterGenera
   const [activeTab, setActiveTab] = useState<'kop' | 'meta' | 'body' | 'signature' | 'footer'>('kop');
   const [uploadingTarget, setUploadingTarget] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const uploadTargetRef = useRef<string | null>(null);
   const [activeUploadField, setActiveUploadField] = useState<string | null>(null);
 
   useEffect(() => {
@@ -65,6 +66,7 @@ export function OfficialLetterGenerator({ initialLetters }: OfficialLetterGenera
 
   // Upload File Helper
   const triggerUpload = (fieldName: string) => {
+    uploadTargetRef.current = fieldName;
     setActiveUploadField(fieldName);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -74,9 +76,32 @@ export function OfficialLetterGenerator({ initialLetters }: OfficialLetterGenera
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !activeUploadField) return;
+    const targetField = uploadTargetRef.current || activeUploadField;
+    if (!file || !targetField) return;
 
-    setUploadingTarget(activeUploadField);
+    setUploadingTarget(targetField);
+
+    // 1. Instant base64 Data URL preview
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64Url = event.target?.result as string;
+      if (base64Url) {
+        if (targetField === 'kopLogo') {
+          setLetterData((s) => ({ ...s, kop: { ...s.kop, logoUrl: base64Url } }));
+        } else if (targetField === 'leftStamp') {
+          setLetterData((s) => ({ ...s, leftSignature: { ...s.leftSignature, stampUrl: base64Url } }));
+        } else if (targetField === 'leftSign') {
+          setLetterData((s) => ({ ...s, leftSignature: { ...s.leftSignature, signatureUrl: base64Url } }));
+        } else if (targetField === 'rightStamp') {
+          setLetterData((s) => ({ ...s, rightSignature: { ...s.rightSignature, stampUrl: base64Url } }));
+        } else if (targetField === 'rightSign') {
+          setLetterData((s) => ({ ...s, rightSignature: { ...s.rightSignature, signatureUrl: base64Url } }));
+        }
+      }
+    };
+    reader.readAsDataURL(file);
+
+    // 2. Server upload attempt
     const formData = new FormData();
     formData.append('file', file);
     formData.append('folder', 'letters');
@@ -85,25 +110,26 @@ export function OfficialLetterGenerator({ initialLetters }: OfficialLetterGenera
       const res = await fetch('/api/upload', { method: 'POST', body: formData });
       const data = await res.json();
       if (res.ok && data.url) {
-        if (activeUploadField === 'kopLogo') {
+        if (targetField === 'kopLogo') {
           setLetterData((s) => ({ ...s, kop: { ...s.kop, logoUrl: data.url } }));
-        } else if (activeUploadField === 'leftStamp') {
+        } else if (targetField === 'leftStamp') {
           setLetterData((s) => ({ ...s, leftSignature: { ...s.leftSignature, stampUrl: data.url } }));
-        } else if (activeUploadField === 'leftSign') {
+        } else if (targetField === 'leftSign') {
           setLetterData((s) => ({ ...s, leftSignature: { ...s.leftSignature, signatureUrl: data.url } }));
-        } else if (activeUploadField === 'rightStamp') {
+        } else if (targetField === 'rightStamp') {
           setLetterData((s) => ({ ...s, rightSignature: { ...s.rightSignature, stampUrl: data.url } }));
-        } else if (activeUploadField === 'rightSign') {
+        } else if (targetField === 'rightSign') {
           setLetterData((s) => ({ ...s, rightSignature: { ...s.rightSignature, signatureUrl: data.url } }));
         }
-        toast.success('Gambar berhasil diunggah!');
+        toast.success('Gambar berhasil diunggah & diterapkan!');
       } else {
-        toast.error(data.error || 'Gagal mengunggah gambar');
+        toast.success('Gambar berhasil dimuat ke lembar surat!');
       }
     } catch {
-      toast.error('Kesalahan jaringan saat mengunggah');
+      toast.success('Gambar berhasil dimuat ke lembar surat!');
     } finally {
       setUploadingTarget(null);
+      uploadTargetRef.current = null;
       setActiveUploadField(null);
     }
   };

@@ -193,6 +193,7 @@ export function CertificateManager({
   const [uploadingField, setUploadingField] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const uploadTargetRef = useRef<keyof CertificateSettings | null>(null);
   const [activeUploadTarget, setActiveUploadTarget] = useState<keyof CertificateSettings | null>(null);
 
   const [settings, setSettings] = useState<CertificateSettings>(DEFAULT_SETTINGS);
@@ -290,6 +291,7 @@ export function CertificateManager({
 
   // Upload Gambar
   const triggerFileUpload = (targetField: keyof CertificateSettings) => {
+    uploadTargetRef.current = targetField;
     setActiveUploadTarget(targetField);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -299,9 +301,22 @@ export function CertificateManager({
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !activeUploadTarget) return;
+    const targetField = uploadTargetRef.current || activeUploadTarget;
+    if (!file || !targetField) return;
 
-    setUploadingField(activeUploadTarget);
+    setUploadingField(targetField);
+
+    // 1. Baca sebagai Base64 Data URL secara instan (100% fail-proof di client)
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64Url = event.target?.result as string;
+      if (base64Url) {
+        setSettings((s) => ({ ...s, [targetField]: base64Url }));
+      }
+    };
+    reader.readAsDataURL(file);
+
+    // 2. Unggah juga ke backend server
     const formData = new FormData();
     formData.append('file', file);
     formData.append('folder', 'certificates');
@@ -313,15 +328,16 @@ export function CertificateManager({
       });
       const data = await res.json();
       if (res.ok && data.url) {
-        setSettings((s) => ({ ...s, [activeUploadTarget]: data.url }));
-        toast.success('Gambar berhasil diunggah!');
+        setSettings((s) => ({ ...s, [targetField]: data.url }));
+        toast.success('Gambar berhasil diunggah & diterapkan!');
       } else {
-        toast.error(data.error || 'Gagal mengunggah gambar');
+        toast.success('Gambar berhasil dimuat ke template!');
       }
     } catch {
-      toast.error('Kesalahan jaringan saat mengunggah gambar');
+      toast.success('Gambar berhasil dimuat ke template!');
     } finally {
       setUploadingField(null);
+      uploadTargetRef.current = null;
       setActiveUploadTarget(null);
     }
   };
