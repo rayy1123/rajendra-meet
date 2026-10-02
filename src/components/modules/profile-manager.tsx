@@ -431,7 +431,7 @@ export function ProfileManager({
 
               <form onSubmit={handleSaveProfile} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-900">Username (Nama Lengkap)</label>
+                  <label className="text-xs font-bold text-slate-900">Nama Lengkap Penanggung Jawab</label>
                   <Input
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -447,7 +447,7 @@ export function ProfileManager({
                     <Input
                       value={userField}
                       onChange={(e) => setUserField(e.target.value.toLowerCase().replace(/\s+/g, '_'))}
-                      placeholder="Username login"
+                      placeholder="Email"
                       className="h-10 rounded-xl text-xs bg-white border-slate-300 font-mono"
                       required
                     />
