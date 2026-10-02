@@ -242,9 +242,9 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
     "style-src 'self' 'unsafe-inline'",
     // Script: hanya milik sendiri (Next.js menyajikan dari /_next).
     `script-src ${scriptSrc}`,
-    "img-src 'self' data: blob: https://*.supabase.co",
-    "font-src 'self' data:",
-    "frame-src 'none'",
+    "img-src 'self' data: blob: https://*.supabase.co https://*.google.com https://*.googleapis.com https://*.gstatic.com",
+    "font-src 'self' data: https://fonts.gstatic.com",
+    "frame-src 'self' https://www.google.com https://maps.google.com https://*.google.com",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
