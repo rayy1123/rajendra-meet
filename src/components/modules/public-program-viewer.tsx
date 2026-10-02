@@ -567,7 +567,8 @@ export function PublicProgramViewer({
                                     <table className="w-full text-left text-sm">
                                       <thead className="bg-[var(--m-soft)] text-[11px] uppercase text-[var(--m-muted)]">
                                         <tr>
-                                          <th className="w-10 px-2 py-1 text-center">Ln</th>
+                                          <th className="w-8 px-2 py-1 text-center">Ln</th>
+                                          <th className="w-14 px-1.5 py-1 text-center">No. Dada</th>
                                           <th className="px-2 py-1">Nama Atlet</th>
                                           <th className="w-18 px-2 py-1 text-right">Seed</th>
                                           <th className="w-18 px-2 py-1 text-right">Final</th>
@@ -580,6 +581,7 @@ export function PublicProgramViewer({
                                           const rawSchool = Array.isArray(rawAth?.schools) ? rawAth?.schools[0] : rawAth?.schools;
 
                                           const rawName = rawAth?.full_name ?? '—';
+                                          const athleteNo = rawAth?.athlete_number || null;
                                           const schoolName = rawSchool?.name ?? null;
                                           const seed = rawReg?.seed_time_ms ?? null;
                                           const resObj = Array.isArray(r.results)
@@ -596,6 +598,7 @@ export function PublicProgramViewer({
                                           const isNameMatched =
                                             cleanQuery &&
                                             (rawName.toLowerCase().includes(cleanQuery) ||
+                                              (athleteNo && athleteNo.toLowerCase().includes(cleanQuery)) ||
                                               (schoolName &&
                                                 schoolName.toLowerCase().includes(cleanQuery)));
 
@@ -621,6 +624,11 @@ export function PublicProgramViewer({
                                                   }
                                                 >
                                                   {r.lane_number}
+                                                </span>
+                                              </td>
+                                              <td className="px-1.5 py-1 text-center font-mono">
+                                                <span className="inline-block px-1.5 py-0.5 rounded bg-blue-50 text-blue-900 border border-blue-200 text-[10px] font-bold">
+                                                  #{athleteNo || r.lane_number}
                                                 </span>
                                               </td>
                                               <td className="px-2 py-1">
