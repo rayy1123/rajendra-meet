@@ -33,8 +33,22 @@ import {
   Copy,
   MessageCircle,
   AlertTriangle,
+  RotateCcw,
+  DownloadCloud,
+  FileDown,
+  FileSpreadsheet,
+  Trash2,
 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { type ScheduleItem } from '@/lib/data/schedules-server';
@@ -120,6 +134,79 @@ export function AdminDashboardView({
   // Average entries per athlete
   const avgEntryPerAthlete = totalAthletes > 0 ? (totalEntries / totalAthletes).toFixed(1) : '2.6';
 
+  // Backup & Reset State
+  const [showBackupModal, setShowBackupModal] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetScope, setResetScope] = useState<'all' | 'results' | 'seeding' | 'call_room'>('results');
+  const [resetConfirmText, setResetConfirmText] = useState('');
+  const [isResetting, setIsResetting] = useState(false);
+  const [isBackingUp, setIsBackingUp] = useState(false);
+
+  // Backup & Download All PDF Trigger
+  const handleDownloadAllPDFs = () => {
+    setIsBackingUp(true);
+    toast.info('Menyiapkan seluruh dokumen PDF (Buku Acara, Rekap Tagihan, Klasemen Medali, Rekor, & Checklist)...');
+
+    const urlsToOpen = [
+      activeEvent ? `/buku-acara?event=${activeEvent.id}` : '/buku-acara',
+      activeEvent ? `/tagihan?event=${activeEvent.id}` : '/tagihan',
+      activeEvent ? `/medali?event=${activeEvent.id}` : '/medali',
+      activeEvent ? `/rajendra-record?eventId=${activeEvent.id}` : '/rajendra-record',
+      activeEvent ? `/export?eventId=${activeEvent.id}` : '/export',
+      '/checklist-teknis',
+      '/kartu-peserta',
+    ];
+
+    let delay = 0;
+    urlsToOpen.forEach((url, i) => {
+      setTimeout(() => {
+        const win = window.open(url, '_blank');
+        if (i === urlsToOpen.length - 1) {
+          setIsBackingUp(false);
+          setShowBackupModal(false);
+          toast.success('Seluruh lembar cetak siap dicetak atau disimpan sebagai PDF.');
+        }
+      }, delay);
+      delay += 300;
+    });
+  };
+
+  // Reset Data Handler
+  const handleExecuteReset = async () => {
+    if (resetConfirmText.trim().toUpperCase() !== 'RESET') {
+      toast.error('Ketik kata "RESET" dengan huruf kapital untuk konfirmasi.');
+      return;
+    }
+
+    setIsResetting(true);
+    try {
+      const res = await fetch('/api/admin/reset-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          scope: resetScope,
+          eventId: activeEvent?.id,
+        }),
+      });
+
+      const json = await res.json();
+      if (!json.success) {
+        throw new Error(json.error || 'Gagal mereset data.');
+      }
+
+      toast.success(json.message || 'Data berhasil di-reset.');
+      setShowResetModal(false);
+      setResetConfirmText('');
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Terjadi kesalahan sistem.');
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* ── 1. HEADER DASBOR OPERASIONAL (SESUAI IMAGE #13) ── */}
@@ -143,18 +230,45 @@ export function AdminDashboardView({
 
         {/* Action Buttons Kanan Atas */}
         <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          {/* Tombol Backup / Download Semua PDF */}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setShowBackupModal(true)}
+            className="h-10 gap-2 border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 text-xs font-bold shadow-2xs px-4 rounded-xl cursor-pointer"
+            title="Buka dan cetak/unduh semua dokumen PDF kejuaraan"
+          >
+            <DownloadCloud className="h-4 w-4 text-emerald-600" />
+            <span>Backup &amp; Cetak PDF</span>
+          </Button>
+
+          {/* Tombol Reset Data */}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setResetConfirmText('');
+              setShowResetModal(true);
+            }}
+            className="h-10 gap-2 border-rose-300 bg-rose-50 hover:bg-rose-100 text-rose-900 text-xs font-bold shadow-2xs px-4 rounded-xl cursor-pointer"
+            title="Reset data hasil lomba, heat lintasan, atau status checkin"
+          >
+            <RotateCcw className="h-4 w-4 text-rose-600" />
+            <span>Reset Data</span>
+          </Button>
+
           <Link href="/events/new">
             <Button
               variant="outline"
               className="h-10 gap-2 border-blue-200 bg-blue-50/80 hover:bg-blue-100 text-blue-800 text-xs font-bold shadow-2xs px-4 rounded-xl"
             >
-              <Plus className="h-4 w-4 text-blue-600" /> Tambah Kejuaraan Baru
+              <Plus className="h-4 w-4 text-blue-600" /> Tambah Kejuaraan
             </Button>
           </Link>
 
           <Link href="/scoreboard" target="_blank">
             <Button className="h-10 gap-2 bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-bold shadow-sm px-4 rounded-xl">
-              <ExternalLink className="h-4 w-4" /> Buka Live Scoreboard
+              <ExternalLink className="h-4 w-4" /> Live Scoreboard
             </Button>
           </Link>
         </div>
@@ -939,6 +1053,209 @@ export function AdminDashboardView({
           </div>
         </div>
       </div>
+
+      {/* ── DIALOG BACKUP & DOWNLOAD SELURUH PDF ── */}
+      <Dialog open={showBackupModal} onOpenChange={setShowBackupModal}>
+        <DialogContent className="max-w-lg bg-white rounded-2xl p-6 space-y-4">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <DownloadCloud className="h-5 w-5 text-emerald-600" />
+              Backup &amp; Download Seluruh Dokumen PDF
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-500">
+              Sistem akan membuka seluruh lembar dokumen kejuaraan siap cetak A4 / simpan sebagai PDF secara otomatis.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3 text-xs">
+            <p className="font-bold text-slate-800">Dokumen yang Akan Diunduh / Dicetak:</p>
+            <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50/80 p-3.5 divide-y divide-slate-200/60 font-medium">
+              <div className="flex items-center justify-between pb-1.5">
+                <span className="flex items-center gap-1.5 text-slate-800">
+                  <BookOpen className="h-4 w-4 text-blue-600" /> Buku Acara &amp; Start List Lengkap
+                </span>
+                <Badge variant="outline" className="bg-white text-[10px]">PDF A4</Badge>
+              </div>
+              <div className="flex items-center justify-between py-1.5">
+                <span className="flex items-center gap-1.5 text-slate-800">
+                  <CreditCard className="h-4 w-4 text-indigo-600" /> Rekap Tagihan &amp; Piutang Klub
+                </span>
+                <Badge variant="outline" className="bg-white text-[10px]">PDF A4</Badge>
+              </div>
+              <div className="flex items-center justify-between py-1.5">
+                <span className="flex items-center gap-1.5 text-slate-800">
+                  <Trophy className="h-4 w-4 text-amber-600" /> Lembar Klasemen Medali Kejuaraan
+                </span>
+                <Badge variant="outline" className="bg-white text-[10px]">PDF A4</Badge>
+              </div>
+              <div className="flex items-center justify-between py-1.5">
+                <span className="flex items-center gap-1.5 text-slate-800">
+                  <Sparkles className="h-4 w-4 text-purple-600" /> Tabel Rekor Resmi (Rajendra Record)
+                </span>
+                <Badge variant="outline" className="bg-white text-[10px]">PDF A4</Badge>
+              </div>
+              <div className="flex items-center justify-between py-1.5">
+                <span className="flex items-center gap-1.5 text-slate-800">
+                  <ShieldCheck className="h-4 w-4 text-emerald-600" /> Berita Acara &amp; Checklist Teknis TD
+                </span>
+                <Badge variant="outline" className="bg-white text-[10px]">PDF A4</Badge>
+              </div>
+              <div className="flex items-center justify-between pt-1.5">
+                <span className="flex items-center gap-1.5 text-slate-800">
+                  <FileSpreadsheet className="h-4 w-4 text-cyan-600" /> Lembar Rekap Hasil &amp; Ekspor Excel
+                </span>
+                <Badge variant="outline" className="bg-white text-[10px]">XLS / PDF</Badge>
+              </div>
+            </div>
+            <p className="text-[11px] text-slate-400">
+              *Tips: Pada jendela print browser yang terbuka, pilih tujuan <b>&quot;Save as PDF&quot;</b> untuk menyimpan file backup ke komputer Anda.
+            </p>
+          </div>
+
+          <DialogFooter className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+            <Button variant="outline" size="sm" onClick={() => setShowBackupModal(false)} className="rounded-xl">
+              Tutup
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleDownloadAllPDFs}
+              disabled={isBackingUp}
+              className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold gap-1.5"
+            >
+              <DownloadCloud className="h-4 w-4" />
+              {isBackingUp ? 'Membuka Dokumen...' : 'Download / Buka Semua PDF'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── DIALOG RESET DATA KEJUARAAN ── */}
+      <Dialog open={showResetModal} onOpenChange={setShowResetModal}>
+        <DialogContent className="max-w-lg bg-white rounded-2xl p-6 space-y-4 border-2 border-rose-300 shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-base font-black text-rose-900 flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-rose-600" />
+              Reset Data Kejuaraan
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-600">
+              Aksi ini akan menghapus data operasional kejuaraan untuk memulai sesi lomba baru. Pastikan Anda telah melakukan backup terlebih dahulu.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3.5 text-xs">
+            {/* Opsi Cakupan Reset */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-800">Pilih Cakupan Reset Data:</label>
+              <div className="space-y-2">
+                <label className={cn(
+                  'flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all',
+                  resetScope === 'results' ? 'border-rose-400 bg-rose-50/70 text-rose-950 font-bold shadow-2xs' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
+                )}>
+                  <input
+                    type="radio"
+                    name="reset_scope"
+                    checked={resetScope === 'results'}
+                    onChange={() => setResetScope('results')}
+                    className="mt-0.5 text-rose-600"
+                  />
+                  <div>
+                    <p className="font-bold text-xs">Reset Catatan Waktu Lomba Saja (Results)</p>
+                    <p className="text-[11px] font-normal text-slate-500">
+                      Mengosongkan input hasil waktu juri/operator, tetapi susunan atlet di heat &amp; lintasan tetap utuh.
+                    </p>
+                  </div>
+                </label>
+
+                <label className={cn(
+                  'flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all',
+                  resetScope === 'call_room' ? 'border-rose-400 bg-rose-50/70 text-rose-950 font-bold shadow-2xs' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
+                )}>
+                  <input
+                    type="radio"
+                    name="reset_scope"
+                    checked={resetScope === 'call_room'}
+                    onChange={() => setResetScope('call_room')}
+                    className="mt-0.5 text-rose-600"
+                  />
+                  <div>
+                    <p className="font-bold text-xs">Reset Status Check-In Call Room (Meja Panggil)</p>
+                    <p className="text-[11px] font-normal text-slate-500">
+                      Mengembalikan seluruh status perenang di Call Room ke status awal (Menunggu).
+                    </p>
+                  </div>
+                </label>
+
+                <label className={cn(
+                  'flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all',
+                  resetScope === 'seeding' ? 'border-rose-400 bg-rose-50/70 text-rose-950 font-bold shadow-2xs' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
+                )}>
+                  <input
+                    type="radio"
+                    name="reset_scope"
+                    checked={resetScope === 'seeding'}
+                    onChange={() => setResetScope('seeding')}
+                    className="mt-0.5 text-rose-600"
+                  />
+                  <div>
+                    <p className="font-bold text-xs">Reset Seeding &amp; Susunan Heat Lintasan</p>
+                    <p className="text-[11px] font-normal text-slate-500">
+                      Menghapus seluruh pembagian heat agar dapat di-generate ulang dari awal.
+                    </p>
+                  </div>
+                </label>
+
+                <label className={cn(
+                  'flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all',
+                  resetScope === 'all' ? 'border-rose-500 bg-rose-100/90 text-rose-950 font-bold shadow-2xs ring-1 ring-rose-400' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
+                )}>
+                  <input
+                    type="radio"
+                    name="reset_scope"
+                    checked={resetScope === 'all'}
+                    onChange={() => setResetScope('all')}
+                    className="mt-0.5 text-rose-600"
+                  />
+                  <div>
+                    <p className="font-bold text-xs text-rose-900">Reset Total Semua Operasional Lomba (Full Clean)</p>
+                    <p className="text-[11px] font-normal text-rose-800">
+                      Mengosongkan seluruh hasil waktu, status Call Room, dan pembagian seri heat kejuaraan aktif.
+                    </p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            {/* Konfirmasi Teks */}
+            <div className="space-y-1.5 p-3 rounded-xl bg-rose-50/60 border border-rose-200">
+              <label className="text-[11px] font-bold text-rose-950 block">
+                Ketik kata <span className="font-mono text-rose-700 bg-rose-200/80 px-1 py-0.5 rounded">RESET</span> untuk konfirmasi eksekusi:
+              </label>
+              <Input
+                type="text"
+                placeholder="Ketik RESET"
+                value={resetConfirmText}
+                onChange={(e) => setResetConfirmText(e.target.value)}
+                className="h-9 text-xs font-mono font-bold bg-white border-rose-300 focus-visible:ring-rose-500"
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+            <Button variant="outline" size="sm" onClick={() => setShowResetModal(false)} className="rounded-xl">
+              Batal
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleExecuteReset}
+              disabled={isResetting || resetConfirmText.trim().toUpperCase() !== 'RESET'}
+              className="rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold gap-1.5 shadow-2xs disabled:opacity-50"
+            >
+              <Trash2 className="h-4 w-4" />
+              {isResetting ? 'Mereset Data...' : 'Konfirmasi Reset Sekarang'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
