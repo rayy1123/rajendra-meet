@@ -1,1 +1,66 @@
-[]
+[
+  {
+    "id": "otp_1790962038886_ykb02",
+    "email": "user_valid_test@gmail.com",
+    "fullName": "User Valid",
+    "code": "816087",
+    "createdAt": "2026-10-02T17:27:18.886Z",
+    "expiresAt": 1790962338882,
+    "status": "verified",
+    "viaEmail": false,
+    "errorMessage": "BREVO_API_KEY belum diatur di environment variables."
+  },
+  {
+    "id": "otp_1790962038881_erxnn",
+    "email": "user_wrong_code@gmail.com",
+    "fullName": "User Wrong",
+    "code": "906271",
+    "createdAt": "2026-10-02T17:27:18.881Z",
+    "expiresAt": 1790962338878,
+    "status": "fallback_to_admin",
+    "viaEmail": false,
+    "errorMessage": "BREVO_API_KEY belum diatur di environment variables."
+  },
+  {
+    "id": "otp_1790962038875_0bm2d",
+    "email": "peserta_fallback@gmail.com",
+    "fullName": "Atlet Fallback",
+    "code": "992211",
+    "createdAt": "2026-10-02T17:27:18.875Z",
+    "expiresAt": 1790962338875,
+    "status": "fallback_to_admin",
+    "viaEmail": false,
+    "errorMessage": "Quota exceeded"
+  },
+  {
+    "id": "otp_1790962038870_mr81k",
+    "email": "peserta_test_unit@gmail.com",
+    "fullName": "Budi Swimmer Test",
+    "code": "817263",
+    "createdAt": "2026-10-02T17:27:18.868Z",
+    "expiresAt": 1790962338867,
+    "status": "verified",
+    "viaEmail": true
+  },
+  {
+    "id": "otp_1790961935453_dg52m",
+    "email": "user_valid_test@gmail.com",
+    "fullName": "User Valid",
+    "code": "799121",
+    "createdAt": "2026-10-02T17:25:35.453Z",
+    "expiresAt": 1790962235447,
+    "status": "verified",
+    "viaEmail": false,
+    "errorMessage": "BREVO_API_KEY belum diatur di environment variables."
+  },
+  {
+    "id": "otp_1790961935412_o46et",
+    "email": "peserta_test_unit@gmail.com",
+    "fullName": "Budi Swimmer Test",
+    "code": "817263",
+    "createdAt": "2026-10-02T17:25:35.409Z",
+    "expiresAt": 1790962235406,
+    "status": "verified",
+    "viaEmail": true
+  }
+]
