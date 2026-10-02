@@ -9,9 +9,9 @@ export type MapRef = {
 
 export function Map({
   center,
-  zoom,
+  zoom = 11,
   className,
-  query,
+  query = 'South Jakarta',
 }: {
   center?: [number, number];
   zoom?: number;
@@ -22,11 +22,9 @@ export function Map({
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [loaded, setLoaded] = useState(false);
 
-  const q = query ? encodeURIComponent(query) : 'Jl. Setu Babakan No. 14A, Jagakarsa, Jakarta Selatan';
-  // Gunakan Google Maps iframe embed yang paling handal dan tanpa API key restriction
-  const src = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3965.234567!2d106.8273!3d-6.3426!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwMjAnMzMuNCJTIDEwNsKwNDknMzguMiJF!5e0!3m2!1sid!2sid!4v1600000000000!5m2!1sid!2sid`;
-  // Alternatif dengan query text search standard
-  const srcSearch = `https://maps.google.com/maps?q=${q}&output=embed`;
+  const q = encodeURIComponent(query || 'South Jakarta');
+  const z = zoom ?? 11;
+  const srcSearch = `https://maps.google.com/maps?q=${q}&t=&z=${z}&ie=UTF8&iwloc=&output=embed`;
 
   return (
     <div className="relative h-full w-full bg-slate-100 overflow-hidden">
@@ -38,7 +36,7 @@ export function Map({
       )}
       <iframe
         ref={iframeRef}
-        title="Peta Kantor Rajendra Swim System"
+        title={`Peta Lokasi - ${query}`}
         src={srcSearch}
         onLoad={() => setLoaded(true)}
         className={className ?? 'h-full w-full border-0'}

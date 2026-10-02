@@ -3,60 +3,50 @@
 import { MapPin, Navigation, ExternalLink, Clock } from 'lucide-react';
 import { Map } from '@/components/ui/map';
 
-const ADDRESS_LABEL = 'Jl. Setu Babakan No. 14A, Srengseng Sawah, Jagakarsa, Jakarta Selatan';
+const ADDRESS_LABEL = 'South Jakarta';
+const FULL_ADDRESS = 'Jl. Setu Babakan No. 14A, Srengseng Sawah, Jagakarsa, Jakarta Selatan';
 const GOOGLE_MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-  ADDRESS_LABEL
+  FULL_ADDRESS
 )}`;
 
 export function KontakMap() {
   return (
-    <div className="relative h-[440px] sm:h-[480px] w-full overflow-hidden rounded-3xl border border-[var(--m-border)] shadow-md">
-      {/* Peta Interaktif Otomatis Tampil */}
-      <Map
-        query={ADDRESS_LABEL}
-        center={[106.8273, -6.3426]}
-        zoom={16}
-        className="h-full w-full border-0"
-      />
+    <div className="rounded-3xl border border-slate-200/90 bg-white p-3 sm:p-5 shadow-sm space-y-3">
+      {/* Container Peta Google Maps Rounded Sesuai Screenshot */}
+      <div className="relative h-[380px] sm:h-[460px] md:h-[500px] w-full overflow-hidden rounded-2xl border border-slate-200 shadow-2xs">
+        <Map
+          query="South Jakarta"
+          zoom={11}
+          className="h-full w-full border-0"
+        />
+      </div>
 
-      {/* Kartu Informasi Mengambang */}
-      <div className="absolute top-4 left-4 z-10 max-w-xs sm:max-w-sm rounded-2xl border border-[var(--m-border)] bg-white/95 p-4 shadow-lg backdrop-blur-md transition-all sm:top-5 sm:left-5">
-        <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--m-aqua)] to-[var(--m-aqua-deep)] text-white shadow-xs">
-            <MapPin className="h-5 w-5" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <h4 className="text-sm font-bold text-[var(--m-ink)]">
-              Kantor Rajendra Swim System
-            </h4>
-            <p className="mt-1 text-xs leading-relaxed text-[var(--m-muted)]">
-              Jl. Setu Babakan No. 14A, Srengseng Sawah, Jagakarsa, Jakarta Selatan
-            </p>
-            <div className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-emerald-600">
-              <Clock className="h-3.5 w-3.5" />
-              <span>Buka Setiap Hari · 08.00 - 21.00 WIB</span>
-            </div>
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <a
-                href={GOOGLE_MAPS_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--m-aqua)] px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[var(--m-aqua-ink)]"
-              >
-                <Navigation className="h-3.5 w-3.5" />
-                Petunjuk Arah
-              </a>
-              <a
-                href={GOOGLE_MAPS_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 rounded-lg border border-[var(--m-border)] bg-white px-2.5 py-1.5 text-xs font-medium text-[var(--m-ink)] hover:bg-[var(--m-soft)]"
-              >
-                <ExternalLink className="h-3 w-3 text-[var(--m-muted)]" />
-                Google Maps
-              </a>
-            </div>
-          </div>
+      {/* Info Bar Lokasi & Petunjuk Arah */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-2 pt-1 text-xs">
+        <div className="flex items-center gap-2 text-slate-700 font-medium">
+          <MapPin className="h-4 w-4 text-blue-600 shrink-0" />
+          <span>{FULL_ADDRESS}</span>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <a
+            href={GOOGLE_MAPS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 px-3.5 py-1.5 text-xs font-bold text-white shadow-2xs transition-colors"
+          >
+            <Navigation className="h-3.5 w-3.5" />
+            Petunjuk Arah
+          </a>
+          <a
+            href={GOOGLE_MAPS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors"
+          >
+            <ExternalLink className="h-3 w-3 text-slate-500" />
+            Buka Google Maps
+          </a>
         </div>
       </div>
     </div>
