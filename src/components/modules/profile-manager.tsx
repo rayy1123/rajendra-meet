@@ -431,7 +431,7 @@ export function ProfileManager({
 
               <form onSubmit={handleSaveProfile} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-900">Nama Lengkap Penanggung Jawab</label>
+                  <label className="text-xs font-bold text-slate-900">Username (Nama Lengkap)</label>
                   <Input
                     value={name}
                     onChange={(e) => setName(e.target.value)}
