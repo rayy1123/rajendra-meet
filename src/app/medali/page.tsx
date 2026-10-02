@@ -3,9 +3,9 @@ import { createClient } from '@/lib/supabase/server';
 import { PublicShell } from '@/components/layout/public-shell';
 import { RouteEventSelect } from '@/components/modules/route-event-select';
 import { Medal, Lock } from 'lucide-react';
-import { PrintButton } from '@/components/modules/print-button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { checkEventResultsVisibility } from '@/lib/data/live-scoreboard-settings';
+import { MedalTallyView, type MedalRowItem } from '@/components/modules/medal-tally-view';
 
 interface SchoolTally {
   name: string;
@@ -33,7 +33,7 @@ export default async function MedalTallyPage({
 
   const { data: events } = await supabase
     .from('events')
-    .select('id, name, start_date, end_date')
+    .select('id, name, location, start_date, end_date')
     .order('start_date', { ascending: false });
   const current = events?.find((e) => e.id === eventId) ?? events?.[0] ?? null;
 
@@ -124,18 +124,18 @@ export default async function MedalTallyPage({
     }
   }
 
-  const rows = Object.values(tally)
+  const rows: MedalRowItem[] = Object.values(tally)
     .map((t) => ({ ...t, points: points(t.gold, t.silver, t.bronze) }))
     .sort((a, b) => b.points - a.points || b.gold - a.gold || b.total - a.total);
 
-  const podium = rows.slice(0, 3);
-  const podiumColors = ['bg-[#FCD34D] text-[#0b1c30]', 'bg-[#E2E8F0] text-[#0b1c30]', 'bg-[#FDBA74] text-[#0b1c30]'];
-  const podiumAccent = ['gold-accent', 'silver-accent', 'bronze-accent'];
+  const eventDateStr = current?.start_date
+    ? new Date(current.start_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+    : undefined;
 
   return (
     <PublicShell
-      title="Klasemen Medali"
-      subtitle="Podium dan klasemen medali per sekolah / klub untuk kejuaraan terpilih."
+      title="Klasemen Medali Kejuaraan"
+      subtitle="Podium kehormatan dan rekapitulasi perolehan medali per kontingen, klub, dan sekolah resmi."
       breadcrumbItems={[
         { label: 'Beranda', href: '/' },
         { label: 'Klasemen Medali' },
@@ -147,83 +147,29 @@ export default async function MedalTallyPage({
           <div className="flex-1">
             <RouteEventSelect events={events ?? []} current={current?.id ?? ''} basePath="/medali" />
           </div>
-          <PrintButton />
         </div>
 
         {!isResultsVisible ? (
           <EmptyState
             icon={<Lock className="h-6 w-6 text-amber-600" />}
-            title="Klasemen Medali Ditingkatkan / Ditutup Sementara"
-            description="Panitia pelaksana sedang memverifikasi hasil resmi kejuaraan. Klasemen medali publik akan muncul setelah panitia menekan tombol publikasi hasil."
+            title="Klasemen Medali Sedang Diverifikasi Panitia"
+            description="Panitia pelaksana sedang memverifikasi hasil resmi kejuaraan. Klasemen medali publik akan muncul otomatis setelah proses pengesahan selesai."
             className="no-print my-6 bg-amber-50/50 border-amber-200"
           />
         ) : rows.length === 0 ? (
           <EmptyState
-            icon={<Medal className="h-6 w-6" />}
-            title="Belum ada hasil"
-            description="Kejuaraan ini belum memiliki hasil finished untuk dihitung medalinya."
+            icon={<Medal className="h-6 w-6 text-blue-600" />}
+            title="Belum Ada Perolehan Medali"
+            description="Nomor lomba pada kejuaraan ini belum memiliki catatan waktu selesai (finished) untuk dihitung ke klasemen medali."
             className="no-print my-6"
           />
         ) : (
-          <>
-            {/* Podium */}
-            <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3 no-print">
-              {podium.map((p, i) => (
-                <div
-                  key={p.name}
-                  className={`pub-card relative flex flex-col items-center border-t-4 p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md ${podiumAccent[i]}`}
-                >
-                  <div className={`flex h-12 w-12 items-center justify-center rounded-2xl text-lg font-black shadow-xs ${podiumColors[i]}`}>
-                    {i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}
-                  </div>
-                  <h3 className="font-heading mt-3.5 text-center font-bold text-base text-[var(--m-ink)]">{p.name}</h3>
-                  <div className="mt-3 flex items-center gap-3">
-                    <span className="flex items-center gap-1.5 text-xs font-mono font-semibold">
-                      <span className="h-3 w-3 rounded-full bg-[#FCD34D] shadow-2xs" /> {p.gold}
-                    </span>
-                    <span className="flex items-center gap-1.5 text-xs font-mono font-semibold">
-                      <span className="h-3 w-3 rounded-full bg-[#E2E8F0] shadow-2xs" /> {p.silver}
-                    </span>
-                    <span className="flex items-center gap-1.5 text-xs font-mono font-semibold">
-                      <span className="h-3 w-3 rounded-full bg-[#FDBA74] shadow-2xs" /> {p.bronze}
-                    </span>
-                  </div>
-                  <p className="font-heading mt-2.5 text-3xl font-black text-[var(--m-aqua-ink)]">{p.points}</p>
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--m-muted)]">poin</p>
-                </div>
-              ))}
-            </section>
-
-            {/* Tabel klasemen */}
-            <div className="printable-area overflow-hidden rounded-2xl border border-[var(--m-border)] bg-[var(--m-surface)] shadow-sm">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-[var(--m-soft)] text-xs font-bold uppercase tracking-wider text-[var(--m-muted)]">
-                  <tr>
-                    <th className="w-12 px-4 py-3.5 text-center">#</th>
-                    <th className="px-4 py-3.5">Sekolah / Klub</th>
-                    <th className="w-20 px-4 py-3.5 text-center">Emas</th>
-                    <th className="w-20 px-4 py-3.5 text-center">Perak</th>
-                    <th className="w-20 px-4 py-3.5 text-center">Perunggu</th>
-                    <th className="w-20 px-4 py-3.5 text-center">Total</th>
-                    <th className="w-20 px-4 py-3.5 text-right">Poin</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--m-border)]">
-                  {rows.map((r, i) => (
-                    <tr key={r.name} className="hover:bg-[var(--m-soft)] transition-colors">
-                      <td className="px-4 py-3 text-center font-bold text-[var(--m-ink)] font-mono">{i + 1}</td>
-                      <td className="px-4 py-3 font-semibold text-[var(--m-ink)]">{r.name}</td>
-                      <td className="px-4 py-3 text-center font-mono text-xs font-semibold">{r.gold}</td>
-                      <td className="px-4 py-3 text-center font-mono text-xs font-semibold">{r.silver}</td>
-                      <td className="px-4 py-3 text-center font-mono text-xs font-semibold">{r.bronze}</td>
-                      <td className="px-4 py-3 text-center font-mono text-xs font-black text-[var(--m-aqua-ink)]">{r.total}</td>
-                      <td className="px-4 py-3 text-right font-mono text-xs font-black text-[var(--m-ink)]">{r.points}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </>
+          <MedalTallyView
+            eventName={current?.name || 'Kejuaraan Renang'}
+            eventDate={eventDateStr}
+            eventLocation={current?.location || undefined}
+            rows={rows}
+          />
         )}
       </div>
     </PublicShell>
