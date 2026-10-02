@@ -134,9 +134,10 @@ export function UserCertificatesView({
             margin: 0 !important;
             padding: 0 !important;
             width: 297mm !important;
-            height: 209mm !important;
+            height: 210mm !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            overflow: hidden !important;
           }
 
           #user-certificate-print-area {
@@ -155,12 +156,12 @@ export function UserCertificatesView({
             break-inside: avoid !important;
             box-sizing: border-box !important;
             width: 297mm !important;
-            height: 209mm !important;
+            height: 210mm !important;
             max-width: 297mm !important;
-            max-height: 209mm !important;
-            min-height: 209mm !important;
+            max-height: 210mm !important;
+            min-height: 210mm !important;
             margin: 0 auto !important;
-            padding: 8mm 12mm !important;
+            padding: 10mm 16mm 8mm 16mm !important;
             border-radius: 0 !important;
             box-shadow: none !important;
             border: none !important;
