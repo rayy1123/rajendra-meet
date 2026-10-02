@@ -231,10 +231,47 @@
 }
 
 .glass_card {
-  @apply rounded-2xl border border-white/60 bg-white/75 shadow-sm backdrop-blur-md;
+  @apply rounded-2xl border border-slate-200/80 bg-white/85 shadow-xs backdrop-blur-md;
 }
 .glass-panel {
-  @apply rounded-2xl border border-white/60 bg-white/70 shadow-sm backdrop-blur;
+  @apply rounded-2xl border border-slate-200/80 bg-white/80 shadow-xs backdrop-blur;
+}
+.glass-card {
+  border-radius: 1rem;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.glass-gold {
+  border-radius: 1rem;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  background: linear-gradient(135deg, rgba(255, 251, 235, 0.95), rgba(254, 243, 199, 0.85));
+  backdrop-filter: blur(8px);
+}
+.glass-silver {
+  border-radius: 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: linear-gradient(135deg, rgba(248, 250, 252, 0.95), rgba(241, 245, 249, 0.85));
+  backdrop-filter: blur(8px);
+}
+.glass-bronze {
+  border-radius: 1rem;
+  border: 1px solid rgba(217, 119, 6, 0.35);
+  background: linear-gradient(135deg, rgba(254, 242, 242, 0.95), rgba(255, 237, 213, 0.85));
+  backdrop-filter: blur(8px);
+}
+.glass-morphism {
+  border-radius: 1rem;
+  border: 1px solid rgba(224, 242, 254, 0.8);
+  background: linear-gradient(135deg, rgba(240, 249, 255, 0.92), rgba(255, 255, 255, 0.9));
+  backdrop-filter: blur(8px);
+}
+.glass-seal {
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), rgba(254, 243, 199, 0.85));
+  border: 1.5px solid rgba(245, 158, 11, 0.5);
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.15);
 }
 
 @keyframes scms-shimmer {
