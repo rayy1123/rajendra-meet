@@ -103,10 +103,28 @@ export function printElement(
           }
           /* Hilangkan bayangan & paksa border dokumen cetak */
           .invoice-paper,
-          .invoice-paper-sheet,
-          .certificate-sheet {
+          .invoice-paper-sheet {
             box-shadow: none !important;
             margin: 0 auto !important;
+          }
+          .certificate-sheet {
+            box-shadow: none !important;
+            box-sizing: border-box !important;
+            width: 297mm !important;
+            height: 210mm !important;
+            max-width: 297mm !important;
+            max-height: 210mm !important;
+            min-height: 210mm !important;
+            margin: 0 auto !important;
+            padding: 8mm 14mm 6mm 14mm !important;
+            overflow: hidden !important;
+            page-break-after: always !important;
+            break-after: page !important;
+            border-radius: 0 !important;
+            border: none !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
           }
         </style>
       </head>
