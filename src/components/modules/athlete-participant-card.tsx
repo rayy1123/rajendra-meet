@@ -130,14 +130,23 @@ export function AthleteParticipantCard({
           </div>
 
           {/* Info Identitas Atlet */}
-          <div className="flex-1 min-w-0 space-y-1">
-            <div className="flex items-center justify-between gap-1">
-              <span className="inline-block rounded-md bg-white px-2 py-0.5 font-mono text-[10px] font-bold text-slate-800 border border-slate-300 shadow-2xs">
-                {athlete.athleteNumber}
-              </span>
-              <span className="rounded-md bg-blue-100 text-blue-900 px-2 py-0.5 text-[9px] font-black border border-blue-200">
-                {formatKuDisplay(athlete.ageGroup)}
-              </span>
+          <div className="flex-1 min-w-0 space-y-1.5">
+            {/* Box Nomor Dada Utama & Kategori KU */}
+            <div className="flex items-center justify-between gap-1.5 bg-gradient-to-r from-[#0f2b5c] via-[#0284c7] to-[#0369a1] text-white px-2.5 py-1.5 rounded-xl shadow-2xs">
+              <div>
+                <span className="text-[7.5px] font-black uppercase tracking-widest text-cyan-200 block leading-none">
+                  NO. DADA (BIB NUMBER)
+                </span>
+                <span className="font-mono text-base font-black tracking-wider text-white leading-tight">
+                  #{athlete.athleteNumber || '000'}
+                </span>
+              </div>
+              <div className="text-right">
+                <span className="text-[7.5px] font-bold text-cyan-200 uppercase block leading-none">KELOMPOK USIA</span>
+                <span className="rounded-md bg-white/20 text-white px-1.5 py-0.5 text-[9px] font-black border border-white/30 inline-block mt-0.5">
+                  {formatKuDisplay(athlete.ageGroup)}
+                </span>
+              </div>
             </div>
 
             {/* NAMA ATLET */}
@@ -211,17 +220,31 @@ export function AthleteParticipantCard({
           </div>
         </div>
 
-        {/* ── 7. FOOTER: QR CODE CALL ROOM & ELEMEN SANCTION RESMI ── */}
+        {/* ── 7. FOOTER: NOMOR DADA RESMI & VERIFIKASI SISTEM (PENGGANTI BARCODE) ── */}
         <div className="flex items-center justify-between gap-3 border-t border-dashed border-slate-300 pt-2.5">
-          {/* QR Code */}
+          {/* Badge Nomor Dada Terverifikasi Sistem */}
           <div className="flex items-center gap-2.5">
-            <div className="rounded-xl border border-slate-300 bg-white p-1 shadow-2xs">
-              <QrCodeSvg value={verificationPayload} size={48} />
+            <div className="flex flex-col items-center justify-center rounded-xl border-2 border-blue-600 bg-blue-50/90 px-3 py-1.5 shadow-2xs text-center min-w-[95px]">
+              <span className="text-[7.5px] font-black uppercase tracking-wider text-blue-800">
+                NO. DADA RESMI
+              </span>
+              <span className="font-mono text-base font-black text-blue-950 leading-none mt-0.5">
+                #{athlete.athleteNumber || '000'}
+              </span>
+              <span className="text-[7px] font-mono font-bold text-emerald-700 mt-0.5 flex items-center gap-0.5">
+                <ShieldCheck className="h-2.5 w-2.5 text-emerald-600" /> TERVERIFIKASI
+              </span>
             </div>
             <div className="text-[9px] text-slate-500 space-y-0.5">
-              <p className="font-mono font-black text-slate-900 uppercase tracking-tight">SCAN CALL ROOM</p>
-              <p className="text-slate-600 font-medium">Validasi Petugas & Juri</p>
-              <p className="text-[8px] text-slate-400 font-mono">Rajendra Swim System Official Pass</p>
+              <p className="font-mono font-black text-slate-900 uppercase tracking-tight">
+                VERIFIKASI CALL ROOM
+              </p>
+              <p className="text-slate-600 font-medium">
+                Validasi Petugas via No. Dada #{athlete.athleteNumber}
+              </p>
+              <p className="text-[8px] text-blue-700 font-mono font-bold">
+                ID Pass: RM-PASS-{athlete.athleteNumber}
+              </p>
             </div>
           </div>
 

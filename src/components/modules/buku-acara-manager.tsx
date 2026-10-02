@@ -908,6 +908,7 @@ export function BukuAcaraManager({
                                 <th className="py-2 px-2 text-center font-bold w-24">Peringkat</th>
                                 <th className="py-2 px-2 w-14 text-center">Seri</th>
                                 <th className="py-2 px-2 w-12 text-center">Lin.</th>
+                                <th className="py-2 px-2 w-18 text-center font-bold">No. Dada</th>
                                 <th className="py-2 px-2 font-bold">Nama Atlet</th>
                                 <th className="py-2 px-2 font-semibold">Klub / Sekolah (Team)</th>
                                 <th className="py-2 px-2 text-right font-bold w-24">Seed Time</th>
@@ -983,6 +984,11 @@ export function BukuAcaraManager({
                                         }
                                       >
                                         {assign.laneNumber}
+                                      </span>
+                                    </td>
+                                    <td className="py-2 px-2 text-center font-mono font-bold">
+                                      <span className="inline-block px-1.5 py-0.5 rounded bg-blue-50 text-blue-900 border border-blue-200 text-[10px]">
+                                        #{assign.athleteNumber && assign.athleteNumber !== '—' ? assign.athleteNumber : `${assign.laneNumber}${assign.heatNumber || ''}`}
                                       </span>
                                     </td>
                                     <td className="py-2 px-2 font-bold text-slate-950">
@@ -1099,6 +1105,7 @@ export function BukuAcaraManager({
                                   <thead>
                                     <tr className="border-b border-slate-300 text-slate-600 text-[11px] font-bold">
                                       <th className="py-2 px-2 w-12 text-center">Lin.</th>
+                                      <th className="py-2 px-2 w-18 text-center font-bold">No. Dada</th>
                                       <th className="py-2 px-2 font-bold">Nama Atlet</th>
                                       <th className="py-2 px-2 font-semibold">Klub / Sekolah (Team)</th>
                                       <th className="py-2 px-2 text-right font-bold w-24">Seed Time</th>
@@ -1137,6 +1144,11 @@ export function BukuAcaraManager({
                                               }
                                             >
                                               {assign.laneNumber}
+                                            </span>
+                                          </td>
+                                          <td className="py-2 px-2 text-center font-mono font-bold">
+                                            <span className="inline-block px-1.5 py-0.5 rounded bg-blue-50 text-blue-900 border border-blue-200 text-[10px]">
+                                              #{assign.athleteNumber && assign.athleteNumber !== '—' ? assign.athleteNumber : `${assign.laneNumber}`}
                                             </span>
                                           </td>
                                           <td className="py-2 px-2 font-bold text-slate-950">
