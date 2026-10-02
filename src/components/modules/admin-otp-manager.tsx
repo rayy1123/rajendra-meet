@@ -16,23 +16,52 @@ import {
   Check,
   Send,
   Info,
+  Plus,
+  Eye,
+  EyeOff,
+  Lock,
+  Sparkles,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { type AdminOtpRecord } from '@/lib/data/admin-otp-server';
 
 export interface AdminOtpManagerProps {
   initialRecords: AdminOtpRecord[];
+  initialMasterCode?: string;
 }
 
-export function AdminOtpManager({ initialRecords }: AdminOtpManagerProps) {
+export function AdminOtpManager({
+  initialRecords,
+  initialMasterCode = '992811',
+}: AdminOtpManagerProps) {
   const [records, setRecords] = useState<AdminOtpRecord[]>(initialRecords);
+  const [masterCode, setMasterCode] = useState<string>(initialMasterCode);
+  const [showMasterCode, setShowMasterCode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'fallback' | 'active' | 'verified'>('all');
   const [refreshing, setRefreshing] = useState(false);
+
+  // Modal Manual Issue OTP
+  const [openManualModal, setOpenManualModal] = useState(false);
+  const [manualEmail, setManualEmail] = useState('');
+  const [manualName, setManualName] = useState('');
+  const [manualCustomCode, setManualCustomCode] = useState('');
+  const [issuingManual, setIssuingManual] = useState(false);
+
+  // Modal Edit Master Code
+  const [openMasterModal, setOpenMasterModal] = useState(false);
+  const [newMasterCodeInput, setNewMasterCodeInput] = useState(masterCode);
+  const [updatingMaster, setUpdatingMaster] = useState(false);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -41,7 +70,8 @@ export function AdminOtpManager({ initialRecords }: AdminOtpManagerProps) {
       const json = await res.json();
       if (res.ok && json.data) {
         setRecords(json.data);
-        toast.success('Daftar kode OTP berhasil diperbarui');
+        if (json.masterCode) setMasterCode(json.masterCode);
+        toast.success('Daftar kode OTP & Master Key berhasil diperbarui');
       } else {
         toast.error(json.error || 'Gagal menyinkronkan data OTP');
       }
@@ -62,6 +92,78 @@ export function AdminOtpManager({ initialRecords }: AdminOtpManagerProps) {
       `Halo *${item.fullName || 'Peserta'}*, berikut adalah 6-digit kode OTP resmi verifikasi akun Rajendra Swim System Anda: *${item.code}*. Silakan masukkan kode ini pada formulir pendaftaran akun Anda. Kode berlaku selama 5 menit. Terima kasih.`
     );
     window.open(`https://wa.me/?text=${text}`, '_blank');
+  };
+
+  // Terbitkan OTP Manual untuk Akun Spesifik
+  const handleIssueManualOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!manualEmail || !manualEmail.includes('@')) {
+      toast.error('Alamat email wajib diisi dengan benar.');
+      return;
+    }
+
+    setIssuingManual(true);
+    try {
+      const res = await fetch('/api/admin/otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create_manual',
+          email: manualEmail.trim(),
+          fullName: manualName.trim() || 'Peserta Terdaftar',
+          customCode: manualCustomCode.trim() || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.code) {
+        toast.success(`Kode OTP manual (${data.code}) berhasil diterbitkan untuk ${manualEmail}`);
+        setOpenManualModal(false);
+        setManualEmail('');
+        setManualName('');
+        setManualCustomCode('');
+        handleRefresh();
+      } else {
+        toast.error(data.error || 'Gagal menerbitkan OTP');
+      }
+    } catch {
+      toast.error('Kesalahan jaringan');
+    } finally {
+      setIssuingManual(false);
+    }
+  };
+
+  // Simpan Master Code Baru
+  const handleSaveMasterCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const clean = newMasterCodeInput.replace(/\D/g, '').slice(0, 6);
+    if (!clean || clean.length < 4) {
+      toast.error('Master OTP minimal 4 digit angka.');
+      return;
+    }
+
+    setUpdatingMaster(true);
+    try {
+      const res = await fetch('/api/admin/otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update_master_code',
+          newMasterCode: clean,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.masterCode) {
+        setMasterCode(data.masterCode);
+        setOpenMasterModal(false);
+        toast.success(`Master Emergency Bypass OTP diperbarui ke: ${data.masterCode}`);
+      } else {
+        toast.error(data.error || 'Gagal memperbarui master code');
+      }
+    } catch {
+      toast.error('Kesalahan jaringan');
+    } finally {
+      setUpdatingMaster(false);
+    }
   };
 
   const filteredRecords = useMemo(() => {
@@ -103,6 +205,70 @@ export function AdminOtpManager({ initialRecords }: AdminOtpManagerProps) {
 
   return (
     <div className="space-y-6">
+      {/* ── 0. SECRET MASTER EMERGENCY BYPASS OTP CARD (HANYA SUPER ADMIN) ── */}
+      <div className="rounded-2xl border-2 border-indigo-400 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-5 text-white shadow-lg space-y-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500 text-white shadow-2xs font-mono font-black text-xs">
+                🔑
+              </span>
+              <h3 className="font-heading font-black text-sm text-white uppercase tracking-wider">
+                Master Emergency Bypass OTP (Kunci Rahasia Super Admin)
+              </h3>
+              <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-emerald-500 text-white">
+                Universal Key Active
+              </span>
+            </div>
+            <p className="text-xs text-indigo-200 leading-relaxed max-w-2xl">
+              Kode darurat ini <b>berlaku untuk memverifikasi akun manapun secara instan</b> di seluruh sistem. Gunakan saat email Brevo mati total, server offline, atau situasi darurat peserta.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2.5 shrink-0">
+            {/* Box Kode Rahasia */}
+            <div className="flex items-center gap-2 bg-slate-800/90 px-3.5 py-1.5 rounded-xl border border-indigo-500/50 shadow-inner">
+              <span className="font-mono text-xs text-indigo-300 font-bold uppercase">Master Code:</span>
+              <span className="font-mono font-black text-lg text-amber-300 tracking-[4px]">
+                {showMasterCode ? masterCode : '••••••'}
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowMasterCode((prev) => !prev)}
+                className="text-slate-400 hover:text-white transition-colors cursor-pointer p-0.5"
+                title={showMasterCode ? 'Sembunyikan' : 'Tampilkan Kode'}
+              >
+                {showMasterCode ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+              </button>
+            </div>
+
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => handleCopyCode(masterCode)}
+              className="h-8 px-2.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white gap-1 cursor-pointer shadow-2xs"
+            >
+              <Copy className="h-3 w-3" />
+              <span>Salin</span>
+            </Button>
+
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setNewMasterCodeInput(masterCode);
+                setOpenMasterModal(true);
+              }}
+              className="h-8 px-2.5 text-xs font-bold border-indigo-400 text-indigo-200 hover:bg-indigo-900/50 hover:text-white cursor-pointer"
+            >
+              <Lock className="h-3 w-3" />
+              <span>Ganti</span>
+            </Button>
+          </div>
+        </div>
+      </div>
+
       {/* ── 1. BANNER NOTIFIKASI EDUKATIF KONDISI LIMITASI BREVO ── */}
       <div className="rounded-2xl border-2 border-amber-300 bg-gradient-to-r from-amber-50 via-orange-50/70 to-yellow-50 p-5 shadow-xs">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -125,16 +291,30 @@ export function AdminOtpManager({ initialRecords }: AdminOtpManagerProps) {
             </div>
           </div>
 
-          <Button
-            type="button"
-            onClick={handleRefresh}
-            disabled={refreshing}
-            variant="outline"
-            className="h-9 px-3.5 text-xs font-bold rounded-xl border-amber-300 bg-white hover:bg-amber-100/60 text-amber-900 gap-1.5 shadow-2xs shrink-0 cursor-pointer"
-          >
-            <RefreshCw className={cn('h-3.5 w-3.5', refreshing && 'animate-spin')} />
-            <span>Sinkronkan Ulang</span>
-          </Button>
+          <div className="flex items-center gap-2 shrink-0 flex-wrap">
+            <Button
+              type="button"
+              onClick={() => {
+                setManualCustomCode(Math.floor(100000 + Math.random() * 900000).toString());
+                setOpenManualModal(true);
+              }}
+              className="h-9 px-3.5 text-xs font-bold rounded-xl bg-blue-600 hover:bg-blue-700 text-white gap-1.5 shadow-xs cursor-pointer"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>+ Terbitkan OTP Manual</span>
+            </Button>
+
+            <Button
+              type="button"
+              onClick={handleRefresh}
+              disabled={refreshing}
+              variant="outline"
+              className="h-9 px-3.5 text-xs font-bold rounded-xl border-amber-300 bg-white hover:bg-amber-100/60 text-amber-900 gap-1.5 shadow-2xs cursor-pointer"
+            >
+              <RefreshCw className={cn('h-3.5 w-3.5', refreshing && 'animate-spin')} />
+              <span>Sinkron</span>
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -169,7 +349,7 @@ export function AdminOtpManager({ initialRecords }: AdminOtpManagerProps) {
             <span className="font-heading font-black text-3xl text-blue-950 font-mono">
               {stats.activeCount}
             </span>
-            <span className="text-xs font-semibold text-blue-700">Dalam 5 Menit</span>
+            <span className="text-xs font-semibold text-blue-700">Dalam 5-10 Menit</span>
           </div>
           <p className="text-[11px] text-blue-600 mt-1">Siap disalin &amp; diverifikasi</p>
         </div>
@@ -301,7 +481,7 @@ export function AdminOtpManager({ initialRecords }: AdminOtpManagerProps) {
                   <td colSpan={6} className="py-8 text-center text-slate-500">
                     <p className="font-semibold text-xs">Tidak ada rekaman kode OTP yang sesuai kriteria.</p>
                     <p className="text-[11px] text-slate-400 mt-0.5">
-                      Setiap peserta yang menekan tombol verifikasi email akan otomatis tercatat di sini.
+                      Gunakan tombol "+ Terbitkan OTP Manual" di atas jika ingin menerbitkan kode instan untuk peserta.
                     </p>
                   </td>
                 </tr>
@@ -375,7 +555,7 @@ export function AdminOtpManager({ initialRecords }: AdminOtpManagerProps) {
                           {isVerified
                             ? 'Terverifikasi'
                             : isFallback
-                            ? 'Bypass Kuota (Ke Admin)'
+                            ? 'Bypass Kuota (Admin)'
                             : isExpired
                             ? 'Kedaluwarsa'
                             : 'Terkirim via Email'}
@@ -447,6 +627,145 @@ export function AdminOtpManager({ initialRecords }: AdminOtpManagerProps) {
           </table>
         </div>
       </div>
+
+      {/* ════ MODAL 1: TERBITKAN OTP MANUAL UNTUK AKUN SPESIFIK ════ */}
+      <Dialog open={openManualModal} onOpenChange={setOpenManualModal}>
+        <DialogContent className="max-w-md p-6 no-print backdrop-blur-xl bg-white/98 border border-white/90 shadow-2xl">
+          <DialogHeader className="border-b pb-3">
+            <DialogTitle className="flex items-center gap-2 text-base font-bold text-slate-900">
+              <Plus className="h-5 w-5 text-blue-600" />
+              Terbitkan Kode OTP Manual untuk Akun
+            </DialogTitle>
+          </DialogHeader>
+
+          <form onSubmit={handleIssueManualOtp} className="space-y-4 pt-2 text-xs">
+            <p className="text-slate-600 text-xs">
+              Gunakan fitur ini untuk menerbitkan kode verifikasi instan bagi peserta yang mengalami kendala penerimaan email.
+            </p>
+
+            <div className="space-y-1">
+              <label className="font-bold text-slate-800">Email Akun Pendaftar</label>
+              <Input
+                type="email"
+                placeholder="nama.peserta@gmail.com"
+                value={manualEmail}
+                onChange={(e) => setManualEmail(e.target.value)}
+                className="h-8 text-xs bg-white"
+                required
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-bold text-slate-800">Nama Lengkap Peserta (Opsional)</label>
+              <Input
+                type="text"
+                placeholder="Contoh: Farrel Tangkas"
+                value={manualName}
+                onChange={(e) => setManualName(e.target.value)}
+                className="h-8 text-xs bg-white"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label className="font-bold text-slate-800">6 Digit Kode OTP</label>
+                <button
+                  type="button"
+                  onClick={() => setManualCustomCode(Math.floor(100000 + Math.random() * 900000).toString())}
+                  className="text-[10px] text-blue-600 hover:underline font-bold cursor-pointer"
+                >
+                  Acak Kode
+                </button>
+              </div>
+              <Input
+                type="text"
+                maxLength={6}
+                value={manualCustomCode}
+                onChange={(e) => setManualCustomCode(e.target.value.replace(/\D/g, ''))}
+                placeholder="000000"
+                className="h-9 text-xs bg-white font-mono font-black text-center text-lg tracking-[8px]"
+                required
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setOpenManualModal(false)}
+                className="text-xs cursor-pointer"
+              >
+                Batal
+              </Button>
+              <Button
+                type="submit"
+                disabled={issuingManual}
+                size="sm"
+                className="text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white gap-1.5 shadow-xs cursor-pointer"
+              >
+                <Check className="h-4 w-4" />
+                <span>{issuingManual ? 'Menerbitkan...' : 'Terbitkan & Aktifkan OTP'}</span>
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* ════ MODAL 2: GANTI MASTER EMERGENCY BYPASS OTP ════ */}
+      <Dialog open={openMasterModal} onOpenChange={setOpenMasterModal}>
+        <DialogContent className="max-w-md p-6 no-print backdrop-blur-xl bg-white/98 border border-white/90 shadow-2xl">
+          <DialogHeader className="border-b pb-3">
+            <DialogTitle className="flex items-center gap-2 text-base font-bold text-slate-900">
+              <Lock className="h-5 w-5 text-indigo-600" />
+              Ubah Master Emergency Bypass OTP
+            </DialogTitle>
+          </DialogHeader>
+
+          <form onSubmit={handleSaveMasterCode} className="space-y-4 pt-2 text-xs">
+            <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-amber-950 space-y-1">
+              <p className="font-bold">⚠️ Perhatian Rahasia Super Admin:</p>
+              <p className="text-[11px] leading-relaxed">
+                Kode ini adalah <b>Master Key</b> yang dapat memverifikasi semua email user tanpa mengirimkan email. Jangan berikan kepada publik kecuali diperlukan.
+              </p>
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-bold text-slate-800">Masukkan 6 Digit Master OTP Baru:</label>
+              <Input
+                type="text"
+                maxLength={6}
+                value={newMasterCodeInput}
+                onChange={(e) => setNewMasterCodeInput(e.target.value.replace(/\D/g, ''))}
+                placeholder="992811"
+                className="h-10 text-xs bg-white font-mono font-black text-center text-xl tracking-[10px]"
+                required
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setOpenMasterModal(false)}
+                className="text-xs cursor-pointer"
+              >
+                Batal
+              </Button>
+              <Button
+                type="submit"
+                disabled={updatingMaster}
+                size="sm"
+                className="text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 shadow-xs cursor-pointer"
+              >
+                <Check className="h-4 w-4" />
+                <span>{updatingMaster ? 'Menyimpan...' : 'Simpan Master OTP'}</span>
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -94,4 +94,42 @@ describe('Admin OTP Queue & Verification System', () => {
     const verifiedEntry = afterRecords.find((r) => r.email === cleanEmail);
     expect(verifiedEntry?.status).toBe('verified');
   });
+
+  it('verifikasi OTP berhasil menggunakan Master Emergency Bypass OTP untuk akun apapun', async () => {
+    const randomUserEmail = 'user_offline_emergency@gmail.com';
+    const { getMasterBypassOtp } = await import('@/lib/data/admin-otp-server');
+    const masterKey = getMasterBypassOtp();
+
+    expect(masterKey).toBeDefined();
+    expect(masterKey.length).toBeGreaterThanOrEqual(4);
+
+    // Verifikasi akun tanpa perlu kirim email sebelumnya
+    const verifyRes = await verifyEmailOtp({
+      email: randomUserEmail,
+      code: masterKey,
+    });
+
+    expect(verifyRes.ok).toBe(true);
+  });
+
+  it('admin dapat menerbitkan OTP manual untuk akun tertentu', async () => {
+    const manualTarget = 'user_manual_issue@gmail.com';
+    const { issueManualAdminOtp } = await import('@/lib/auth/otp-service');
+    const res = await issueManualAdminOtp({
+      email: manualTarget,
+      fullName: 'Manual Swimmer',
+      customCode: '776655',
+    });
+
+    expect(res.ok).toBe(true);
+    expect(res.code).toBe('776655');
+
+    // Verifikasi dengan kode yang baru diterbitkan admin
+    const verifyRes = await verifyEmailOtp({
+      email: manualTarget,
+      code: '776655',
+    });
+
+    expect(verifyRes.ok).toBe(true);
+  });
 });
