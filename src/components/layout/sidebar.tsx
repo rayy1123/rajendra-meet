@@ -42,6 +42,7 @@ import {
   KeyRound,
   Megaphone,
   UserCog,
+  FileText,
   type LucideIcon,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -93,6 +94,7 @@ const adminNavGroups: NavGroup[] = [
     label: 'Kejuaraan & Kontingen',
     items: [
       { title: 'Kejuaraan / Events', href: '/events', icon: CalendarDays, description: 'Kelola master kejuaraan' },
+      { title: 'Surat Resmi (Generator)', href: '/surat-resmi', icon: FileText, description: 'Cetak surat resmi, kop & dual TTD' },
       { title: 'Buku Acara & Seeding', href: '/buku-acara', icon: BookOpen, description: 'Susunan acara, start list & edit lintasan' },
       { title: 'Data Atlet', href: '/athletes', icon: Users, description: 'Master seluruh data atlet' },
       { title: 'Sekolah & Klub', href: '/schools', icon: School, description: 'Master data kontingen tim' },
