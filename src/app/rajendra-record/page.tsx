@@ -14,7 +14,7 @@ export default async function PublicRajendraRecordPage({
   const params = await searchParams;
   const activeEventId = params?.eventId || 'all';
 
-  // 1. Ambil daftar event untuk filter switcher
+  // 1. Ambil daftar event untuk switcher
   const { data: eventsData } = await supabase
     .from('events')
     .select('id, name')
@@ -22,7 +22,7 @@ export default async function PublicRajendraRecordPage({
 
   const events = (eventsData || []).map((e) => ({ id: e.id, name: e.name }));
 
-  // 2. Ambil data nomor lomba
+  // 2. Ambil data nomor lomba (competition_events)
   let compQuery = supabase
     .from('competition_events')
     .select('id, name, distance_meters, stroke, gender, grade_level, event_id, events(id, name)')
@@ -41,17 +41,41 @@ export default async function PublicRajendraRecordPage({
   });
   const targetCompIds = compEvents.map((c) => c.id);
 
-  // 3. Ambil data rekor resmi di database (rajendra_records)
+  // 3. Ambil data master atlet & sekolah secara terpusat untuk hydration 100% aman
+  const { data: athletesData } = await supabase
+    .from('athletes')
+    .select('id, athlete_number, full_name, school_id, schools(id, name)');
+
+  const athleteMap = new Map<string, { id: string; name: string; schoolName: string; athleteNumber?: string }>();
+  (athletesData || []).forEach((a: any) => {
+    const rawSchool = Array.isArray(a.schools) ? a.schools[0] : a.schools;
+    athleteMap.set(a.id, {
+      id: a.id,
+      name: a.full_name || 'Atlet',
+      schoolName: rawSchool?.name || 'Umum / Perorangan',
+      athleteNumber: a.athlete_number,
+    });
+  });
+
+  // 4. Ambil master registrasi terpusat
+  let regQuery = supabase
+    .from('registrations')
+    .select('id, athlete_id, competition_event_id, event_id');
+
+  if (activeEventId && activeEventId !== 'all') {
+    regQuery = regQuery.eq('event_id', activeEventId);
+  }
+
+  const { data: regData } = await regQuery;
+  const regMap = new Map<string, { id: string; athlete_id: string; competition_event_id: string; event_id: string }>();
+  (regData || []).forEach((r: any) => {
+    regMap.set(r.id, r);
+  });
+
+  // 5. Ambil data rekor resmi di database (rajendra_records)
   let existingQuery = supabase
     .from('rajendra_records')
-    .select(`
-      competition_event_id,
-      time_ms,
-      event_year,
-      athlete_id,
-      athletes ( id, full_name, schools ( name ) ),
-      competition_events ( id, name, event_id, events ( id, name ) )
-    `)
+    .select('id, competition_event_id, time_ms, event_year, athlete_id, is_active')
     .eq('is_active', true);
 
   if (activeEventId && activeEventId !== 'all' && targetCompIds.length > 0) {
@@ -59,16 +83,19 @@ export default async function PublicRajendraRecordPage({
   }
 
   const { data: existingRecordsData } = await existingQuery;
-
   const existingMap = new Map<string, any>();
   (existingRecordsData || []).forEach((r: any) => {
     if (r.competition_event_id) {
-      existingMap.set(r.competition_event_id, r);
+      const ath = athleteMap.get(r.athlete_id);
+      existingMap.set(r.competition_event_id, {
+        ...r,
+        athleteName: ath?.name || 'Pemegang Rekor',
+        schoolName: ath?.schoolName || 'Klub',
+      });
     }
   });
 
-  // 4. Ambil catatan waktu hasil lomba riil (results)
-  // Query terstruktur 2 tahap untuk menjamin data hasil terekstrak tanpa kegagalan nested join
+  // 6. Ambil catatan waktu hasil lomba (results) dengan relasi heats & assignments
   const candidateResultsByComp = new Map<string, Array<{
     athlete_id: string;
     athlete_name: string;
@@ -93,25 +120,12 @@ export default async function PublicRajendraRecordPage({
     if (heatIds.length > 0) {
       const { data: assigns } = await supabase
         .from('heat_assignments')
-        .select(`
-          id,
-          heat_id,
-          registration_id,
-          registrations (
-            id,
-            athlete_id,
-            athletes (
-              id,
-              full_name,
-              schools ( name )
-            )
-          )
-        `)
+        .select('id, heat_id, registration_id')
         .in('heat_id', heatIds);
 
       const assignIds = (assigns || []).map((a) => a.id);
-      const assignMap = new Map<string, any>();
-      (assigns || []).forEach((a) => {
+      const assignMap = new Map<string, { heat_id: string; registration_id: string }>();
+      (assigns || []).forEach((a: any) => {
         assignMap.set(a.id, a);
       });
 
@@ -125,31 +139,36 @@ export default async function PublicRajendraRecordPage({
           .gt('time_ms', 0)
           .order('time_ms', { ascending: true });
 
-        (results || []).forEach((r) => {
+        (results || []).forEach((r: any) => {
           const assign = assignMap.get(r.heat_assignment_id);
-          const heatId = assign?.heat_id;
+          if (!assign) return;
+
+          const heatId = assign.heat_id;
           const compId = heatId ? ceOfHeat[heatId] : null;
-          const reg = assign?.registrations;
-          const ath = reg?.athletes;
-          if (compId && ath && r.time_ms && r.time_ms > 0) {
-            const comp = compMap.get(compId);
-            const list = candidateResultsByComp.get(compId) || [];
+          const reg = regMap.get(assign.registration_id);
+          const resolvedCompId = compId || reg?.competition_event_id;
+          const athId = reg?.athlete_id;
+          const ath = athId ? athleteMap.get(athId) : null;
+
+          if (resolvedCompId && ath && r.time_ms && r.time_ms > 0) {
+            const comp = compMap.get(resolvedCompId);
+            const list = candidateResultsByComp.get(resolvedCompId) || [];
             list.push({
-              athlete_id: ath.id || '',
-              athlete_name: ath.full_name || 'Atlet',
-              school_name: ath.schools?.name || 'Umum / Perorangan',
-              time_ms: r.time_ms,
+              athlete_id: ath.id,
+              athlete_name: ath.name,
+              school_name: ath.schoolName,
+              time_ms: Number(r.time_ms),
               event_id: comp?.event_id,
               event_name: comp?.events?.name || 'Kejuaraan Renang',
             });
-            candidateResultsByComp.set(compId, list);
+            candidateResultsByComp.set(resolvedCompId, list);
           }
         });
       }
     }
   }
 
-  // 5. Gabungkan dan bentuk daftar rekor resmi per nomor lomba
+  // 7. Bentuk daftar rekor resmi per nomor lomba
   const formattedRecords: RecordItemView[] = [];
 
   compEvents.forEach((comp) => {
@@ -173,11 +192,8 @@ export default async function PublicRajendraRecordPage({
 
     // Skenario A: Hasil lomba baru memecahkan rekor yang ada di rajendra_records
     if (bestResult && existingRec && bestResult.time_ms < existingRec.time_ms) {
-      const prevAthlete = existingRec.athletes?.full_name || 'Pemegang Rekor Sebelumnya';
-      const prevSchool = existingRec.athletes?.schools?.name || null;
-      const recEvents = (existingRec.competition_events as any)?.events;
-      const prevEvent =
-        (Array.isArray(recEvents) ? recEvents[0]?.name : recEvents?.name) || null;
+      const prevAthlete = existingRec.athleteName || 'Pemegang Rekor Sebelumnya';
+      const prevSchool = existingRec.schoolName || null;
       const prevTime = existingRec.time_ms;
       const diffMs = prevTime - bestResult.time_ms;
 
@@ -192,9 +208,9 @@ export default async function PublicRajendraRecordPage({
         previous_time_ms: prevTime,
         previous_athlete_name: prevAthlete,
         previous_school_name: prevSchool,
-        previous_event_name: prevEvent,
+        previous_event_name: null,
         improvement_ms: diffMs,
-        notes: `${bestResult.athlete_name} mendapatkan rekor ${formatMsToTime(bestResult.time_ms)} mengalahkan ${prevAthlete} yang sebelumnya mencetak ${formatMsToTime(prevTime)}${prevEvent ? ` di ${prevEvent}` : ''}`,
+        notes: `${bestResult.athlete_name} mencetak rekor baru ${formatMsToTime(bestResult.time_ms)} (-${(diffMs / 1000).toFixed(2)}s) mengalahkan rekor sebelumnya oleh ${prevAthlete}`,
         comp_name: displayName,
         stroke: strokeName,
         distance_meters: dist,
@@ -204,30 +220,25 @@ export default async function PublicRajendraRecordPage({
     }
     // Skenario B: Rekor di rajendra_records tetap bertahan (tidak ada yang mengalahkan)
     else if (existingRec) {
-      const ath = existingRec.athletes;
       const diffMs =
         bestResult && bestResult.time_ms > existingRec.time_ms
           ? bestResult.time_ms - existingRec.time_ms
           : null;
 
-      const recEvents = (existingRec.competition_events as any)?.events;
-      const recEventName =
-        (Array.isArray(recEvents) ? recEvents[0]?.name : recEvents?.name) || eventName;
-
       formattedRecords.push({
         competition_event_id: compId,
-        event_id: existingRec.competition_events?.event_id || comp.event_id,
-        event_name: recEventName,
-        athlete_id: existingRec.athlete_id || ath?.id || '',
-        athlete_name: ath?.full_name || 'Atlet',
-        school_name: ath?.schools?.name || 'Umum / Perorangan',
+        event_id: comp.event_id,
+        event_name: eventName,
+        athlete_id: existingRec.athlete_id || '',
+        athlete_name: existingRec.athleteName || 'Atlet',
+        school_name: existingRec.schoolName || 'Umum / Perorangan',
         time_ms: existingRec.time_ms,
         previous_time_ms: null,
         previous_athlete_name: null,
         previous_school_name: null,
         previous_event_name: null,
         improvement_ms: diffMs,
-        notes: `Rekor resmi kejuaraan yang masih bertahan dengan catatan waktu ${formatMsToTime(existingRec.time_ms)}`,
+        notes: `Rekor resmi kejuaraan yang masih bertahan (${formatMsToTime(existingRec.time_ms)})`,
         comp_name: displayName,
         stroke: strokeName,
         distance_meters: dist,
@@ -242,7 +253,7 @@ export default async function PublicRajendraRecordPage({
 
       let notes = `${bestResult.athlete_name} mencetak rekor kejuaraan dengan catatan waktu ${formatMsToTime(bestResult.time_ms)}`;
       if (secondPlace && secondPlace.athlete_name !== bestResult.athlete_name) {
-        notes = `${bestResult.athlete_name} mendapatkan rekor ${formatMsToTime(bestResult.time_ms)} mengalahkan ${secondPlace.athlete_name} yang mencetak ${formatMsToTime(secondPlace.time_ms)}`;
+        notes = `${bestResult.athlete_name} memimpin rekor dengan waktu ${formatMsToTime(bestResult.time_ms)} unggul +${(diffMs! / 1000).toFixed(2)}s dari ${secondPlace.athlete_name}`;
       }
 
       formattedRecords.push({
@@ -256,7 +267,7 @@ export default async function PublicRajendraRecordPage({
         previous_time_ms: secondPlace ? secondPlace.time_ms : null,
         previous_athlete_name: secondPlace ? secondPlace.athlete_name : null,
         previous_school_name: secondPlace ? secondPlace.school_name : null,
-        previous_event_name: secondPlace ? secondPlace.event_name : null,
+        previous_event_name: null,
         improvement_ms: diffMs,
         notes,
         comp_name: displayName,
@@ -271,7 +282,7 @@ export default async function PublicRajendraRecordPage({
   return (
     <PublicShell
       title="Rajendra Record"
-      subtitle="Daftar rekor resmi kejuaraan renang Rajendra Swim System. Memuat nama atlet, klub/sekolah, waktu rekor, dan kejuaraan tempat rekor diraih."
+      subtitle="Rekor resmi kejuaraan renang terverifikasi sepanjang sejarah Rajendra Swim System."
       breadcrumbItems={[
         { label: 'Beranda', href: '/' },
         { label: 'Rajendra Record' },

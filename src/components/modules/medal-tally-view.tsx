@@ -30,7 +30,6 @@ export interface MedalRowItem {
   silver: number;
   bronze: number;
   total: number;
-  points: number;
 }
 
 interface MedalTallyViewProps {
@@ -47,10 +46,10 @@ export function MedalTallyView({
   rows,
 }: MedalTallyViewProps) {
   const [search, setSearch] = useState('');
-  const [sortBy, setSortBy] = useState<'olympic' | 'points' | 'total'>('olympic');
+  const [sortBy, setSortBy] = useState<'olympic' | 'total'>('olympic');
   const printAreaRef = useRef<HTMLDivElement>(null);
 
-  // Sorting logic
+  // Sorting logic (Standar Olimpiade: Emas > Perak > Perunggu > Total)
   const sortedRows = useMemo(() => {
     const list = [...rows];
     if (sortBy === 'olympic') {
@@ -58,12 +57,10 @@ export function MedalTallyView({
         if (b.gold !== a.gold) return b.gold - a.gold;
         if (b.silver !== a.silver) return b.silver - a.silver;
         if (b.bronze !== a.bronze) return b.bronze - a.bronze;
-        return b.points - a.points;
+        return b.total - a.total;
       });
-    } else if (sortBy === 'points') {
-      list.sort((a, b) => b.points - a.points || b.gold - a.gold || b.total - a.total);
     } else if (sortBy === 'total') {
-      list.sort((a, b) => b.total - a.total || b.gold - a.gold || b.points - a.points);
+      list.sort((a, b) => b.total - a.total || b.gold - a.gold || b.silver - a.silver);
     }
     return list;
   }, [rows, sortBy]);
@@ -140,9 +137,8 @@ export function MedalTallyView({
                     {second.bronze} 🥉
                   </span>
                 </div>
-                <div className="mt-3 pt-2.5 border-t border-slate-200 flex items-center justify-between text-xs">
-                  <span className="text-slate-500 font-semibold">{second.total} Medali</span>
-                  <span className="font-mono font-black text-slate-900">{second.points} Poin</span>
+                <div className="mt-3.5 pt-2.5 border-t border-slate-200 flex items-center justify-center text-xs font-bold text-slate-700">
+                  <span>{second.total} Total Medali</span>
                 </div>
               </div>
             ) : <div className="hidden sm:block" />}
@@ -173,10 +169,9 @@ export function MedalTallyView({
                     {first.bronze} 🥉
                   </span>
                 </div>
-                <div className="mt-4 pt-3 border-t border-amber-200 flex items-center justify-between text-xs">
-                  <span className="text-amber-900 font-bold">{first.total} Total Medali</span>
-                  <span className="font-mono font-black text-slate-950 text-sm bg-amber-200/80 px-2 py-0.5 rounded">
-                    {first.points} Poin
+                <div className="mt-4 pt-3 border-t border-amber-200 flex items-center justify-center text-xs">
+                  <span className="font-mono font-black text-slate-950 text-sm bg-amber-200/80 px-3.5 py-1 rounded-full">
+                    {first.total} Total Medali
                   </span>
                 </div>
               </div>
@@ -206,9 +201,8 @@ export function MedalTallyView({
                     {third.bronze} 🥉
                   </span>
                 </div>
-                <div className="mt-3 pt-2.5 border-t border-slate-200 flex items-center justify-between text-xs">
-                  <span className="text-slate-500 font-semibold">{third.total} Medali</span>
-                  <span className="font-mono font-black text-slate-900">{third.points} Poin</span>
+                <div className="mt-3.5 pt-2.5 border-t border-slate-200 flex items-center justify-center text-xs font-bold text-slate-700">
+                  <span>{third.total} Total Medali</span>
                 </div>
               </div>
             ) : <div className="hidden sm:block" />}
@@ -267,19 +261,7 @@ export function MedalTallyView({
                   : 'text-slate-600 hover:text-slate-900'
               )}
             >
-              Standar Emas
-            </button>
-            <button
-              type="button"
-              onClick={() => setSortBy('points')}
-              className={cn(
-                'px-3 py-1 rounded-lg transition-all cursor-pointer',
-                sortBy === 'points'
-                  ? 'bg-white text-slate-900 shadow-2xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              )}
-            >
-              Total Poin
+              Standar Emas (Olimpiade)
             </button>
             <button
               type="button"
@@ -311,19 +293,47 @@ export function MedalTallyView({
         ref={printAreaRef}
         className="rounded-2xl border border-slate-200/90 bg-white overflow-hidden shadow-sm print:border-none print:shadow-none print:rounded-none"
       >
-        {/* Printable Official Header */}
+        {/* Printable Official Header (Dengan Logo Rajendra Swim System & Rajendra Organizer) */}
         <div className="only-print p-6 space-y-4">
-          <div className="bg-[#1b2e4b] text-white p-5 rounded-lg flex items-center justify-between">
-            <div className="space-y-1">
-              <h1 className="text-lg font-bold uppercase tracking-tight">KLASEMEN PEROLEHAN MEDALI & POIN</h1>
-              <p className="text-xs text-slate-200">{eventName}</p>
-              <p className="text-xs text-slate-300">
-                {eventLocation ? `${eventLocation} · ` : ''}{eventDate || 'Oktober 2026'}
+          <div className="bg-[#1b2e4b] text-white p-5 rounded-xl flex items-center justify-between gap-4">
+            {/* Logo Kiri: Rajendra Swim System */}
+            <div className="flex items-center gap-2.5 shrink-0 text-left">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand/logo.png"
+                alt="Rajendra Swim System"
+                className="h-10 w-auto object-contain bg-white/10 rounded-lg p-1 backdrop-blur-xs"
+              />
+              <div>
+                <p className="font-heading font-black text-xs text-white uppercase tracking-tight">
+                  Rajendra <span className="text-cyan-300">Swim System</span>
+                </p>
+                <p className="text-[9px] font-mono text-cyan-200 font-semibold uppercase">OFFICIAL MEDAL TALLY</p>
+              </div>
+            </div>
+
+            {/* Info Tengah: Judul & Event */}
+            <div className="text-center flex-1 px-2 space-y-0.5">
+              <h1 className="text-base sm:text-lg font-black uppercase tracking-tight text-white">
+                KLASEMEN PEROLEHAN MEDALI
+              </h1>
+              <p className="text-xs text-slate-200 font-bold">{eventName}</p>
+              <p className="text-[11px] text-slate-300">
+                {eventLocation ? `${eventLocation} · ` : ''}{eventDate || 'Musim 2026'}
               </p>
             </div>
-            <div className="text-right text-[10px] text-slate-300">
-              <p>Dicetak: {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-              <p className="font-bold text-white uppercase mt-0.5">STATUS: HASIL RESMI TERVERIFIKASI</p>
+
+            {/* Logo Kanan: Rajendra Swimming Organizer */}
+            <div className="flex flex-col items-end gap-1 shrink-0 text-right">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand/rajendra-organizer-logo.png"
+                alt="Rajendra Swimming Organizer"
+                className="h-8 w-auto max-w-[120px] object-contain bg-white/10 rounded-lg p-1 backdrop-blur-xs"
+              />
+              <span className="text-[9px] font-mono text-cyan-200 uppercase font-bold">
+                HASIL RESMI TERVERIFIKASI
+              </span>
             </div>
           </div>
         </div>
@@ -335,24 +345,22 @@ export function MedalTallyView({
               <tr>
                 <th className="py-3.5 px-3 w-14 text-center">Rank</th>
                 <th className="py-3.5 px-4 font-bold">Kontingen / Klub / Sekolah</th>
-                <th className="py-3.5 px-3 text-center w-20 text-amber-300">🥇 Emas</th>
-                <th className="py-3.5 px-3 text-center w-20 text-slate-200">🥈 Perak</th>
-                <th className="py-3.5 px-3 text-center w-20 text-orange-300">🥉 Perunggu</th>
-                <th className="py-3.5 px-3 text-center w-24">Total Medali</th>
-                <th className="py-3.5 px-4 text-right w-24">Poin (5-3-1)</th>
+                <th className="py-3.5 px-3 text-center w-24 text-amber-300">🥇 Emas</th>
+                <th className="py-3.5 px-3 text-center w-24 text-slate-200">🥈 Perak</th>
+                <th className="py-3.5 px-3 text-center w-24 text-orange-300">🥉 Perunggu</th>
+                <th className="py-3.5 px-4 text-right w-28 font-bold">Total Medali</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
               {filteredRows.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400 text-xs">
+                  <td colSpan={6} className="py-12 text-center text-slate-400 text-xs">
                     Tidak ada kontingen atau sekolah yang cocok dengan pencarian &quot;{search}&quot;.
                   </td>
                 </tr>
               ) : (
                 filteredRows.map((item, idx) => {
                   const rank = idx + 1;
-                  const isTop3 = rank <= 3;
 
                   return (
                     <tr
@@ -410,7 +418,7 @@ export function MedalTallyView({
 
                       <td className="py-3 px-3 text-center font-mono font-bold text-amber-700 bg-amber-50/30">
                         {item.gold > 0 ? (
-                          <span className="inline-block px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-black">
+                          <span className="inline-block px-2.5 py-0.5 rounded bg-amber-100 text-amber-900 font-black">
                             {item.gold}
                           </span>
                         ) : (
@@ -420,7 +428,7 @@ export function MedalTallyView({
 
                       <td className="py-3 px-3 text-center font-mono font-bold text-slate-700 bg-slate-50/40">
                         {item.silver > 0 ? (
-                          <span className="inline-block px-2 py-0.5 rounded bg-slate-200 text-slate-900 font-black">
+                          <span className="inline-block px-2.5 py-0.5 rounded bg-slate-200 text-slate-900 font-black">
                             {item.silver}
                           </span>
                         ) : (
@@ -430,7 +438,7 @@ export function MedalTallyView({
 
                       <td className="py-3 px-3 text-center font-mono font-bold text-orange-700 bg-orange-50/30">
                         {item.bronze > 0 ? (
-                          <span className="inline-block px-2 py-0.5 rounded bg-orange-100 text-orange-900 font-black">
+                          <span className="inline-block px-2.5 py-0.5 rounded bg-orange-100 text-orange-900 font-black">
                             {item.bronze}
                           </span>
                         ) : (
@@ -438,12 +446,8 @@ export function MedalTallyView({
                         )}
                       </td>
 
-                      <td className="py-3 px-3 text-center font-mono font-black text-slate-900">
+                      <td className="py-3 px-4 text-right font-mono font-black text-slate-950 text-sm">
                         {item.total}
-                      </td>
-
-                      <td className="py-3 px-4 text-right font-mono font-black text-blue-900 text-sm">
-                        {item.points}
                       </td>
                     </tr>
                   );
@@ -453,20 +457,10 @@ export function MedalTallyView({
           </table>
         </div>
 
-        {/* Printable Official Signature Footer */}
-        <div className="only-print pt-8 p-6 grid grid-cols-2 text-center text-xs text-slate-800">
-          <div className="space-y-16">
-            <p className="font-semibold">Ketua Panitia Pelaksana</p>
-            <p className="font-bold border-t border-slate-400 max-w-[200px] mx-auto pt-1">
-              ( .................................................. )
-            </p>
-          </div>
-          <div className="space-y-16">
-            <p className="font-semibold">Technical Delegate (TD) / Referee</p>
-            <p className="font-bold border-t border-slate-400 max-w-[200px] mx-auto pt-1">
-              ( .................................................. )
-            </p>
-          </div>
+        {/* Printable Clean Official Footer */}
+        <div className="only-print px-6 py-4 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-500 font-mono">
+          <span>© {new Date().getFullYear()} Rajendra Swim System &bull; Official Meet Platform</span>
+          <span>Dicetak otomatis &bull; Status: Hasil Resmi Terverifikasi</span>
         </div>
       </div>
     </div>
