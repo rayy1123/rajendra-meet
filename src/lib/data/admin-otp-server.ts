@@ -14,6 +14,7 @@ export interface AdminOtpRecord {
 }
 
 const STORE_PATH = path.join(process.cwd(), 'src', 'lib', 'data', 'admin-otp-store.json');
+const MASTER_CONFIG_PATH = path.join(process.cwd(), 'src', 'lib', 'data', 'master-otp-config.json');
 
 function ensureStoreFile(): void {
   try {
@@ -27,6 +28,51 @@ function ensureStoreFile(): void {
   } catch (err) {
     console.error('[AdminOtpStore] Error ensuring store file:', err);
   }
+}
+
+/**
+ * Dapatkan Master Emergency Bypass OTP (Hanya diketahui Super Admin)
+ */
+export function getMasterBypassOtp(): string {
+  try {
+    if (fs.existsSync(MASTER_CONFIG_PATH)) {
+      const raw = fs.readFileSync(MASTER_CONFIG_PATH, 'utf-8');
+      const cfg = JSON.parse(raw);
+      if (cfg && cfg.masterCode) {
+        return String(cfg.masterCode).trim();
+      }
+    }
+  } catch (err) {
+    console.warn('[AdminOtpStore] Read master config error:', err);
+  }
+  return process.env.MASTER_ADMIN_OTP || '992811';
+}
+
+/**
+ * Ubah Master Emergency Bypass OTP oleh Super Admin
+ */
+export function setMasterBypassOtp(newCode: string): string {
+  const cleanCode = newCode.replace(/\D/g, '').slice(0, 6) || '992811';
+  try {
+    const dir = path.dirname(MASTER_CONFIG_PATH);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(
+      MASTER_CONFIG_PATH,
+      JSON.stringify(
+        {
+          masterCode: cleanCode,
+          updatedAt: new Date().toISOString(),
+          description: 'Master Emergency Bypass OTP — Berlaku untuk verifikasi seluruh akun jika server email / redis error',
+        },
+        null,
+        2
+      ),
+      'utf-8'
+    );
+  } catch (err) {
+    console.error('[AdminOtpStore] Save master config error:', err);
+  }
+  return cleanCode;
 }
 
 export function getAdminOtpRecords(): AdminOtpRecord[] {
@@ -110,4 +156,27 @@ export function updateAdminOtpStatus(email: string, status: AdminOtpRecord['stat
       console.error('[AdminOtpStore] Update status error:', err);
     }
   }
+}
+
+/**
+ * Generator Manual Kode OTP untuk Akun Spesifik oleh Admin
+ */
+export function createManualOtpForUser(params: {
+  email: string;
+  fullName?: string;
+  customCode?: string;
+}): AdminOtpRecord {
+  const cleanEmail = params.email.trim().toLowerCase();
+  const code = params.customCode?.replace(/\D/g, '').slice(0, 6) || Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = Date.now() + 600 * 1000; // 10 menit untuk manual admin OTP
+
+  return saveAdminOtpRecord({
+    email: cleanEmail,
+    fullName: params.fullName || 'Peserta',
+    code,
+    expiresAt,
+    status: 'fallback_to_admin',
+    viaEmail: false,
+    errorMessage: 'Diterbitkan secara manual oleh Admin Panitia',
+  });
 }

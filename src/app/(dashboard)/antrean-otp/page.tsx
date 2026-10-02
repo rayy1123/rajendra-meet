@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { AdminOtpManager } from '@/components/modules/admin-otp-manager';
-import { getAdminOtpRecords } from '@/lib/data/admin-otp-server';
+import { getAdminOtpRecords, getMasterBypassOtp } from '@/lib/data/admin-otp-server';
 import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
@@ -15,6 +15,7 @@ export default async function AntreanOtpPage() {
   }
 
   const initialRecords = getAdminOtpRecords();
+  const initialMasterCode = getMasterBypassOtp();
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
@@ -39,7 +40,7 @@ export default async function AntreanOtpPage() {
         </div>
       </div>
 
-      <AdminOtpManager initialRecords={initialRecords} />
+      <AdminOtpManager initialRecords={initialRecords} initialMasterCode={initialMasterCode} />
     </div>
   );
 }

@@ -1,6 +1,10 @@
 import { redis } from '@/lib/cache/redis';
 import { sendBrevoEmail } from '@/lib/email/brevo';
-import { saveAdminOtpRecord, updateAdminOtpStatus } from '@/lib/data/admin-otp-server';
+import {
+  saveAdminOtpRecord,
+  updateAdminOtpStatus,
+  getMasterBypassOtp,
+} from '@/lib/data/admin-otp-server';
 
 const OTP_TTL_SECONDS = 300; // 5 menit
 
@@ -14,6 +18,43 @@ const localOtpStore = new Map<string, LocalOtpEntry>();
 
 function generateNumericOtp(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+/**
+ * Buat dan daftarkan kode OTP manual oleh Panitia/Admin untuk akun spesifik
+ */
+export async function issueManualAdminOtp(params: {
+  email: string;
+  fullName?: string;
+  customCode?: string;
+}): Promise<{ ok: boolean; code: string }> {
+  const cleanEmail = params.email.trim().toLowerCase();
+  const code = params.customCode?.replace(/\D/g, '').slice(0, 6) || generateNumericOtp();
+  const expiresAt = Date.now() + 600 * 1000; // 10 menit untuk manual admin
+  const key = `otp_code:${cleanEmail}`;
+
+  try {
+    await redis.set(
+      key,
+      JSON.stringify({ code, expiresAt, attempts: 0 }),
+      { ex: 600 }
+    );
+  } catch (err) {
+    console.warn('[OTP Store] Redis set notice:', err);
+  }
+  localOtpStore.set(cleanEmail, { code, expiresAt, attempts: 0 });
+
+  saveAdminOtpRecord({
+    email: cleanEmail,
+    fullName: params.fullName || 'Peserta',
+    code,
+    expiresAt,
+    status: 'fallback_to_admin',
+    viaEmail: false,
+    errorMessage: 'Diterbitkan secara manual oleh Admin Panitia',
+  });
+
+  return { ok: true, code };
 }
 
 /**
@@ -195,6 +236,16 @@ export async function verifyEmailOtp(params: {
 
   if (!cleanEmail || !cleanCode) {
     return { ok: false, error: 'Email dan kode OTP wajib diisi.' };
+  }
+
+  // 0. Cek Master Emergency Bypass OTP (Berlaku universal jika kondisi server / email error)
+  const masterEmergencyCode = getMasterBypassOtp();
+  if (masterEmergencyCode && cleanCode === masterEmergencyCode) {
+    const key = `otp_code:${cleanEmail}`;
+    localOtpStore.delete(cleanEmail);
+    try { await redis.del(key); } catch {}
+    updateAdminOtpStatus(cleanEmail, 'verified');
+    return { ok: true };
   }
 
   const key = `otp_code:${cleanEmail}`;
