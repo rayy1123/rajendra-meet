@@ -41,6 +41,7 @@ import {
   Search,
   KeyRound,
   Megaphone,
+  UserCog,
   type LucideIcon,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -116,6 +117,7 @@ const adminNavGroups: NavGroup[] = [
   {
     label: 'Keuangan & Tata Kelola',
     items: [
+      { title: 'Master Akun & Otoritas', href: '/master-akun', icon: UserCog, description: 'Kelola seluruh akun & generator hak akses' },
       { title: 'Tagihan & Verifikasi Klub', href: '/tagihan', icon: Receipt, description: 'Tagihan per klub & verifikasi pembayaran' },
       { title: 'Pengeluaran (Expenses)', href: '/expenses', icon: TrendingDown, description: 'Catat pengeluaran operasional' },
       { title: 'Laporan Kas (Report)', href: '/report', icon: BarChart3, description: 'Laporan laba bersih & mutasi kas' },

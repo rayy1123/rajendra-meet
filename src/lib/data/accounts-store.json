@@ -1,0 +1,123 @@
+[
+  {
+    "id": "usr-admin-01",
+    "username": "admin_utama",
+    "email": "admin@rajendra.id",
+    "full_name": "Dr. H. Hendra Wijaya, M.Pd",
+    "role": "super_admin",
+    "classified_title": "Meet Director / Super Admin",
+    "authorities": [
+      "results_input",
+      "scoreboard_live",
+      "buku_acara",
+      "juknis_manage",
+      "heats_seeding",
+      "nomor_lomba",
+      "checklist_teknis",
+      "verifikasi_bayar",
+      "tagihan_expenses",
+      "sertifikat_manage",
+      "master_akun",
+      "registrasi_atlet"
+    ],
+    "phone": "081283626284",
+    "school_name": "Pengprov Akuatik Indonesia",
+    "status": "active",
+    "created_at": "2026-01-10T08:00:00.000Z"
+  },
+  {
+    "id": "usr-op-01",
+    "username": "wasit_waktu_01",
+    "email": "timer1@rajendra.id",
+    "full_name": "Budi Santoso, S.Pd (Timekeeper 1)",
+    "role": "operator",
+    "classified_title": "Pencatat Waktu / Operator Lomba",
+    "authorities": [
+      "results_input",
+      "scoreboard_live",
+      "heats_seeding"
+    ],
+    "phone": "081392817261",
+    "school_name": "Korps Wasit Akuatik",
+    "status": "active",
+    "created_at": "2026-01-15T09:30:00.000Z"
+  },
+  {
+    "id": "usr-tech-01",
+    "username": "sekretariat_lomba",
+    "email": "technical@rajendra.id",
+    "full_name": "Bambang S., S.Pd (Technical Delegate)",
+    "role": "admin_technical",
+    "classified_title": "Pembuat Juknis & Buku Acara",
+    "authorities": [
+      "buku_acara",
+      "juknis_manage",
+      "checklist_teknis",
+      "nomor_lomba",
+      "heats_seeding"
+    ],
+    "phone": "081239847120",
+    "school_name": "Technical Committee",
+    "status": "active",
+    "created_at": "2026-01-18T10:00:00.000Z"
+  },
+  {
+    "id": "usr-fin-01",
+    "username": "bendahara_kejuaraan",
+    "email": "finance@rajendra.id",
+    "full_name": "Siti Rahmawati, S.E (Bendahara)",
+    "role": "admin_keuangan",
+    "classified_title": "Admin Keuangan & Tagihan",
+    "authorities": [
+      "verifikasi_bayar",
+      "tagihan_expenses"
+    ],
+    "phone": "081827364512",
+    "school_name": "Panitia Pelaksana",
+    "status": "active",
+    "created_at": "2026-01-20T11:15:00.000Z"
+  },
+  {
+    "id": "usr-coach-01",
+    "username": "pelatih_millennium",
+    "email": "coach.millennium@gmail.com",
+    "full_name": "Coach Albert Sutanto",
+    "role": "viewer",
+    "classified_title": "Pelatih / Official Kontingen",
+    "authorities": [
+      "registrasi_atlet"
+    ],
+    "phone": "081726354890",
+    "school_name": "Millennium Aquatic Club Jakarta",
+    "status": "active",
+    "created_at": "2026-02-01T14:20:00.000Z"
+  },
+  {
+    "id": "usr-coach-02",
+    "username": "pelatih_jaq",
+    "email": "jaq.swimming@gmail.com",
+    "full_name": "Coach Wisnu Wardhana",
+    "role": "viewer",
+    "classified_title": "Pelatih / Official Kontingen",
+    "authorities": [
+      "registrasi_atlet"
+    ],
+    "phone": "081928374650",
+    "school_name": "Jakarta Aquatic Club (JAQ)",
+    "status": "active",
+    "created_at": "2026-02-05T15:40:00.000Z"
+  },
+  {
+    "id": "usr-athlete-01",
+    "username": "farrel_manik",
+    "email": "farrel.swimmer@gmail.com",
+    "full_name": "Farrel Armandio Tangkas",
+    "role": "viewer",
+    "classified_title": "Atlet / Peserta Mandiri",
+    "authorities": [],
+    "phone": "081298374615",
+    "school_name": "Pengprov Akuatik Papua",
+    "status": "active",
+    "created_at": "2026-02-10T16:00:00.000Z"
+  }
+]
