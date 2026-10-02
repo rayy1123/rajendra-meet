@@ -10,7 +10,7 @@
     "location": "Kolam Perlombaan Utama (50M)",
     "notes": "Suhu kolam 26.5°C stabil, tes sensor berhasil.",
     "verifiedBy": "Drs. H. Bambang Subagyo (TD)",
-    "verifiedAt": "2026-10-02T14:43:33.971Z",
+    "verifiedAt": "2026-10-02T15:47:50.167Z",
     "orderNo": 1
   },
   {
@@ -796,5 +796,33 @@
     "verifiedAt": "2026-10-02T14:43:33.976Z",
     "id": "chk-mur2pgig-yr40",
     "orderNo": 57
+  },
+  {
+    "category": "fasilitas_kolam",
+    "title": "Uji Coba Lampu Cadangan Genset Kolam",
+    "description": "Simulasi pemadaman listrik PLN dan peralihan otomatis ke genset 150 kVA.",
+    "scheduledTime": "05:30 WIB",
+    "location": "Ruang Genset & Pool Deck",
+    "pic": "Teknisi Listrik Gelora",
+    "status": "completed",
+    "notes": "Waktu peralihan 4 detik, lampu arena tetap menyala.",
+    "verifiedBy": "Technical Delegate",
+    "verifiedAt": "2026-10-02T15:44:43.138Z",
+    "id": "chk-mur4w3nn-8iwd",
+    "orderNo": 58
+  },
+  {
+    "category": "fasilitas_kolam",
+    "title": "Uji Coba Lampu Cadangan Genset Kolam",
+    "description": "Simulasi pemadaman listrik PLN dan peralihan otomatis ke genset 150 kVA.",
+    "scheduledTime": "05:30 WIB",
+    "location": "Ruang Genset & Pool Deck",
+    "pic": "Teknisi Listrik Gelora",
+    "status": "completed",
+    "notes": "Waktu peralihan 4 detik, lampu arena tetap menyala.",
+    "verifiedBy": "Technical Delegate",
+    "verifiedAt": "2026-10-02T15:47:50.172Z",
+    "id": "chk-mur503z1-nnw0",
+    "orderNo": 59
   }
 ]

@@ -26,6 +26,7 @@ export interface TechnicalChecklistItem {
   orderNo: number;
 }
 
+// ponytail: local store for TD checklist items; upgrade to signed audit log table in DB upon federation
 const STORE_PATH = path.join(process.cwd(), 'src', 'lib', 'data', 'technical-checklist-store.json');
 
 export function readLocalChecklist(): TechnicalChecklistItem[] {

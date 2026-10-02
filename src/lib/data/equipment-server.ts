@@ -14,6 +14,7 @@ export interface EquipmentItem {
   created_at?: string;
 }
 
+// ponytail: atomic JSON file persistence for arena telemetries; upgrade to Postgres pub/sub if telemetry ingestion rate > 50 msg/sec
 const STORE_PATH = path.join(process.cwd(), 'src', 'lib', 'data', 'equipment-store.json');
 
 export const DEFAULT_EQUIPMENT: EquipmentItem[] = [
