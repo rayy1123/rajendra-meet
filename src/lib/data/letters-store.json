@@ -1,0 +1,193 @@
+[
+  {
+    "id": "let-01-harahap-series4",
+    "templateType": "pemberitahuan",
+    "title": "Surat Pemberitahuan Home Tournament Series 4",
+    "kop": {
+      "logoUrl": "/brand/logo.png",
+      "bannerBadgeText": "HOME TOURNAMENT SERIES 4",
+      "organizationName": "HARAHAP SWIMMING SCHOOL",
+      "subOrganizationName": "HARAHAP SWIMMING SCHOOL",
+      "locationLine": "KOLAM RENANG GRJS BULUNGAN JAKARTA SELATAN",
+      "dateLine": "SABTU, 17 OKTOBER 2026",
+      "accentColor": "#0052cc"
+    },
+    "letterNumber": "0926/HT-S4/HSS/IX/2026",
+    "attachment": "-",
+    "subject": "Pemberitahuan",
+    "letterDate": "26 September 2026",
+    "recipientTitle": "Kepada\nYth. Bapak / Ibu\nPeserta Home Tournament\nSeries IV",
+    "salutation": "Salam Olahraga,",
+    "openingParagraph": "Diberitahukan bahwa untuk Home Tournament Series 4 Harahap Swimming School ada beberapa perubahan, antara lain :",
+    "numberedPoints": [
+      "Peserta diputuskan hanya untuk Internal Siswa Harahap Swimming School",
+      "Batas Pendaftaran & Pembayaran diperpanjang sampai dengan Kamis, 08 Oktober 2026",
+      "Jika sampai batas waktu pendaftaran jumlah peserta dibawah 150 Peserta maka kegiatan akan diundur atau dibatalkan"
+    ],
+    "closingParagraph": "Demikian hal ini disampaikan, atas perhatiannya diucapkan terima kasih.",
+    "watermarkText": "HARAHAP SWIMMING SCHOOL",
+    "showWatermark": true,
+    "leftSignature": {
+      "roleTitle": "Owner Harahap Swimming School,",
+      "signerName": "Shafira Ramadhian, S.Pd.",
+      "showSignature": true,
+      "showStamp": true,
+      "stampUrl": "/brand/rajendra-organizer-logo.png"
+    },
+    "rightSignature": {
+      "roleTitle": "Ketua Pelaksana,",
+      "signerName": "Rega Partuasan Damanik, S.Pd.",
+      "showSignature": true,
+      "showStamp": true,
+      "stampUrl": "/brand/rajendra-organizer-logo.png"
+    },
+    "footer": {
+      "admin1Label": "ADMIN 1",
+      "admin1Number": "088 77 151189",
+      "admin2Label": "ADMIN 2",
+      "admin2Number": "088 999 151189",
+      "showPartners": true,
+      "partnerLogos": [
+        {
+          "id": "p-1",
+          "name": "Media Generasi",
+          "logoUrl": "/brand/logo.png"
+        },
+        {
+          "id": "p-2",
+          "name": "Rafka Printing",
+          "logoUrl": "/brand/rajendra-organizer-logo.png"
+        },
+        {
+          "id": "p-3",
+          "name": "Rajendra Project",
+          "logoUrl": "/brand/rajendra-organizer-logo.png"
+        },
+        {
+          "id": "p-4",
+          "name": "Seputar Renang",
+          "logoUrl": "/brand/logo.png"
+        }
+      ]
+    },
+    "createdAt": "2026-09-26T08:00:00.000Z"
+  },
+  {
+    "id": "let-02-rajendra-undangan",
+    "templateType": "undangan",
+    "title": "Surat Undangan Resmi Kejuaraan Rajendra Swim System",
+    "kop": {
+      "logoUrl": "/brand/logo.png",
+      "bannerBadgeText": "KEJUARAAN RENANG ANTAR PERKUMPULAN 2026",
+      "organizationName": "RAJENDRA SWIM SYSTEM",
+      "subOrganizationName": "OFFICIAL AQUATIC CHAMPIONSHIP",
+      "locationLine": "STADION AKUATIK GELORA BUNG KARNO SENAYAN JAKARTA",
+      "dateLine": "SABTU - MINGGU, 24-25 OKTOBER 2026",
+      "accentColor": "#0284c7"
+    },
+    "letterNumber": "1024/RSS-UND/X/2026",
+    "attachment": "1 (Satu) Berkas Juknis",
+    "subject": "Undangan Kejuaraan Renang Resmi",
+    "letterDate": "02 Oktober 2026",
+    "recipientTitle": "Kepada\nYth. Ketua / Pelatih Kepala Perkumpulan Renang (Klub)\ndi Tempat",
+    "salutation": "Salam Olahraga Akuatik,",
+    "openingParagraph": "Dalam rangka pembinaan prestasi atlet renang usia dini dan junior berstandar resmi, Pengurus Rajendra Swim System mengundang klub renang binaan Anda untuk berpartisipasi dalam:",
+    "numberedPoints": [
+      "Pelaksanaan lomba: 24 - 25 Oktober 2026 di Stadion Akuatik GBK Senayan (50M / 8 Lintasan)",
+      "Sistem waktu: Swiss Timing Quantum Touchpad Resmi dengan live arena timing broadcast",
+      "Pendaftaran atlet massal dibuka melalui sistem web SCMS hingga tanggal 18 Oktober 2026",
+      "Technical Meeting akan diselenggarakan secara hybrid pada hari Jumat, 23 Oktober 2026 pukul 14.00 WIB"
+    ],
+    "closingParagraph": "Besar harapan kami atas partisipasi perkumpulan renang yang Bapak/Ibu pimpin. Atas perhatian dan kerjasamanya, kami sampaikan terima kasih.",
+    "watermarkText": "RAJENDRA SWIM SYSTEM",
+    "showWatermark": true,
+    "leftSignature": {
+      "roleTitle": "Technical Delegate,",
+      "signerName": "Bambang S., S.Pd",
+      "showSignature": true,
+      "showStamp": true
+    },
+    "rightSignature": {
+      "roleTitle": "Ketua Panitia Pelaksana,",
+      "signerName": "Dr. H. Hendra Wijaya, M.Pd",
+      "showSignature": true,
+      "showStamp": true
+    },
+    "footer": {
+      "admin1Label": "HOTLINE 1",
+      "admin1Number": "0812 8362 6284",
+      "admin2Label": "HOTLINE 2",
+      "admin2Number": "0813 9281 7261",
+      "showPartners": true,
+      "partnerLogos": [
+        {
+          "id": "p-1",
+          "name": "Rajendra Swim System",
+          "logoUrl": "/brand/logo.png"
+        },
+        {
+          "id": "p-2",
+          "name": "Rajendra Organizer",
+          "logoUrl": "/brand/rajendra-organizer-logo.png"
+        }
+      ]
+    },
+    "createdAt": "2026-10-02T08:00:00.000Z"
+  },
+  {
+    "id": "let-03-dispensasi-sekolah",
+    "templateType": "dispensasi",
+    "title": "Surat Permohonan Dispensasi Izin Siswa Atlet",
+    "kop": {
+      "logoUrl": "/brand/logo.png",
+      "bannerBadgeText": "PERMOHONAN DISPENSASI SISWA ATLET",
+      "organizationName": "PANITIA PELAKSANA RAJENDRA MEET",
+      "subOrganizationName": "KOMISI PERLOMBAAN AKUATIK",
+      "locationLine": "STADION AKUATIK GELORA BUNG KARNO SENAYAN",
+      "dateLine": "TAHUN AJARAN 2026 / 2027",
+      "accentColor": "#0369a1"
+    },
+    "letterNumber": "1028/DISP/RSS/X/2026",
+    "attachment": "Daftar Nomor Acara Lomba",
+    "subject": "Permohonan Dispensasi Izin Tidak Mengikuti KBM",
+    "letterDate": "05 Oktober 2026",
+    "recipientTitle": "Kepada\nYth. Kepala Sekolah SD / SMP / SMA\ndi Tempat",
+    "salutation": "Dengan hormat,",
+    "openingParagraph": "Sehubungan dengan keikutsertaan siswa/siswi sekolah Bapak/Ibu sebagai atlet resmi dalam Kejuaraan Renang Tingkat Nasional Rajendra Swim Championship 2026, kami memohon izin dispensasi bagi siswa terkait:",
+    "numberedPoints": [
+      "Waktu pelaksanaan: Jumat s/d Minggu, 23 - 25 Oktober 2026",
+      "Kegiatan: Pemanasan Resmi, Babak Penyisihan & Final Kejuaraan Renang",
+      "Kami menjamin atlet yang bersangkutan tetap akan memenuhi kewajiban tugas akademik susulan setelah kompetisi berakhir"
+    ],
+    "closingParagraph": "Demikian surat permohonan dispensasi ini kami sampaikan. Atas dukungan dan kerjasama pihak sekolah demi kemajuan prestasi olahraga siswa, kami ucapkan terima kasih.",
+    "watermarkText": "DISPENSASI RESMI ATLET",
+    "showWatermark": true,
+    "leftSignature": {
+      "roleTitle": "Pelatih Kepala Kontingen,",
+      "signerName": "Coach Albert Sutanto",
+      "showSignature": true,
+      "showStamp": true
+    },
+    "rightSignature": {
+      "roleTitle": "Ketua Pelaksana Kejuaraan,",
+      "signerName": "Dr. H. Hendra Wijaya, M.Pd",
+      "showSignature": true,
+      "showStamp": true
+    },
+    "footer": {
+      "admin1Label": "SEKRETARIAT",
+      "admin1Number": "0812 8362 6284",
+      "admin2Label": "LAYANAN ATLET",
+      "admin2Number": "0818 2736 4512",
+      "showPartners": true,
+      "partnerLogos": [
+        {
+          "id": "p-1",
+          "name": "Rajendra Swim System",
+          "logoUrl": "/brand/logo.png"
+        }
+      ]
+    },
+    "createdAt": "2026-10-05T08:00:00.000Z"
+  }
+]
