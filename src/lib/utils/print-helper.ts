@@ -77,7 +77,7 @@ export function printElement(
         <style>
           @page {
             size: ${isLandscape ? 'A4 landscape' : 'A4 portrait'};
-            margin: ${pageMargin};
+            margin: 0;
           }
           *, *::before, *::after {
             -webkit-print-color-adjust: exact !important;
@@ -89,10 +89,9 @@ export function printElement(
             color: #0f172a !important;
             margin: 0 !important;
             padding: 0 !important;
-            width: 100% !important;
-            height: auto !important;
-            min-height: 0 !important;
-            overflow: visible !important;
+            width: ${isLandscape ? '297mm' : '100%'} !important;
+            height: ${isLandscape ? '210mm' : 'auto'} !important;
+            overflow: ${isLandscape ? 'hidden' : 'visible'} !important;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
           }
           .no-print,
@@ -115,8 +114,8 @@ export function printElement(
             max-width: 297mm !important;
             max-height: 210mm !important;
             min-height: 210mm !important;
-            margin: 0 auto !important;
-            padding: 8mm 14mm 6mm 14mm !important;
+            margin: 0 !important;
+            padding: 10mm 16mm 8mm 16mm !important;
             overflow: hidden !important;
             page-break-after: always !important;
             break-after: page !important;
