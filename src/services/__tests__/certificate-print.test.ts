@@ -93,4 +93,29 @@ describe('Certificate Print & Rendering Engine', () => {
     expect(mockRecipient.isNewRecord).toBe(true);
     expect(mockRecipient.recordType).toBe('games');
   });
+
+  it('memvalidasi konfigurasi template Kejurda PORKOT Abrisam dengan 3 penandatangan', () => {
+    const abrisamSettings: CertificateSettings = {
+      ...mockSettings,
+      templateLayout: 'kejurda_abrisam',
+      skNumber: '0545/Koni-JakartaPusat/PORKOT/26/VII/2026',
+      firstSignerName: 'Rusdiyanto',
+      firstSignerRole: 'Mengetahui',
+      firstSignerTitle: 'Kepala Suku Dinas Pemuda dan Olahraga',
+      secondSignerName: 'Zaenar Arifin, SE',
+      secondSignerRole: 'Ketua KONI',
+      thirdSignerName: 'Yonas Bain, M.Pd.',
+      thirdSignerRole: 'Ketua Akuatik',
+      showCornerRibbons: true,
+      showRibbonSeal: true,
+      showThreeSigners: true,
+    };
+
+    expect(abrisamSettings.templateLayout).toBe('kejurda_abrisam');
+    expect(abrisamSettings.firstSignerName).toBe('Rusdiyanto');
+    expect(abrisamSettings.secondSignerName).toBe('Zaenar Arifin, SE');
+    expect(abrisamSettings.thirdSignerName).toBe('Yonas Bain, M.Pd.');
+    expect(abrisamSettings.showCornerRibbons).toBe(true);
+    expect(abrisamSettings.showRibbonSeal).toBe(true);
+  });
 });
