@@ -5,15 +5,7 @@ import { QrCodeSvg } from './qr-code-svg';
 import { Award, Trophy, Star, Sparkles, ShieldCheck } from 'lucide-react';
 import type { CertificateRecipient, CertificateSettings } from './certificate-manager';
 import type { SponsorItem } from '@/lib/data/sponsors';
-import { SponsorLogosStrip } from './sponsor-logos-strip';
 import { formatCompEventLabel } from '@/lib/utils';
-
-export const RECORD_BADGES: Record<string, { label: string; cls: string }> = {
-  pribadi: { label: 'REKOR PRIBADI (PB)', cls: 'bg-cyan-700 text-white border-cyan-400 shadow-2xs' },
-  games: { label: 'REKOR GAMES (KEJUARAAN)', cls: 'bg-rose-700 text-white border-rose-400 shadow-2xs' },
-  daerah: { label: 'REKOR DAERAH (REGIONAL)', cls: 'bg-purple-700 text-white border-purple-400 shadow-2xs' },
-  nasional: { label: 'REKOR NASIONAL (NATIONAL)', cls: 'bg-amber-600 text-white border-amber-300 shadow-2xs' },
-};
 
 export function CertificateCard({
   recipient,
@@ -32,12 +24,12 @@ export function CertificateCard({
   const isBronze = recipient.rank === 3;
 
   const medalLabel = isGold
-    ? 'JUARA 1 (MEDALI EMAS)'
+    ? 'JUARA 1'
     : isSilver
-    ? 'JUARA 2 (MEDALI PERAK)'
+    ? 'JUARA 2'
     : isBronze
-    ? 'JUARA 3 (MEDALI PERUNGGU)'
-    : `PERINGKAT KE-${recipient.rank}`;
+    ? 'JUARA 3'
+    : `PERINGKAT ${recipient.rank}`;
 
   const certNumber = settings.skNumber?.includes('/')
     ? settings.skNumber
@@ -59,11 +51,9 @@ export function CertificateCard({
     false
   );
 
-  const isAbrisamStyle = settings.templateLayout !== 'royal_gold';
-
   return (
     <div
-      className={`certificate-sheet relative mx-auto bg-white text-slate-900 rounded-2xl print:rounded-none print:shadow-none print:m-0 print:border-0 ${
+      className={`certificate-sheet relative mx-auto bg-white text-slate-900 ${
         isPrintOnly ? 'print:block' : 'print:break-after-page print:break-inside-avoid'
       }`}
       style={{
@@ -73,7 +63,7 @@ export function CertificateCard({
         height: isPrintOnly ? '210mm' : 'auto',
         minHeight: isPrintOnly ? '210mm' : '650px',
         maxHeight: isPrintOnly ? '210mm' : 'none',
-        padding: '24px 38px 20px 38px',
+        padding: '24px 36px 20px 36px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
@@ -100,53 +90,78 @@ export function CertificateCard({
         </div>
       )}
 
-      {/* ── 1. DYNAMIC NAVY & GOLD CORNER SWASHES (STYLE EXACT ABRISAM PDF) ── */}
+      {/* ── 1. CORNER RIBBONS (NAVY & GOLD WAVES MATCHING EXACT ABRISAM PDF) ── */}
       {settings.showCornerRibbons !== false && (
         <>
-          {/* Top-Right Navy & Gold Ribbon Sweep */}
-          <div className="absolute top-0 right-0 w-56 sm:w-72 h-36 sm:h-44 pointer-events-none z-10">
-            <svg viewBox="0 0 280 170" fill="none" className="w-full h-full">
-              {/* Outer Deep Navy */}
-              <path d="M 280 0 L 100 0 C 140 25 190 70 280 150 Z" fill="#0f2b5c" />
-              {/* Mid Gold Foil */}
-              <path d="M 280 0 L 140 0 C 175 25 215 65 280 125 Z" fill="#c59b27" opacity="0.95" />
-              {/* Inner Royal Navy */}
-              <path d="M 280 0 L 180 0 C 205 20 235 50 280 95 Z" fill="#061426" />
+          {/* Top-Right Smooth Curved Ribbon */}
+          <div className="absolute top-0 right-0 w-64 sm:w-80 h-40 sm:h-48 pointer-events-none z-0">
+            <svg viewBox="0 0 320 190" fill="none" className="w-full h-full">
+              {/* Deep Navy Sweep */}
+              <path d="M 320 0 L 130 0 C 175 35 230 85 320 160 Z" fill="#0f2b5c" />
+              {/* Gold Ribbon Accent */}
+              <path d="M 320 0 L 175 0 C 215 35 260 80 320 135 Z" fill="#c59b27" />
+              {/* Dark Accent Edge */}
+              <path d="M 320 0 L 220 0 C 250 25 285 55 320 100 Z" fill="#061426" />
             </svg>
           </div>
 
-          {/* Bottom-Left Navy & Gold Ribbon Sweep */}
-          <div className="absolute bottom-0 left-0 w-56 sm:w-72 h-36 sm:h-44 pointer-events-none z-10">
-            <svg viewBox="0 0 280 170" fill="none" className="w-full h-full">
-              {/* Outer Deep Navy */}
-              <path d="M 0 170 L 180 170 C 140 145 90 100 0 20 Z" fill="#0f2b5c" />
-              {/* Mid Gold Foil */}
-              <path d="M 0 170 L 140 170 C 105 145 65 105 0 45 Z" fill="#c59b27" opacity="0.95" />
-              {/* Inner Royal Navy */}
-              <path d="M 0 170 L 100 170 C 75 150 45 120 0 75 Z" fill="#061426" />
+          {/* Bottom-Left Smooth Curved Ribbon */}
+          <div className="absolute bottom-0 left-0 w-64 sm:w-80 h-40 sm:h-48 pointer-events-none z-0">
+            <svg viewBox="0 0 320 190" fill="none" className="w-full h-full">
+              {/* Deep Navy Sweep */}
+              <path d="M 0 190 L 190 190 C 145 155 90 105 0 30 Z" fill="#0f2b5c" />
+              {/* Gold Ribbon Accent */}
+              <path d="M 0 190 L 145 190 C 105 155 60 110 0 55 Z" fill="#c59b27" />
+              {/* Dark Accent Edge */}
+              <path d="M 0 190 L 100 190 C 70 165 35 135 0 90 Z" fill="#061426" />
             </svg>
           </div>
 
-          {/* Red Flag Strip Accent on Right Border (Exact Abrisam PDF) */}
+          {/* Red Flag Accent Strip on Right Edge */}
           <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-20 bg-[#c53030] pointer-events-none z-10" />
         </>
       )}
 
-      {/* ── 2. OUTER ELEGANT DIPLOMA FRAMING BORDER ── */}
-      <div className="absolute inset-2 sm:inset-3 border border-slate-300 rounded-xl pointer-events-none z-10" />
+      {/* ── 2. INNER DIPLOMA FRAMING BORDER (CLEAN RECTANGLE INSIDE MARGINS) ── */}
+      <div className="absolute inset-4 sm:inset-5 border-[1.5px] border-slate-300 rounded-lg pointer-events-none z-10" />
 
-      {/* ── 3. HEADER SECTION: 3 LOGOS + TOP CENTER GOLD MEDALLION RIBBON ── */}
+      {/* ── 3. TOP 3D GOLDEN MEDALLION RIBBON BADGE (CENTER HORIZONTAL, EXACT PDF POSITION) ── */}
+      {settings.showRibbonSeal !== false && (
+        <div className="absolute left-1/2 -translate-x-1/2 top-3 sm:top-4 pointer-events-none z-20">
+          <svg viewBox="0 0 90 110" className="h-18 sm:h-22 w-auto drop-shadow-md">
+            {/* Hanging Gold Ribbons */}
+            <path d="M 32 48 L 22 100 L 36 88 L 45 100 L 40 48 Z" fill="#b38728" />
+            <path d="M 58 48 L 68 100 L 54 88 L 45 100 L 50 48 Z" fill="#d4af37" />
+            {/* Medallion Outer Scallop */}
+            <circle cx="45" cy="42" r="32" fill="url(#goldMedallionGrad)" stroke="#8a671c" strokeWidth="1.5" />
+            <circle cx="45" cy="42" r="27" fill="none" stroke="#ffffff" strokeWidth="1.2" strokeDasharray="3 2" />
+            <circle cx="45" cy="42" r="22" fill="#c59b27" opacity="0.3" />
+            {/* 5-Point Star */}
+            <polygon points="45,26 50,35 60,36 52,43 55,53 45,47 35,53 38,43 30,36 40,35" fill="#8a671c" opacity="0.9" />
+            <defs>
+              <radialGradient id="goldMedallionGrad" cx="35%" cy="35%" r="65%">
+                <stop offset="0%" stopColor="#fff8e1" />
+                <stop offset="35%" stopColor="#f7d983" />
+                <stop offset="70%" stopColor="#d4af37" />
+                <stop offset="100%" stopColor="#99731e" />
+              </radialGradient>
+            </defs>
+          </svg>
+        </div>
+      )}
+
+      {/* ── 4. HEADER SECTION: 3 LOGOS AT TOP-LEFT ── */}
       <div className="relative z-20">
         <div className="flex items-start justify-between px-2 pt-1">
-          {/* 3 Logos in a Row (Left) */}
-          <div className="flex items-center gap-3.5 sm:gap-5">
+          {/* 3 Logos in a Row */}
+          <div className="flex items-center gap-3 sm:gap-4">
             {/* Logo 1: Organisasi / RSS */}
             <div className="flex flex-col items-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={settings.leftLogoUrl || '/brand/logo.png'}
                 alt={settings.leftLogoTitle || 'Logo 1'}
-                className="h-11 sm:h-13 w-auto object-contain shrink-0 drop-shadow-2xs"
+                className="h-11 sm:h-12 w-auto object-contain shrink-0 drop-shadow-2xs"
               />
               <span className="text-[7.5px] font-black tracking-tight text-[#0f2b5c] uppercase mt-0.5">
                 {settings.leftLogoTitle || 'RAJENDRA'}
@@ -160,7 +175,7 @@ export function CertificateCard({
                 <img
                   src={settings.mainSponsorLogoUrl}
                   alt={settings.mainSponsorTitle || 'Logo 2'}
-                  className="h-11 sm:h-13 w-auto object-contain shrink-0 drop-shadow-2xs"
+                  className="h-11 sm:h-12 w-auto object-contain shrink-0 drop-shadow-2xs"
                 />
               ) : (
                 <div className="h-11 w-11 rounded-full border-2 border-rose-600 bg-rose-50 flex items-center justify-center text-rose-700 font-black text-[9px] shadow-2xs">
@@ -172,13 +187,13 @@ export function CertificateCard({
               </span>
             </div>
 
-            {/* Logo 3: Akuatik Indonesia / Organizer */}
+            {/* Logo 3: Akuatik Indonesia */}
             <div className="flex flex-col items-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={settings.rightLogoUrl || '/brand/rajendra-organizer-logo.png'}
                 alt={settings.rightLogoTitle || 'Logo 3'}
-                className="h-11 sm:h-13 w-auto object-contain shrink-0 drop-shadow-2xs"
+                className="h-11 sm:h-12 w-auto object-contain shrink-0 drop-shadow-2xs"
               />
               <div className="text-center leading-none mt-0.5">
                 <span className="text-[7px] font-black text-[#0f2b5c] block uppercase">
@@ -191,41 +206,17 @@ export function CertificateCard({
             </div>
           </div>
 
-          {/* Top Center-Right: 3D Golden Medallion Ribbon (Exact Abrisam Style) */}
-          {settings.showRibbonSeal !== false && (
-            <div className="pr-12 sm:pr-16">
-              <div className="relative flex flex-col items-center">
-                <svg viewBox="0 0 80 95" className="h-16 sm:h-20 w-auto drop-shadow-md">
-                  {/* Hanging Gold Ribbons */}
-                  <path d="M 28 42 L 20 88 L 32 78 L 40 88 L 36 42 Z" fill="#b38728" />
-                  <path d="M 52 42 L 60 88 L 48 78 L 40 88 L 44 42 Z" fill="#d4af37" />
-                  {/* Outer Scalloped / Starburst Gold Seal */}
-                  <circle cx="40" cy="38" r="28" fill="url(#gold3DGrad)" stroke="#8a671c" strokeWidth="1.2" />
-                  <circle cx="40" cy="38" r="23" fill="none" stroke="#ffffff" strokeWidth="1" strokeDasharray="3 2" />
-                  <circle cx="40" cy="38" r="19" fill="#c59b27" opacity="0.35" />
-                  {/* Star Emblem */}
-                  <polygon points="40,24 44,32 53,33 46,39 48,48 40,43 32,48 34,39 27,33 36,32" fill="#8a671c" opacity="0.85" />
-                  <defs>
-                    <radialGradient id="gold3DGrad" cx="35%" cy="35%" r="65%">
-                      <stop offset="0%" stopColor="#fff6d6" />
-                      <stop offset="40%" stopColor="#f5d77f" />
-                      <stop offset="70%" stopColor="#d4af37" />
-                      <stop offset="100%" stopColor="#99731e" />
-                    </radialGradient>
-                  </defs>
-                </svg>
-              </div>
-            </div>
-          )}
+          {/* Spacer on right so header balances */}
+          <div className="w-16" />
         </div>
 
-        {/* ── 4. TITLE: PIAGAM PENGHARGAAN & NOMOR RESMI ── */}
-        <div className="pt-2 text-center space-y-1">
+        {/* ── 5. TITLE: PIAGAM PENGHARGAAN & NOMOR RESMI ── */}
+        <div className="pt-2 sm:pt-3 text-center space-y-1">
           <h1
-            className="text-3xl sm:text-[38px] font-black uppercase tracking-[0.16em] leading-none"
+            className="text-3xl sm:text-[40px] font-black uppercase tracking-[0.16em] leading-none"
             style={{
               color: '#8a671c',
-              textShadow: '0 1px 1px rgba(0,0,0,0.05)',
+              textShadow: '0 1px 1px rgba(0,0,0,0.06)',
               fontFamily: "'Cinzel', 'Times New Roman', Times, serif",
             }}
           >
@@ -236,14 +227,14 @@ export function CertificateCard({
             {certNumber}
           </p>
 
-          <p className="text-xs sm:text-[13px] font-bold uppercase tracking-[0.22em] text-slate-800 pt-1">
+          <p className="text-xs sm:text-[13.5px] font-bold uppercase tracking-[0.22em] text-slate-800 pt-1">
             {settings.presentedText || 'DIBERIKAN KEPADA'}
           </p>
         </div>
       </div>
 
-      {/* ── 5. ATHLETE RECIPIENT NAME (GRAND UNDERLINED HERO TYPOGRAPHY) ── */}
-      <div className="relative z-20 text-center my-1">
+      {/* ── 6. ATHLETE RECIPIENT NAME (HERO TYPOGRAPHY WITH UNDERLINE) ── */}
+      <div className="relative z-20 text-center my-1.5">
         <div className="inline-block relative">
           <h2
             className="text-3xl sm:text-[38px] font-black tracking-wide text-slate-900 uppercase leading-tight px-6"
@@ -254,7 +245,7 @@ export function CertificateCard({
           >
             {recipient.swimmerName}
           </h2>
-          {/* Subtle Underline Line (Exact Abrisam Style) */}
+          {/* Subtle Underline Line */}
           <div className="h-[2px] w-full bg-slate-400 mt-1" />
         </div>
 
@@ -263,17 +254,17 @@ export function CertificateCard({
         </p>
       </div>
 
-      {/* ── 6. ACHIEVEMENT / JUARA & EVENT DETAILS ── */}
-      <div className="relative z-20 text-center space-y-1.5 max-w-3xl mx-auto px-4">
+      {/* ── 7. ACHIEVEMENT / JUARA & EVENT DETAILS ── */}
+      <div className="relative z-20 text-center space-y-1 max-w-3xl mx-auto px-4">
         {/* Main Achievement Header (Royal Blue Bold) */}
         <h3
-          className="text-lg sm:text-[21px] font-black uppercase tracking-wider leading-snug"
+          className="text-lg sm:text-[22px] font-black uppercase tracking-wider leading-snug"
           style={{ color: '#034694' }}
         >
           {medalLabel} {formattedEventTitle}
         </h3>
 
-        {/* Event Context & Date Range Description */}
+        {/* Event Context & Date Range */}
         <div className="text-xs sm:text-[13px] text-slate-700 leading-relaxed font-normal">
           <p>
             Pada Kejuaraan <b>{recipient.eventName}</b> yang diselenggarakan pada
@@ -283,14 +274,14 @@ export function CertificateCard({
           </p>
         </div>
 
-        {/* Time Pill Badge */}
+        {/* Optional Time Pill */}
         {recipient.formattedTime && recipient.formattedTime !== 'NT' && (
           <div className="pt-0.5">
-            <span className="inline-flex items-center gap-1.5 px-3.5 py-0.5 rounded-full bg-amber-50 border border-amber-300 text-xs font-bold text-slate-900 shadow-2xs">
-              <span className="text-slate-500 font-semibold text-[10.5px]">Waktu Resmi:</span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-0.2 rounded-full bg-amber-50 border border-amber-300 text-xs font-bold text-slate-900 shadow-2xs">
+              <span className="text-slate-500 font-semibold text-[10px]">Waktu Resmi:</span>
               <b className="font-mono font-black">{recipient.formattedTime} detik</b>
               {recipient.isNewRecord && (
-                <span className="ml-1 text-[9px] font-black text-rose-700 bg-rose-100 px-1.5 py-0.2 rounded uppercase">
+                <span className="ml-1 text-[8.5px] font-black text-rose-700 bg-rose-100 px-1 py-0.2 rounded uppercase">
                   ★ Rekor Baru
                 </span>
               )}
@@ -299,21 +290,21 @@ export function CertificateCard({
         )}
       </div>
 
-      {/* ── 7. DATE & 3 OFFICIAL SIGNATURES WITH AUTHENTIC SEALS (EXACT ABRISAM STYLE) ── */}
+      {/* ── 8. DATE & 3 OFFICIAL SIGNATURES WITH AUTHENTIC STAMPS (EXACT PDF ALIGNMENT) ── */}
       <div className="relative z-20 pt-2 border-t border-slate-200">
-        {/* Date line (Top Center of Signatures) */}
+        {/* Date line */}
         <div className="text-center mb-1">
           <p className="text-xs sm:text-[13px] font-semibold text-slate-800">
             {settings.issuedCity || 'Jakarta'}, {settings.issuedDate || '26 Juli 2026'}
           </p>
         </div>
 
-        {/* 3 Signatures Columns in a Row */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-4 items-end text-center text-xs">
+        {/* 3 Signatures in a Row */}
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 items-end text-center text-xs px-2">
           {/* 1. SIGNER KIRI (Mengetahui / Kadispora) */}
           <div className="space-y-0.5 flex flex-col items-center">
             <p className="text-[10px] text-slate-600 font-semibold">
-              {settings.firstSignerRole || 'Mengetahui'}
+              {settings.firstSignerRole || 'Mengetahui,'}
             </p>
             <p className="text-[10.5px] font-bold text-slate-800 leading-tight max-w-[200px]">
               {settings.firstSignerTitle || 'Kepala Suku Dinas Pemuda dan Olahraga'}
@@ -326,20 +317,20 @@ export function CertificateCard({
 
             {/* Signature & Stamp Area */}
             <div className="relative h-16 w-36 flex items-center justify-center my-0.5">
-              {/* Official Stamp Seal (Purple/Blue Circular Cap) */}
-              <div className="absolute left-2 top-0 h-16 w-16 pointer-events-none opacity-85">
+              {/* Official Stamp Seal with clean upright circular text */}
+              <div className="absolute left-2 top-0 h-16 w-16 pointer-events-none opacity-80">
                 <svg viewBox="0 0 100 100" className="h-full w-full text-indigo-700">
                   <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="3 1.5" />
-                  <circle cx="50" cy="50" r="41" fill="none" stroke="currentColor" strokeWidth="1.2" />
+                  <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" strokeWidth="1.2" />
                   <circle cx="50" cy="50" r="28" fill="none" stroke="currentColor" strokeWidth="0.8" />
-                  <path id={`stamp-left-${recipient.id}`} d="M 50, 50 m -35, 0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" fill="none" />
-                  <text fontSize="7.5" fontWeight="900" fill="currentColor" letterSpacing="0.1em">
-                    <textPath href={`#stamp-left-${recipient.id}`} startOffset="50%" textAnchor="middle">
-                      PEMERINTAH PROVINSI DKI
-                    </textPath>
+                  <text x="50" y="24" textAnchor="middle" fontSize="6.5" fontWeight="900" fill="currentColor">
+                    PEMERINTAH PROVINSI
                   </text>
                   <text x="50" y="53" textAnchor="middle" fontSize="7.5" fontWeight="900" fill="currentColor">
                     DISPORA
+                  </text>
+                  <text x="50" y="80" textAnchor="middle" fontSize="6.5" fontWeight="900" fill="currentColor">
+                    DKI JAKARTA
                   </text>
                 </svg>
               </div>
@@ -375,19 +366,19 @@ export function CertificateCard({
             {/* Signature & Stamp Center Area */}
             <div className="relative h-16 w-36 flex items-center justify-center my-0.5">
               {/* Official Stamp KONI */}
-              <div className="absolute left-3 top-0 h-16 w-16 pointer-events-none opacity-85">
+              <div className="absolute left-3 top-0 h-16 w-16 pointer-events-none opacity-80">
                 <svg viewBox="0 0 100 100" className="h-full w-full text-blue-800">
                   <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" strokeWidth="2" />
-                  <circle cx="50" cy="50" r="41" fill="none" stroke="currentColor" strokeWidth="1.2" />
+                  <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" strokeWidth="1.2" />
                   <circle cx="50" cy="50" r="28" fill="none" stroke="currentColor" strokeWidth="0.8" />
-                  <path id={`stamp-mid-${recipient.id}`} d="M 50, 50 m -35, 0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" fill="none" />
-                  <text fontSize="7.5" fontWeight="900" fill="currentColor" letterSpacing="0.1em">
-                    <textPath href={`#stamp-mid-${recipient.id}`} startOffset="50%" textAnchor="middle">
-                      KOMITE OLAHRAGA NASIONAL
-                    </textPath>
+                  <text x="50" y="24" textAnchor="middle" fontSize="6.5" fontWeight="900" fill="currentColor">
+                    KOMITE OLAHRAGA
                   </text>
                   <text x="50" y="53" textAnchor="middle" fontSize="8" fontWeight="900" fill="currentColor">
                     KONI
+                  </text>
+                  <text x="50" y="80" textAnchor="middle" fontSize="6.5" fontWeight="900" fill="currentColor">
+                    JAKARTA PUSAT
                   </text>
                 </svg>
               </div>
@@ -423,19 +414,19 @@ export function CertificateCard({
             {/* Signature & Stamp Right Area */}
             <div className="relative h-16 w-36 flex items-center justify-center my-0.5">
               {/* Official Stamp Akuatik */}
-              <div className="absolute left-2 top-0 h-16 w-16 pointer-events-none opacity-85">
+              <div className="absolute left-2 top-0 h-16 w-16 pointer-events-none opacity-80">
                 <svg viewBox="0 0 100 100" className="h-full w-full text-blue-900">
                   <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" strokeWidth="2" />
-                  <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" strokeWidth="1" />
+                  <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" strokeWidth="1.2" />
                   <circle cx="50" cy="50" r="28" fill="none" stroke="currentColor" strokeWidth="0.8" />
-                  <path id={`stamp-right-${recipient.id}`} d="M 50, 50 m -35, 0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" fill="none" />
-                  <text fontSize="7" fontWeight="900" fill="currentColor" letterSpacing="0.1em">
-                    <textPath href={`#stamp-right-${recipient.id}`} startOffset="50%" textAnchor="middle">
-                      PENGURUS KOTA AKUATIK
-                    </textPath>
+                  <text x="50" y="24" textAnchor="middle" fontSize="6" fontWeight="900" fill="currentColor">
+                    PENGURUS KOTA
                   </text>
                   <text x="50" y="53" textAnchor="middle" fontSize="7.5" fontWeight="900" fill="currentColor">
-                    PENGKOT
+                    AKUATIK
+                  </text>
+                  <text x="50" y="80" textAnchor="middle" fontSize="6" fontWeight="900" fill="currentColor">
+                    INDONESIA
                   </text>
                 </svg>
               </div>
@@ -456,16 +447,16 @@ export function CertificateCard({
         </div>
       </div>
 
-      {/* ── 8. CORNER QR CODE VERIFICATION & SANCTION BADGE ── */}
-      <div className="absolute bottom-2.5 right-3.5 flex items-center gap-1.5 pointer-events-none z-20">
-        <div className="bg-white/95 p-0.5 rounded-lg border border-slate-300 shadow-2xs">
-          <QrCodeSvg value={verificationPayload} size={28} />
+      {/* ── 9. CORNER QR CODE VERIFICATION BADGE (INSIDE FRAME MARGIN, NO OVERFLOW) ── */}
+      <div className="absolute bottom-5 right-6 flex items-center gap-1.5 pointer-events-none z-20">
+        <div className="bg-white p-0.5 rounded-lg border border-slate-300 shadow-2xs">
+          <QrCodeSvg value={verificationPayload} size={26} />
         </div>
         <div className="text-left leading-tight hidden sm:block">
-          <span className="text-[6.5px] font-mono font-black text-slate-700 uppercase block">
+          <span className="text-[6px] font-mono font-black text-slate-700 uppercase block">
             VERIFIED RECORD
           </span>
-          <span className="text-[6px] font-mono text-emerald-700 font-bold block">
+          <span className="text-[5.5px] font-mono text-emerald-700 font-bold block">
             SWIMSYS SANCTION
           </span>
         </div>

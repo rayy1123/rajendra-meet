@@ -115,7 +115,7 @@ export function printElement(
             max-height: 210mm !important;
             min-height: 210mm !important;
             margin: 0 !important;
-            padding: 10mm 16mm 8mm 16mm !important;
+            padding: 8mm 12mm 6mm 12mm !important;
             overflow: hidden !important;
             page-break-after: always !important;
             break-after: page !important;
