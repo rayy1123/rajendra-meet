@@ -382,7 +382,7 @@ export function UserCertificatesView({
                     Tutup
                   </Button>
                   <Button
-                    onClick={handlePrintModal}
+                    onClick={() => handlePrint(selectedRecipient)}
                     size="sm"
                     className="gap-1.5 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
                   >

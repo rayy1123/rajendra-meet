@@ -70,6 +70,9 @@ export interface CertificateRecipient {
 }
 
 export interface CertificateSettings {
+  // Pilihan Layout Template
+  templateLayout?: 'kejurda_abrisam' | 'royal_gold' | 'classic';
+
   // Nomor & Penerbitan
   skNumber: string;
   issuedCity: string;
@@ -98,6 +101,8 @@ export interface CertificateSettings {
   backgroundOpacity?: number;
   showWatermark?: boolean;
   borderStyle?: 'gold_classic' | 'navy_aquatic' | 'silver_modern' | 'none';
+  showCornerRibbons?: boolean;
+  showRibbonSeal?: boolean;
 
   // Teks & Gelar
   headerTitle?: string;
@@ -105,6 +110,22 @@ export interface CertificateSettings {
   presentedText?: string;
   achievementText?: string;
   defaultRecordType?: 'pribadi' | 'games' | 'daerah' | 'nasional';
+  eventDateRangeText?: string;
+
+  // 3 Pejabat Penandatangan (Khusus Template PORKOT / Kejurda Resmi)
+  showThreeSigners?: boolean;
+  firstSignerRole?: string; // e.g. "Mengetahui"
+  firstSignerTitle?: string; // e.g. "Kepala Suku Dinas Pemuda dan Olahraga"
+  firstSignerOrg?: string; // e.g. "Kota Administrasi Jakarta Pusat"
+  firstSignerName?: string; // e.g. "Rusdiyanto"
+  secondSignerRole?: string; // e.g. "Ketua KONI"
+  secondSignerTitle?: string; // e.g. "Kota Administrasi Jakarta Pusat"
+  secondSignerOrg?: string;
+  secondSignerName?: string; // e.g. "Zaenar Arifin, SE"
+  thirdSignerRole?: string; // e.g. "Ketua Akuatik"
+  thirdSignerTitle?: string; // e.g. "Kota Administrasi Jakarta Pusat"
+  thirdSignerOrg?: string;
+  thirdSignerName?: string; // e.g. "Yonas Bain, M.Pd."
 
   // Footer Sponsorship
   showSponsors?: boolean;
@@ -120,13 +141,14 @@ export interface CompetitionEventOption {
 }
 
 const DEFAULT_SETTINGS: CertificateSettings = {
-  skNumber: '028/SK-RM/X/2026',
-  issuedCity: 'Bandung',
-  issuedDate: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
-  organizerChairman: 'Dr. H. Hendra Wijaya, M.Pd',
-  organizerChairmanTitle: 'Ketua Panitia Pelaksana',
-  technicalDelegate: 'Bambang S., S.Pd',
-  technicalDelegateTitle: 'Technical Delegate / Referee',
+  templateLayout: 'kejurda_abrisam',
+  skNumber: '0545/Koni-JakartaPusat/PORKOT/26/VII/2026',
+  issuedCity: 'Jakarta',
+  issuedDate: '26 Juli 2026',
+  organizerChairman: 'Zaenar Arifin, SE',
+  organizerChairmanTitle: 'Ketua KONI Kota Administrasi',
+  technicalDelegate: 'Rusdiyanto',
+  technicalDelegateTitle: 'Kadispora Kota Administrasi',
   certificateType: 'auto',
   showSponsors: true,
 
@@ -135,12 +157,12 @@ const DEFAULT_SETTINGS: CertificateSettings = {
   leftLogoTitle: 'RAJENDRA SWIM SYSTEM',
   leftLogoSubtitle: 'OFFICIAL SANCTIONED SYSTEM',
   mainSponsorLogoUrl: null,
-  mainSponsorTitle: 'OFFICIAL MAIN SPONSOR',
-  mainSponsorSubtitle: 'SPONSOR UTAMA RESMI',
+  mainSponsorTitle: 'DISPORA JAKARTA',
+  mainSponsorSubtitle: 'OFFICIAL PARTNER',
   showMainSponsor: true,
   rightLogoUrl: '/brand/rajendra-organizer-logo.png',
-  rightLogoTitle: 'RAJENDRA ORGANIZER',
-  rightLogoSubtitle: 'CHAMPIONSHIP ORGANIZER',
+  rightLogoTitle: 'AKUATIK INDONESIA',
+  rightLogoSubtitle: 'PENGPROV OFFICIAL',
 
   // Background & Bingkai
   backgroundTheme: 'default',
@@ -148,13 +170,31 @@ const DEFAULT_SETTINGS: CertificateSettings = {
   backgroundOpacity: 100,
   showWatermark: true,
   borderStyle: 'gold_classic',
+  showCornerRibbons: true,
+  showRibbonSeal: true,
 
   // Teks
-  headerTitle: '',
-  headerSubtitle: '',
-  presentedText: 'Diberikan dengan bangga kepada / Proudly presented to:',
-  achievementText: 'Atas prestasinya meraih pencapaian:',
+  headerTitle: 'PIAGAM PENGHARGAAN',
+  headerSubtitle: 'CERTIFICATE OF ACHIEVEMENT',
+  presentedText: 'DIBERIKAN KEPADA',
+  achievementText: 'SEBAGAI',
+  eventDateRangeText: 'Pada Kejuaraan Renang Tingkat Pelajar & Prestasi yang diselenggarakan secara resmi',
   defaultRecordType: 'games',
+
+  // 3 Pejabat Penandatangan
+  showThreeSigners: true,
+  firstSignerRole: 'Mengetahui,',
+  firstSignerTitle: 'Kepala Suku Dinas Pemuda & Olahraga',
+  firstSignerOrg: 'Kota Administrasi Terkait',
+  firstSignerName: 'Rusdiyanto',
+  secondSignerRole: 'Ketua Pelaksana,',
+  secondSignerTitle: 'Ketua Panitia / KONI Kota',
+  secondSignerOrg: 'Panitia Pelaksana Kejuaraan',
+  secondSignerName: 'Zaenar Arifin, SE',
+  thirdSignerRole: 'Ketua Akuatik,',
+  thirdSignerTitle: 'Ketua Pengcab Akuatik Indonesia',
+  thirdSignerOrg: 'Komisi Perlombaan',
+  thirdSignerName: 'Yonas Bain, M.Pd.',
 };
 
 export function CertificateManager({
@@ -863,11 +903,7 @@ export function CertificateManager({
                   </Button>
                   <Button
                     onClick={() => {
-                      printElement('modal-admin-cert-preview-card', {
-                        title: `Sertifikat-Juara-${previewRecipient.swimmerName.replace(/\s+/g, '-')}`,
-                        isLandscape: true,
-                        pageMargin: '0mm',
-                      });
+                      handlePrintSingle(previewRecipient);
                     }}
                     size="sm"
                     className="gap-1.5 text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white cursor-pointer"
@@ -1351,17 +1387,36 @@ export function CertificateManager({
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="font-bold text-slate-900 block">Watermark Segel Resmi</label>
-                    <div className="flex items-center gap-2 pt-2">
-                      <input
-                        type="checkbox"
-                        id="show-watermark-check"
-                        checked={settings.showWatermark !== false}
-                        onChange={(e) => setSettings((s) => ({ ...s, showWatermark: e.target.checked }))}
-                        className="h-4 w-4 rounded border-slate-300 text-primary cursor-pointer"
-                      />
-                      <label htmlFor="show-watermark-check" className="font-semibold text-slate-700 cursor-pointer">
-                        Aktifkan Segel Watermark Tengah
+                    <label className="font-bold text-slate-900 block">Ornamen Desain Khusus</label>
+                    <div className="space-y-1.5 pt-1">
+                      <label className="flex items-center gap-2 text-slate-700 cursor-pointer text-[11px] font-semibold">
+                        <input
+                          type="checkbox"
+                          checked={settings.showCornerRibbons !== false}
+                          onChange={(e) => setSettings((s) => ({ ...s, showCornerRibbons: e.target.checked }))}
+                          className="h-3.5 w-3.5 rounded border-slate-300 text-blue-600"
+                        />
+                        <span>Pita Sudut Emas &amp; Navy (Top-Right/Bottom-Left)</span>
+                      </label>
+
+                      <label className="flex items-center gap-2 text-slate-700 cursor-pointer text-[11px] font-semibold">
+                        <input
+                          type="checkbox"
+                          checked={settings.showRibbonSeal !== false}
+                          onChange={(e) => setSettings((s) => ({ ...s, showRibbonSeal: e.target.checked }))}
+                          className="h-3.5 w-3.5 rounded border-slate-300 text-blue-600"
+                        />
+                        <span>Medali Segel Emas 3D (Top-Center)</span>
+                      </label>
+
+                      <label className="flex items-center gap-2 text-slate-700 cursor-pointer text-[11px] font-semibold">
+                        <input
+                          type="checkbox"
+                          checked={settings.showWatermark !== false}
+                          onChange={(e) => setSettings((s) => ({ ...s, showWatermark: e.target.checked }))}
+                          className="h-3.5 w-3.5 rounded border-slate-300 text-blue-600"
+                        />
+                        <span>Watermark Guilloche Samar</span>
                       </label>
                     </div>
                   </div>
@@ -1372,13 +1427,64 @@ export function CertificateManager({
             {/* ════ TAB 3: TEKS, PEJABAT & SK ════ */}
             {settingsTab === 'texts' && (
               <div className="space-y-3.5">
+                {/* Preset Template Switcher */}
+                <div className="space-y-1.5 p-3 rounded-xl border border-blue-200 bg-blue-50/60">
+                  <label className="font-bold text-blue-950 block text-xs">Pilihan Layout Sertifikat:</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setSettings((s) => ({
+                          ...s,
+                          templateLayout: 'kejurda_abrisam',
+                          showCornerRibbons: true,
+                          showRibbonSeal: true,
+                          showThreeSigners: true,
+                          headerTitle: 'PIAGAM PENGHARGAAN',
+                          presentedText: 'DIBERIKAN KEPADA',
+                          achievementText: 'SEBAGAI',
+                        }))
+                      }
+                      className={`p-2 rounded-lg border text-left text-xs transition-all cursor-pointer ${
+                        settings.templateLayout === 'kejurda_abrisam'
+                          ? 'border-blue-500 bg-white font-bold shadow-2xs text-blue-900 ring-1 ring-blue-500'
+                          : 'border-slate-200 bg-white/70 text-slate-700 hover:bg-white'
+                      }`}
+                    >
+                      <span>🏆 PORKOT / Kejurda Resmi (Style PDF)</span>
+                      <span className="text-[10px] text-slate-500 block mt-0.5 font-normal">Pita pojok emas & 3 tanda tangan</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setSettings((s) => ({
+                          ...s,
+                          templateLayout: 'royal_gold',
+                          showCornerRibbons: false,
+                          showRibbonSeal: false,
+                          showThreeSigners: false,
+                        }))
+                      }
+                      className={`p-2 rounded-lg border text-left text-xs transition-all cursor-pointer ${
+                        settings.templateLayout === 'royal_gold'
+                          ? 'border-blue-500 bg-white font-bold shadow-2xs text-blue-900 ring-1 ring-blue-500'
+                          : 'border-slate-200 bg-white/70 text-slate-700 hover:bg-white'
+                      }`}
+                    >
+                      <span>👑 Grand Royal Aquatic (Classic)</span>
+                      <span className="text-[10px] text-slate-500 block mt-0.5 font-normal">Guilloche frame & dual signature</span>
+                    </button>
+                  </div>
+                </div>
+
                 <div className="space-y-1">
                   <label className="font-bold text-slate-900">Nomor Surat Keputusan / SK Panitia</label>
                   <Input
                     value={settings.skNumber}
                     onChange={(e) => setSettings((s) => ({ ...s, skNumber: e.target.value }))}
-                    placeholder="Contoh: 028/SK-RM/X/2026"
-                    className="h-8 text-xs bg-white"
+                    placeholder="Contoh: No. 0545/Koni-JakartaPusat/PORKOT/26/VII/2026"
+                    className="h-8 text-xs bg-white font-mono font-bold"
                     required
                   />
                 </div>
@@ -1390,7 +1496,7 @@ export function CertificateManager({
                       value={settings.headerTitle || ''}
                       onChange={(e) => setSettings((s) => ({ ...s, headerTitle: e.target.value }))}
                       placeholder="PIAGAM PENGHARGAAN"
-                      className="h-8 text-xs bg-white"
+                      className="h-8 text-xs bg-white font-bold"
                     />
                   </div>
                   <div className="space-y-1">
@@ -1410,8 +1516,8 @@ export function CertificateManager({
                     <Input
                       value={settings.presentedText || ''}
                       onChange={(e) => setSettings((s) => ({ ...s, presentedText: e.target.value }))}
-                      placeholder="Diberikan dengan bangga kepada:"
-                      className="h-8 text-xs bg-white"
+                      placeholder="DIBERIKAN KEPADA"
+                      className="h-8 text-xs bg-white font-semibold"
                     />
                   </div>
                   <div className="space-y-1">
@@ -1419,10 +1525,20 @@ export function CertificateManager({
                     <Input
                       value={settings.achievementText || ''}
                       onChange={(e) => setSettings((s) => ({ ...s, achievementText: e.target.value }))}
-                      placeholder="Atas prestasinya meraih pencapaian:"
-                      className="h-8 text-xs bg-white"
+                      placeholder="SEBAGAI"
+                      className="h-8 text-xs bg-white font-semibold"
                     />
                   </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-900">Keterangan Tanggal &amp; Tempat Lomba</label>
+                  <Input
+                    value={settings.eventDateRangeText || ''}
+                    onChange={(e) => setSettings((s) => ({ ...s, eventDateRangeText: e.target.value }))}
+                    placeholder="tanggal 18 Juli 2026 sampai dengan 26 Juli 2026"
+                    className="h-8 text-xs bg-white"
+                  />
                 </div>
 
                 <div className="grid grid-cols-2 gap-2.5 pt-1 border-t">
@@ -1431,7 +1547,7 @@ export function CertificateManager({
                     <Input
                       value={settings.issuedCity}
                       onChange={(e) => setSettings((s) => ({ ...s, issuedCity: e.target.value }))}
-                      placeholder="Contoh: Bandung"
+                      placeholder="Contoh: Jakarta"
                       className="h-8 text-xs bg-white"
                       required
                     />
@@ -1442,47 +1558,88 @@ export function CertificateManager({
                     <Input
                       value={settings.issuedDate}
                       onChange={(e) => setSettings((s) => ({ ...s, issuedDate: e.target.value }))}
-                      placeholder="Contoh: 18 Oktober 2026"
-                      className="h-8 text-xs bg-white"
+                      placeholder="Contoh: 26 Juli 2026"
+                      className="h-8 text-xs bg-white font-bold"
                       required
                     />
                   </div>
                 </div>
 
-                {/* Pejabat Tanda Tangan */}
-                <div className="grid grid-cols-2 gap-2.5 pt-1 border-t">
-                  <div className="space-y-2">
-                    <span className="font-bold text-blue-900 text-[11px] block">Pejabat Kiri (Technical Delegate)</span>
-                    <Input
-                      value={settings.technicalDelegate}
-                      onChange={(e) => setSettings((s) => ({ ...s, technicalDelegate: e.target.value }))}
-                      placeholder="Nama Lengkap & Gelar"
-                      className="h-8 text-xs bg-white"
-                      required
-                    />
-                    <Input
-                      value={settings.technicalDelegateTitle}
-                      onChange={(e) => setSettings((s) => ({ ...s, technicalDelegateTitle: e.target.value }))}
-                      placeholder="Jabatan"
-                      className="h-7 text-xs bg-white"
-                    />
-                  </div>
+                {/* 3 Pejabat Penandatangan Resmi */}
+                <div className="space-y-2 pt-2 border-t">
+                  <span className="font-bold text-blue-950 text-xs block">
+                    3 Pejabat Penandatangan (Kiri • Tengah • Kanan):
+                  </span>
 
-                  <div className="space-y-2">
-                    <span className="font-bold text-blue-900 text-[11px] block">Pejabat Kanan (Ketua Panitia)</span>
-                    <Input
-                      value={settings.organizerChairman}
-                      onChange={(e) => setSettings((s) => ({ ...s, organizerChairman: e.target.value }))}
-                      placeholder="Nama Lengkap & Gelar"
-                      className="h-8 text-xs bg-white"
-                      required
-                    />
-                    <Input
-                      value={settings.organizerChairmanTitle}
-                      onChange={(e) => setSettings((s) => ({ ...s, organizerChairmanTitle: e.target.value }))}
-                      placeholder="Jabatan"
-                      className="h-7 text-xs bg-white"
-                    />
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    {/* Pejabat 1 (Kiri) */}
+                    <div className="p-2.5 rounded-lg border border-slate-200 bg-slate-50/70 space-y-1.5">
+                      <span className="font-bold text-[11px] text-slate-700 block">1. Pejabat Kiri</span>
+                      <Input
+                        value={settings.firstSignerRole || ''}
+                        onChange={(e) => setSettings((s) => ({ ...s, firstSignerRole: e.target.value }))}
+                        placeholder="Mengetahui,"
+                        className="h-7 text-xs bg-white"
+                      />
+                      <Input
+                        value={settings.firstSignerTitle || ''}
+                        onChange={(e) => setSettings((s) => ({ ...s, firstSignerTitle: e.target.value }))}
+                        placeholder="Kadispora"
+                        className="h-7 text-xs bg-white"
+                      />
+                      <Input
+                        value={settings.firstSignerName || ''}
+                        onChange={(e) => setSettings((s) => ({ ...s, firstSignerName: e.target.value }))}
+                        placeholder="Rusdiyanto"
+                        className="h-7 text-xs bg-white font-bold"
+                      />
+                    </div>
+
+                    {/* Pejabat 2 (Tengah) */}
+                    <div className="p-2.5 rounded-lg border border-slate-200 bg-slate-50/70 space-y-1.5">
+                      <span className="font-bold text-[11px] text-slate-700 block">2. Pejabat Tengah</span>
+                      <Input
+                        value={settings.secondSignerRole || ''}
+                        onChange={(e) => setSettings((s) => ({ ...s, secondSignerRole: e.target.value }))}
+                        placeholder="Ketua KONI,"
+                        className="h-7 text-xs bg-white"
+                      />
+                      <Input
+                        value={settings.secondSignerTitle || ''}
+                        onChange={(e) => setSettings((s) => ({ ...s, secondSignerTitle: e.target.value }))}
+                        placeholder="Kota Administrasi"
+                        className="h-7 text-xs bg-white"
+                      />
+                      <Input
+                        value={settings.secondSignerName || ''}
+                        onChange={(e) => setSettings((s) => ({ ...s, secondSignerName: e.target.value }))}
+                        placeholder="Zaenar Arifin, SE"
+                        className="h-7 text-xs bg-white font-bold"
+                      />
+                    </div>
+
+                    {/* Pejabat 3 (Kanan) */}
+                    <div className="p-2.5 rounded-lg border border-slate-200 bg-slate-50/70 space-y-1.5">
+                      <span className="font-bold text-[11px] text-slate-700 block">3. Pejabat Kanan</span>
+                      <Input
+                        value={settings.thirdSignerRole || ''}
+                        onChange={(e) => setSettings((s) => ({ ...s, thirdSignerRole: e.target.value }))}
+                        placeholder="Ketua Akuatik,"
+                        className="h-7 text-xs bg-white"
+                      />
+                      <Input
+                        value={settings.thirdSignerTitle || ''}
+                        onChange={(e) => setSettings((s) => ({ ...s, thirdSignerTitle: e.target.value }))}
+                        placeholder="Pengcab Kota"
+                        className="h-7 text-xs bg-white"
+                      />
+                      <Input
+                        value={settings.thirdSignerName || ''}
+                        onChange={(e) => setSettings((s) => ({ ...s, thirdSignerName: e.target.value }))}
+                        placeholder="Yonas Bain, M.Pd."
+                        className="h-7 text-xs bg-white font-bold"
+                      />
+                    </div>
                   </div>
                 </div>
 

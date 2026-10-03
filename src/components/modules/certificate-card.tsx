@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { QrCodeSvg } from './qr-code-svg';
 import { Award, Trophy, Star, Sparkles, ShieldCheck } from 'lucide-react';
 import type { CertificateRecipient, CertificateSettings } from './certificate-manager';
@@ -31,14 +32,17 @@ export function CertificateCard({
   const isBronze = recipient.rank === 3;
 
   const medalLabel = isGold
-    ? 'JUARA I (MEDALI EMAS)'
+    ? 'JUARA 1 (MEDALI EMAS)'
     : isSilver
-    ? 'JUARA II (MEDALI PERAK)'
+    ? 'JUARA 2 (MEDALI PERAK)'
     : isBronze
-    ? 'JUARA III (MEDALI PERUNGGU)'
+    ? 'JUARA 3 (MEDALI PERUNGGU)'
     : `PERINGKAT KE-${recipient.rank}`;
 
-  const certNumber = `${settings.skNumber || 'RM/CERT'}/${recipient.orderNo ? String(recipient.orderNo).padStart(2, '0') : '01'}/${String(recipient.rank).padStart(2, '0')}`;
+  const certNumber = settings.skNumber?.includes('/')
+    ? settings.skNumber
+    : `No. ${settings.skNumber || '0545/Koni-JakartaPusat/PORKOT/26/VII/2026'}`;
+
   const verificationPayload = typeof window !== 'undefined'
     ? `${window.location.origin}/verifikasi/${recipient.id}`
     : `https://scms-app-umber.vercel.app/verifikasi/${recipient.id}`;
@@ -55,35 +59,21 @@ export function CertificateCard({
     false
   );
 
-  // Background Theme Palette
-  const bgThemeClass = (() => {
-    switch (settings.backgroundTheme) {
-      case 'classic_gold':
-        return 'bg-gradient-to-br from-[#ffffff] via-[#fffdf9] to-[#fef8ea] text-slate-900';
-      case 'oceanic_blue':
-        return 'bg-gradient-to-br from-[#ffffff] via-[#f7fbff] to-[#ebf5fc] text-slate-900';
-      case 'pure_white':
-        return 'bg-white text-slate-900';
-      default:
-        return 'bg-gradient-to-br from-[#ffffff] via-[#fdfdfc] to-[#f8f9fb] text-slate-900';
-    }
-  })();
-
-  const borderTheme = settings.borderStyle || 'gold_classic';
+  const isAbrisamStyle = settings.templateLayout !== 'royal_gold';
 
   return (
     <div
-      className={`certificate-sheet relative mx-auto ${bgThemeClass} text-slate-900 rounded-2xl print:rounded-none print:shadow-none print:m-0 print:border-0 ${
+      className={`certificate-sheet relative mx-auto bg-white text-slate-900 rounded-2xl print:rounded-none print:shadow-none print:m-0 print:border-0 ${
         isPrintOnly ? 'print:block' : 'print:break-after-page print:break-inside-avoid'
       }`}
       style={{
         boxSizing: 'border-box',
         width: '100%',
-        maxWidth: isPrintOnly ? '297mm' : '960px',
+        maxWidth: isPrintOnly ? '297mm' : '980px',
         height: isPrintOnly ? '210mm' : 'auto',
-        minHeight: isPrintOnly ? '210mm' : '580px',
+        minHeight: isPrintOnly ? '210mm' : '650px',
         maxHeight: isPrintOnly ? '210mm' : 'none',
-        padding: '18px 28px 14px 28px',
+        padding: '24px 38px 20px 38px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
@@ -91,9 +81,11 @@ export function CertificateCard({
         overflow: 'hidden',
         pageBreakAfter: 'always',
         breakAfter: 'page',
+        background: '#ffffff',
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
       }}
     >
-      {/* ── 0. CUSTOM BACKGROUND IMAGE (DAPAT DIATUR ADMIN) ── */}
+      {/* ── 0. CUSTOM BACKGROUND IMAGE ── */}
       {settings.customBackgroundImage && (
         <div
           className="absolute inset-0 z-0 pointer-events-none overflow-hidden"
@@ -102,292 +94,381 @@ export function CertificateCard({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={settings.customBackgroundImage}
-            alt="Custom Certificate Background"
+            alt="Custom Background"
             className="h-full w-full object-cover"
           />
         </div>
       )}
 
-      {/* ── 1. VECTOR GUILLOCHE WATERMARK ── */}
-      {settings.showWatermark !== false && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.035] print:opacity-[0.05] z-0">
-          <svg viewBox="0 0 500 500" className="h-[380px] w-[380px] text-[#0a192f]">
-            <circle cx="250" cy="250" r="235" fill="none" stroke="currentColor" strokeWidth="2.5" strokeDasharray="8 4" />
-            <circle cx="250" cy="250" r="226" fill="none" stroke="#c59b27" strokeWidth="2" />
-            <circle cx="250" cy="250" r="180" fill="none" stroke="currentColor" strokeWidth="1.5" />
-            <circle cx="250" cy="250" r="172" fill="none" stroke="#c59b27" strokeWidth="1.2" strokeDasharray="6 3" />
-            <path id={`circleTextPath-${recipient.id}`} d="M 250, 250 m -195, 0 a 195,195 0 1,1 390,0 a 195,195 0 1,1 -390,0" fill="none" />
-            <text fontSize="12" fontWeight="900" letterSpacing="0.28em" fill="#0a192f">
-              <textPath href={`#circleTextPath-${recipient.id}`} startOffset="50%" textAnchor="middle">
-                ★ RAJENDRA SWIM SYSTEM • OFFICIAL CHAMPIONSHIP SANCTIONED ★
-              </textPath>
-            </text>
-            <g transform="translate(135, 175) scale(4.5)" stroke="currentColor" strokeWidth="2.2" fill="none" strokeLinecap="round">
-              <path d="M4 6 Q 16 1, 26 6 T 48 6" />
-              <path d="M4 14 Q 16 9, 26 14 T 48 14" />
-              <path d="M4 22 Q 16 17, 26 22 T 48 22" />
-              <path d="M4 30 Q 16 25, 26 30 T 48 30" />
-            </g>
-          </svg>
-        </div>
-      )}
-
-      {/* ── 2. BINGKAI MASTER VEKTOR EMAS (FIGMA & CANVA STANDARD) ── */}
-      {borderTheme !== 'none' && (
-        <div className="absolute inset-1.5 sm:inset-2.5 pointer-events-none z-10">
-          <div
-            className={`h-full w-full rounded-xl border-[2.5px] p-1 ${
-              borderTheme === 'navy_aquatic'
-                ? 'border-[#0284c7]'
-                : borderTheme === 'silver_modern'
-                ? 'border-[#94a3b8]'
-                : 'border-[#c59b27]'
-            }`}
-          >
-            <div
-              className={`h-full w-full rounded-lg border-[1px] ${
-                borderTheme === 'navy_aquatic'
-                  ? 'border-[#0a192f]'
-                  : borderTheme === 'silver_modern'
-                  ? 'border-[#475569]'
-                  : 'border-[#0a192f]'
-              }`}
-            />
+      {/* ── 1. DYNAMIC NAVY & GOLD CORNER SWASHES (STYLE EXACT ABRISAM PDF) ── */}
+      {settings.showCornerRibbons !== false && (
+        <>
+          {/* Top-Right Navy & Gold Ribbon Sweep */}
+          <div className="absolute top-0 right-0 w-56 sm:w-72 h-36 sm:h-44 pointer-events-none z-10">
+            <svg viewBox="0 0 280 170" fill="none" className="w-full h-full">
+              {/* Outer Deep Navy */}
+              <path d="M 280 0 L 100 0 C 140 25 190 70 280 150 Z" fill="#0f2b5c" />
+              {/* Mid Gold Foil */}
+              <path d="M 280 0 L 140 0 C 175 25 215 65 280 125 Z" fill="#c59b27" opacity="0.95" />
+              {/* Inner Royal Navy */}
+              <path d="M 280 0 L 180 0 C 205 20 235 50 280 95 Z" fill="#061426" />
+            </svg>
           </div>
-          {/* Corner Flourishes */}
-          <div className="absolute top-2 left-2 w-8 h-8 border-t-[3px] border-l-[3px] border-[#c59b27] pointer-events-none" />
-          <div className="absolute top-2 right-2 w-8 h-8 border-t-[3px] border-r-[3px] border-[#c59b27] pointer-events-none" />
-          <div className="absolute bottom-2 left-2 w-8 h-8 border-b-[3px] border-l-[3px] border-[#c59b27] pointer-events-none" />
-          <div className="absolute bottom-2 right-2 w-8 h-8 border-b-[3px] border-r-[3px] border-[#c59b27] pointer-events-none" />
-        </div>
+
+          {/* Bottom-Left Navy & Gold Ribbon Sweep */}
+          <div className="absolute bottom-0 left-0 w-56 sm:w-72 h-36 sm:h-44 pointer-events-none z-10">
+            <svg viewBox="0 0 280 170" fill="none" className="w-full h-full">
+              {/* Outer Deep Navy */}
+              <path d="M 0 170 L 180 170 C 140 145 90 100 0 20 Z" fill="#0f2b5c" />
+              {/* Mid Gold Foil */}
+              <path d="M 0 170 L 140 170 C 105 145 65 105 0 45 Z" fill="#c59b27" opacity="0.95" />
+              {/* Inner Royal Navy */}
+              <path d="M 0 170 L 100 170 C 75 150 45 120 0 75 Z" fill="#061426" />
+            </svg>
+          </div>
+
+          {/* Red Flag Strip Accent on Right Border (Exact Abrisam PDF) */}
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-20 bg-[#c53030] pointer-events-none z-10" />
+        </>
       )}
 
-      {/* ── 3. HEADER 3 LOGO SIMETRIS (KIRI • TENGAH • KANAN) ── */}
+      {/* ── 2. OUTER ELEGANT DIPLOMA FRAMING BORDER ── */}
+      <div className="absolute inset-2 sm:inset-3 border border-slate-300 rounded-xl pointer-events-none z-10" />
+
+      {/* ── 3. HEADER SECTION: 3 LOGOS + TOP CENTER GOLD MEDALLION RIBBON ── */}
       <div className="relative z-20">
-        <div className="grid grid-cols-12 items-center px-2 pb-1.5 border-b border-amber-300/60 gap-1.5">
-          {/* Logo Kiri */}
-          <div className="col-span-4 flex items-center gap-2 text-left justify-start">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={settings.leftLogoUrl || '/brand/logo.png'}
-              alt={settings.leftLogoTitle || 'Rajendra Swim System'}
-              className="h-9 sm:h-10 w-auto object-contain drop-shadow-xs shrink-0"
-            />
-            <div className="hidden sm:block leading-none">
-              <p className="font-heading font-black text-[10.5px] text-[#0a192f] tracking-wide uppercase">
-                {settings.leftLogoTitle || 'RAJENDRA SWIM SYSTEM'}
-              </p>
-              <p className="font-mono text-[7px] font-bold text-slate-500 uppercase tracking-wider mt-0.5">
-                {settings.leftLogoSubtitle || 'OFFICIAL SANCTIONED SYSTEM'}
-              </p>
+        <div className="flex items-start justify-between px-2 pt-1">
+          {/* 3 Logos in a Row (Left) */}
+          <div className="flex items-center gap-3.5 sm:gap-5">
+            {/* Logo 1: Organisasi / RSS */}
+            <div className="flex flex-col items-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={settings.leftLogoUrl || '/brand/logo.png'}
+                alt={settings.leftLogoTitle || 'Logo 1'}
+                className="h-11 sm:h-13 w-auto object-contain shrink-0 drop-shadow-2xs"
+              />
+              <span className="text-[7.5px] font-black tracking-tight text-[#0f2b5c] uppercase mt-0.5">
+                {settings.leftLogoTitle || 'RAJENDRA'}
+              </span>
             </div>
-          </div>
 
-          {/* Logo Tengah (Sponsor Utama) */}
-          <div className="col-span-4 flex flex-col items-center justify-center text-center">
-            {settings.showMainSponsor !== false && (
-              <div className="px-2.5 py-0.5 rounded-lg border border-amber-300/90 bg-gradient-to-b from-amber-50/95 via-white to-amber-50/80 shadow-2xs flex flex-col items-center justify-center min-w-[130px] max-w-[200px]">
-                <span className="text-[6.5px] font-black uppercase tracking-wider text-amber-900 bg-amber-200/80 px-1.5 py-0.2 rounded-full mb-0.5 border border-amber-300">
-                  ★ {settings.mainSponsorSubtitle || 'OFFICIAL MAIN SPONSOR'} ★
+            {/* Logo 2: Dispora / Sponsor Utama */}
+            <div className="flex flex-col items-center">
+              {settings.mainSponsorLogoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={settings.mainSponsorLogoUrl}
+                  alt={settings.mainSponsorTitle || 'Logo 2'}
+                  className="h-11 sm:h-13 w-auto object-contain shrink-0 drop-shadow-2xs"
+                />
+              ) : (
+                <div className="h-11 w-11 rounded-full border-2 border-rose-600 bg-rose-50 flex items-center justify-center text-rose-700 font-black text-[9px] shadow-2xs">
+                  DISPORA
+                </div>
+              )}
+              <span className="text-[7.5px] font-black tracking-tight text-slate-600 uppercase mt-0.5">
+                {settings.mainSponsorTitle || 'DISPORA'}
+              </span>
+            </div>
+
+            {/* Logo 3: Akuatik Indonesia / Organizer */}
+            <div className="flex flex-col items-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={settings.rightLogoUrl || '/brand/rajendra-organizer-logo.png'}
+                alt={settings.rightLogoTitle || 'Logo 3'}
+                className="h-11 sm:h-13 w-auto object-contain shrink-0 drop-shadow-2xs"
+              />
+              <div className="text-center leading-none mt-0.5">
+                <span className="text-[7px] font-black text-[#0f2b5c] block uppercase">
+                  AKUATIK INDONESIA
                 </span>
-                {settings.mainSponsorLogoUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={settings.mainSponsorLogoUrl}
-                    alt={settings.mainSponsorTitle || 'Sponsor Utama'}
-                    className="h-6 sm:h-7 w-auto max-w-[150px] object-contain my-0.5"
-                  />
-                ) : (
-                  <div className="py-0.2 px-1.5 border border-dashed border-amber-400/80 rounded bg-white/80 my-0.5 text-center">
-                    <p className="font-mono font-bold text-[7.5px] text-amber-950 uppercase">
-                      {settings.mainSponsorTitle || 'MAIN SPONSOR'}
-                    </p>
-                  </div>
-                )}
+                <span className="text-[6px] font-semibold text-slate-500 block">
+                  {settings.issuedCity || 'Jakarta Pusat'}
+                </span>
               </div>
-            )}
-            <p className="text-[7px] font-mono font-bold tracking-widest text-slate-500 uppercase mt-0.5">
-              NO: {certNumber}
-            </p>
+            </div>
           </div>
 
-          {/* Logo Kanan */}
-          <div className="col-span-4 flex items-center gap-2 text-right justify-end">
-            <div className="hidden sm:block leading-none">
-              <p className="font-heading font-black text-[10.5px] text-[#0a192f] tracking-wide uppercase">
-                {settings.rightLogoTitle || 'RAJENDRA ORGANIZER'}
-              </p>
-              <p className="font-mono text-[7px] font-bold text-slate-500 uppercase tracking-wider mt-0.5">
-                {settings.rightLogoSubtitle || 'CHAMPIONSHIP ORGANIZER'}
-              </p>
+          {/* Top Center-Right: 3D Golden Medallion Ribbon (Exact Abrisam Style) */}
+          {settings.showRibbonSeal !== false && (
+            <div className="pr-12 sm:pr-16">
+              <div className="relative flex flex-col items-center">
+                <svg viewBox="0 0 80 95" className="h-16 sm:h-20 w-auto drop-shadow-md">
+                  {/* Hanging Gold Ribbons */}
+                  <path d="M 28 42 L 20 88 L 32 78 L 40 88 L 36 42 Z" fill="#b38728" />
+                  <path d="M 52 42 L 60 88 L 48 78 L 40 88 L 44 42 Z" fill="#d4af37" />
+                  {/* Outer Scalloped / Starburst Gold Seal */}
+                  <circle cx="40" cy="38" r="28" fill="url(#gold3DGrad)" stroke="#8a671c" strokeWidth="1.2" />
+                  <circle cx="40" cy="38" r="23" fill="none" stroke="#ffffff" strokeWidth="1" strokeDasharray="3 2" />
+                  <circle cx="40" cy="38" r="19" fill="#c59b27" opacity="0.35" />
+                  {/* Star Emblem */}
+                  <polygon points="40,24 44,32 53,33 46,39 48,48 40,43 32,48 34,39 27,33 36,32" fill="#8a671c" opacity="0.85" />
+                  <defs>
+                    <radialGradient id="gold3DGrad" cx="35%" cy="35%" r="65%">
+                      <stop offset="0%" stopColor="#fff6d6" />
+                      <stop offset="40%" stopColor="#f5d77f" />
+                      <stop offset="70%" stopColor="#d4af37" />
+                      <stop offset="100%" stopColor="#99731e" />
+                    </radialGradient>
+                  </defs>
+                </svg>
+              </div>
             </div>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={settings.rightLogoUrl || '/brand/rajendra-organizer-logo.png'}
-              alt={settings.rightLogoTitle || 'Rajendra Organizer'}
-              className="h-9 sm:h-10 w-auto object-contain drop-shadow-xs shrink-0"
-            />
-          </div>
+          )}
         </div>
 
-        {/* ── JUDUL BESAR PIAGAM PENGHARGAAN ── */}
-        <div className="pt-2 space-y-0.5 text-center">
-          <h1 className="text-2xl sm:text-[26px] font-black uppercase tracking-[0.16em] text-[#0a192f] font-serif leading-tight">
-            {settings.headerTitle || (isMedalist ? 'PIAGAM PENGHARGAAN' : 'SERTIFIKAT PARTISIPASI')}
+        {/* ── 4. TITLE: PIAGAM PENGHARGAAN & NOMOR RESMI ── */}
+        <div className="pt-2 text-center space-y-1">
+          <h1
+            className="text-3xl sm:text-[38px] font-black uppercase tracking-[0.16em] leading-none"
+            style={{
+              color: '#8a671c',
+              textShadow: '0 1px 1px rgba(0,0,0,0.05)',
+              fontFamily: "'Cinzel', 'Times New Roman', Times, serif",
+            }}
+          >
+            {settings.headerTitle || 'PIAGAM PENGHARGAAN'}
           </h1>
 
-          <div className="flex items-center justify-center gap-2">
-            <div className="h-[1px] w-10 bg-gradient-to-r from-transparent to-[#c59b27]" />
-            <p className="text-[10px] font-extrabold tracking-[0.22em] text-[#c59b27] uppercase font-sans">
-              {settings.headerSubtitle || (isMedalist ? 'CERTIFICATE OF ACHIEVEMENT' : 'CERTIFICATE OF PARTICIPATION')}
-            </p>
-            <div className="h-[1px] w-10 bg-gradient-to-l from-transparent to-[#c59b27]" />
-          </div>
+          <p className="text-xs sm:text-[13px] font-medium text-slate-700 tracking-wide font-sans">
+            {certNumber}
+          </p>
 
-          <p className="text-[10.5px] font-bold text-slate-800 uppercase tracking-wider">
-            {recipient.eventName}
+          <p className="text-xs sm:text-[13px] font-bold uppercase tracking-[0.22em] text-slate-800 pt-1">
+            {settings.presentedText || 'DIBERIKAN KEPADA'}
           </p>
         </div>
       </div>
 
-      {/* ── 4. IDENTITAS ATLET PENERIMA ── */}
-      <div className="relative z-20 my-0.5 text-center space-y-0.5">
-        <p className="text-[10px] italic text-slate-500 font-serif">
-          {settings.presentedText || 'Diberikan dengan bangga kepada / Proudly presented to:'}
+      {/* ── 5. ATHLETE RECIPIENT NAME (GRAND UNDERLINED HERO TYPOGRAPHY) ── */}
+      <div className="relative z-20 text-center my-1">
+        <div className="inline-block relative">
+          <h2
+            className="text-3xl sm:text-[38px] font-black tracking-wide text-slate-900 uppercase leading-tight px-6"
+            style={{
+              fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+              letterSpacing: '0.04em',
+            }}
+          >
+            {recipient.swimmerName}
+          </h2>
+          {/* Subtle Underline Line (Exact Abrisam Style) */}
+          <div className="h-[2px] w-full bg-slate-400 mt-1" />
+        </div>
+
+        <p className="text-xs sm:text-[13px] font-bold uppercase tracking-[0.2em] text-slate-700 mt-2">
+          {settings.achievementText || 'SEBAGAI'}
         </p>
-
-        <h2 className="text-2xl sm:text-[28px] font-black tracking-wide text-[#0a192f] uppercase font-serif py-0.5 leading-none">
-          {recipient.swimmerName}
-        </h2>
-
-        {recipient.schoolName && (
-          <p className="text-[12px] font-bold tracking-wider text-[#0284c7] uppercase">
-            {recipient.schoolName}
-          </p>
-        )}
       </div>
 
-      {/* ── 5. KOTAK PRESTASI & CATATAN WAKTU ── */}
-      <div className="relative z-20 mx-auto w-full max-w-xl text-center">
-        <div
-          className={`rounded-xl p-2.5 border shadow-2xs ${
-            isGold
-              ? 'bg-gradient-to-r from-amber-50/90 via-yellow-50/70 to-amber-50/90 border-amber-300'
-              : isSilver
-              ? 'bg-gradient-to-r from-slate-50 via-slate-100/80 to-slate-50 border-slate-300'
-              : isBronze
-              ? 'bg-gradient-to-r from-orange-50/90 via-amber-50/60 to-orange-50/90 border-orange-300'
-              : 'bg-gradient-to-r from-blue-50/80 via-sky-50/60 to-blue-50/80 border-blue-200'
-          }`}
+      {/* ── 6. ACHIEVEMENT / JUARA & EVENT DETAILS ── */}
+      <div className="relative z-20 text-center space-y-1.5 max-w-3xl mx-auto px-4">
+        {/* Main Achievement Header (Royal Blue Bold) */}
+        <h3
+          className="text-lg sm:text-[21px] font-black uppercase tracking-wider leading-snug"
+          style={{ color: '#034694' }}
         >
-          <p className="text-[9.5px] text-slate-600 font-medium">
-            {settings.achievementText || 'Atas prestasinya meraih pencapaian:'}
-          </p>
+          {medalLabel} {formattedEventTitle}
+        </h3>
 
-          <div className="mt-0.5 flex justify-center">
-            <span
-              className={`inline-flex items-center gap-1.5 px-3.5 py-0.5 rounded-full text-[11px] font-black tracking-widest uppercase shadow-2xs ${
-                isGold
-                  ? 'bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-slate-950 border border-amber-300'
-                  : isSilver
-                  ? 'bg-gradient-to-r from-slate-300 via-slate-200 to-slate-400 text-slate-900 border border-slate-300'
-                  : isBronze
-                  ? 'bg-gradient-to-r from-amber-700 via-amber-600 to-amber-800 text-white border border-amber-600'
-                  : 'bg-gradient-to-r from-blue-600 to-indigo-700 text-white'
-              }`}
-            >
-              {isGold ? <Trophy className="h-3 w-3" /> : isMedalist ? <Award className="h-3 w-3" /> : <Star className="h-3 w-3" />}
-              {medalLabel}
+        {/* Event Context & Date Range Description */}
+        <div className="text-xs sm:text-[13px] text-slate-700 leading-relaxed font-normal">
+          <p>
+            Pada Kejuaraan <b>{recipient.eventName}</b> yang diselenggarakan pada
+          </p>
+          <p className="font-semibold text-slate-800">
+            {settings.eventDateRangeText || `${recipient.eventLocation} • ${settings.issuedDate || '2026'}`}
+          </p>
+        </div>
+
+        {/* Time Pill Badge */}
+        {recipient.formattedTime && recipient.formattedTime !== 'NT' && (
+          <div className="pt-0.5">
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-0.5 rounded-full bg-amber-50 border border-amber-300 text-xs font-bold text-slate-900 shadow-2xs">
+              <span className="text-slate-500 font-semibold text-[10.5px]">Waktu Resmi:</span>
+              <b className="font-mono font-black">{recipient.formattedTime} detik</b>
+              {recipient.isNewRecord && (
+                <span className="ml-1 text-[9px] font-black text-rose-700 bg-rose-100 px-1.5 py-0.2 rounded uppercase">
+                  ★ Rekor Baru
+                </span>
+              )}
             </span>
           </div>
+        )}
+      </div>
 
-          <p className="text-[11px] font-black text-[#0a192f] mt-0.5 uppercase tracking-wide">
-            {formattedEventTitle}
+      {/* ── 7. DATE & 3 OFFICIAL SIGNATURES WITH AUTHENTIC SEALS (EXACT ABRISAM STYLE) ── */}
+      <div className="relative z-20 pt-2 border-t border-slate-200">
+        {/* Date line (Top Center of Signatures) */}
+        <div className="text-center mb-1">
+          <p className="text-xs sm:text-[13px] font-semibold text-slate-800">
+            {settings.issuedCity || 'Jakarta'}, {settings.issuedDate || '26 Juli 2026'}
           </p>
+        </div>
 
-          <div className="mt-1 flex flex-wrap items-center justify-center gap-2 text-xs">
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.2 rounded-full bg-white border border-amber-300/80 shadow-2xs font-semibold">
-              <span className="text-slate-600 text-[9px] uppercase font-bold">Waktu Tempuh Resmi:</span>
-              <b className="font-mono font-black text-slate-950 text-[11px] tabular-nums">
-                {recipient.formattedTime} detik
-              </b>
-            </span>
+        {/* 3 Signatures Columns in a Row */}
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 items-end text-center text-xs">
+          {/* 1. SIGNER KIRI (Mengetahui / Kadispora) */}
+          <div className="space-y-0.5 flex flex-col items-center">
+            <p className="text-[10px] text-slate-600 font-semibold">
+              {settings.firstSignerRole || 'Mengetahui'}
+            </p>
+            <p className="text-[10.5px] font-bold text-slate-800 leading-tight max-w-[200px]">
+              {settings.firstSignerTitle || 'Kepala Suku Dinas Pemuda dan Olahraga'}
+            </p>
+            {settings.firstSignerOrg && (
+              <p className="text-[9.5px] text-slate-500 font-medium leading-none">
+                {settings.firstSignerOrg}
+              </p>
+            )}
 
-            {recipient.isNewRecord && (() => {
-              const rType = recipient.recordType || settings.defaultRecordType || 'games';
-              const rConfig = RECORD_BADGES[rType] || RECORD_BADGES.games;
-              return (
-                <span className={`inline-flex items-center gap-1 px-2 py-0.2 rounded-full text-[9.5px] font-black tracking-wide uppercase border ${rConfig.cls}`}>
-                  <Sparkles className="h-2.5 w-2.5" /> {rConfig.label}
-                </span>
-              );
-            })()}
+            {/* Signature & Stamp Area */}
+            <div className="relative h-16 w-36 flex items-center justify-center my-0.5">
+              {/* Official Stamp Seal (Purple/Blue Circular Cap) */}
+              <div className="absolute left-2 top-0 h-16 w-16 pointer-events-none opacity-85">
+                <svg viewBox="0 0 100 100" className="h-full w-full text-indigo-700">
+                  <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="3 1.5" />
+                  <circle cx="50" cy="50" r="41" fill="none" stroke="currentColor" strokeWidth="1.2" />
+                  <circle cx="50" cy="50" r="28" fill="none" stroke="currentColor" strokeWidth="0.8" />
+                  <path id={`stamp-left-${recipient.id}`} d="M 50, 50 m -35, 0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" fill="none" />
+                  <text fontSize="7.5" fontWeight="900" fill="currentColor" letterSpacing="0.1em">
+                    <textPath href={`#stamp-left-${recipient.id}`} startOffset="50%" textAnchor="middle">
+                      PEMERINTAH PROVINSI DKI
+                    </textPath>
+                  </text>
+                  <text x="50" y="53" textAnchor="middle" fontSize="7.5" fontWeight="900" fill="currentColor">
+                    DISPORA
+                  </text>
+                </svg>
+              </div>
+
+              {/* Digital Cursive Signature Stroke */}
+              <div className="absolute left-4 top-2 h-14 w-32 pointer-events-none z-10">
+                <svg viewBox="0 0 140 50" className="h-full w-full text-slate-950 stroke-current fill-none">
+                  <path d="M 15 35 Q 30 10 45 30 T 70 25 Q 95 10 120 38" strokeWidth="2.2" strokeLinecap="round" />
+                  <path d="M 30 28 L 125 26" strokeWidth="1.6" strokeLinecap="round" />
+                </svg>
+              </div>
+            </div>
+
+            <p className="font-bold text-slate-950 text-xs sm:text-[13px] leading-tight mt-0.5">
+              {settings.firstSignerName || settings.technicalDelegate || 'Rusdiyanto'}
+            </p>
+          </div>
+
+          {/* 2. SIGNER TENGAH (Ketua KONI / Ketua Panitia) */}
+          <div className="space-y-0.5 flex flex-col items-center">
+            <p className="text-[10.5px] font-bold text-slate-800 leading-tight">
+              {settings.secondSignerRole || 'Ketua KONI'}
+            </p>
+            <p className="text-[10px] text-slate-600 font-semibold leading-tight max-w-[200px]">
+              {settings.secondSignerTitle || 'Kota Administrasi Jakarta Pusat'}
+            </p>
+            {settings.secondSignerOrg && (
+              <p className="text-[9.5px] text-slate-500 font-medium leading-none">
+                {settings.secondSignerOrg}
+              </p>
+            )}
+
+            {/* Signature & Stamp Center Area */}
+            <div className="relative h-16 w-36 flex items-center justify-center my-0.5">
+              {/* Official Stamp KONI */}
+              <div className="absolute left-3 top-0 h-16 w-16 pointer-events-none opacity-85">
+                <svg viewBox="0 0 100 100" className="h-full w-full text-blue-800">
+                  <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" strokeWidth="2" />
+                  <circle cx="50" cy="50" r="41" fill="none" stroke="currentColor" strokeWidth="1.2" />
+                  <circle cx="50" cy="50" r="28" fill="none" stroke="currentColor" strokeWidth="0.8" />
+                  <path id={`stamp-mid-${recipient.id}`} d="M 50, 50 m -35, 0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" fill="none" />
+                  <text fontSize="7.5" fontWeight="900" fill="currentColor" letterSpacing="0.1em">
+                    <textPath href={`#stamp-mid-${recipient.id}`} startOffset="50%" textAnchor="middle">
+                      KOMITE OLAHRAGA NASIONAL
+                    </textPath>
+                  </text>
+                  <text x="50" y="53" textAnchor="middle" fontSize="8" fontWeight="900" fill="currentColor">
+                    KONI
+                  </text>
+                </svg>
+              </div>
+
+              {/* Digital Cursive Signature Stroke */}
+              <div className="absolute left-2 top-2 h-14 w-32 pointer-events-none z-10">
+                <svg viewBox="0 0 140 50" className="h-full w-full text-slate-950 stroke-current fill-none">
+                  <path d="M 10 40 Q 35 8 55 35 T 85 20 Q 110 15 130 35" strokeWidth="2.4" strokeLinecap="round" />
+                  <path d="M 35 30 Q 65 42 120 25" strokeWidth="1.8" strokeLinecap="round" />
+                </svg>
+              </div>
+            </div>
+
+            <p className="font-bold text-slate-950 text-xs sm:text-[13px] leading-tight mt-0.5">
+              {settings.secondSignerName || settings.organizerChairman || 'Zaenar Arifin, SE'}
+            </p>
+          </div>
+
+          {/* 3. SIGNER KANAN (Ketua Akuatik / Pengcab) */}
+          <div className="space-y-0.5 flex flex-col items-center">
+            <p className="text-[10.5px] font-bold text-slate-800 leading-tight">
+              {settings.thirdSignerRole || 'Ketua Akuatik'}
+            </p>
+            <p className="text-[10px] text-slate-600 font-semibold leading-tight max-w-[200px]">
+              {settings.thirdSignerTitle || 'Kota Administrasi Jakarta Pusat'}
+            </p>
+            {settings.thirdSignerOrg && (
+              <p className="text-[9.5px] text-slate-500 font-medium leading-none">
+                {settings.thirdSignerOrg}
+              </p>
+            )}
+
+            {/* Signature & Stamp Right Area */}
+            <div className="relative h-16 w-36 flex items-center justify-center my-0.5">
+              {/* Official Stamp Akuatik */}
+              <div className="absolute left-2 top-0 h-16 w-16 pointer-events-none opacity-85">
+                <svg viewBox="0 0 100 100" className="h-full w-full text-blue-900">
+                  <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" strokeWidth="2" />
+                  <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" strokeWidth="1" />
+                  <circle cx="50" cy="50" r="28" fill="none" stroke="currentColor" strokeWidth="0.8" />
+                  <path id={`stamp-right-${recipient.id}`} d="M 50, 50 m -35, 0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" fill="none" />
+                  <text fontSize="7" fontWeight="900" fill="currentColor" letterSpacing="0.1em">
+                    <textPath href={`#stamp-right-${recipient.id}`} startOffset="50%" textAnchor="middle">
+                      PENGURUS KOTA AKUATIK
+                    </textPath>
+                  </text>
+                  <text x="50" y="53" textAnchor="middle" fontSize="7.5" fontWeight="900" fill="currentColor">
+                    PENGKOT
+                  </text>
+                </svg>
+              </div>
+
+              {/* Digital Signature Stroke */}
+              <div className="absolute left-4 top-2 h-14 w-32 pointer-events-none z-10">
+                <svg viewBox="0 0 140 50" className="h-full w-full text-slate-950 stroke-current fill-none">
+                  <path d="M 20 40 Q 40 10 65 30 T 95 18 Q 120 12 135 32" strokeWidth="2" strokeLinecap="round" />
+                  <path d="M 45 28 L 125 24" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+              </div>
+            </div>
+
+            <p className="font-bold text-slate-950 text-xs sm:text-[13px] leading-tight mt-0.5">
+              {settings.thirdSignerName || 'Yonas Bain, M.Pd.'}
+            </p>
           </div>
         </div>
       </div>
 
-      {/* ── 6. DUAL TANDA TANGAN + QR VERIFIKASI RESMI ── */}
-      <div className="relative z-20 border-t border-slate-200/80 pt-1.5">
-        <div className="grid grid-cols-3 items-end gap-2 text-center">
-          {/* Kiri: Technical Delegate */}
-          <div className="space-y-0.5">
-            <p className="text-[8px] text-slate-500 font-medium">Technical Delegate / Referee</p>
-            <div className="h-7 flex items-end justify-center">
-              <div className="w-24 border-b border-dashed border-slate-400" />
-            </div>
-            <p className="text-[10px] font-black text-slate-900 uppercase leading-none">
-              {settings.technicalDelegate || 'Technical Delegate'}
-            </p>
-            <p className="text-[7px] text-slate-500">
-              {settings.technicalDelegateTitle || 'Technical Delegate / Referee'}
-            </p>
-          </div>
-
-          {/* Tengah: QR Code & Verification Badge */}
-          <div className="flex flex-col items-center justify-center space-y-0.5">
-            <div className="relative">
-              <div className="rounded-lg border border-amber-200 bg-white p-0.5 shadow-2xs">
-                <QrCodeSvg value={verificationPayload} size={36} />
-              </div>
-              <div className="absolute -top-1 -right-2 px-1 py-0.2 rounded bg-emerald-600 text-white font-mono text-[5.5px] font-black uppercase tracking-tighter shadow-2xs border border-emerald-400">
-                VERIFIED
-              </div>
-            </div>
-            <p className="text-[6.5px] font-mono font-black text-slate-700 uppercase tracking-tight flex items-center gap-0.5">
-              <ShieldCheck className="h-2 w-2 text-emerald-600 inline" /> SWIMSYS SANCTIONED
-            </p>
-            <p className="text-[7.5px] text-slate-600 font-bold">
-              {settings.issuedCity || 'Kota Kejuaraan'}, {settings.issuedDate || '2026'}
-            </p>
-          </div>
-
-          {/* Kanan: Ketua Panitia Pelaksana */}
-          <div className="space-y-0.5">
-            <p className="text-[8px] text-slate-500 font-medium">Ketua Panitia Pelaksana</p>
-            <div className="h-7 flex items-end justify-center">
-              <div className="w-24 border-b border-dashed border-slate-400" />
-            </div>
-            <p className="text-[10px] font-black text-slate-900 uppercase leading-none">
-              {settings.organizerChairman || 'Ketua Panitia'}
-            </p>
-            <p className="text-[7px] text-slate-500">
-              {settings.organizerChairmanTitle || 'Panitia Pelaksana Kejuaraan'}
-            </p>
-          </div>
+      {/* ── 8. CORNER QR CODE VERIFICATION & SANCTION BADGE ── */}
+      <div className="absolute bottom-2.5 right-3.5 flex items-center gap-1.5 pointer-events-none z-20">
+        <div className="bg-white/95 p-0.5 rounded-lg border border-slate-300 shadow-2xs">
+          <QrCodeSvg value={verificationPayload} size={28} />
         </div>
-
-        {/* ── 7. FOOTER SPONSORS STRIP ── */}
-        {settings.showSponsors !== false && sponsors && sponsors.length > 0 && (
-          <div className="mt-1 pt-1 border-t border-amber-200/40">
-            <div className="rounded-lg border border-slate-200/60 bg-white/70 backdrop-blur-xs p-0.5 shadow-2xs">
-              <SponsorLogosStrip
-                sponsors={sponsors}
-                title="OFFICIAL SPONSORS & PARTNERS"
-                size="sm"
-              />
-            </div>
-          </div>
-        )}
+        <div className="text-left leading-tight hidden sm:block">
+          <span className="text-[6.5px] font-mono font-black text-slate-700 uppercase block">
+            VERIFIED RECORD
+          </span>
+          <span className="text-[6px] font-mono text-emerald-700 font-bold block">
+            SWIMSYS SANCTION
+          </span>
+        </div>
       </div>
     </div>
   );
