@@ -5,22 +5,23 @@ import {
   setMasterBypassOtp,
 } from '@/lib/data/admin-otp-server';
 import { issueManualAdminOtp } from '@/lib/auth/otp-service';
-import { createClient } from '@/lib/supabase/server';
+import { verifyApiRole } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
+const OTP_ADMIN_ROLES = ['super_admin', 'admin', 'event_admin', 'operator', 'admin_kejuaraan'] as const;
+
 export async function GET() {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    // Verifikasi sesi login (hanya admin/operator/panitia yang berhak melihat antrean OTP)
-    if (!user) {
-      return NextResponse.json({ error: 'Tidak memiliki izin akses.' }, { status: 401 });
+    const auth = await verifyApiRole([...OTP_ADMIN_ROLES]);
+    if (!auth.ok) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
 
     const records = getAdminOtpRecords();
-    const masterCode = getMasterBypassOtp();
+    // masterCode hanya diserahkan jika super_admin atau admin
+    const canViewMasterCode = auth.role === 'super_admin' || auth.role === 'admin';
+    const masterCode = canViewMasterCode ? getMasterBypassOtp() : undefined;
 
     return NextResponse.json({
       success: true,
@@ -35,11 +36,9 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: 'Sesi login berakhir.' }, { status: 401 });
+    const auth = await verifyApiRole([...OTP_ADMIN_ROLES]);
+    if (!auth.ok) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
 
     const body = await request.json();
@@ -55,6 +54,9 @@ export async function POST(request: Request) {
     }
 
     if (action === 'update_master_code') {
+      if (auth.role !== 'super_admin' && auth.role !== 'admin') {
+        return NextResponse.json({ error: 'Hanya Super Admin yang berhak mengubah Master OTP.' }, { status: 403 });
+      }
       const { newMasterCode } = body;
       if (!newMasterCode || newMasterCode.length < 4) {
         return NextResponse.json({ error: 'Master OTP minimal 4 digit angka.' }, { status: 400 });

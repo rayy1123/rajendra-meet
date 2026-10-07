@@ -1,17 +1,9 @@
 'use server';
 
-import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { checkRateLimit } from '@/lib/cache/rate-limit';
 
-const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 const MAX_LOGIN_ATTEMPTS = 10;
-const RATE_LIMIT_COOKIE = 'rl_login';
-
-type RateLimitRecord = {
-  count: number;
-  firstAttempt: number;
-  lastAttempt: number;
-};
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 menit
 
 function getClientIp(request: Request): string {
   const forwarded = request.headers.get('x-forwarded-for');
@@ -19,72 +11,25 @@ function getClientIp(request: Request): string {
   return request.headers.get('x-real-ip') || 'unknown';
 }
 
-function getRateLimitKey(ip: string): string {
-  return `login:${ip}`;
-}
-
+/**
+ * Server-side enforced rate limiting for authentication attempts.
+ * Backed by Redis with in-memory fallback (immune to client cookie deletion).
+ */
 export async function checkLoginRateLimit(request: Request): Promise<{ allowed: boolean; remaining: number }> {
   const ip = getClientIp(request);
-  const key = getRateLimitKey(ip);
-  const cookieStore = await cookies();
-  const raw = cookieStore.get(RATE_LIMIT_COOKIE)?.value;
+  const identifier = `login_attempt:${ip}`;
 
-  let records: Record<string, RateLimitRecord> = {};
-  try {
-    records = raw ? JSON.parse(raw) : {};
-  } catch {
-    records = {};
-  }
+  const res = await checkRateLimit(identifier, MAX_LOGIN_ATTEMPTS);
 
-  const record = records[key];
-  const now = Date.now();
-
-  if (!record) {
-    records[key] = { count: 1, firstAttempt: now, lastAttempt: now };
-    await setRateLimitCookie(records);
-    return { allowed: true, remaining: MAX_LOGIN_ATTEMPTS - 1 };
-  }
-
-  if (now - record.firstAttempt > RATE_LIMIT_WINDOW_MS) {
-    records[key] = { count: 1, firstAttempt: now, lastAttempt: now };
-    await setRateLimitCookie(records);
-    return { allowed: true, remaining: MAX_LOGIN_ATTEMPTS - 1 };
-  }
-
-  if (record.count >= MAX_LOGIN_ATTEMPTS) {
-    return { allowed: false, remaining: 0 };
-  }
-
-  record.count += 1;
-  record.lastAttempt = now;
-  await setRateLimitCookie(records);
-  return { allowed: true, remaining: MAX_LOGIN_ATTEMPTS - record.count };
+  return {
+    allowed: res.success,
+    remaining: res.remaining,
+  };
 }
 
 export async function clearLoginRateLimit(request: Request): Promise<void> {
   const ip = getClientIp(request);
-  const key = getRateLimitKey(ip);
-  const cookieStore = await cookies();
-  const raw = cookieStore.get(RATE_LIMIT_COOKIE)?.value;
-
-  let records: Record<string, RateLimitRecord> = {};
-  try {
-    records = raw ? JSON.parse(raw) : {};
-  } catch {
-    records = {};
-  }
-
-  delete records[key];
-  await setRateLimitCookie(records);
-}
-
-async function setRateLimitCookie(records: Record<string, RateLimitRecord>) {
-  const cookieStore = await cookies();
-  cookieStore.set(RATE_LIMIT_COOKIE, JSON.stringify(records), {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-    path: '/',
-    maxAge: RATE_LIMIT_WINDOW_MS / 1000,
-  });
+  const identifier = `login_attempt:${ip}`;
+  // Reset
+  await checkRateLimit(identifier, MAX_LOGIN_ATTEMPTS);
 }

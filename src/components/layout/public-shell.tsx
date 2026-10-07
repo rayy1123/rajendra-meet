@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { ProfileMenu } from '@/components/layout/logout-button';
 import { Breadcrumb, type BreadcrumbItem } from '@/components/ui/breadcrumb';
 import { PublicFooter } from '@/components/layout/public-footer';
+import { FloatingActionDock } from '@/components/modules/floating-action-dock';
 
 export function PublicShell({
   children,
@@ -143,6 +144,8 @@ export function PublicShell({
         )}
         {children}
       </main>
+
+      <FloatingActionDock />
 
       <PublicFooter />
     </div>

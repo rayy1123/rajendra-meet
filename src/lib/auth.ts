@@ -82,3 +82,40 @@ export async function requireRole(allowed: UserRole[]) {
   }
   return { supabase, user, role };
 }
+
+/**
+ * Validasi hak akses untuk API Route & Server Actions tanpa memicu redirect() Next.js
+ */
+export async function verifyApiRole(allowed: UserRole[]): Promise<
+  | { ok: true; user: any; role: UserRole; profile: any; supabase: any }
+  | { ok: false; status: 401 | 403; error: string }
+> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { ok: false, status: 401, error: 'Sesi login tidak valid atau berakhir.' };
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  const role =
+    (profile?.role as UserRole | undefined) ||
+    (user.user_metadata?.role as UserRole | undefined);
+
+  if (!role || !allowed.includes(role)) {
+    return {
+      ok: false,
+      status: 403,
+      error: 'Anda tidak memiliki hak akses (wewenang) untuk fungsi ini.',
+    };
+  }
+
+  return { ok: true, user, role, profile, supabase };
+}

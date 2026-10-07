@@ -6,16 +6,17 @@ import {
   updateAccountAuthorityServer,
   deleteAccountServer,
 } from '@/lib/data/accounts-server';
-import { createClient } from '@/lib/supabase/server';
+import { verifyApiRole } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
+const ADMIN_ALLOWED_ROLES = ['super_admin', 'admin', 'admin_kejuaraan'] as const;
+
 export async function GET() {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Tidak memiliki izin akses.' }, { status: 401 });
+    const auth = await verifyApiRole([...ADMIN_ALLOWED_ROLES]);
+    if (!auth.ok) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
 
     const accounts = await getAllAccountsServer();
@@ -28,10 +29,9 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Sesi login berakhir.' }, { status: 401 });
+    const auth = await verifyApiRole([...ADMIN_ALLOWED_ROLES]);
+    if (!auth.ok) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
 
     const body = await request.json();

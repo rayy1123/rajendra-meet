@@ -4,6 +4,16 @@ import {
   saveEquipmentServer,
   deleteEquipmentServer,
 } from '@/lib/data/equipment-server';
+import { verifyApiRole } from '@/lib/auth';
+
+const EQUIPMENT_ROLES = [
+  'super_admin',
+  'admin',
+  'admin_technical',
+  'admin-technical',
+  'event_admin',
+  'operator',
+] as const;
 
 export async function GET() {
   try {
@@ -17,6 +27,11 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const auth = await verifyApiRole([...EQUIPMENT_ROLES]);
+    if (!auth.ok) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
+
     const body = await request.json();
     const { id, name, location, category, status, due_date, technician, note } = body;
 
@@ -50,6 +65,11 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const auth = await verifyApiRole([...EQUIPMENT_ROLES]);
+    if (!auth.ok) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 

@@ -1,10 +1,26 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getLaneOrder } from '@/lib/utils/lane-order';
+import { verifyApiRole } from '@/lib/auth';
+
+const HEATS_ADMIN_ROLES = [
+  'super_admin',
+  'admin',
+  'event_admin',
+  'operator',
+  'admin_technical',
+  'admin-technical',
+  'admin_kejuaraan',
+] as const;
 
 export async function POST(request: Request) {
   try {
+    const auth = await verifyApiRole([...HEATS_ADMIN_ROLES]);
+    if (!auth.ok) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
     const supabase = await createClient();
+
     const body = await request.json();
     const { compEventId, eventId, laneCount = 8 } = body;
 
@@ -20,7 +36,7 @@ export async function POST(request: Request) {
         .from('competition_events')
         .select('id')
         .eq('event_id', eventId);
-      compEventIds = (ces || []).map((c) => c.id);
+      compEventIds = (ces || []).map((c: any) => c.id);
     } else {
       return NextResponse.json(
         { error: 'compEventId atau eventId wajib disertakan.' },
