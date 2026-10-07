@@ -191,7 +191,7 @@ export function PublicFooter() {
           href="https://wa.me/628877151189"
           target="_blank"
           rel="noreferrer"
-          className="no-print print:hidden fixed bottom-16 right-5 z-40 flex h-11 w-11 items-center justify-center rounded-full bg-[#25D366] text-white shadow-xl transition-all duration-300 hover:scale-110 hover:bg-[#20bd5a]"
+          className="no-print print:hidden fixed bottom-16 right-5 max-md:hidden z-40 flex h-11 w-11 items-center justify-center rounded-full bg-[#25D366] text-white shadow-xl transition-all duration-300 hover:scale-110 hover:bg-[#20bd5a]"
           title="Hubungi Kami via WhatsApp"
         >
           <Phone className="h-5 w-5" />
@@ -200,7 +200,7 @@ export function PublicFooter() {
         <button
           type="button"
           onClick={scrollToTop}
-          className="no-print print:hidden fixed bottom-4 right-5 z-40 flex h-10 w-10 items-center justify-center rounded-full bg-slate-900/80 text-white shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-slate-900 border border-white/10 cursor-pointer"
+          className="no-print print:hidden fixed bottom-4 right-5 max-md:bottom-20 max-md:right-4 z-40 flex h-10 w-10 items-center justify-center rounded-full bg-slate-900/80 text-white shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-slate-900 border border-white/10 cursor-pointer"
           title="Kembali ke Atas"
         >
           <ArrowUp className="h-4 w-4" />

@@ -289,5 +289,46 @@ export async function verifyEmailOtp(params: {
   try { await redis.del(key); } catch {}
   updateAdminOtpStatus(cleanEmail, 'verified');
 
+  // Catat token otentikasi verifikasi sementara (TTL 10 menit) untuk reset password / registrasi
+  const verifiedKey = `otp_verified:${cleanEmail}`;
+  try {
+    await redis.set(verifiedKey, 'true', { ex: 600 });
+  } catch {}
+  localVerifiedStore.set(cleanEmail, Date.now() + 600 * 1000);
+
   return { ok: true };
+}
+
+const localVerifiedStore = new Map<string, number>();
+
+/**
+ * Cek apakah email telah diverifikasi OTP dalam 10 menit terakhir
+ */
+export async function isEmailOtpVerified(email: string): Promise<boolean> {
+  const cleanEmail = email.trim().toLowerCase();
+  const verifiedKey = `otp_verified:${cleanEmail}`;
+
+  try {
+    const val = await redis.get<string>(verifiedKey);
+    if (val === 'true') return true;
+  } catch {}
+
+  const localExp = localVerifiedStore.get(cleanEmail);
+  if (localExp && Date.now() < localExp) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Konsumsi (hapus) status verifikasi setelah berhasil digunakan
+ */
+export async function consumeEmailOtpVerified(email: string): Promise<void> {
+  const cleanEmail = email.trim().toLowerCase();
+  const verifiedKey = `otp_verified:${cleanEmail}`;
+  localVerifiedStore.delete(cleanEmail);
+  try {
+    await redis.del(verifiedKey);
+  } catch {}
 }

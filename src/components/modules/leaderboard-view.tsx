@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { formatMsToTime } from '@/lib/utils';
+import { formatMsToTime, cn } from '@/lib/utils';
 import { rankResults, type RankableResult, type ResultStatus } from '@/services/ranking';
-import { Trophy, ListOrdered, Layers, Timer, CheckCircle2 } from 'lucide-react';
+import { Trophy, ListOrdered, Layers, Timer, CheckCircle2, Search, X, Radio } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 export interface CompEvent {
@@ -73,6 +73,8 @@ export function LeaderboardView({ compEvents, embedded, showHeatTab = true }: Le
   const [selectedCompEventId, setSelectedCompEventId] = useState<string>(compEvents[0]?.id || '');
   const [heats, setHeats] = useState<HeatGroup[]>([]);
   const [tab, setTab] = useState<'rank' | 'heat'>('rank');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [lastSyncTime, setLastSyncTime] = useState<string>('Baru saja');
 
   const fetchData = useCallback(async () => {
     if (!selectedCompEventId) return;
@@ -131,6 +133,7 @@ export function LeaderboardView({ compEvents, embedded, showHeatTab = true }: Le
       })
     );
     setHeats(flat);
+    setLastSyncTime(new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB');
   }, [selectedCompEventId, supabase]);
 
   useEffect(() => {
@@ -207,6 +210,20 @@ export function LeaderboardView({ compEvents, embedded, showHeatTab = true }: Le
     return m;
   }, [ranked]);
 
+  const cleanQuery = searchQuery.trim().toLowerCase();
+
+  const displayRanked = useMemo(() => {
+    if (!cleanQuery) return ranked;
+    return ranked.filter((r) => {
+      const h = heats.find((x) => (x.registration_id || x.id) === r.registration_id);
+      return (
+        h?.athlete_name?.toLowerCase().includes(cleanQuery) ||
+        h?.school_name?.toLowerCase().includes(cleanQuery) ||
+        h?.athlete_number?.toLowerCase().includes(cleanQuery)
+      );
+    });
+  }, [ranked, heats, cleanQuery]);
+
   const heatsSorted = useMemo(
     () => [...heats].sort((a, b) => a.heat_number - b.heat_number || a.lane_number - b.lane_number),
     [heats]
@@ -229,12 +246,12 @@ export function LeaderboardView({ compEvents, embedded, showHeatTab = true }: Le
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="pub-eyebrow">Pilih Acara / Nomor Lomba</p>
           <div className="flex items-center gap-2">
-            <span className="pub-chip">
+            <span className="pub-chip" title={`Waktu update terakhir: ${lastSyncTime}`}>
               <span className="relative inline-flex h-3.5 w-3.5 items-center justify-center overflow-hidden">
-                <span className="absolute inline-flex h-3.5 w-3.5 animate-ping rounded-full bg-[var(--m-aqua)]/70" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--m-aqua)]" />
+                <span className="absolute inline-flex h-3.5 w-3.5 animate-ping rounded-full bg-emerald-400" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
               </span>
-              Live
+              <span className="font-mono text-[11px] font-bold text-emerald-800">Live Sync</span>
             </span>
             {total > 0 && (
               <span className="pub-chip">
@@ -243,26 +260,50 @@ export function LeaderboardView({ compEvents, embedded, showHeatTab = true }: Le
             )}
           </div>
         </div>
-        <select
-          value={selectedCompEventId}
-          onChange={(e) => { setSelectedCompEventId(e.target.value); setTab('rank'); }}
-          className="w-full rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] px-3.5 py-2.5 text-sm font-semibold text-[var(--m-ink)] shadow-sm transition-colors hover:border-[var(--m-aqua)] focus:border-[var(--m-aqua)] focus:outline-none focus:ring-2 focus:ring-[var(--m-aqua)]/20 sm:w-auto sm:min-w-[340px]"
-        >
-          {sortedCompEvents.map((ce) => {
-            const usia =
-              ce.grade_level === 'TK'
-                ? 'PAUD/TK'
-                : ce.grade_level === 'SD' && ce.class_name
-                  ? `SD ${ce.class_name}`
-                  : ce.grade_level || '';
-            const gender = ce.gender === 'female' ? 'Putri' : 'Putra';
-            return (
-              <option key={ce.id} value={ce.id}>
-                {ce.distance_meters}m {ce.stroke} · {usia} · {gender}
-              </option>
-            );
-          })}
-        </select>
+
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <select
+            value={selectedCompEventId}
+            onChange={(e) => { setSelectedCompEventId(e.target.value); setTab('rank'); }}
+            className="flex-1 rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] px-3.5 py-2.5 text-sm font-semibold text-[var(--m-ink)] shadow-sm transition-colors hover:border-[var(--m-aqua)] focus:border-[var(--m-aqua)] focus:outline-none focus:ring-2 focus:ring-[var(--m-aqua)]/20"
+          >
+            {sortedCompEvents.map((ce) => {
+              const usia =
+                ce.grade_level === 'TK'
+                  ? 'PAUD/TK'
+                  : ce.grade_level === 'SD' && ce.class_name
+                    ? `SD ${ce.class_name}`
+                    : ce.grade_level || '';
+              const gender = ce.gender === 'female' ? 'Putri' : 'Putra';
+              return (
+                <option key={ce.id} value={ce.id}>
+                  {ce.distance_meters}m {ce.stroke} · {usia} · {gender}
+                </option>
+              );
+            })}
+          </select>
+
+          {/* Quick Athlete Search Bar */}
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Cari atlet / klub / no. dada..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-8 h-10 rounded-xl border border-[var(--m-border)] bg-[var(--m-surface)] text-xs text-[var(--m-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--m-aqua)]/20"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       {total === 0 ? (
@@ -305,37 +346,58 @@ export function LeaderboardView({ compEvents, embedded, showHeatTab = true }: Le
                 </div>
               )}
               <div className="divide-y divide-[var(--m-border)]">
-                {ranked.map((r) => {
-                  const h = heats.find((x) => (x.registration_id || x.id) === r.registration_id);
-                  const isDnf = r.status !== 'finished';
-                  const rankClass = r.rank === 1 ? 'rank-1' : r.rank === 2 ? 'rank-2' : r.rank === 3 ? 'rank-3' : 'rank-n';
-                  return (
-                    <div key={r.registration_id} className="flex items-stretch gap-3 px-3 py-3 transition-colors hover:bg-[var(--m-aqua-soft)] sm:px-4">
-                      <span className={`${rankClass} h-auto w-9 shrink-0 self-center`}>{r.rank ?? '–'}</span>
-                      <span className="flex w-9 shrink-0 self-center flex-col items-center justify-center rounded-lg bg-[var(--m-aqua-soft)] py-1 text-[var(--m-aqua-ink)]">
-                        <span className="text-[9px] font-semibold uppercase leading-none">Lane</span>
-                        <span className="text-base font-black leading-none">{h?.lane_number ?? '-'}</span>
-                        <span className="mt-0.5 text-[8px] font-medium leading-none text-[var(--m-muted)]">Acara {h?.heat_number}</span>
-                      </span>
-                      <div className="min-w-0 flex-1 self-center">
-                        <h4 className="truncate text-base font-semibold text-[var(--m-ink)]">{h?.athlete_name || 'Lintasan Kosong'}</h4>
-                        <p className="truncate text-xs text-[var(--m-muted)]">{h?.school_name || 'Umum'}</p>
-                      </div>
-                      <div className="flex shrink-0 flex-col items-end justify-center gap-0.5">
-                        <span className="pub-time text-xl leading-none text-[var(--m-aqua-ink)] sm:text-2xl">
-                          {isDnf ? (
-                            <Badge variant="destructive" className="font-mono text-xs font-bold uppercase">{STATUS_LABEL[r.status] || r.status}</Badge>
-                          ) : h?.time_ms ? (
-                            formatMsToTime(h.time_ms)
-                          ) : (
-                            <span className="text-sm text-[var(--m-muted)]">—</span>
-                          )}
+                {displayRanked.length === 0 ? (
+                  <div className="p-8 text-center text-xs text-[var(--m-muted)]">
+                    Tidak ditemukan atlet dengan kata kunci &quot;{searchQuery}&quot;.
+                  </div>
+                ) : (
+                  displayRanked.map((r, idx) => {
+                    const h = heats.find((x) => (x.registration_id || x.id) === r.registration_id);
+                    const isDnf = r.status !== 'finished';
+                    const rankClass = r.rank === 1 ? 'rank-1' : r.rank === 2 ? 'rank-2' : r.rank === 3 ? 'rank-3' : 'rank-n';
+                    const isZebra = idx % 2 === 1;
+
+                    return (
+                      <div
+                        key={r.registration_id}
+                        className={cn(
+                          'flex items-stretch gap-3 px-3 py-3 transition-colors hover:bg-[var(--m-aqua-soft)] sm:px-4',
+                          isZebra ? 'bg-slate-50/50' : 'bg-white'
+                        )}
+                      >
+                        <span className={`${rankClass} h-auto w-9 shrink-0 self-center`}>{r.rank ?? '–'}</span>
+                        <span className="flex w-9 shrink-0 self-center flex-col items-center justify-center rounded-lg bg-[var(--m-aqua-soft)] py-1 text-[var(--m-aqua-ink)] border border-[var(--m-aqua)]/20 shadow-2xs">
+                          <span className="text-[9px] font-semibold uppercase leading-none">Lane</span>
+                          <span className="text-base font-black leading-none">{h?.lane_number ?? '-'}</span>
+                          <span className="mt-0.5 text-[8px] font-medium leading-none text-[var(--m-muted)]">Acara {h?.heat_number}</span>
                         </span>
-                        <span className="text-[10px] font-medium uppercase tracking-wide text-[var(--m-muted)]">Seed {formatMsToTime(h?.seed_time_ms)}</span>
+                        <div className="min-w-0 flex-1 self-center">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <h4 className="truncate text-base font-bold text-[var(--m-ink)]">{h?.athlete_name || 'Lintasan Kosong'}</h4>
+                            {h?.athlete_number && (
+                              <span className="font-mono text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-200">
+                                #{h.athlete_number}
+                              </span>
+                            )}
+                          </div>
+                          <p className="truncate text-xs text-[var(--m-muted)] mt-0.5">{h?.school_name || 'Umum'}</p>
+                        </div>
+                        <div className="flex shrink-0 flex-col items-end justify-center gap-0.5">
+                          <span className="pub-time text-xl leading-none text-[var(--m-aqua-ink)] sm:text-2xl font-mono font-bold">
+                            {isDnf ? (
+                              <Badge variant="destructive" className="font-mono text-xs font-bold uppercase">{STATUS_LABEL[r.status] || r.status}</Badge>
+                            ) : h?.time_ms ? (
+                              formatMsToTime(h.time_ms)
+                            ) : (
+                              <span className="text-sm text-[var(--m-muted)]">—</span>
+                            )}
+                          </span>
+                          <span className="text-[10px] font-medium uppercase tracking-wide text-[var(--m-muted)]">Seed {formatMsToTime(h?.seed_time_ms)}</span>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                )}
               </div>
             </div>
           ) : (
@@ -360,15 +422,38 @@ export function LeaderboardView({ compEvents, embedded, showHeatTab = true }: Le
                           const raw = (l.status || 'finished').toLowerCase();
                           const isDnf = raw !== 'finished';
                           const rank = rankByReg.get(l.registration_id || l.id);
+                          const isMatch =
+                            !cleanQuery ||
+                            Boolean(
+                              l.athlete_name?.toLowerCase().includes(cleanQuery) ||
+                              l.school_name?.toLowerCase().includes(cleanQuery) ||
+                              l.athlete_number?.toLowerCase().includes(cleanQuery)
+                            );
+
                           return (
-                            <div key={l.id} className="flex items-stretch gap-2.5 bg-[var(--m-surface)] px-3 py-2.5 sm:px-4">
-                              <span className="flex w-8 shrink-0 self-center flex-col items-center justify-center rounded-lg bg-[var(--m-aqua-soft)] py-1 text-[var(--m-aqua-ink)]">
+                            <div
+                              key={l.id}
+                              className={cn(
+                                'flex items-stretch gap-2.5 px-3 py-2.5 sm:px-4 transition-colors',
+                                isMatch && cleanQuery
+                                  ? 'bg-amber-100/70 ring-1 ring-amber-300 font-semibold'
+                                  : 'bg-[var(--m-surface)] hover:bg-slate-50'
+                              )}
+                            >
+                              <span className="flex w-8 shrink-0 self-center flex-col items-center justify-center rounded-lg bg-[var(--m-aqua-soft)] py-1 text-[var(--m-aqua-ink)] border border-[var(--m-aqua)]/20 shadow-2xs">
                                 <span className="text-[8px] font-semibold uppercase leading-none">Lane</span>
                                 <span className="text-sm font-black leading-none">{l.lane_number}</span>
                               </span>
                               <div className="min-w-0 flex-1 self-center">
-                                <p className="truncate text-sm font-semibold text-[var(--m-ink)]">{l.athlete_name || 'Kosong'}</p>
-                                <p className="truncate text-xs text-[var(--m-muted)]">{l.school_name || 'Umum'}</p>
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <p className="truncate text-sm font-bold text-[var(--m-ink)]">{l.athlete_name || 'Kosong'}</p>
+                                  {l.athlete_number && (
+                                    <span className="font-mono text-[10px] font-bold text-blue-700 bg-blue-50 px-1 py-0.2 rounded border border-blue-200">
+                                      #{l.athlete_number}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="truncate text-xs text-[var(--m-muted)] mt-0.5">{l.school_name || 'Umum'}</p>
                               </div>
                               <div className="flex shrink-0 flex-col items-end justify-center gap-0.5">
                                 <div className="flex items-center gap-1">

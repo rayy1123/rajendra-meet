@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { readLocalAccounts, writeLocalAccounts } from '@/lib/data/accounts-server';
 import { sendBrevoEmail } from '@/lib/email/brevo';
 import { createClient } from '@/lib/supabase/server';
+import { isEmailOtpVerified, consumeEmailOtpVerified } from '@/lib/auth/otp-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,6 +27,18 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+
+    // Verifikasi bukti bahwa pengguna telah memverifikasi kode OTP email
+    const isVerified = await isEmailOtpVerified(cleanEmail);
+    if (!isVerified) {
+      return NextResponse.json(
+        { error: 'Akses ditolak: Alamat email belum diverifikasi via kode OTP resmi.' },
+        { status: 403 }
+      );
+    }
+
+    // Konsumsi status verifikasi agar tidak bisa digunakan ulang
+    await consumeEmailOtpVerified(cleanEmail);
 
     // 1. Update password di accounts-store jika ada
     const accounts = readLocalAccounts();

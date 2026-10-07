@@ -1,6 +1,9 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { getEventSettings, saveEventSettings } from '@/lib/data/event-settings-server';
 import { createClient } from '@/lib/supabase/server';
+import { verifyApiRole } from '@/lib/auth';
+
+const EVENT_SETTINGS_ROLES = ['super_admin', 'admin', 'event_admin', 'admin_kejuaraan'] as const;
 
 export async function GET(
   request: NextRequest,
@@ -43,6 +46,11 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await verifyApiRole([...EVENT_SETTINGS_ROLES]);
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  }
+
   const { id } = await params;
   const body = await request.json();
 

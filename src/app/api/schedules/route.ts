@@ -4,6 +4,17 @@ import {
   saveScheduleServer,
   deleteScheduleServer,
 } from '@/lib/data/schedules-server';
+import { verifyApiRole } from '@/lib/auth';
+
+const SCHEDULE_ROLES = [
+  'super_admin',
+  'admin',
+  'event_admin',
+  'operator',
+  'admin_technical',
+  'admin-technical',
+  'admin_kejuaraan',
+] as const;
 
 export async function GET(request: Request) {
   try {
@@ -19,6 +30,11 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const auth = await verifyApiRole([...SCHEDULE_ROLES]);
+    if (!auth.ok) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
+
     const body = await request.json();
     const { time, category, title, description, location, status, eventId, id } = body;
 
@@ -52,6 +68,11 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const auth = await verifyApiRole([...SCHEDULE_ROLES]);
+    if (!auth.ok) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     if (!id) {

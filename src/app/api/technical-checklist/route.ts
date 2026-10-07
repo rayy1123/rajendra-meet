@@ -8,6 +8,15 @@ import {
   type ChecklistCategory,
   type ChecklistStatus,
 } from '@/lib/data/technical-checklist-server';
+import { verifyApiRole } from '@/lib/auth';
+
+const TD_ALLOWED_ROLES = [
+  'super_admin',
+  'admin',
+  'admin_technical',
+  'admin-technical',
+  'event_admin',
+] as const;
 
 export async function GET(request: Request) {
   try {
@@ -23,6 +32,11 @@ export async function GET(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
+    const auth = await verifyApiRole([...TD_ALLOWED_ROLES]);
+    if (!auth.ok) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
+
     const body = await request.json();
     const { id, status, notes, verifiedBy } = body;
 
@@ -34,7 +48,7 @@ export async function PATCH(request: Request) {
     if (status) updates.status = status as ChecklistStatus;
     if (typeof notes === 'string') updates.notes = notes.trim();
     if (verifiedBy !== undefined) {
-      updates.verifiedBy = verifiedBy;
+      updates.verifiedBy = verifiedBy || auth.user.email;
       updates.verifiedAt = verifiedBy ? new Date().toISOString() : null;
     }
 
@@ -55,6 +69,11 @@ export async function PATCH(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const auth = await verifyApiRole([...TD_ALLOWED_ROLES]);
+    if (!auth.ok) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
+
     const body = await request.json();
     const { title, description, category, scheduledTime, pic, location, status, notes } = body;
 
@@ -70,7 +89,7 @@ export async function POST(request: Request) {
       description: String(description || '').trim(),
       category: category as ChecklistCategory,
       scheduledTime: scheduledTime ? String(scheduledTime).trim() : undefined,
-      pic: String(pic || 'Panitia Teknis').trim(),
+      pic: String(pic || auth.user.email).trim(),
       location: String(location || 'Arena Kolam').trim(),
       status: (status as ChecklistStatus) || 'pending',
       notes: notes ? String(notes).trim() : undefined,
@@ -91,6 +110,11 @@ export async function POST(request: Request) {
 // Reset data ke default jika diperlukan
 export async function PUT() {
   try {
+    const auth = await verifyApiRole(['super_admin', 'admin']);
+    if (!auth.ok) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
+
     const defaultData = readLocalChecklist();
     writeLocalChecklist(defaultData);
     return NextResponse.json({ success: true, message: 'Data checklist siap.' }, { status: 200 });

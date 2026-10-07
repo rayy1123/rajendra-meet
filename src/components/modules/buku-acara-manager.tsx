@@ -940,7 +940,9 @@ export function BukuAcaraManager({
                                     className={
                                       isMatch
                                         ? 'bg-amber-100/70 font-semibold transition-colors'
-                                        : 'hover:bg-slate-50/60'
+                                        : assign.laneNumber % 2 === 0
+                                        ? 'bg-slate-50/50 hover:bg-slate-100/70'
+                                        : 'bg-white hover:bg-slate-50/60'
                                     }
                                   >
                                     <td className="py-2 px-2 text-center font-mono">
@@ -1132,7 +1134,9 @@ export function BukuAcaraManager({
                                           className={
                                             isMatch
                                               ? 'bg-amber-100/70 font-semibold transition-colors'
-                                              : 'hover:bg-slate-50/60'
+                                              : assign.laneNumber % 2 === 0
+                                              ? 'bg-slate-50/50 hover:bg-slate-100/70'
+                                              : 'bg-white hover:bg-slate-50/60'
                                           }
                                         >
                                           <td className="py-2 px-2 text-center font-black font-mono text-slate-900">

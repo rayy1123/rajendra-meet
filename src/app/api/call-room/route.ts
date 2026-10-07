@@ -6,6 +6,17 @@ import {
   type CallRoomStatus,
 } from '@/lib/data/call-room-server';
 import { createClient } from '@/lib/supabase/server';
+import { verifyApiRole } from '@/lib/auth';
+
+const CALL_ROOM_ROLES = [
+  'super_admin',
+  'admin',
+  'event_admin',
+  'operator',
+  'admin_technical',
+  'admin-technical',
+  'admin_kejuaraan',
+] as const;
 
 export async function GET(request: Request) {
   try {
@@ -26,6 +37,12 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const auth = await verifyApiRole([...CALL_ROOM_ROLES]);
+    if (!auth.ok) {
+      return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+    }
+    const supabase = await createClient();
+
     const body = await request.json();
     const { action } = body;
 
@@ -62,12 +79,11 @@ export async function POST(request: Request) {
         athlete_number: athleteNumber,
         school_name: schoolName,
         scratch_reason: scratchReason,
-        checked_in_by: operatorName,
+        checked_in_by: operatorName || auth.user.email,
       });
 
       // Sinkronisasi status ke Supabase results jika status scratched atau no_show
       try {
-        const supabase = await createClient();
         if (status === 'scratched' || status === 'no_show') {
           const dbStatus = status === 'scratched' ? 'scr' : 'dns';
           // Check if result exists
@@ -122,7 +138,7 @@ export async function POST(request: Request) {
         heatId,
         assignments,
         targetStatus as CallRoomStatus,
-        operatorName
+        operatorName || auth.user.email
       );
 
       return NextResponse.json({ ok: true, data: results });

@@ -22,8 +22,9 @@ export default async function ScoreboardPage({
   const { data: { user } } = await supabase.auth.getUser();
   let isAdmin = false;
   if (user) {
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-    isAdmin = profile?.role === 'admin' || profile?.role === 'operator';
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
+    const ADMIN_ROLES = ['super_admin', 'event_admin', 'operator', 'admin', 'admin_kejuaraan'];
+    isAdmin = ADMIN_ROLES.includes(profile?.role || '');
   }
 
   const { data: events } = await supabase

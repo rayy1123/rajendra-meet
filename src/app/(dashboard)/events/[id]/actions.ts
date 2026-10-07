@@ -1,7 +1,17 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
+import { requireRole } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
+
+const EVENT_ADMIN_ROLES = [
+  'super_admin',
+  'admin',
+  'event_admin',
+  'admin_kejuaraan',
+  'operator',
+  'admin_technical',
+  'admin-technical',
+] as const;
 
 export interface ActionResult<T = unknown> {
   ok: boolean;
@@ -26,9 +36,7 @@ export async function createCompEventAction(
   eventId: string,
   payload: CompEventPayload,
 ): Promise<ActionResult> {
-  const supabase = await createClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await requireRole([...EVENT_ADMIN_ROLES]);
   if (!user) {
     return { ok: false, error: 'Sesi login telah berakhir. Silakan login kembali.' };
   }
@@ -76,9 +84,7 @@ export async function updateCompEventAction(
   compEventId: string,
   payload: Partial<CompEventPayload>,
 ): Promise<ActionResult> {
-  const supabase = await createClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await requireRole([...EVENT_ADMIN_ROLES]);
   if (!user) {
     return { ok: false, error: 'Sesi login telah berakhir. Silakan login kembali.' };
   }
@@ -123,9 +129,7 @@ export async function deleteCompEventAction(
   eventId: string,
   compEventId: string,
 ): Promise<ActionResult> {
-  const supabase = await createClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await requireRole([...EVENT_ADMIN_ROLES]);
   if (!user) {
     return { ok: false, error: 'Sesi login telah berakhir. Silakan login kembali.' };
   }
@@ -151,9 +155,10 @@ export async function batchCreateCompEventsAction(
   eventId: string,
   items: CompEventPayload[],
 ): Promise<ActionResult<{ count: number }>> {
-  const supabase = await createClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await requireRole([...EVENT_ADMIN_ROLES]);
+  if (!user) {
+    return { ok: false, error: 'Sesi login telah berakhir. Silakan login kembali.' };
+  }
   if (!user) {
     return { ok: false, error: 'Sesi login telah berakhir. Silakan login kembali.' };
   }
@@ -194,9 +199,7 @@ export async function reorderCompEventsAction(
   eventId: string,
   orderedIds: string[],
 ): Promise<ActionResult> {
-  const supabase = await createClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await requireRole([...EVENT_ADMIN_ROLES]);
   if (!user) {
     return { ok: false, error: 'Sesi login telah berakhir. Silakan login kembali.' };
   }

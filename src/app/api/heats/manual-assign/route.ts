@@ -1,9 +1,25 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { verifyApiRole } from '@/lib/auth';
+
+const HEATS_ADMIN_ROLES = [
+  'super_admin',
+  'admin',
+  'event_admin',
+  'operator',
+  'admin_technical',
+  'admin-technical',
+  'admin_kejuaraan',
+] as const;
 
 export async function POST(request: Request) {
   try {
+    const auth = await verifyApiRole([...HEATS_ADMIN_ROLES]);
+    if (!auth.ok) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
     const supabase = await createClient();
+
     const body = await request.json();
     const { action } = body;
 

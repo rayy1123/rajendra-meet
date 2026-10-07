@@ -424,6 +424,35 @@ export function ResultInputOperator({
     currentAssignId: string,
     existingResult?: { id: string; time_ms?: number | null; status?: string }
   ) => {
+    // Navigasi cepat tombol panah atas / bawah antar-lintasan
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      const currentIndex = orderedAssignmentIds.indexOf(currentAssignId);
+      if (currentIndex >= 0 && currentIndex < orderedAssignmentIds.length - 1) {
+        const nextAssignId = orderedAssignmentIds[currentIndex + 1];
+        const nextInputEl = inputRefs.current[nextAssignId];
+        if (nextInputEl) {
+          nextInputEl.focus();
+          nextInputEl.select();
+        }
+      }
+      return;
+    }
+
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      const currentIndex = orderedAssignmentIds.indexOf(currentAssignId);
+      if (currentIndex > 0) {
+        const prevAssignId = orderedAssignmentIds[currentIndex - 1];
+        const prevInputEl = inputRefs.current[prevAssignId];
+        if (prevInputEl) {
+          prevInputEl.focus();
+          prevInputEl.select();
+        }
+      }
+      return;
+    }
+
     if (e.key === 'Enter') {
       e.preventDefault();
 
@@ -674,6 +703,12 @@ export function ResultInputOperator({
               </div>
             )}
           </div>
+
+          {/* Keyboard shortcut hint for timekeeper */}
+          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-mono">
+            <span>⌨️ Shortcut: <b className="text-slate-800">[Enter]</b> Simpan &amp; Lanjut &bull; <b className="text-slate-800">[↓ / ↑]</b> Pindah Lintasan</span>
+            <span className="hidden sm:inline">Ketik 6 digit langsung auto-format (contoh: <code className="bg-slate-100 px-1 py-0.5 rounded text-blue-700 font-bold">002021</code> → <code className="font-bold text-slate-900">00.20.21</code>)</span>
+          </div>
         </div>
       )}
 
@@ -807,8 +842,12 @@ export function ResultInputOperator({
                         <div
                           key={assign.id}
                           className={cn(
-                            'p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-colors',
-                            existingResult?.time_ms ? 'bg-emerald-50/20 hover:bg-emerald-50/40' : 'hover:bg-muted/10'
+                            'p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-colors border-b last:border-b-0',
+                            existingResult?.time_ms
+                              ? 'bg-emerald-50/20 hover:bg-emerald-50/40'
+                              : assign.lane_number % 2 === 0
+                              ? 'bg-slate-50/50 hover:bg-sky-50/40'
+                              : 'bg-white hover:bg-sky-50/40'
                           )}
                         >
                           {/* Lane & Athlete Info */}

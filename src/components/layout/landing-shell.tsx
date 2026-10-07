@@ -6,6 +6,7 @@ import { BreadcrumbMenuButton, LandingSidebarDrawer } from '@/components/layout/
 import { ProfileMenu } from '@/components/layout/logout-button';
 import { createClient } from '@/lib/supabase/client';
 import { PublicFooter } from '@/components/layout/public-footer';
+import { FloatingActionDock } from '@/components/modules/floating-action-dock';
 
 export function LandingShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -115,6 +116,8 @@ export function LandingShell({ children }: { children: React.ReactNode }) {
       />
 
       <main className="flex-1">{children}</main>
+
+      <FloatingActionDock />
 
       <PublicFooter />
     </div>
