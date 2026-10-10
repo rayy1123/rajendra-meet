@@ -51,24 +51,28 @@ export async function POST(request: Request) {
       const isRateLimit =
         error.message?.toLowerCase().includes('rate limit') ||
         error.status === 429;
+      const isAlreadyRegistered =
+        error.message?.toLowerCase().includes('already registered') ||
+        error.message?.toLowerCase().includes('already exists');
+
+      if (isAlreadyRegistered) {
+        return NextResponse.json(
+          { error: `Akun dengan email ${authEmail} sudah terdaftar. Silakan langsung login di halaman Masuk.` },
+          { status: 400 }
+        );
+      }
 
       if (isRateLimit) {
-        // Supabase Auth membatasi pengiriman email konfirmasi (rate limit).
-        // Akun tetap dicatat di master akun karena verifikasi OTP sudah sukses via Brevo.
-        console.warn('[Register Notice] Supabase Auth email rate limit bypassed via Brevo OTP verification.');
-        const fallbackRes = await createUserAccountServer({
-          fullName: full_name.trim(),
-          username: cleanUsername,
-          email: authEmail,
-          password,
-          userType: school_id ? 'pelatih_klub' : 'atlet_mandiri',
-          schoolId: school_id || null,
-          phone: phone || null,
-        });
-        registeredUserId = fallbackRes.account?.id;
-      } else {
-        return NextResponse.json({ error: error.message }, { status: 400 });
+        return NextResponse.json(
+          {
+            error:
+              'Batas pengiriman email bawaan Supabase tercapai (rate limit). Harap nonaktifkan "Confirm email" di Supabase Dashboard (Authentication -> Providers -> Email -> Confirm email: OFF) agar registrasi aktif langsung tanpa hambatan.',
+          },
+          { status: 429 }
+        );
       }
+
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
     // 2. Kirim email selamat datang resmi via Brevo API (Bukan via Supabase)
