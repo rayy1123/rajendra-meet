@@ -98,9 +98,9 @@ export default function LoginPage() {
         const rawErr = lastAuthError?.message || '';
         let userFriendlyError = 'Login gagal. Periksa kembali email/username dan kata sandi Anda.';
         if (rawErr.toLowerCase().includes('invalid login credentials')) {
-          userFriendlyError = 'Login gagal. Email/username atau kata sandi yang Anda masukkan salah.';
+          userFriendlyError = 'Login gagal. Email/username atau kata sandi yang Anda masukkan salah. Pastikan akun sudah terdaftar dan email persis sesuai pendaftaran.';
         } else if (rawErr.toLowerCase().includes('email not confirmed')) {
-          userFriendlyError = 'Login gagal. Alamat email belum terkonfirmasi.';
+          userFriendlyError = 'Login gagal: Alamat email belum terkonfirmasi di Supabase. Harap nonaktifkan "Confirm email" di Supabase Dashboard (Authentication -> Providers -> Email -> Confirm email: OFF) agar akun langsung aktif seketika.';
         } else if (rawErr && !rawErr.includes('fetch')) {
           userFriendlyError = `Login gagal: ${rawErr}`;
         }

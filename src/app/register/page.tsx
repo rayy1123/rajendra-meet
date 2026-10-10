@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 import {
   User,
+  Mail,
   Lock,
   Phone,
   School,
@@ -39,7 +40,7 @@ interface SchoolOption {
 export default function RegisterPage() {
   const [form, setForm] = useState({
     full_name: '',
-    username: '',
+    email: '',
     password: '',
     confirm_password: '',
     phone: '',
@@ -147,8 +148,14 @@ export default function RegisterPage() {
       return;
     }
 
-    if (!form.full_name || !form.username || !form.password) {
-      setErrorMsg('Nama lengkap, username, dan kata sandi wajib diisi.');
+    const cleanEmail = form.email.trim().toLowerCase();
+    if (!form.full_name.trim() || !cleanEmail || !form.password) {
+      setErrorMsg('Nama lengkap, alamat email, dan kata sandi wajib diisi.');
+      return;
+    }
+
+    if (!cleanEmail.includes('@') || !cleanEmail.includes('.')) {
+      setErrorMsg('Format email tidak valid. Masukkan email lengkap seperti nama@gmail.com.');
       return;
     }
 
@@ -162,13 +169,7 @@ export default function RegisterPage() {
       return;
     }
 
-    // Tentukan email pendaftaran (jika input username berupa email atau username biasa)
-    const rawUsername = form.username.trim().toLowerCase();
-    const resolvedEmail = rawUsername.includes('@')
-      ? rawUsername
-      : `${rawUsername}@gmail.com`;
-
-    setTargetOtpEmail(resolvedEmail);
+    setTargetOtpEmail(cleanEmail);
     setShowOtpModal(true);
   };
 
@@ -179,30 +180,33 @@ export default function RegisterPage() {
     setSuccessMsg('');
 
     try {
+      const cleanEmail = targetOtpEmail.trim().toLowerCase();
+      const cleanUsername = cleanEmail.split('@')[0].replace(/[^a-z0-9_]/g, '_');
+
       const res = await fetch('/api/register', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
-          full_name: form.full_name,
-          username: form.username,
-          email: targetOtpEmail,
+          full_name: form.full_name.trim(),
+          username: cleanUsername,
+          email: cleanEmail,
           password: form.password,
           school_id: affiliationType === 'club' ? selectedSchoolId : null,
           phone: form.phone || null,
         }),
       });
 
+      const payload = await res.json().catch(() => ({}));
+
       if (!res.ok) {
-        const payload = await res.json().catch(() => ({}));
-        const msg = payload?.error || 'Gagal membuat akun.';
-        throw new Error(msg);
+        throw new Error(payload?.error || 'Gagal membuat akun.');
       }
 
-      setSuccessMsg('Email terverifikasi & Pendaftaran akun berhasil! Mengalihkan ke halaman masuk...');
+      setSuccessMsg('Pendaftaran akun berhasil! Mengalihkan ke halaman masuk...');
       toast.success('Pendaftaran akun berhasil!');
       setForm({
         full_name: '',
-        username: '',
+        email: '',
         password: '',
         confirm_password: '',
         phone: '',
@@ -419,52 +423,70 @@ export default function RegisterPage() {
         )}
 
         {/* Nama Lengkap */}
-        <div className="space-y-1">
-          <label className="text-xs font-bold text-slate-900">Nama Lengkap Penanggung Jawab / Wali</label>
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold text-slate-900 flex items-center justify-between">
+            <span>Nama Lengkap (Sesuai KTP / Akta)</span>
+            <span className="text-[10px] text-slate-400 font-normal">Wajib diisi</span>
+          </label>
           <div className="relative">
-            <User className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+            <User className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
             <Input
               type="text"
-              placeholder="Nama sesuai KTP / Identitas resmi"
-              className="h-10 rounded-xl bg-white pl-9 text-xs font-medium text-slate-900 border-slate-300 focus-visible:ring-2 focus-visible:ring-blue-500/20 shadow-2xs"
+              placeholder="Contoh: Rayvanes Arrasyid"
+              className="h-10 rounded-xl bg-white pl-10 text-xs font-medium text-slate-900 border-slate-300 focus-visible:ring-2 focus-visible:ring-blue-500/20 shadow-2xs"
               value={form.full_name}
               onChange={(e) => setForm((s) => ({ ...s, full_name: e.target.value }))}
               required
             />
           </div>
+          <p className="text-[10px] text-slate-500">
+            Ketik nama lengkap resmi Anda untuk akun dan penerbitan berkas kejuaraan.
+          </p>
         </div>
 
-        {/* Username & Nomor WhatsApp */}
+        {/* Email & Nomor WhatsApp */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-900">Email</label>
-            <Input
-              type="text"
-              placeholder="huruf_kecil_angka"
-              className="h-10 rounded-xl bg-white text-xs font-mono text-slate-900 border-slate-300 focus-visible:ring-2 focus-visible:ring-blue-500/20 shadow-2xs"
-              value={form.username}
-              onChange={(e) =>
-                setForm((s) => ({
-                  ...s,
-                  username: e.target.value.toLowerCase().replace(/\s+/g, '_'),
-                }))
-              }
-              required
-            />
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-900 flex items-center justify-between">
+              <span>Alamat Email Login</span>
+              <span className="text-[10px] text-slate-400 font-normal">Email aktif</span>
+            </label>
+            <div className="relative">
+              <Mail className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
+              <Input
+                type="email"
+                placeholder="Contoh: rayvanesarrasyid@gmail.com"
+                className="h-10 rounded-xl bg-white pl-10 text-xs font-medium text-slate-900 border-slate-300 focus-visible:ring-2 focus-visible:ring-blue-500/20 shadow-2xs"
+                value={form.email}
+                onChange={(e) =>
+                  setForm((s) => ({
+                    ...s,
+                    email: e.target.value.trim().toLowerCase(),
+                  }))
+                }
+                required
+              />
+            </div>
+            <p className="text-[10px] text-slate-500">
+              Ketik alamat email aktif lengkap Anda (contoh: nama@gmail.com).
+            </p>
           </div>
 
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-900">Nomor WhatsApp / HP</label>
             <div className="relative">
-              <Phone className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+              <Phone className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
               <Input
                 type="tel"
-                placeholder="08xxxxxxxxxx"
-                className="h-10 rounded-xl bg-white pl-9 text-xs font-medium text-slate-900 border-slate-300 focus-visible:ring-2 focus-visible:ring-blue-500/20 shadow-2xs"
+                placeholder="Contoh: 081234567890"
+                className="h-10 rounded-xl bg-white pl-10 text-xs font-medium text-slate-900 border-slate-300 focus-visible:ring-2 focus-visible:ring-blue-500/20 shadow-2xs"
                 value={form.phone}
                 onChange={(e) => setForm((s) => ({ ...s, phone: e.target.value }))}
               />
             </div>
+            <p className="text-[10px] text-slate-500">
+              Nomor WhatsApp aktif untuk koordinasi darurat perlombaan.
+            </p>
           </div>
         </div>
 
